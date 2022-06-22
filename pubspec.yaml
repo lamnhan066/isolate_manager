@@ -1,0 +1,19 @@
+name: isolate_manager
+description: A new Flutter plugin project.
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ">=2.17.3 <3.0.0"
+
+dependencies: 
+  isolate_contactor: ^1.6.0
+
+dependency_overrides:
+  isolate_contactor:
+    git: https://github.com/vursin/isolate_contactor
+
+dev_dependencies:
+  test: ^1.17.12
+  lints: ^2.0.0
+
