@@ -1,15 +1,35 @@
-import 'package:isolate_contactor/isolate_contactor.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Test IsolateManager', () async {
+  test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
+    print('Create IsolateManager instance');
     IsolateManager<int> isolateManager =
         IsolateManager.create(numOfIsolates: 4, isolateFunction: fibonacci);
 
+    print('Starting IsolateManager instance...');
     await isolateManager.start();
 
+    print('Computing IsolateManager instance...');
+    final result = await isolateManager.compute(3);
+
+    expect(result, fibonacci(3));
+
+    print('Dispose IsolateManager instance.');
+    isolateManager.stop();
+  });
+
+  test('Test IsolateManager.create', () async {
+    // Create IsolateContactor
+    print('Create IsolateManager instance');
+    IsolateManager<int> isolateManager =
+        IsolateManager.create(numOfIsolates: 4, isolateFunction: fibonacci);
+
+    print('Starting IsolateManager instance...');
+    await isolateManager.start();
+
+    print('Computing IsolateManager instance...');
     await Future.wait([
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
@@ -18,25 +38,24 @@ void main() {
         })
     ]);
 
-    // for (int i = 0; i < 2; i++) {
-    //   await isolateManager.compute(i).then((value) => print(value));
-    // }
-
     await Future.delayed(Duration(seconds: 3));
 
-    // Dispose
+    print('Dispose IsolateManager instance.');
     isolateManager.stop();
   });
 
-  test('Test IsolateManager', () async {
+  test('Test IsolateManager.createOwnIsolate', () async {
     // Create IsolateContactor
+    print('Create IsolateManager instance');
     IsolateManager<int> isolateManager = IsolateManager.createOwnIsolate(
       numOfIsolates: 4,
       isolateFunction: isolateFunction,
     );
 
+    print('Starting IsolateManager instance...');
     await isolateManager.start();
 
+    print('Computing IsolateManager instance...');
     await Future.wait([
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
@@ -44,15 +63,24 @@ void main() {
           expect(value, fibonacci(i));
         })
     ]);
+    await Future.delayed(Duration(seconds: 3));
 
-    // for (int i = 0; i < 2; i++) {
-    //   await isolateManager.compute(i).then((value) => print(value));
-    // }
+    print('Restarting IsolateManager instance...');
+    await isolateManager.restart();
+
+    print('Computing IsolateManager instance second times...');
+    await Future.wait([
+      for (int i = 5; i < 13; i++)
+        isolateManager.compute(i).then((value) {
+          print('Fibonacci $i = $value');
+          expect(value, fibonacci(i));
+        })
+    ]);
 
     await Future.delayed(Duration(seconds: 3));
 
-    // Dispose
-    isolateManager.stop();
+    print('Dispose IsolateManager instance.');
+    await isolateManager.stop();
   });
 }
 
@@ -71,7 +99,7 @@ int fibonacci(dynamic n) {
 }
 
 void isolateFunction(dynamic params) {
-  final controller = IsolateContactorController(params);
+  final controller = IsolateManagerController(params);
 
   controller.onIsolateMessage.listen((message) {
     final result = fibonacci(message);

@@ -1,17 +1,13 @@
 name: isolate_manager
-description: A new Flutter plugin project.
+description: A plugin helps you to create multiple isolates for a function, keep it running and comunicate with it.
 version: 0.0.1
-homepage:
+homepage: https://github.com/vursin/isolate_manager
 
 environment:
   sdk: ">=2.17.3 <3.0.0"
 
 dependencies: 
-  isolate_contactor: ^1.6.0
-
-dependency_overrides:
-  isolate_contactor:
-    git: https://github.com/vursin/isolate_contactor
+  isolate_contactor: ^1.6.1
 
 dev_dependencies:
   test: ^1.17.12

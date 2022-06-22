@@ -3,12 +3,7 @@ import 'dart:collection';
 
 import 'package:isolate_contactor/isolate_contactor.dart';
 
-class IsolateQueue<R> {
-  final Completer<R> completer = Completer<R>();
-  final dynamic params;
-
-  IsolateQueue(this.params);
-}
+import 'utils.dart';
 
 class IsolateManager<R> {
   /// Number of concurrent isolates
@@ -26,8 +21,11 @@ class IsolateManager<R> {
   /// Allow print debug log
   final bool isDebug;
 
-  /// Get value as stream
+  /// Similar to `onResult`, for who's using IsolateContactor
   Stream<R> get onMessage => _streamController.stream;
+
+  /// Get value as stream
+  Stream<R> get stream => _streamController.stream;
 
   IsolateManager._({
     required this.numOfIsolates,
@@ -67,7 +65,8 @@ class IsolateManager<R> {
   final Map<IsolateContactor<R>, bool> _isolates = {};
 
   /// Controller for stream
-  final StreamController<R> _streamController = StreamController.broadcast();
+  StreamController<R> _streamController = StreamController.broadcast();
+  StreamSubscription<R>? _streamSubscription;
 
   /// Start initialize IsolateManager
   Future<void> start() async {
@@ -94,8 +93,9 @@ class IsolateManager<R> {
       );
     }
 
+    _streamController = StreamController.broadcast();
     for (final isolate in _isolates.keys) {
-      isolate.onMessage.listen((value) {
+      _streamSubscription = isolate.onMessage.listen((value) {
         _streamController.sink.add(value);
         if (_queue.isNotEmpty) {
           final queue = _queue.removeFirst();
@@ -112,17 +112,26 @@ class IsolateManager<R> {
   }
 
   /// Stop isolate manager
-  void stop() {
-    for (final isolate in _isolates.keys) {
-      isolate.dispose();
-    }
+  Future<void> stop() async {
+    _queue.clear();
+    await Future.wait(
+        [for (final isolate in _isolates.keys) isolate.dispose()]);
+    _isolates.clear();
+    await _streamSubscription?.cancel();
+    await _streamController.close();
   }
+
+  Future<void> restart() async {
+    await stop();
+    await start();
+  }
+
+  ///  Similar to `commpute`, for who's using IsolateContactor
+  Future<R> sendMessage(dynamic params) => compute(params);
 
   /// Compute isolate manager
   Future<R> compute(dynamic params) async {
     final queue = IsolateQueue<R>(params);
-
-    print(_isolates);
 
     for (final isolate in _isolates.keys) {
       if (_isolates[isolate] == false) {
