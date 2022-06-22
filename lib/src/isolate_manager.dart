@@ -65,7 +65,7 @@ class IsolateManager<R> {
   final Map<IsolateContactor<R>, bool> _isolates = {};
 
   /// Controller for stream
-  StreamController<R> _streamController = StreamController.broadcast();
+  final StreamController<R> _streamController = StreamController.broadcast();
   StreamSubscription<R>? _streamSubscription;
 
   /// Start initialize IsolateManager
@@ -93,7 +93,7 @@ class IsolateManager<R> {
       );
     }
 
-    _streamController = StreamController.broadcast();
+    // _streamController = StreamController.broadcast();
     for (final isolate in _isolates.keys) {
       _streamSubscription = isolate.onMessage.listen((value) {
         _streamController.sink.add(value);
@@ -111,18 +111,23 @@ class IsolateManager<R> {
     }
   }
 
-  /// Stop isolate manager
-  Future<void> stop() async {
+  /// Stop isolate manager without close streamController
+  Future<void> _tempStop() async {
     _queue.clear();
     await Future.wait(
         [for (final isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
     await _streamSubscription?.cancel();
+  }
+
+  /// Stop isolate manager
+  Future<void> stop() async {
+    _tempStop();
     await _streamController.close();
   }
 
   Future<void> restart() async {
-    await stop();
+    await _tempStop();
     await start();
   }
 

@@ -52,6 +52,10 @@ void main() {
       isolateFunction: isolateFunction,
     );
 
+    isolateManager.stream.listen((value) {
+      print('Stream: $value');
+    });
+
     print('Starting IsolateManager instance...');
     await isolateManager.start();
 
