@@ -21,7 +21,7 @@ class IsolateManager<R> {
   /// Allow print debug log
   final bool isDebug;
 
-  /// Similar to `onResult`, for who's using IsolateContactor
+  /// Similar to `stream`, for who's using IsolateContactor
   Stream<R> get onMessage => _streamController.stream;
 
   /// Get value as stream
