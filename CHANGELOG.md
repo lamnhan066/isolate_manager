@@ -1,3 +1,7 @@
+## 1.0.0+1
+
+* Update README
+
 ## 1.0.0
 
 * **BREAKING CHANGE:** Change `isolateFunction` parameter of `createOwnIsolate` method from named to required parameter.
