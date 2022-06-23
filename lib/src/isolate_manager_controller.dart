@@ -14,6 +14,9 @@ class IsolateManagerController<T> implements IsolateContactorController<T> {
   get controller => _delegate.controller;
 
   @override
+  get initialParams => _delegate.initialParams;
+
+  @override
   Stream get onIsolateMessage => _delegate.onIsolateMessage;
 
   @override
