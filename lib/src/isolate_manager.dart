@@ -35,9 +35,9 @@ class IsolateManager<R> {
     this.isDebug = false,
   });
 
-  factory IsolateManager.create({
-    required int numOfIsolates,
-    required FutureOr<R> Function(dynamic) isolateFunction,
+  factory IsolateManager.create(
+    FutureOr<R> Function(dynamic) isolateFunction, {
+    int numOfIsolates = 1,
     bool isDebug = false,
   }) =>
       IsolateManager._(
@@ -46,14 +46,16 @@ class IsolateManager<R> {
         isDebug: isDebug,
       );
 
-  factory IsolateManager.createOwnIsolate({
-    required int numOfIsolates,
-    required void Function(dynamic) isolateFunction,
+  factory IsolateManager.createOwnIsolate(
+    void Function(dynamic) isolateFunction, {
+    dynamic initialParams,
+    int numOfIsolates = 1,
     bool isDebug = false,
   }) =>
       IsolateManager._(
         numOfIsolates: numOfIsolates,
         isolateFunction: isolateFunction,
+        initialParams: initialParams,
         isOwnIsolate: true,
         isDebug: isDebug,
       );
@@ -76,7 +78,7 @@ class IsolateManager<R> {
           for (int i = 0; i < numOfIsolates; i++)
             IsolateContactor.createOwnIsolate<R>(
               isolateFunction,
-              isolateParams: initialParams,
+              initialParams: initialParams,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
