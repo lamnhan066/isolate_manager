@@ -17,10 +17,10 @@ double add(dynamic value) => value[0] + value[1];
 ### **Step 2:** Create IsolateManager instance for that function
 
 ``` dart
-  IsolateManager<int> isolateManager = IsolateManager.createOwnIsolate(
-    add, // Function that you want to compute
-    numOfIsolates: 4, // Number of concurrent isolates. Default is 1
-  );
+final isolateManager = IsolateManager.create(
+  add, // Function that you want to compute
+  numOfIsolates: 4, // Number of concurrent isolates. Default is 1
+);
 ```
 
 ### **Step 3:** Initialize the instance
@@ -67,7 +67,7 @@ StreamBuilder(
 await isolateManager.restart();
 ```
 
-### Step 6: Stop `IsolateManager` when it finishes work
+### **Step 6:** Stop `IsolateManager` when it finishes work
 
 ``` dart
 await isolateManager.stop();
@@ -83,12 +83,17 @@ You can control everything with this method when you want to create multiple iso
 // Create your own function here
 void isolateFunction(dynamic params) {
   // Initial the controller for child isolate
-  final controller = IsolateManagerController<double>(params);
+  final controller = IsolateManagerController<double>(
+    params, 
+    onDispose: () {
+      print('Dispose isolateFunction');
+    }
+  );
 
-  // Get your initialParams
+  // Get your initialParams.
+  // Notice that this `initialParams` different from the `params` above.
   final initialParams = controller.initialParams;
-
-  // Initial anything here. This area of codes only run once
+  print(initialParams);
 
   // Listen to the message receiving from main isolate
   controller.onIsolateMessage.listen((message) {
@@ -104,7 +109,11 @@ void isolateFunction(dynamic params) {
 ### **Step 2:** Create IsolateManager instance for your own function
 
 ``` dart
-IsolateManager<int> isolateManager = IsolateManager.createOwnIsolate(numOfIsolates: 4, isolateFunction: isolateFunction);
+final isolateManager =  await IsolateManager.createOwnIsolate(
+      isolateFunction,
+      initialParams: 'This is initialParams',
+      debugMode: true,
+    );
 ```
 
 ### **Step 3:** Now you can use everything as above from this step
