@@ -9,6 +9,12 @@ environment:
 dependencies: 
   isolate_contactor: ^1.7.0
 
+dependency_overrides:
+  isolate_contactor:
+    git:
+      url: https://github.com/vursin/isolate_contactor
+      ref: worker.js
+
 dev_dependencies:
   test: ^1.17.12
   lints: ^2.0.0
