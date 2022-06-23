@@ -12,6 +12,9 @@ class IsolateManager<R> {
   /// Isolate function
   final dynamic Function(dynamic) isolateFunction;
 
+  /// Worker name
+  final String workerName;
+
   /// Initial parameters
   final dynamic initialParams;
 
@@ -30,6 +33,7 @@ class IsolateManager<R> {
   IsolateManager._({
     required this.numOfIsolates,
     required this.isolateFunction,
+    required this.workerName,
     this.initialParams,
     this.isOwnIsolate = false,
     this.isDebug = false,
@@ -37,17 +41,20 @@ class IsolateManager<R> {
 
   factory IsolateManager.create(
     FutureOr<R> Function(dynamic) isolateFunction, {
+    String workerName = '',
     int numOfIsolates = 1,
     bool isDebug = false,
   }) =>
       IsolateManager._(
         numOfIsolates: numOfIsolates,
         isolateFunction: isolateFunction,
+        workerName: workerName,
         isDebug: isDebug,
       );
 
   factory IsolateManager.createOwnIsolate(
     void Function(dynamic) isolateFunction, {
+    String workerName = '',
     dynamic initialParams,
     int numOfIsolates = 1,
     bool isDebug = false,
@@ -55,6 +62,7 @@ class IsolateManager<R> {
       IsolateManager._(
         numOfIsolates: numOfIsolates,
         isolateFunction: isolateFunction,
+        workerName: workerName,
         initialParams: initialParams,
         isOwnIsolate: true,
         isDebug: isDebug,
@@ -78,6 +86,7 @@ class IsolateManager<R> {
           for (int i = 0; i < numOfIsolates; i++)
             IsolateContactor.createOwnIsolate<R>(
               isolateFunction,
+              workerName: workerName,
               initialParams: initialParams,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
@@ -89,6 +98,7 @@ class IsolateManager<R> {
           for (int i = 0; i < numOfIsolates; i++)
             IsolateContactor.create<R>(
               isolateFunction as FutureOr<R> Function(dynamic),
+              workerName: workerName,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
@@ -155,7 +165,7 @@ class IsolateManager<R> {
     _isolates[isolate] = true;
 
     isolate.sendMessage(queue.params).then((value) {
-      queue.completer.complete(value);
+      if (!queue.completer.isCompleted) queue.completer.complete(value);
       _isolates[isolate] = false;
     });
 
