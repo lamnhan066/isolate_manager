@@ -81,16 +81,16 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final IsolateManager<int> isolateContactor1 = IsolateManager.create(
     isDebug: true,
-    isolateFunction: fibonacciFuture,
+    fibonacciFuture,
     numOfIsolates: 2,
   );
   final IsolateManager<int> isolateContactor2 = IsolateManager.createOwnIsolate(
     numOfIsolates: 2,
-    isolateFunction: isolateFunction,
+    isolateFunction,
     isDebug: true,
   );
   late IsolateManager<int> isolateContactor3 = IsolateManager.create(
-    isolateFunction: fibonacciRescusiveFuture,
+    fibonacciRescusiveFuture,
     numOfIsolates: 2,
   );
   int value1 = 2;

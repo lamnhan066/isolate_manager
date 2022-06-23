@@ -1,13 +1,13 @@
 name: isolate_manager
-description: A plugin helps you to create multiple isolates for a function, keep it running and comunicate with it.
-version: 0.1.0
+description: A plugin that helps you create multiple isolates for a function, keep it active and compute with it.
+version: 1.0.0
 homepage: https://github.com/vursin/isolate_manager
 
 environment:
   sdk: ">=2.17.3 <3.0.0"
 
 dependencies: 
-  isolate_contactor: ^1.6.1
+  isolate_contactor: ^1.7.0
 
 dev_dependencies:
   test: ^1.17.12

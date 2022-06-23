@@ -5,8 +5,10 @@ void main() {
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
-    IsolateManager<int> isolateManager =
-        IsolateManager.create(numOfIsolates: 4, isolateFunction: fibonacci);
+    IsolateManager<int> isolateManager = IsolateManager.create(
+      fibonacci,
+      numOfIsolates: 4,
+    );
 
     print('Starting IsolateManager instance...');
     await isolateManager.start();
@@ -23,8 +25,10 @@ void main() {
   test('Test IsolateManager.create', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
-    IsolateManager<int> isolateManager =
-        IsolateManager.create(numOfIsolates: 4, isolateFunction: fibonacci);
+    IsolateManager<int> isolateManager = IsolateManager.create(
+      fibonacci,
+      numOfIsolates: 4,
+    );
 
     print('Starting IsolateManager instance...');
     await isolateManager.start();
@@ -48,8 +52,9 @@ void main() {
     // Create IsolateContactor
     print('Create IsolateManager instance');
     IsolateManager<int> isolateManager = IsolateManager.createOwnIsolate(
+      isolateFunction,
       numOfIsolates: 4,
-      isolateFunction: isolateFunction,
+      initialParams: ['Test initialParams 0', 'Test initialParams 1'],
     );
 
     isolateManager.stream.listen((value) {
@@ -104,6 +109,10 @@ int fibonacci(dynamic n) {
 
 void isolateFunction(dynamic params) {
   final controller = IsolateManagerController(params);
+
+  final initialParams = controller.initialParams;
+  print('initialParams 0: ${initialParams[0]}');
+  print('initialParams 1: ${initialParams[1]}');
 
   controller.onIsolateMessage.listen((message) {
     final result = fibonacci(message);
