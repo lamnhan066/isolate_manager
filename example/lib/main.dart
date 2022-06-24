@@ -82,6 +82,7 @@ class _MyAppState extends State<MyApp> {
   final IsolateManager<int> isolateContactor1 = IsolateManager.create(
     isDebug: true,
     fibonacciFuture,
+    workerName: 'fibonacci',
     numOfIsolates: 2,
   );
   final IsolateManager<int> isolateContactor2 = IsolateManager.createOwnIsolate(

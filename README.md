@@ -1,8 +1,12 @@
 # Isolate Manager
 
-A plugin that helps you create multiple isolates for a function, keep it active and compute with it.
+## Features
 
-This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor). The main difference is that it allows to create multiple isolates for a function, automatically queues the input data and sends it to free isolate later.
+* Easy to create multiple isolate for a function, keep it active and comunicate with it.
+
+* Supports Web with `Worker` (`Worker` is the real Isolate on Web) and `Future` if `Worker` is not available or not configured.
+
+* Multiple `compute`s are allowed because the plugin will queues the input data and sends it to free isolate later.
 
 ## **BASIC USAGE** *(Use build-in function)*
 
@@ -118,15 +122,63 @@ final isolateManager =  await IsolateManager.createOwnIsolate(
 
 ### **Step 3:** Now you can use everything as above from this step
 
-## Limitation
+## CONFIGURATION FOR `WORKER` *(Real Isolate on Web)*
 
-Support web platform with limited features. The package use `Future` to provide the same features to Isolate.
+* **Step 1:** Download [isolate_manager/worker/function_name.dart](https://raw.githubusercontent.com/vursin/isolate_manager/main/worker/function_name.dart) and rename it to the `<function_name>.dart` that you want to create isolate.
+* **Step 2:** Modify the function `dynamic functionName(dynamic message)` in the script to serves your purposes, then rename it to the same as the above `<function_name>` (Just helping you easier to remember for later use). You can also use the `top-level or static function` that you have created above.
+
+  ***You should copy that function to separated file or copy to `<function_name>.dart` file to prevent the `dart compile js` error because some other functions depend on flutter library.***
+
+* **Step 3:** Run `dart compile js <function_name>.dart -o <function_name>.js -O4` to compile dart to js (-O0 to -O4 is the obfuscated level of `js`).
+* **Step 4:** Copy `<function_name>.js` to web folder (the same folder with `index.html`).
+* **Step 5:** Now you can add parameter `workerName` to your code like below:
+
+  ``` dart
+  final isolateManager = await IsolateManager.create(
+      add,
+      workerName: 'add', // add.js
+    );
+  ```
+
+  Now the plugin will handle all other action to make the real isolate works on Web.
+
+## Additional
+
+* If the `function_name.dart` show errors for `js` package, you can add `js` to `dev_dependencies`:
+  
+  ``` dart
+  dev_dependencies:
+    js: ^0.6.4
+  ```
+
+* `IsolateManager.create` and `createOwnIsolate` include `converter` and `workerConverter` parameters which helping you to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter) and send it to the result. Example:
+
+  ``` dart
+  final isolateManager =
+      await IsolateManager.create(
+    convertToMap,
+    workerName: 'map_result',
+    workerConverter: (result) {
+      final Map<int, double> convert = {};
+
+      // Convert Map<String, String> (received from Worker) to Map<int, double>
+      (jsonDecode(result) as Map).forEach((key, value) => {
+            convert.addAll({int.parse(key): double.parse(value)})
+          });
+
+      return convert;
+    },
+  );
+  ```
+
+    Data flow: Main -> Isolate or Worker -> Converter -> Result
 
 ## Contributions
 
-- This plugin as an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
-- If you encounter any problems or feel the library is missing a feature, please feel free to open an issue. Pull request are also welcome.
+* This plugin as an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
+* If you encounter any problems or feel the library is missing a feature, please feel free to open an issue. Pull request are also welcome.
 
 ## To-do list
 
-- [ ] Add real isolate for web platform with service-worker.js.
+* [x] Add real isolate for web platform with service-worker.js.
+* [ ] Find the best way to prevent using `dart compile js`.

@@ -91,12 +91,42 @@ void main() {
     print('Dispose IsolateManager instance.');
     await isolateManager.stop();
   });
+
+  test('Test IsolateManager.create with Worker', () async {
+    // Create IsolateContactor
+    print('Create IsolateManager instance');
+    IsolateManager<int> isolateManager = IsolateManager.create(
+      fibonacci,
+      workerName: 'fibonacci',
+      numOfIsolates: 4,
+    );
+
+    print('Starting IsolateManager instance...');
+    await isolateManager.start();
+
+    print('Computing IsolateManager instance...');
+    await Future.wait([
+      for (int i = 0; i < 10; i++)
+        isolateManager.compute(i).then((value) {
+          final realFib = fibonacci(i);
+          print('Fibonacci $i = $value == $realFib');
+
+          expect(value, realFib);
+        })
+    ]);
+
+    await Future.delayed(Duration(seconds: 3));
+
+    print('Dispose IsolateManager instance.');
+    isolateManager.stop();
+  });
 }
 
 int fibonacci(dynamic n) {
+  if (n == 0) return 0;
   if (n <= 2) return 1;
 
-  int n1 = 0, n2 = 1, n3 = 1;
+  double n1 = 0, n2 = 1, n3 = 1;
 
   for (int i = 2; i <= n; i++) {
     n3 = n1 + n2;
