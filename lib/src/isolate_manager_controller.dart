@@ -3,8 +3,18 @@ import 'package:isolate_contactor/isolate_contactor.dart';
 class IsolateManagerController<T> implements IsolateContactorController<T> {
   late IsolateContactorController<T> _delegate;
 
-  IsolateManagerController(dynamic params, {Function()? onDispose}) {
-    _delegate = IsolateContactorController(params, onDispose: onDispose);
+  IsolateManagerController(
+    dynamic params, {
+    Function()? onDispose,
+    T Function(dynamic)? converter,
+    T Function(dynamic)? workerConverter,
+  }) {
+    _delegate = IsolateContactorController(
+      params,
+      onDispose: onDispose,
+      converter: converter,
+      workerConverter: workerConverter,
+    );
   }
 
   @override

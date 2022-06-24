@@ -30,10 +30,24 @@ class IsolateManager<R> {
   /// Get value as stream
   Stream<R> get stream => _streamController.stream;
 
+  /// Convert the result received from the isolate before getting real result.
+  /// This function useful when the result received from the isolate is different
+  /// from the return type.
+  final R Function(dynamic)? converter;
+
+  /// Convert the result received from the isolate before getting real result.
+  /// This function useful when the result received from the isolate is different
+  /// from the return type.
+  ///
+  /// This function only available in `Worker` mode on Web platform.
+  final R Function(dynamic)? workerConverter;
+
   IsolateManager._({
     required this.numOfIsolates,
     required this.isolateFunction,
     required this.workerName,
+    this.converter,
+    this.workerConverter,
     this.initialParams,
     this.isOwnIsolate = false,
     this.isDebug = false,
@@ -43,12 +57,16 @@ class IsolateManager<R> {
     FutureOr<R> Function(dynamic) isolateFunction, {
     String workerName = '',
     int numOfIsolates = 1,
+    R Function(dynamic)? converter,
+    R Function(dynamic)? workerConverter,
     bool isDebug = false,
   }) =>
       IsolateManager._(
         numOfIsolates: numOfIsolates,
         isolateFunction: isolateFunction,
         workerName: workerName,
+        converter: converter,
+        workerConverter: workerConverter,
         isDebug: isDebug,
       );
 
@@ -57,6 +75,8 @@ class IsolateManager<R> {
     String workerName = '',
     dynamic initialParams,
     int numOfIsolates = 1,
+    R Function(dynamic)? converter,
+    R Function(dynamic)? workerConverter,
     bool isDebug = false,
   }) =>
       IsolateManager._(
@@ -64,6 +84,8 @@ class IsolateManager<R> {
         isolateFunction: isolateFunction,
         workerName: workerName,
         initialParams: initialParams,
+        converter: converter,
+        workerConverter: workerConverter,
         isOwnIsolate: true,
         isDebug: isDebug,
       );
@@ -88,6 +110,8 @@ class IsolateManager<R> {
               isolateFunction,
               workerName: workerName,
               initialParams: initialParams,
+              converter: converter,
+              workerConverter: workerConverter,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
@@ -99,6 +123,8 @@ class IsolateManager<R> {
             IsolateContactor.create<R>(
               isolateFunction as FutureOr<R> Function(dynamic),
               workerName: workerName,
+              converter: converter,
+              workerConverter: workerConverter,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
