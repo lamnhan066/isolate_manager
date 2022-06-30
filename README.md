@@ -4,7 +4,7 @@
 
 * Easy to create multiple isolate for a function, keep it active and comunicate with it.
 
-* Supports Web with `Worker` (`Worker` is the real Isolate on Web) and `Future` if `Worker` is not available or not configured.
+* Supports `Worker` on Web (`Worker` is the real Isolate on Web). The plugin will use `Future` (and `Stream`) if `Worker` is not available on the working browser or is not configured.
 
 * Multiple `compute`s are allowed because the plugin will queues the input data and sends it to free isolate later.
 
@@ -113,7 +113,7 @@ void isolateFunction(dynamic params) {
 ### **Step 2:** Create IsolateManager instance for your own function
 
 ``` dart
-final isolateManager =  await IsolateManager.createOwnIsolate(
+final isolateManager = IsolateManager.createOwnIsolate(
       isolateFunction,
       initialParams: 'This is initialParams',
       debugMode: true,
@@ -134,7 +134,7 @@ final isolateManager =  await IsolateManager.createOwnIsolate(
 * **Step 5:** Now you can add parameter `workerName` to your code like below:
 
   ``` dart
-  final isolateManager = await IsolateManager.create(
+  final isolateManager = IsolateManager.create(
       add,
       workerName: 'add', // add.js
     );
@@ -154,8 +154,7 @@ final isolateManager =  await IsolateManager.createOwnIsolate(
 * `IsolateManager.create` and `createOwnIsolate` include `converter` and `workerConverter` parameters which helping you to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter) and send it to the result. Example:
 
   ``` dart
-  final isolateManager =
-      await IsolateManager.create(
+  final isolateManager = IsolateManager.create(
     convertToMap,
     workerName: 'map_result',
     workerConverter: (result) {

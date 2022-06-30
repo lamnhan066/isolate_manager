@@ -1,3 +1,8 @@
+## 2.0.1
+
+* Remove useless `await` in README.
+* Downgrade Dart SDK min version to `2.12.0`.
+
 ## 2.0.0
 
 * **NO BREAKING CHANGE**
