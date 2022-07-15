@@ -6,8 +6,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 
-void main() {
-  runApp(const MyApp());
+void main(List<String> args) {
+  if (args.isNotEmpty) {
+    IsolateManager.register(fibonacci);
+  } else {
+    runApp(const MyApp());
+  }
 }
 
 /// This must be a static or top-level function
@@ -82,7 +86,7 @@ class _MyAppState extends State<MyApp> {
   final IsolateManager<int> isolateContactor1 = IsolateManager.create(
     isDebug: true,
     fibonacciFuture,
-    workerName: 'fibonacci',
+    workerName: 'main.dart',
     numOfIsolates: 2,
   );
   final IsolateManager<int> isolateContactor2 = IsolateManager.createOwnIsolate(

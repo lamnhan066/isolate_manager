@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'isolate_manager_register/stub.dart'
+    if (dart.library.html) 'isolate_manager_register/web.dart';
+
 import 'package:isolate_contactor/isolate_contactor.dart';
 
 import 'utils.dart';
@@ -89,6 +92,23 @@ class IsolateManager<R> {
         isOwnIsolate: true,
         isDebug: isDebug,
       );
+
+  /// Register isolate Worker function
+  ///
+  /// You can register many Workers but you need to to add your register
+  /// on top all of others
+  /// ``` dart
+  /// void main() {
+  ///   if (IsolateManager.register(worker)) return;
+  ///   if (IsolateManager.register(worker2)) return;
+  ///
+  ///
+  ///   [Other code below]
+  /// }
+  /// ````
+  static bool register(Function(dynamic params) worker) {
+    return registerImpl(worker);
+  }
 
   /// Queue of isolates
   final Queue<IsolateQueue<R>> _queue = Queue();

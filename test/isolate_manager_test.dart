@@ -1,7 +1,13 @@
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
-void main() {
+void main(List<String> args) {
+  if (args.isNotEmpty) {
+    IsolateManager.register(fibonacci);
+
+    return;
+  }
+
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
@@ -97,7 +103,7 @@ void main() {
     print('Create IsolateManager instance');
     IsolateManager<int> isolateManager = IsolateManager.create(
       fibonacci,
-      workerName: 'fibonacci',
+      workerName: 'isolate_manager_test.dart',
       numOfIsolates: 4,
     );
 
