@@ -71,6 +71,8 @@ void isolateFunction(dynamic params) {
   });
 }
 
+dynamic functionName(dynamic message) => message;
+
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -79,24 +81,30 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final IsolateManager<int> isolateContactor1 = IsolateManager.create(
+  final IsolateManager<int> isolateManager1 = IsolateManager.create(
     isDebug: true,
     fibonacciFuture,
     workerName: 'fibonacci',
     numOfIsolates: 2,
   );
-  final IsolateManager<int> isolateContactor2 = IsolateManager.createOwnIsolate(
+  final IsolateManager<int> isolateManager2 = IsolateManager.createOwnIsolate(
     numOfIsolates: 2,
     isolateFunction,
     isDebug: true,
   );
-  late IsolateManager<int> isolateContactor3 = IsolateManager.create(
+  late IsolateManager<int> isolateManager3 = IsolateManager.create(
     fibonacciRescusiveFuture,
     numOfIsolates: 2,
+  );
+  late IsolateManager isolateManager4 = IsolateManager.create(
+    functionName,
+    workerName: 'function_name',
+    isDebug: true,
   );
   int value1 = 2;
   int value2 = 3;
   int value3 = 4;
+  int value4 = 5;
 
   bool isLoading = true;
   Random rad = Random();
@@ -109,16 +117,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    isolateContactor1.stop();
-    isolateContactor2.stop();
-    isolateContactor3.stop();
+    isolateManager1.stop();
+    isolateManager2.stop();
+    isolateManager3.stop();
+    isolateManager4.stop();
     super.dispose();
   }
 
   Future<void> initial() async {
-    await isolateContactor1.start();
-    await isolateContactor2.start();
-    await isolateContactor3.start();
+    await isolateManager1.start();
+    await isolateManager2.start();
+    await isolateManager3.start();
+    await isolateManager4.start();
 
     setState(() => isLoading = false);
   }
@@ -126,19 +136,25 @@ class _MyAppState extends State<MyApp> {
   void calculateValue1([int max = 100]) {
     value1 = rad.nextInt(max);
     print('Isolate 1: Calculate fibonancci at F$value1');
-    isolateContactor1.sendMessage(value1);
+    isolateManager1.sendMessage(value1);
   }
 
   void calculateValue2([int max = 100]) {
     value2 = rad.nextInt(max);
     print('Isolate 2: Calculate fibonancci at F$value2');
-    isolateContactor2.sendMessage(value2);
+    isolateManager2.sendMessage(value2);
   }
 
   void calculateValue3([int max = 30]) {
     value3 = rad.nextInt(max);
     print('Isolate 3: Calculate fibonancci at F$value3');
-    isolateContactor3.sendMessage(value3);
+    isolateManager3.sendMessage(value3);
+  }
+
+  void calculateValue4([int max = 30]) {
+    value4 = rad.nextInt(max);
+    print('Isolate 3: Calculate fibonancci at F$value4');
+    isolateManager4.sendMessage(value4);
   }
 
   @override
@@ -158,10 +174,10 @@ class _MyAppState extends State<MyApp> {
                     children: [
                       const SizedBox(height: 8),
                       StreamBuilder(
-                        stream: isolateContactor1.onMessage,
+                        stream: isolateManager1.onMessage,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateContactor1.sendMessage(value1);
+                            isolateManager1.sendMessage(value1);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -179,7 +195,7 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateContactor1.restart();
+                            isolateManager1.restart();
                           },
                           child: const Text('Restart isolate 1'),
                         ),
@@ -187,16 +203,16 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateContactor1.stop();
+                            isolateManager1.stop();
                           },
                           child: const Text('Terminate isolate 1'),
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateContactor2.onMessage,
+                        stream: isolateManager2.onMessage,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateContactor2.sendMessage(value2);
+                            isolateManager2.sendMessage(value2);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -214,7 +230,7 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateContactor2.restart();
+                            isolateManager2.restart();
                           },
                           child: const Text('Restart isolate 2'),
                         ),
@@ -222,16 +238,16 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateContactor2.stop();
+                            isolateManager2.stop();
                           },
                           child: const Text('Terminate isolate 2'),
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateContactor3.onMessage,
+                        stream: isolateManager3.onMessage,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateContactor3.sendMessage(value3);
+                            isolateManager3.sendMessage(value3);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -249,7 +265,7 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateContactor3.restart();
+                            isolateManager3.restart();
                           },
                           child: const Text('Restart isolate 3'),
                         ),
@@ -257,9 +273,28 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateContactor3.stop();
+                            isolateManager3.stop();
                           },
                           child: const Text('Terminate isolate 3'),
+                        ),
+                      ),
+                      StreamBuilder(
+                        stream: isolateManager4.onMessage,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            isolateManager4.sendMessage(value4);
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          return Text(
+                              'Isolate4: Value of $value4 = ${snapshot.data}');
+                        },
+                      ),
+                      ListTile(
+                        title: ElevatedButton(
+                          onPressed: () => calculateValue4(),
+                          child: const Text('Calculate new Fibonacci'),
                         ),
                       ),
                     ],

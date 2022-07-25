@@ -30,11 +30,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
-dependency_overrides:
-  isolate_contactor:
-    git:
-      url: https://github.com/vursin/isolate_contactor
-      ref: worker.js
+# dependency_overrides:
+#   isolate_contactor:
+#     git:
+#       url: https://github.com/vursin/isolate_contactor
+#       ref: worker.js
 
 
 dev_dependencies:

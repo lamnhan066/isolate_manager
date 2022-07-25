@@ -11,16 +11,16 @@ import 'package:js/js_util.dart' as js_util;
 @pjs.JS('self')
 external dynamic get globalScopeSelf;
 
-// dart compile js isolate.dart -o isolate.js
+// dart compile js function_name.dart -o function_name.js
 
 main() {
   callbackToStream('onmessage', (html.MessageEvent e) {
     return js_util.getProperty(e, 'data');
   }).listen((message) async {
     // TODO: Function for computation here
-    final result = await functionName(message);
-
-    jsSendMessage(result);
+    final Completer completer = Completer();
+    completer.future.then((value) => jsSendMessage(value));
+    completer.complete(functionName(message));
   });
 }
 

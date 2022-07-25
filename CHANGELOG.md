@@ -1,3 +1,8 @@
+## 2.0.1+1
+
+* Update base `function_name.dart` to make it works with `FutureOr` function.
+* Add `function_name.js` to example and create example for it.
+
 ## 2.0.1
 
 * Remove useless `await` in README.
