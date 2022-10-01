@@ -122,7 +122,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
 ### **Step 3:** Now you can use everything as above from this step
 
-## CONFIGURATION FOR `WORKER` *(Real Isolate on Web)*
+## CONFIGURATION FOR `WORKER`
 
 * **Step 1:** Download [isolate_manager/worker/function_name.dart](https://raw.githubusercontent.com/vursin/isolate_manager/main/worker/function_name.dart) and rename it to the `<function_name>.dart` that you want to create isolate.
 * **Step 2:** Modify the function `dynamic functionName(dynamic message)` in the script to serves your purposes, then rename it to the same as the above `<function_name>` (Just helping you easier to remember for later use). You can also use the `top-level or static function` that you have created above.
@@ -136,7 +136,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
   ``` dart
   final isolateManager = IsolateManager.create(
       add,
-      workerName: 'add', // add.js
+      workerName: '<function_name>', // Ex: 'add' if the name is 'add.js'
     );
   ```
 
@@ -156,7 +156,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
   ``` dart
   final isolateManager = IsolateManager.create(
     convertToMap,
-    workerName: 'map_result',
+    workerName: '<function_name>', // Ex: 'map_result' if the name is 'map_result.js'
     workerConverter: (result) {
       final Map<int, double> convert = {};
 
@@ -170,7 +170,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
   );
   ```
 
-    Data flow: Main -> Isolate or Worker -> Converter -> Result
+    **Data flow:** Main -> Isolate or Worker -> *Converter* -> Result
 
 ## Contributions
 
@@ -179,5 +179,4 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
 ## To-do list
 
-* [x] Add real isolate for web platform with service-worker.js.
 * [ ] Find the best way to prevent using `dart compile js`.

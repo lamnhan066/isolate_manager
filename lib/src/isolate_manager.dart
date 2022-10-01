@@ -53,12 +53,30 @@ class IsolateManager<R> {
     this.isDebug = false,
   });
 
+  /// Easy way to create a new isolate.
   factory IsolateManager.create(
+    /// A function that you want to create an isolate.
     FutureOr<R> Function(dynamic) isolateFunction, {
+
+    /// Name of the .js file that you want to create a Worker.
     String workerName = '',
+
+    /// Number of isolates for this function.
     int numOfIsolates = 1,
+
+    /// Convert values before you get the last result.
+    ///
+    /// This parameter isn't used for for `Worker` on Web, you can use `workerConverter`
+    /// instead if you need to.
     R Function(dynamic)? converter,
+
+    /// Convert values before you get the last result.
+    ///
+    /// This parameter is only used for `Worker` on Web, you can use `converter`
+    /// instead if you need to.
     R Function(dynamic)? workerConverter,
+
+    /// Print debug information.
     bool isDebug = false,
   }) =>
       IsolateManager._(
@@ -70,13 +88,32 @@ class IsolateManager<R> {
         isDebug: isDebug,
       );
 
+  /// Create a new isolate with your own isolate function.
   factory IsolateManager.createOwnIsolate(
+    /// A function that you want to create an isolate.
     void Function(dynamic) isolateFunction, {
+
+    /// Name of the .js file that you want to create a Worker.
     String workerName = '',
+
+    /// Initial parameters that you want to pass to your function.
     dynamic initialParams,
+
+    /// Number of isolates for this function.
     int numOfIsolates = 1,
+
+    /// Convert the result received from the isolate before getting real result.
+    /// This function useful when the result received from the isolate is different
+    /// from the return type.
     R Function(dynamic)? converter,
+
+    /// Convert values before you get the last result.
+    ///
+    /// This parameter is only used for `Worker` on Web, you can use `converter`
+    /// instead if you need to.
     R Function(dynamic)? workerConverter,
+
+    /// Print debug information.
     bool isDebug = false,
   }) =>
       IsolateManager._(

@@ -1,3 +1,9 @@
+## 2.0.1+2
+
+* Update function headers.
+* Update README.
+* Update dependencies.
+
 ## 2.0.1+1
 
 * Update base `function_name.dart` to make it works with `FutureOr` function.
