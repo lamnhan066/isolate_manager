@@ -1,3 +1,7 @@
+## 2.0.1+3
+
+* Improve function headers.
+
 ## 2.0.1+2
 
 * Update function headers.

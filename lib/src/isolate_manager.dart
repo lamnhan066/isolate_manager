@@ -209,7 +209,7 @@ class IsolateManager<R> {
   ///  Similar to `commpute`, for who's using IsolateContactor
   Future<R> sendMessage(dynamic params) => compute(params);
 
-  /// Compute isolate manager
+  /// Compute isolate manager with [R] is return type.
   Future<R> compute(dynamic params) async {
     final queue = IsolateQueue<R>(params);
 
