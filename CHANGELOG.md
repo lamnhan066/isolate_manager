@@ -1,3 +1,7 @@
+## 2.0.2
+
+* Fixes issue in `restart` and `stop` methods.
+
 ## 2.0.1+3
 
 * Improve function headers.

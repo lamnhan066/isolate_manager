@@ -135,7 +135,7 @@ class IsolateManager<R> {
 
   /// Controller for stream
   final StreamController<R> _streamController = StreamController.broadcast();
-  StreamSubscription<R>? _streamSubscription;
+  final List<StreamSubscription<R>> _streamSubscriptions = [];
 
   /// Start initialize IsolateManager
   Future<void> start() async {
@@ -170,13 +170,13 @@ class IsolateManager<R> {
 
     // _streamController = StreamController.broadcast();
     for (final isolate in _isolates.keys) {
-      _streamSubscription = isolate.onMessage.listen((value) {
+      _streamSubscriptions.add(isolate.onMessage.listen((value) {
         _streamController.sink.add(value);
         if (_queue.isNotEmpty) {
           final queue = _queue.removeFirst();
           _excute(isolate, queue);
         }
-      });
+      }));
 
       /// Allow calling `compute` before `start`
       if (_queue.isNotEmpty) {
@@ -192,13 +192,16 @@ class IsolateManager<R> {
     await Future.wait(
         [for (final isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
-    await _streamSubscription?.cancel();
+    await Future.wait([for (final sub in _streamSubscriptions) sub.cancel()]);
+    _streamSubscriptions.clear();
   }
 
   /// Stop isolate manager
   Future<void> stop() async {
-    _tempStop();
-    await _streamController.close();
+    await Future.wait([
+      _tempStop(),
+      _streamController.close(),
+    ]);
   }
 
   Future<void> restart() async {
