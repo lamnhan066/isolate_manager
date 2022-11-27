@@ -1,6 +1,6 @@
 # Isolate Manager
 
-## Features
+## **Features**
 
 * Easy to create multiple isolate for a function, keep it active and comunicate with it.
 
@@ -175,8 +175,8 @@ final isolateManager = IsolateManager.createOwnIsolate(
 ## Contributions
 
 * This plugin as an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
-* If you encounter any problems or feel the library is missing a feature, please feel free to open an issue. Pull request are also welcome.
+* If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull request are also welcome.
 
 ## To-do list
 
-* [ ] Find the best way to prevent using `dart compile js`.
+* Find the best way to prevent using `dart compile js`.
