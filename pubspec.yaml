@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies: 
-  isolate_contactor: ^2.0.0
+  isolate_contactor: ^2.0.0+1
 
 dev_dependencies:
   test: ^1.17.12
