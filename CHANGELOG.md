@@ -1,6 +1,7 @@
-## 2.0.2+1
+## 2.0.2+2
 
 * Changes the name from `function_name` to `worker`.
+* Improves `worker.dart` form.
 * Improves README.
 
 ## 2.0.2
