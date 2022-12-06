@@ -1,3 +1,8 @@
+## 2.0.2+1
+
+* Changes the name from `function_name` to `worker`.
+* Improves README.
+
 ## 2.0.2
 
 * Fixes issue in `restart` and `stop` methods.

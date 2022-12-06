@@ -8,7 +8,7 @@
 
 * Multiple `compute`s are allowed because the plugin will queues the input data and sends it to free isolate later.
 
-## **BASIC USAGE** *(Use build-in function)*
+## **Basic Usage** (Use build-in function)
 
 There are multiple ways to use this package, the only thing to notice that the `function` have to be a `static` or `top-level` function to make it works.
 
@@ -59,8 +59,7 @@ StreamBuilder(
         child: CircularProgressIndicator(),
       );
     }
-    return Text(
-        'Result of the `add` function: ${snapshot.data}');
+    return Text('Result of the `add` function: ${snapshot.data}');
   },
 ),
 ```
@@ -77,7 +76,7 @@ await isolateManager.restart();
 await isolateManager.stop();
 ```
 
-## **ADVANCED USAGE** *(Use your own function)*
+## **Advanced Usage** (Use your own function)
 
 You can control everything with this method when you want to create multiple isolates for a function.
 
@@ -97,7 +96,6 @@ void isolateFunction(dynamic params) {
   // Get your initialParams.
   // Notice that this `initialParams` different from the `params` above.
   final initialParams = controller.initialParams;
-  print(initialParams);
 
   // Listen to the message receiving from main isolate
   controller.onIsolateMessage.listen((message) {
@@ -114,29 +112,81 @@ void isolateFunction(dynamic params) {
 
 ``` dart
 final isolateManager = IsolateManager.createOwnIsolate(
-      isolateFunction,
-      initialParams: 'This is initialParams',
-      debugMode: true,
-    );
+    isolateFunction,
+    initialParams: 'This is initialParams',
+    debugMode: true,
+  );
 ```
 
 ### **Step 3:** Now you can use everything as above from this step
 
-## CONFIGURATION FOR `WORKER`
+## Worker Configuration
 
-* **Step 1:** Download [isolate_manager/worker/function_name.dart](https://raw.githubusercontent.com/vursin/isolate_manager/main/worker/function_name.dart) and rename it to the `<function_name>.dart` that you want to create isolate.
-* **Step 2:** Modify the function `dynamic functionName(dynamic message)` in the script to serves your purposes, then rename it to the same as the above `<function_name>` (Just helping you easier to remember for later use). You can also use the `top-level or static function` that you have created above.
+* **Step 1:** Download [isolate_manager/worker/worker.dart](https://raw.githubusercontent.com/vursin/isolate_manager/main/worker/worker.dart) or copy the below code to the file named `worker.dart`:
 
-  ***You should copy that function to separated file or copy to `<function_name>.dart` file to prevent the `dart compile js` error because some other functions depend on flutter library.***
+  <details>
+  
+  <summary>worker.dart</summary>
 
-* **Step 3:** Run `dart compile js <function_name>.dart -o <function_name>.js -O4` to compile dart to js (-O0 to -O4 is the obfuscated level of `js`).
-* **Step 4:** Copy `<function_name>.js` to web folder (the same folder with `index.html`).
-* **Step 5:** Now you can add parameter `workerName` to your code like below:
+  ``` dart
+  // ignore_for_file: avoid_web_libraries_in_flutter, depend_on_referenced_packages
+
+  import 'dart:async';
+  import 'dart:convert';
+  import 'dart:html' as html;
+  import 'dart:js' as js;
+
+  import 'package:js/js.dart' as pjs;
+  import 'package:js/js_util.dart' as js_util;
+
+  @pjs.JS('self')
+  external dynamic get globalScopeSelf;
+
+  // dart compile js worker.dart -o worker.js -O4
+
+  main() {
+    callbackToStream('onmessage', (html.MessageEvent e) {
+      return js_util.getProperty(e, 'data');
+    }).listen((message) async {
+      final Completer completer = Completer();
+      completer.future.then((value) => jsSendMessage(value));
+      completer.complete(worker(message));
+    });
+  }
+
+  /// TODO: Modify your function here
+  FutureOr<dynamic> worker(dynamic message) {
+    return message;
+  }
+
+  Stream<T> callbackToStream<J, T>(
+      String name, T Function(J jsValue) unwrapValue) {
+    var controller = StreamController<T>.broadcast(sync: true);
+    js_util.setProperty(js.context['self'], name, js.allowInterop((J event) {
+      controller.add(unwrapValue(event));
+    }));
+    return controller.stream;
+  }
+
+  void jsSendMessage(dynamic m) {
+    js.context.callMethod('postMessage', [jsonEncode(m)]);
+  }
+  ```
+
+  </details>
+
+* **Step 2:** Modify the function `FutureOr<dynamic> worker(dynamic message)` in the script to serves your purposes. You can also use the `top-level or static function` that you have created above.
+
+ **You should copy that function to separated file or copy to `worker.dart` file to prevent the `dart compile js` error because some other functions depend on flutter library.**
+
+* **Step 3:** Run `dart compile js worker.dart -o worker.js -O4` to compile dart to js (-O0 to -O4 is the obfuscated level of `js`).
+* **Step 4:** Copy `worker.js` to web folder (the same folder with `index.html`).
+* **Step 5:** Now you can add `worker` to `workerName` like below:
 
   ``` dart
   final isolateManager = IsolateManager.create(
       add,
-      workerName: '<function_name>', // Ex: 'add' if the name is 'add.js'
+      workerName: 'worker', // Don't need to add the extension
     );
   ```
 
@@ -144,33 +194,34 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
 ## Additional
 
-* If the `function_name.dart` show errors for `js` package, you can add `js` to `dev_dependencies`:
+* If the `worker.dart` show errors for `js` package, you can add `js` to `dev_dependencies`:
   
   ``` dart
   dev_dependencies:
-    js: ^0.6.4
+    js:
   ```
 
-* `IsolateManager.create` and `createOwnIsolate` include `converter` and `workerConverter` parameters which helping you to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter) and send it to the result. Example:
+* The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
 
   ``` dart
   final isolateManager = IsolateManager.create(
     convertToMap,
-    workerName: '<function_name>', // Ex: 'map_result' if the name is 'map_result.js'
+    // Ex: 'map_result' if the name is 'map_result.js'
+    workerName: 'worker',
+    // Convert the data from worker to fix the issue related to the different data type between dart and js
     workerConverter: (result) {
       final Map<int, double> convert = {};
 
       // Convert Map<String, String> (received from Worker) to Map<int, double>
-      (jsonDecode(result) as Map).forEach((key, value) => {
-            convert.addAll({int.parse(key): double.parse(value)})
-          });
+      final decodedMap = jsonDecode(result) as Map;
+      decodedMap.forEach((key, value) => convert.addAll({int.parse(key): double.parse(value)}));
 
       return convert;
     },
   );
   ```
 
-    **Data flow:** Main -> Isolate or Worker -> *Converter* -> Result
+  **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
 
 ## Contributions
 
