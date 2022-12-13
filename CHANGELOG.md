@@ -1,3 +1,7 @@
+## 2.0.2+3
+
+* Improve README.
+
 ## 2.0.2+2
 
 * Changes the name from `function_name` to `worker`.

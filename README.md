@@ -2,15 +2,15 @@
 
 ## **Features**
 
-* Easy to create multiple isolate for a function, keep it active and comunicate with it.
+* Easy to create multiple isolates for a function, keep it active and communicate with it.
 
-* Supports `Worker` on Web (`Worker` is the real Isolate on Web). The plugin will use `Future` (and `Stream`) if `Worker` is not available on the working browser or is not configured.
+* Supports `Worker` on Web (`Worker` is the real Isolate on Web). The plugin will use `Future` (and `Stream`) if `Worker` is unavailable on the working browser or is not configured.
 
-* Multiple `compute`s are allowed because the plugin will queues the input data and sends it to free isolate later.
+* Multiple `compute`s are allowed because the plugin will queue the input data and sends it to free isolate later.
 
 ## **Basic Usage** (Use build-in function)
 
-There are multiple ways to use this package, the only thing to notice that the `function` have to be a `static` or `top-level` function to make it works.
+There are multiple ways to use this package, the only thing to notice is that the `function` has to be a `static` or `top-level` function to make it works.
 
 ### **Step 1:** Create a top-level or static function
 
