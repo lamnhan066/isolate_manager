@@ -10,7 +10,7 @@ void main() {
     print('Create IsolateManager instance');
     IsolateManager<int> isolateManager = IsolateManager.create(
       fibonacci,
-      numOfIsolates: 4,
+      concurrent: 4,
     );
 
     print('Starting IsolateManager instance...');
@@ -30,7 +30,7 @@ void main() {
     print('Create IsolateManager instance');
     IsolateManager<int> isolateManager = IsolateManager.create(
       fibonacci,
-      numOfIsolates: 4,
+      concurrent: 4,
     );
 
     print('Starting IsolateManager instance...');
@@ -56,7 +56,7 @@ void main() {
     print('Create IsolateManager instance');
     IsolateManager<int> isolateManager = IsolateManager.createOwnIsolate(
       isolateFunction,
-      numOfIsolates: 4,
+      concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
     );
 
@@ -101,7 +101,7 @@ void main() {
     IsolateManager<int> isolateManager = IsolateManager.create(
       fibonacci,
       workerName: 'fibonacci',
-      numOfIsolates: 4,
+      concurrent: 4,
     );
 
     print('Starting IsolateManager instance...');

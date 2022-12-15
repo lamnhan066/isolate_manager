@@ -1,3 +1,8 @@
+## 2.1.0
+
+* **[BREADKING CHANGE]**: Change the parameter name from `numOfIsolates` to `concurrent`.
+* Update dependencies.
+
 ## 2.0.2+3
 
 * Improve README.

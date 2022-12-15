@@ -23,7 +23,7 @@ double add(dynamic value) => value[0] + value[1];
 ``` dart
 final isolateManager = IsolateManager.create(
   add, // Function that you want to compute
-  numOfIsolates: 4, // Number of concurrent isolates. Default is 1
+  concurrent: 4, // Number of concurrent isolates. Default is 1
 );
 ```
 
@@ -41,7 +41,7 @@ You can listen to the result as `stream`
 isolateManager.stream.listen((result) => print(result));
 ```
 
-You can send even more times then `numOfIsolates` because the plugin will queues the input data and sends it to free isolate later.
+You can send even more times then `concurrent` because the plugin will queues the input data and sends it to free isolate later.
 
 ``` dart
 // add([10, 20])
@@ -231,8 +231,8 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
 ## Contributions
 
-* This plugin as an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
-* If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull request are also welcome.
+* This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
+* If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
 
 ## To-do list
 

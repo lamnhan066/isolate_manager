@@ -85,16 +85,16 @@ class _MyAppState extends State<MyApp> {
     isDebug: true,
     fibonacciFuture,
     workerName: 'fibonacci',
-    numOfIsolates: 2,
+    concurrent: 2,
   );
   final IsolateManager<int> isolateManager2 = IsolateManager.createOwnIsolate(
-    numOfIsolates: 2,
+    concurrent: 2,
     isolateFunction,
     isDebug: true,
   );
   late IsolateManager<int> isolateManager3 = IsolateManager.create(
     fibonacciRescusiveFuture,
-    numOfIsolates: 2,
+    concurrent: 2,
   );
   late IsolateManager isolateManager4 = IsolateManager.create(
     functionName,

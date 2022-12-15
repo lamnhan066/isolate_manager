@@ -7,7 +7,7 @@ import 'utils.dart';
 
 class IsolateManager<R> {
   /// Number of concurrent isolates
-  final int numOfIsolates;
+  final int concurrent;
 
   /// Isolate function
   final dynamic Function(dynamic) isolateFunction;
@@ -43,7 +43,7 @@ class IsolateManager<R> {
   final R Function(dynamic)? workerConverter;
 
   IsolateManager._({
-    required this.numOfIsolates,
+    required this.concurrent,
     required this.isolateFunction,
     required this.workerName,
     this.converter,
@@ -61,8 +61,8 @@ class IsolateManager<R> {
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
-    /// Number of isolates for this function.
-    int numOfIsolates = 1,
+    /// Number of concurrent isolates for this function.
+    int concurrent = 1,
 
     /// Convert values before you get the last result.
     ///
@@ -80,7 +80,7 @@ class IsolateManager<R> {
     bool isDebug = false,
   }) =>
       IsolateManager._(
-        numOfIsolates: numOfIsolates,
+        concurrent: concurrent,
         isolateFunction: isolateFunction,
         workerName: workerName,
         converter: converter,
@@ -100,7 +100,7 @@ class IsolateManager<R> {
     dynamic initialParams,
 
     /// Number of isolates for this function.
-    int numOfIsolates = 1,
+    int concurrent = 1,
 
     /// Convert the result received from the isolate before getting real result.
     /// This function useful when the result received from the isolate is different
@@ -117,7 +117,7 @@ class IsolateManager<R> {
     bool isDebug = false,
   }) =>
       IsolateManager._(
-        numOfIsolates: numOfIsolates,
+        concurrent: concurrent,
         isolateFunction: isolateFunction,
         workerName: workerName,
         initialParams: initialParams,
@@ -142,7 +142,7 @@ class IsolateManager<R> {
     if (isOwnIsolate) {
       await Future.wait(
         [
-          for (int i = 0; i < numOfIsolates; i++)
+          for (int i = 0; i < concurrent; i++)
             IsolateContactor.createOwnIsolate<R>(
               isolateFunction,
               workerName: workerName,
@@ -156,7 +156,7 @@ class IsolateManager<R> {
     } else {
       await Future.wait(
         [
-          for (int i = 0; i < numOfIsolates; i++)
+          for (int i = 0; i < concurrent; i++)
             IsolateContactor.create<R>(
               isolateFunction as FutureOr<R> Function(dynamic),
               workerName: workerName,
