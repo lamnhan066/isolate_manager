@@ -234,6 +234,11 @@ final isolateManager = IsolateManager.createOwnIsolate(
 * This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
 * If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
 
+* If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
+</br>
+<a href="https://www.buymeacoffee.com/vursin" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px hex(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" >
+</a>
+
 ## To-do list
 
 * Find the best way to prevent using `dart compile js`.
