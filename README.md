@@ -15,8 +15,11 @@ There are multiple ways to use this package, the only thing to notice is that th
 ### **Step 1:** Create a top-level or static function
 
 ``` dart
+@pragma('vm:entry-point')
 double add(dynamic value) => value[0] + value[1];
 ```
+
+**You have to add `@pragma('vm:entry-point')` anotation to all methods that you want to use for isolation since Flutter 3.3.0. Without this annotation, the dart compiler could strip out unused functions, inline them, shrink names, etc, and the native code would fail to call it.**
 
 ### **Step 2:** Create IsolateManager instance for that function
 
@@ -84,6 +87,7 @@ You can control everything with this method when you want to create multiple iso
 
 ``` dart
 // Create your own function here
+@pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   // Initial the controller for child isolate
   final controller = IsolateManagerController<double>(

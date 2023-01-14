@@ -13,6 +13,7 @@ void main() {
 /// This must be a static or top-level function
 ///
 /// This function is very expensive to calculate, so I can test for un-blocking UI feature
+@pragma('vm:entry-point')
 Future<int> fibonacciRescusiveFuture(dynamic n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
@@ -25,6 +26,7 @@ Future<int> fibonacciRescusiveFuture(dynamic n) async {
 }
 
 /// This must be a static or top-level function
+@pragma('vm:entry-point')
 Future<int> fibonacciFuture(dynamic n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
@@ -44,6 +46,7 @@ Future<int> fibonacciFuture(dynamic n) async {
 }
 
 /// This must be a static or top-level function
+@pragma('vm:entry-point')
 int fibonacci(dynamic n) {
   if (n == 0) return 0;
   if (n == 1 || n == 2) return 1;
@@ -59,6 +62,7 @@ int fibonacci(dynamic n) {
   return n3.round();
 }
 
+@pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   final channel = IsolateManagerController<int>(params);
   channel.onIsolateMessage.listen((message) async {
@@ -71,6 +75,7 @@ void isolateFunction(dynamic params) {
   });
 }
 
+@pragma('vm:entry-point')
 dynamic functionName(dynamic message) => message;
 
 class MyApp extends StatefulWidget {

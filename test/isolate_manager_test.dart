@@ -125,6 +125,7 @@ void main() {
   });
 }
 
+@pragma('vm:entry-point')
 int fibonacci(dynamic n) {
   if (n == 0) return 0;
   if (n <= 2) return 1;
@@ -140,6 +141,7 @@ int fibonacci(dynamic n) {
   return n3.round();
 }
 
+@pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   final controller = IsolateManagerController(params);
 
