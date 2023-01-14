@@ -137,9 +137,26 @@ class IsolateManager<R> {
   final StreamController<R> _streamController = StreamController.broadcast();
   final List<StreamSubscription<R>> _streamSubscriptions = [];
 
-  /// Start initialize IsolateManager
+  /// Is the `start` method is starting
+  bool _isStarting = false;
+
+  /// Control when the `start` method is completed
+  Completer<void> _startedCompleter = Completer();
+
+  /// Initialize the instance. This method can be called manually or will be
+  /// called when the first `compute()` has been made.
   Future<void> start() async {
+    // If this method is already completed than return
+    if (_startedCompleter.isCompleted) return;
+
+    // If this method has already been called, it will wait for completion
+    if (_isStarting) return _startedCompleter.future;
+
+    // Mark as the `start()` is starting
+    _isStarting = true;
+
     if (isOwnIsolate) {
+      // Create your own isolates
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
@@ -154,6 +171,7 @@ class IsolateManager<R> {
         ],
       );
     } else {
+      // Create isolates with the internal method
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
@@ -184,10 +202,15 @@ class IsolateManager<R> {
         _excute(isolate, queue);
       }
     }
+
+    // Mark the `start()` to be completed
+    _startedCompleter.complete();
   }
 
   /// Stop isolate manager without close streamController
   Future<void> _tempStop() async {
+    _isStarting = false;
+    _startedCompleter = Completer();
     _queue.clear();
     await Future.wait(
         [for (final isolate in _isolates.keys) isolate.dispose()]);
@@ -214,6 +237,8 @@ class IsolateManager<R> {
 
   /// Compute isolate manager with [R] is return type.
   Future<R> compute(dynamic params) async {
+    await start();
+
     final queue = IsolateQueue<R>(params);
 
     for (final isolate in _isolates.keys) {

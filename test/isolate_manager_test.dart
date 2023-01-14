@@ -13,9 +13,6 @@ void main() {
       concurrent: 4,
     );
 
-    print('Starting IsolateManager instance...');
-    await isolateManager.start();
-
     print('Computing IsolateManager instance...');
     final result = await isolateManager.compute(3);
 
@@ -34,7 +31,7 @@ void main() {
     );
 
     print('Starting IsolateManager instance...');
-    await isolateManager.start();
+    isolateManager.start();
 
     print('Computing IsolateManager instance...');
     await Future.wait([
@@ -58,14 +55,11 @@ void main() {
       isolateFunction,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
-    );
+    )..start();
 
     isolateManager.stream.listen((value) {
       print('Stream: $value');
     });
-
-    print('Starting IsolateManager instance...');
-    await isolateManager.start();
 
     print('Computing IsolateManager instance...');
     await Future.wait([

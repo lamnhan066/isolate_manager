@@ -30,10 +30,19 @@ final isolateManager = IsolateManager.create(
 );
 ```
 
-### **Step 3:** Initialize the instance
+### **Step 3:** Initialize the instance, this step is not required because it's automatically called when you use `.compute` for the first time
 
 ``` dart
 await isolateManager.start();
+```
+
+You can also run this method when creating the instance:
+
+``` dart
+final isolateManager = IsolateManager.create(
+  add, // Function that you want to compute
+  concurrent: 4, // Number of concurrent isolates. Default is 1
+)..start();
 ```
 
 ### **Step 4:** Send and receive data

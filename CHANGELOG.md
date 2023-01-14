@@ -1,3 +1,38 @@
+## 2.1.2
+
+* The method `.start()` is now optional, the plugin will automatically call this method when using `.compute` for the first time, so you have 3 way to create the instance:
+
+    1. Basic usage:
+
+    ``` dart
+    IsolateManager<int> isolateManager = IsolateManager.create(
+      fibonacci,
+      concurrent: 4,
+    );
+
+    await isolateManager.start();
+    ```
+
+    2. Use `start` without `await`:
+
+    ``` dart
+    IsolateManager<int> isolateManager = IsolateManager.create(
+      fibonacci,
+      concurrent: 4,
+    );
+
+    isolateManager.start();
+    ```
+
+    3. Use `start` when creating the instance:
+
+    ``` dart
+    IsolateManager<int> isolateManager = IsolateManager.create(
+      fibonacci,
+      concurrent: 4,
+    )..start();
+    ```
+
 ## 2.1.1
 
 * On Flutter >3.3.0 - `@pragma('vm:entry-point')` anotation must be added to all methods that you want to use for isolation. Read README for more information.
