@@ -1,3 +1,7 @@
+## 2.1.2+1
+
+* Improve pub scores.
+
 ## 2.1.2
 
 * The method `.start()` is now optional, the plugin will automatically call this method when using `.compute` for the first time, so you have 3 way to create the instance:

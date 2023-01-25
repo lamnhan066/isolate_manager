@@ -57,7 +57,6 @@ class IsolateManager<R> {
   factory IsolateManager.create(
     /// A function that you want to create an isolate.
     FutureOr<R> Function(dynamic) isolateFunction, {
-
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
@@ -92,7 +91,6 @@ class IsolateManager<R> {
   factory IsolateManager.createOwnIsolate(
     /// A function that you want to create an isolate.
     void Function(dynamic) isolateFunction, {
-
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
