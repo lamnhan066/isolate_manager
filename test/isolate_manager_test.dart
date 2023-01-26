@@ -117,6 +117,28 @@ void main() {
     print('Dispose IsolateManager instance.');
     isolateManager.stop();
   });
+
+  test('Test with Exception function', () async {
+    final isolateManager = IsolateManager.create(
+      errorFunction,
+      concurrent: 2,
+      isDebug: true,
+    );
+    await isolateManager.start();
+    final List<Future> futures = [];
+
+    try {
+      for (var i = 0; i < 100; i++) {
+        futures.add(isolateManager.compute([i, 20]));
+      }
+
+      await Future.wait(futures, eagerError: true);
+    } on StateError catch (e) {
+      expect(e.message, equals('The exception is threw at value[0] = 50'));
+    } finally {
+      isolateManager.stop();
+    }
+  });
 }
 
 @pragma('vm:entry-point')
@@ -148,4 +170,12 @@ void isolateFunction(dynamic params) {
 
     controller.sendResult(result);
   });
+}
+
+@pragma('vm:entry-point')
+int errorFunction(dynamic value) {
+  if (value[0] == 50) {
+    throw StateError('The exception is threw at value[0] = ${value[0]}');
+  }
+  return value[0] + value[1];
 }

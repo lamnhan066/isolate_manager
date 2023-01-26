@@ -8,6 +8,8 @@
 
 * Multiple `compute`s are allowed because the plugin will queue the input data and sends it to free isolate later.
 
+* Support `try-catch` block.
+
 ## **Basic Usage** (Use build-in function)
 
 There are multiple ways to use this package, the only thing to notice is that the `function` has to be a `static` or `top-level` function to make it works.
@@ -30,7 +32,7 @@ final isolateManager = IsolateManager.create(
 );
 ```
 
-### **Step 3:** Initialize the instance, this step is not required because it's automatically called when you use `.compute` for the first time
+### **Step 3 [Optional]:** Initialize the instance, this step is not required because it's automatically called when you use `.compute` for the first time
 
 ``` dart
 await isolateManager.start();
@@ -58,6 +60,18 @@ You can send even more times then `concurrent` because the plugin will queues th
 ``` dart
 // add([10, 20])
 final result = await isolateManager.compute([10, 20]);
+```
+
+You can use `try-catch` to catch the exception:
+
+``` dart
+try {
+  final result = await isolateManager.compute([10, 20]);
+} on Exception catch (e1) {
+  print(e1);
+} catch (e2) {
+  print(e2);
+}
 ```
 
 Build your widget with `StreamBuilder`
@@ -149,6 +163,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
   import 'dart:html' as html;
   import 'dart:js' as js;
 
+  import 'package:isolate_contactor/src/utils/exception.dart';
   import 'package:js/js.dart' as pjs;
   import 'package:js/js_util.dart' as js_util;
 
@@ -163,12 +178,29 @@ final isolateManager = IsolateManager.createOwnIsolate(
       return js_util.getProperty(e, 'data');
     }).listen((message) async {
       final Completer completer = Completer();
-      completer.future.then((value) => jsSendMessage(value));
-      completer.complete(worker(message));
+      completer.future.then(
+        (value) => jsSendMessage(value),
+        onError: (err, stack) =>
+            jsSendMessage(IsolateException(err, stack).toJson()),
+      );
+      try {
+        completer.complete(worker(message));
+      } catch (err, stack) {
+        jsSendMessage(IsolateException(err, stack).toJson());
+      }
     });
   }
 
-  /// TODO: Modify your function here
+  /// TODO: Modify your function here:
+  ///
+  ///  Do this if you need to throw an exception
+  ///
+  ///  You should only throw the `message` instead of a whole Object because it may
+  ///  not show as expected when sending back to the main app.
+  ///
+  /// ``` dart
+  ///  return throw 'This is an error that you need to catch in your main app';
+  /// ```
   FutureOr<dynamic> worker(dynamic message) {
     // Best way to use this method is encoding the result to JSON
     // before sending to the main app, then you can decode it back to

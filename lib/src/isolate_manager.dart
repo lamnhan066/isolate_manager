@@ -51,7 +51,10 @@ class IsolateManager<R> {
     this.initialParams,
     this.isOwnIsolate = false,
     this.isDebug = false,
-  });
+  }) {
+    // Set the debug log prefix
+    IsolateContactor.debugLogPrefix = 'Isolate Manager';
+  }
 
   /// Easy way to create a new isolate.
   factory IsolateManager.create(
@@ -144,7 +147,10 @@ class IsolateManager<R> {
   /// Initialize the instance. This method can be called manually or will be
   /// called when the first `compute()` has been made.
   Future<void> start() async {
-    // If this method is already completed than return
+    // This instance is stoped
+    if (_streamController.isClosed) return;
+
+    // Return here if this method is already completed
     if (_startedCompleter.isCompleted) return;
 
     // If this method has already been called, it will wait for completion
@@ -184,15 +190,20 @@ class IsolateManager<R> {
       );
     }
 
-    // _streamController = StreamController.broadcast();
     for (final isolate in _isolates.keys) {
-      _streamSubscriptions.add(isolate.onMessage.listen((value) {
-        _streamController.sink.add(value);
-        if (_queue.isNotEmpty) {
-          final queue = _queue.removeFirst();
-          _excute(isolate, queue);
-        }
-      }));
+      // Add all listeners
+      _streamSubscriptions.add(
+        isolate.onMessage.listen((value) {
+          _streamController.sink.add(value);
+          if (_queue.isNotEmpty) {
+            final queue = _queue.removeFirst();
+            _excute(isolate, queue);
+          }
+        })
+          ..onError((err, stack) {
+            _streamController.sink.addError(err, stack);
+          }),
+      );
 
       /// Allow calling `compute` before `start`
       if (_queue.isNotEmpty) {
@@ -217,14 +228,13 @@ class IsolateManager<R> {
     _streamSubscriptions.clear();
   }
 
-  /// Stop isolate manager
+  /// Stop the isolate
   Future<void> stop() async {
-    await Future.wait([
-      _tempStop(),
-      _streamController.close(),
-    ]);
+    await _tempStop();
+    await _streamController.close();
   }
 
+  /// Restart the isolate
   Future<void> restart() async {
     await _tempStop();
     await start();
@@ -255,6 +265,11 @@ class IsolateManager<R> {
 
     isolate.sendMessage(queue.params).then((value) {
       if (!queue.completer.isCompleted) queue.completer.complete(value);
+      _isolates[isolate] = false;
+    }).onError((error, stackTrace) {
+      if (!queue.completer.isCompleted) {
+        queue.completer.completeError(error!, stackTrace);
+      }
       _isolates[isolate] = false;
     });
 

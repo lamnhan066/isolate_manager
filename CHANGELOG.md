@@ -1,3 +1,11 @@
+## 2.2.0-PRE.1
+
+* Support `try-catch` block for all platforms including Worker on Web.
+* Update `worker.dart` to support `try-catch` block.
+* Change all the debug logs prefix to `[Isolate Mangager]`.
+* Add test for `try-catch`.
+* Increase min SDK to 2.15.0.
+
 ## 2.1.2+1
 
 * Improve pub scores.

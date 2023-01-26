@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:js' as js;
 
+import 'package:isolate_contactor/src/utils/exception.dart';
 import 'package:js/js.dart' as pjs;
 import 'package:js/js_util.dart' as js_util;
 
@@ -19,12 +20,29 @@ main() {
     return js_util.getProperty(e, 'data');
   }).listen((message) async {
     final Completer completer = Completer();
-    completer.future.then((value) => jsSendMessage(value));
-    completer.complete(worker(message));
+    completer.future.then(
+      (value) => jsSendMessage(value),
+      onError: (err, stack) =>
+          jsSendMessage(IsolateException(err, stack).toJson()),
+    );
+    try {
+      completer.complete(worker(message));
+    } catch (err, stack) {
+      jsSendMessage(IsolateException(err, stack).toJson());
+    }
   });
 }
 
-/// TODO: Modify your function here
+/// TODO: Modify your function here:
+///
+///  Do this if you need to throw an exception
+///
+///  You should only throw the `message` instead of a whole Object because it may
+///  not show as expected when sending back to the main app.
+///
+/// ``` dart
+///  return throw 'This is an error that you need to catch in your main app';
+/// ```
 FutureOr<dynamic> worker(dynamic message) {
   // Best way to use this method is encoding the result to JSON
   // before sending to the main app, then you can decode it back to
