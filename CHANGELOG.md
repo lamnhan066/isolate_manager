@@ -1,3 +1,8 @@
+## 2.2.0+1
+
+* Improve function descriptions.
+* Improve README for catching exception with `createOwnIsolate`.
+
 ## 2.2.0
 
 * Support `try-catch` block for all platforms including Worker on Web.
