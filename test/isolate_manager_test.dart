@@ -118,7 +118,7 @@ void main() {
     isolateManager.stop();
   });
 
-  test('Test with Exception function', () async {
+  test('Test with Exception function with eagerError is true', () async {
     final isolateManager = IsolateManager.create(
       errorFunction,
       concurrent: 2,
@@ -133,6 +133,28 @@ void main() {
       }
 
       await Future.wait(futures, eagerError: true);
+    } on StateError catch (e) {
+      expect(e.message, equals('The exception is threw at value[0] = 50'));
+    } finally {
+      isolateManager.stop();
+    }
+  });
+
+  test('Test with Exception function with eagerError is false', () async {
+    final isolateManager = IsolateManager.create(
+      errorFunction,
+      concurrent: 2,
+      isDebug: true,
+    );
+    await isolateManager.start();
+    final List<Future> futures = [];
+
+    try {
+      for (var i = 0; i < 100; i++) {
+        futures.add(isolateManager.compute([i, 20]));
+      }
+
+      await Future.wait(futures, eagerError: false);
     } on StateError catch (e) {
       expect(e.message, equals('The exception is threw at value[0] = 50'));
     } finally {
