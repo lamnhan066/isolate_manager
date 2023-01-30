@@ -104,12 +104,12 @@ await isolateManager.stop();
 
 ## **Advanced Usage** (Use your own function)
 
-You can control everything with this method when you want to create multiple isolates for a function.
+You can control everything with this method when you want to create multiple isolates for a function. With this method, you can also do one-time stuff when the isolate is started or each-time stuff when you call `compute` or `sendMessage`.
 
 ### **Step 1:** Create a function of this form
 
 ``` dart
-// Create your own function here
+/// Create your own function here. This function will be called when your isolate started.
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   // Initial the controller for child isolate
@@ -124,13 +124,32 @@ void isolateFunction(dynamic params) {
   // Notice that this `initialParams` different from the `params` above.
   final initialParams = controller.initialParams;
 
-  // Listen to the message receiving from main isolate
+  // Do your one-time stuff here, this area of code will be called only one-time when you `start`
+  // this instance of `IsolateManager`
+
+  // Listen to the message receiving from main isolate, this area of code will be called each time
+  // you use `compute` or `sendMessage`.
   controller.onIsolateMessage.listen((message) {
-    // Do your stuff here
-    final result = add(message[0], message[1]);
-    
-    // Send value back to your main process in stream [onMessage]
-    controller.sendResult(result);
+    // Create a completer
+    Completer completer = Completer();
+
+    // Handle the result an exceptions
+    completer.future.then(
+      (value) => controller.sendResult(value),
+      onError: (err, stack) =>
+          controller.sendResult(IsolateException(err, stack)),
+    );
+
+    // Use try-catch to send the exception to the main app
+    try {
+
+      // Do your stuff here. 
+      completer.complete(add(message[0], message[1]));
+
+    } catch (err, stack) {
+      // Send the exception to your main app
+      controller.sendResult(IsolateException(err, stack));
+    }
   });
 }
 ```
