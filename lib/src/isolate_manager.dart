@@ -260,16 +260,25 @@ class IsolateManager<R> {
     return queue.completer.future;
   }
 
+  /// Send and recieve value
   Future<R> _excute(IsolateContactor<R> isolate, IsolateQueue<R> queue) async {
+    // Mark the current isolate as busy
     _isolates[isolate] = true;
 
+    // Send the `param` to the isolate and wait for the result
     isolate.sendMessage(queue.params).then((value) {
+      // Send the result back to the main app
       if (!queue.completer.isCompleted) queue.completer.complete(value);
+
+      // Mark the current isolate as free
       _isolates[isolate] = false;
     }).onError((error, stackTrace) {
       if (!queue.completer.isCompleted) {
+        // Send the exception back to the main app
         queue.completer.completeError(error!, stackTrace);
       }
+
+      // Mark the current isolate as free
       _isolates[isolate] = false;
     });
 
