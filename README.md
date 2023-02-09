@@ -182,7 +182,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
   import 'dart:html' as html;
   import 'dart:js' as js;
 
-  import 'package:isolate_contactor/src/utils/exception.dart';
+  import 'package:isolate_manager/isolate_manager.dart';
   import 'package:js/js.dart' as pjs;
   import 'package:js/js_util.dart' as js_util;
 
@@ -199,8 +199,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
       final Completer completer = Completer();
       completer.future.then(
         (value) => jsSendMessage(value),
-        onError: (err, stack) =>
-            jsSendMessage(IsolateException(err, stack).toJson()),
+        onError: (err, stack) => jsSendMessage(IsolateException(err, stack).toJson()),
       );
       try {
         completer.complete(worker(message));
@@ -228,8 +227,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
   }
 
   /// Internal function
-  Stream<T> callbackToStream<J, T>(
-      String name, T Function(J jsValue) unwrapValue) {
+  Stream<T> callbackToStream<J, T>(String name, T Function(J jsValue) unwrapValue) {
     var controller = StreamController<T>.broadcast(sync: true);
     js_util.setProperty(js.context['self'], name, js.allowInterop((J event) {
       controller.add(unwrapValue(event));

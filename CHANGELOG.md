@@ -1,3 +1,8 @@
+## 2.2.0+2
+
+* Improve `worker.dart` imports.
+* Use new `worker.dart` in testing.
+
 ## 2.2.0+1
 
 * Improve function descriptions.
