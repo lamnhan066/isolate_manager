@@ -1,3 +1,7 @@
+## 2.2.0+3
+
+* Improves README.
+
 ## 2.2.0+2
 
 * Improve `worker.dart` imports.

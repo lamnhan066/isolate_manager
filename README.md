@@ -2,7 +2,7 @@
 
 ## **Features**
 
-* Easy to create multiple isolates for a function, keep it active and communicate with it.
+* An easy way to create multiple isolates for a function, also keep it active to send and receive data multiple times.
 
 * Supports `Worker` on Web (`Worker` is the real Isolate on Web). The plugin will use `Future` (and `Stream`) if `Worker` is unavailable on the working browser or is not configured.
 
@@ -299,7 +299,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
 * If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
 </br>
 
-<p align='center'><a href="https://www.buymeacoffee.com/vursin"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=vursin&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00"></a></p>
+<p align='center'><a href="https://www.buymeacoffee.com/vursin"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=vursin&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" width="200"></a></p>
 
 ## To-do list
 
