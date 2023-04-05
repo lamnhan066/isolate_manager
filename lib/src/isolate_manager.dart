@@ -6,6 +6,9 @@ import 'package:isolate_contactor/isolate_contactor.dart';
 import 'utils.dart';
 
 class IsolateManager<R> {
+  /// Debug logs prefix
+  static String debugLogPrefix = 'Isolate Manager';
+
   /// Number of concurrent isolates
   final int concurrent;
 
@@ -53,7 +56,7 @@ class IsolateManager<R> {
     this.isDebug = false,
   }) {
     // Set the debug log prefix
-    IsolateContactor.debugLogPrefix = 'Isolate Manager';
+    IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
   /// Easy way to create a new isolate.

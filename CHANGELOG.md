@@ -1,6 +1,7 @@
-## 2.2.0+3
+## 2.2.0+4
 
 * Improves README.
+* Add `IsolateManager.debugLogPrefix` to set the prefix debug logs.
 
 ## 2.2.0+2
 
