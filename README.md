@@ -10,6 +10,8 @@
 
 * Support `try-catch` block.
 
+* If you don't need to control your own function, you can use [isolates_helper](https://pub.dev/packages/isolates_helper) - the simple version of this package that will allow you to compute with multiple functions.
+
 ## **Basic Usage** (Use build-in function)
 
 There are multiple ways to use this package, the only thing to notice is that the `function` has to be a `static` or `top-level` function to make it works.

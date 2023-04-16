@@ -1,3 +1,7 @@
+## 2.2.0+5
+
+* Add `isolates_helper` to README.
+
 ## 2.2.0+4
 
 * Improves README.
