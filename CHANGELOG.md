@@ -1,3 +1,7 @@
+## 3.0.0
+
+* Bumped Dart sdk to `>=2.18.0 <4.0.0`.
+
 ## 2.2.0+5
 
 * Add `isolates_helper` to README.
