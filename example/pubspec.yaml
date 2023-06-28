@@ -3,7 +3,7 @@ description: Demonstrates how to use the isolate_manager plugin.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 environment:
   sdk: ">=2.17.3 <3.0.0"
@@ -30,13 +30,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
-# dependency_overrides:
-#   isolate_contactor:
-#     git:
-#       url: https://github.com/vursin/isolate_contactor
-#       ref: worker.js
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,7 +46,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

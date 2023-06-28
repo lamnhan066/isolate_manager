@@ -10,6 +10,19 @@ void main() {
   runApp(const MyApp());
 }
 
+@pragma('vm:entry-point')
+int countEven(dynamic num) {
+  print('count');
+  int count = 0;
+  while (num > 0) {
+    if (num % 2 == 0) {
+      count++;
+    }
+    num--;
+  }
+  return count;
+}
+
 /// This must be a static or top-level function
 ///
 /// This function is very expensive to calculate, so I can test for un-blocking UI feature
@@ -63,6 +76,12 @@ int fibonacci(dynamic n) {
 }
 
 @pragma('vm:entry-point')
+int error(dynamic n) {
+  if (n == 0) throw StateError('n == 0');
+  return n;
+}
+
+@pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   final channel = IsolateManagerController<int>(params);
   channel.onIsolateMessage.listen((message) async {
@@ -97,19 +116,30 @@ class _MyAppState extends State<MyApp> {
     isolateFunction,
     isDebug: true,
   );
-  late IsolateManager<int> isolateManager3 = IsolateManager.create(
+  final IsolateManager<int> isolateManager3 = IsolateManager.create(
     fibonacciRescusiveFuture,
     concurrent: 2,
   );
-  late IsolateManager isolateManager4 = IsolateManager.create(
+  final IsolateManager isolateManager4 = IsolateManager.create(
     functionName,
     workerName: 'function_name',
     isDebug: true,
   );
+  final isolateManager5 = IsolateManager.create(
+    countEven,
+    isDebug: true,
+  );
+  final isolateManager6 = IsolateManager.create(
+    error,
+    concurrent: 1,
+    isDebug: true,
+  );
+
   int value1 = 2;
   int value2 = 3;
   int value3 = 4;
   int value4 = 5;
+  int value5 = 1000000000;
 
   bool isLoading = true;
   Random rad = Random();
@@ -126,6 +156,8 @@ class _MyAppState extends State<MyApp> {
     isolateManager2.stop();
     isolateManager3.stop();
     isolateManager4.stop();
+    isolateManager5.stop();
+    isolateManager6.stop();
     super.dispose();
   }
 
@@ -134,6 +166,8 @@ class _MyAppState extends State<MyApp> {
     await isolateManager2.start();
     await isolateManager3.start();
     await isolateManager4.start();
+    await isolateManager5.start();
+    await isolateManager6.start();
 
     setState(() => isLoading = false);
   }
@@ -160,6 +194,24 @@ class _MyAppState extends State<MyApp> {
     value4 = rad.nextInt(max);
     print('Isolate 3: Calculate fibonancci at F$value4');
     isolateManager4.sendMessage(value4);
+  }
+
+  void calculateValue5() {
+    isolateManager5.compute(value5);
+  }
+
+  void callErrorFunction() async {
+    await isolateManager6.start();
+
+    try {
+      await isolateManager6.compute(0);
+    } on StateError catch (e) {
+      print('>> $e');
+    } catch (e) {
+      print('>>> $e');
+    }
+
+    await Future.delayed(const Duration(seconds: 3));
   }
 
   @override
@@ -300,6 +352,18 @@ class _MyAppState extends State<MyApp> {
                         title: ElevatedButton(
                           onPressed: () => calculateValue4(),
                           child: const Text('Calculate new Fibonacci'),
+                        ),
+                      ),
+                      ListTile(
+                        title: ElevatedButton(
+                          onPressed: () => calculateValue5(),
+                          child: const Text('Count'),
+                        ),
+                      ),
+                      ListTile(
+                        title: ElevatedButton(
+                          onPressed: callErrorFunction,
+                          child: const Text('Error'),
                         ),
                       ),
                     ],
