@@ -118,6 +118,24 @@ void main() {
     isolateManager.stop();
   });
 
+  test('Test with Exception function', () async {
+    final isolateManager = IsolateManager.create(
+      errorFunction,
+      concurrent: 1,
+      isDebug: true,
+    );
+    await isolateManager.start();
+
+    expect(
+      () async => await isolateManager.compute([50, 50]),
+      throwsStateError,
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
+  });
+
   test('Test with Exception function with eagerError is true', () async {
     final isolateManager = IsolateManager.create(
       errorFunction,
@@ -127,17 +145,18 @@ void main() {
     await isolateManager.start();
     final List<Future> futures = [];
 
-    try {
-      for (var i = 0; i < 100; i++) {
-        futures.add(isolateManager.compute([i, 20]));
-      }
-
-      await Future.wait(futures, eagerError: true);
-    } on StateError catch (e) {
-      expect(e.message, equals('The exception is threw at value[0] = 50'));
-    } finally {
-      isolateManager.stop();
+    for (var i = 0; i < 100; i++) {
+      futures.add(isolateManager.compute([i, 20]));
     }
+
+    expect(
+      () async => await Future.wait(futures, eagerError: true),
+      throwsStateError,
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
   });
 
   test('Test with Exception function with eagerError is false', () async {
@@ -149,17 +168,18 @@ void main() {
     await isolateManager.start();
     final List<Future> futures = [];
 
-    try {
-      for (var i = 0; i < 100; i++) {
-        futures.add(isolateManager.compute([i, 20]));
-      }
-
-      await Future.wait(futures, eagerError: false);
-    } on StateError catch (e) {
-      expect(e.message, equals('The exception is threw at value[0] = 50'));
-    } finally {
-      isolateManager.stop();
+    for (var i = 0; i < 100; i++) {
+      futures.add(isolateManager.compute([i, 20]));
     }
+
+    expect(
+      () async => await Future.wait(futures, eagerError: false),
+      throwsStateError,
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
   });
 }
 
