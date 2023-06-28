@@ -139,7 +139,8 @@ class IsolateManager<R> {
 
   /// Controller for stream
   final StreamController<R> _streamController = StreamController.broadcast();
-  final List<StreamSubscription<R>> _streamSubscriptions = [];
+  StreamSubscription<R>? _streamSubscription;
+  // final List<StreamSubscription<R>> _streamSubscriptions = [];
 
   /// Is the `start` method is starting
   bool _isStarting = false;
@@ -193,27 +194,13 @@ class IsolateManager<R> {
       );
     }
 
-    for (final isolate in _isolates.keys) {
-      // Add all listeners
-      _streamSubscriptions.add(
-        isolate.onMessage.listen((value) {
-          _streamController.sink.add(value);
-          if (_queue.isNotEmpty) {
-            final queue = _queue.removeFirst();
-            _excute(isolate, queue);
-          }
-        })
-          ..onError((err, stack) {
-            _streamController.sink.addError(err, stack);
-          }),
-      );
+    _streamSubscription = _streamController.stream.listen((result) {
+      _excuteQueue();
+    })
+      // Needs to put onError here to make the try-catch work properly
+      ..onError((error, stack) {});
 
-      /// Allow calling `compute` before `start`
-      if (_queue.isNotEmpty) {
-        final queue = _queue.removeFirst();
-        _excute(isolate, queue);
-      }
-    }
+    _excuteQueue();
 
     // Mark the `start()` to be completed
     _startedCompleter.complete();
@@ -227,8 +214,7 @@ class IsolateManager<R> {
     await Future.wait(
         [for (final isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
-    await Future.wait([for (final sub in _streamSubscriptions) sub.cancel()]);
-    _streamSubscriptions.clear();
+    _streamSubscription?.cancel();
   }
 
   /// Stop the isolate
@@ -251,16 +237,22 @@ class IsolateManager<R> {
     await start();
 
     final queue = IsolateQueue<R>(params);
-
-    for (final isolate in _isolates.keys) {
-      if (_isolates[isolate] == false) {
-        return _excute(isolate, queue);
-      }
-    }
-
     _queue.add(queue);
 
+    _excuteQueue();
+
     return queue.completer.future;
+  }
+
+  /// Exccute the element in the queues.
+  void _excuteQueue() {
+    for (final isolate in _isolates.keys) {
+      /// Allow calling `compute` before `start`
+      if (_queue.isNotEmpty && _isolates[isolate] == false) {
+        final queue = _queue.removeFirst();
+        _excute(isolate, queue);
+      }
+    }
   }
 
   /// Send and recieve value
@@ -270,19 +262,19 @@ class IsolateManager<R> {
 
     // Send the `param` to the isolate and wait for the result
     isolate.sendMessage(queue.params).then((value) {
+      // Mark the current isolate as free
+      _isolates[isolate] = false;
+
       // Send the result back to the main app
-      if (!queue.completer.isCompleted) queue.completer.complete(value);
-
-      // Mark the current isolate as free
-      _isolates[isolate] = false;
+      _streamController.sink.add(value);
+      queue.completer.complete(value);
     }).onError((error, stackTrace) {
-      if (!queue.completer.isCompleted) {
-        // Send the exception back to the main app
-        queue.completer.completeError(error!, stackTrace);
-      }
-
       // Mark the current isolate as free
       _isolates[isolate] = false;
+
+      // Send the exception back to the main app
+      _streamController.sink.addError(error!, stackTrace);
+      queue.completer.completeError(error, stackTrace);
     });
 
     return queue.completer.future;
