@@ -1,3 +1,8 @@
+## 3.0.1
+
+* [Fixes]: The `compute` method will be failed if user tap on a button that calling it multiple times continuously.
+* Improves tests.
+
 ## 3.0.0
 
 * Bumped Dart sdk to `>=2.18.0 <4.0.0`.
