@@ -132,7 +132,7 @@ class IsolateManager<R> {
       );
 
   /// Queue of isolates
-  final Queue<IsolateQueue<R>> _queue = Queue();
+  final Queue<IsolateQueue<R>> _queues = Queue();
 
   /// Map<IsolateContactor instance, isBusy>
   final Map<IsolateContactor<R>, bool> _isolates = {};
@@ -210,7 +210,7 @@ class IsolateManager<R> {
   Future<void> _tempStop() async {
     _isStarting = false;
     _startedCompleter = Completer();
-    _queue.clear();
+    _queues.clear();
     await Future.wait(
         [for (final isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
@@ -237,7 +237,7 @@ class IsolateManager<R> {
     await start();
 
     final queue = IsolateQueue<R>(params);
-    _queue.add(queue);
+    _queues.add(queue);
 
     _excuteQueue();
 
@@ -246,10 +246,11 @@ class IsolateManager<R> {
 
   /// Exccute the element in the queues.
   void _excuteQueue() {
+    _print('Number of queues: ${_queues.length}');
     for (final isolate in _isolates.keys) {
       /// Allow calling `compute` before `start`
-      if (_queue.isNotEmpty && _isolates[isolate] == false) {
-        final queue = _queue.removeFirst();
+      if (_queues.isNotEmpty && _isolates[isolate] == false) {
+        final queue = _queues.removeFirst();
         _excute(isolate, queue);
       }
     }
@@ -278,5 +279,10 @@ class IsolateManager<R> {
     });
 
     return queue.completer.future;
+  }
+
+  /// Print debug log
+  void _print(String log) {
+    if (isDebug) print('[$debugLogPrefix] $log');
   }
 }
