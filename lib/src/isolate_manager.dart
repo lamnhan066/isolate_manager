@@ -5,7 +5,7 @@ import 'package:isolate_contactor/isolate_contactor.dart';
 
 import 'utils.dart';
 
-class IsolateManager<R> {
+class IsolateManager<R, P> {
   /// Debug logs prefix
   static String debugLogPrefix = 'Isolate Manager';
 
@@ -13,13 +13,13 @@ class IsolateManager<R> {
   final int concurrent;
 
   /// Isolate function
-  final dynamic Function(dynamic) isolateFunction;
+  final dynamic isolateFunction;
 
   /// Worker name
   final String workerName;
 
   /// Initial parameters
-  final dynamic initialParams;
+  final Object? initialParams;
 
   /// Is using your own isolate function
   final bool isOwnIsolate;
@@ -62,7 +62,7 @@ class IsolateManager<R> {
   /// Easy way to create a new isolate.
   factory IsolateManager.create(
     /// A function that you want to create an isolate.
-    FutureOr<R> Function(dynamic) isolateFunction, {
+    FutureOr<R> Function(P params) isolateFunction, {
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
@@ -101,7 +101,7 @@ class IsolateManager<R> {
     String workerName = '',
 
     /// Initial parameters that you want to pass to your function.
-    dynamic initialParams,
+    Object? initialParams,
 
     /// Number of isolates for this function.
     int concurrent = 1,
@@ -135,7 +135,7 @@ class IsolateManager<R> {
   final Queue<IsolateQueue<R>> _queues = Queue();
 
   /// Map<IsolateContactor instance, isBusy>
-  final Map<IsolateContactor<R>, bool> _isolates = {};
+  final Map<IsolateContactor<R, P>, bool> _isolates = {};
 
   /// Controller for stream
   final StreamController<R> _streamController = StreamController.broadcast();
@@ -168,8 +168,8 @@ class IsolateManager<R> {
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
-            IsolateContactor.createOwnIsolate<R>(
-              isolateFunction,
+            IsolateContactor.createOwnIsolate<R, P>(
+              isolateFunction as FutureOr<void> Function(dynamic),
               workerName: workerName,
               initialParams: initialParams,
               converter: converter,
@@ -183,8 +183,8 @@ class IsolateManager<R> {
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
-            IsolateContactor.create<R>(
-              isolateFunction as FutureOr<R> Function(dynamic),
+            IsolateContactor.create<R, P>(
+              isolateFunction as FutureOr<R> Function(P),
               workerName: workerName,
               converter: converter,
               workerConverter: workerConverter,
@@ -212,7 +212,7 @@ class IsolateManager<R> {
     _startedCompleter = Completer();
     _queues.clear();
     await Future.wait(
-        [for (final isolate in _isolates.keys) isolate.dispose()]);
+        [for (IsolateContactor isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
     _streamSubscription?.cancel();
   }
@@ -230,10 +230,10 @@ class IsolateManager<R> {
   }
 
   ///  Similar to `commpute`, for who's using IsolateContactor
-  Future<R> sendMessage(dynamic params) => compute(params);
+  Future<R> sendMessage(P params) => compute(params);
 
   /// Compute isolate manager with [R] is return type.
-  Future<R> compute(dynamic params) async {
+  Future<R> compute(P params) async {
     await start();
 
     final queue = IsolateQueue<R>(params);
@@ -257,7 +257,8 @@ class IsolateManager<R> {
   }
 
   /// Send and recieve value
-  Future<R> _excute(IsolateContactor<R> isolate, IsolateQueue<R> queue) async {
+  Future<R> _excute(
+      IsolateContactor<R, P> isolate, IsolateQueue<R> queue) async {
     // Mark the current isolate as busy
     _isolates[isolate] = true;
 
