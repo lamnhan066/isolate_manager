@@ -1,3 +1,11 @@
+## 4.0.0-rc.1
+
+* Add parameter type as `P` and change return type to `R`.
+* Add return type as `void` to `onDispose` method.
+* Change `isolateParams` from dynamic to `Object?`.
+* Update tests.
+* Update example.
+
 ## 3.0.1
 
 * [Fixes]: The `compute` method will be failed if user tap on a button that calling it multiple times continuously.
