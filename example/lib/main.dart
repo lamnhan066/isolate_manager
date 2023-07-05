@@ -11,7 +11,7 @@ void main() {
 }
 
 @pragma('vm:entry-point')
-int countEven(dynamic num) {
+int countEven(int num) {
   print('count');
   int count = 0;
   while (num > 0) {
@@ -27,7 +27,7 @@ int countEven(dynamic num) {
 ///
 /// This function is very expensive to calculate, so I can test for un-blocking UI feature
 @pragma('vm:entry-point')
-Future<int> fibonacciRescusiveFuture(dynamic n) async {
+Future<int> fibonacciRescusiveFuture(int n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
 
@@ -40,7 +40,7 @@ Future<int> fibonacciRescusiveFuture(dynamic n) async {
 
 /// This must be a static or top-level function
 @pragma('vm:entry-point')
-Future<int> fibonacciFuture(dynamic n) async {
+Future<int> fibonacciFuture(int n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
 
@@ -60,7 +60,7 @@ Future<int> fibonacciFuture(dynamic n) async {
 
 /// This must be a static or top-level function
 @pragma('vm:entry-point')
-int fibonacci(dynamic n) {
+int fibonacci(int n) {
   if (n == 0) return 0;
   if (n == 1 || n == 2) return 1;
 
@@ -76,14 +76,14 @@ int fibonacci(dynamic n) {
 }
 
 @pragma('vm:entry-point')
-int error(dynamic n) {
+int error(int n) {
   if (n == 0) throw StateError('n == 0');
   return n;
 }
 
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  final channel = IsolateManagerController<int>(params);
+  final channel = IsolateManagerController(params);
   channel.onIsolateMessage.listen((message) async {
     // Do more stuff here
 
@@ -105,18 +105,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final IsolateManager<int> isolateManager1 = IsolateManager.create(
+  final isolateManager1 = IsolateManager.create(
     isDebug: true,
     fibonacciFuture,
     workerName: 'fibonacci',
     concurrent: 2,
   );
-  final IsolateManager<int> isolateManager2 = IsolateManager.createOwnIsolate(
+  final isolateManager2 = IsolateManager.createOwnIsolate(
     concurrent: 2,
     isolateFunction,
     isDebug: true,
   );
-  final IsolateManager<int> isolateManager3 = IsolateManager.create(
+  final isolateManager3 = IsolateManager.create(
     fibonacciRescusiveFuture,
     concurrent: 2,
   );
