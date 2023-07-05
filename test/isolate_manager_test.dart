@@ -8,7 +8,7 @@ void main() {
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
-    IsolateManager<int> isolateManager = IsolateManager.create(
+    final isolateManager = IsolateManager.create(
       fibonacci,
       concurrent: 4,
     );
@@ -25,7 +25,7 @@ void main() {
   test('Test IsolateManager.create', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
-    IsolateManager<int> isolateManager = IsolateManager.create(
+    final isolateManager = IsolateManager.create(
       fibonacci,
       concurrent: 4,
     );
@@ -51,7 +51,7 @@ void main() {
   test('Test IsolateManager.createOwnIsolate', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
-    IsolateManager<int> isolateManager = IsolateManager.createOwnIsolate(
+    final isolateManager = IsolateManager<int, int>.createOwnIsolate(
       isolateFunction,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
@@ -92,7 +92,7 @@ void main() {
   test('Test IsolateManager.create with Worker', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
-    IsolateManager<int> isolateManager = IsolateManager.create(
+    final isolateManager = IsolateManager.create(
       fibonacci,
       workerName: 'fibonacci',
       concurrent: 4,
@@ -184,7 +184,7 @@ void main() {
 }
 
 @pragma('vm:entry-point')
-int fibonacci(dynamic n) {
+int fibonacci(int n) {
   if (n == 0) return 0;
   if (n <= 2) return 1;
 
@@ -201,7 +201,7 @@ int fibonacci(dynamic n) {
 
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  final controller = IsolateManagerController(params);
+  final controller = IsolateManagerController<int, int>(params);
 
   final initialParams = controller.initialParams;
   print('initialParams 0: ${initialParams[0]}');
@@ -215,7 +215,7 @@ void isolateFunction(dynamic params) {
 }
 
 @pragma('vm:entry-point')
-int errorFunction(dynamic value) {
+int errorFunction(List<int> value) {
   if (value[0] == 50) {
     throw StateError('The exception is threw at value[0] = ${value[0]}');
   }
