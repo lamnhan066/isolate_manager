@@ -20,7 +20,7 @@ There are multiple ways to use this package, the only thing to notice is that th
 
 ``` dart
 @pragma('vm:entry-point')
-double add(dynamic value) => value[0] + value[1];
+double add(List<double> value) => value[0] + value[1];
 ```
 
 **You have to add `@pragma('vm:entry-point')` anotation to all methods that you want to use for isolation since Flutter 3.3.0. Without this annotation, the dart compiler could strip out unused functions, inline them, shrink names, etc, and the native code would fail to call it.**
@@ -114,8 +114,9 @@ You can control everything with this method when you want to create multiple iso
 /// Create your own function here. This function will be called when your isolate started.
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  // Initial the controller for child isolate
-  final controller = IsolateManagerController<double>(
+  // Initial the controller for the child isolate. This function will be declared
+  // with `double` as the return type (.sendResult) and `List<double>` as the parameter type (.sendMessage).
+  final controller = IsolateManagerController<double, List<double>>(
     params, 
     onDispose: () {
       print('Dispose isolateFunction');
@@ -138,8 +139,9 @@ void isolateFunction(dynamic params) {
     // Handle the result an exceptions
     completer.future.then(
       (value) => controller.sendResult(value),
+      // Send the exception to your main app
       onError: (err, stack) =>
-          controller.sendResult(IsolateException(err, stack)),
+          controller.sendResultError(IsolateException(err, stack)),
     );
 
     // Use try-catch to send the exception to the main app
@@ -150,7 +152,7 @@ void isolateFunction(dynamic params) {
 
     } catch (err, stack) {
       // Send the exception to your main app
-      controller.sendResult(IsolateException(err, stack));
+      controller.sendResultError(IsolateException(err, stack));
     }
   });
 }

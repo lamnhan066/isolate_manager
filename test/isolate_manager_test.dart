@@ -208,9 +208,12 @@ void isolateFunction(dynamic params) {
   print('initialParams 1: ${initialParams[1]}');
 
   controller.onIsolateMessage.listen((message) {
-    final result = fibonacci(message);
-
-    controller.sendResult(result);
+    try {
+      final result = fibonacci(message);
+      controller.sendResult(result);
+    } catch (err, stack) {
+      controller.sendResultError(IsolateException(err, stack));
+    }
   });
 }
 

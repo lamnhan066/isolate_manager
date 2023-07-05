@@ -1,3 +1,8 @@
+## 4.0.0-rc.2
+
+* Add `sendResultError` to `IsolateManagerController` to make it easier to send the Exception from the Isolate to main app.
+* `IsolateException` parameters are now `Object` and `StackTrace`.
+
 ## 4.0.0-rc.1
 
 * Add parameter type as `P` and change return type to `R`.
