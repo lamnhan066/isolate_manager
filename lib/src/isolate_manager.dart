@@ -5,6 +5,8 @@ import 'package:isolate_contactor/isolate_contactor.dart';
 
 import 'utils.dart';
 
+typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
+
 class IsolateManager<R, P> {
   /// Debug logs prefix
   static String debugLogPrefix = 'Isolate Manager';
@@ -28,6 +30,7 @@ class IsolateManager<R, P> {
   final bool isDebug;
 
   /// Similar to `stream`, for who's using IsolateContactor
+  @Deprecated('Use [stream] instead')
   Stream<R> get onMessage => _streamController.stream;
 
   /// Get value as stream
@@ -132,7 +135,7 @@ class IsolateManager<R, P> {
       );
 
   /// Queue of isolates
-  final Queue<IsolateQueue<R>> _queues = Queue();
+  final Queue<IsolateQueue<R, P>> _queues = Queue();
 
   /// Map<IsolateContactor instance, isBusy>
   final Map<IsolateContactor<R, P>, bool> _isolates = {};
@@ -229,14 +232,32 @@ class IsolateManager<R, P> {
     await start();
   }
 
-  ///  Similar to `commpute`, for who's using IsolateContactor
-  Future<R> sendMessage(P params) => compute(params);
+  ///  Similar to the [compute], for who's using IsolateContactor.
+  Future<R> sendMessage(P params, {IsolateCallback<R>? callback}) =>
+      compute(params, callback: callback);
 
   /// Compute isolate manager with [R] is return type.
-  Future<R> compute(P params) async {
+  ///
+  /// You can use [callback] to be able to receive many values before receiving
+  /// the final result that is returned from the [compute] method. The final
+  /// result will be returned when the callback returns `true`.
+  ///
+  /// Ex:
+  /// ``` dart
+  /// final result = await compute(params, (value) {
+  ///       if (value is int) {
+  ///         // Do something here with the value that is not returned to the `result`
+  ///         print('progress: $value');
+  ///         return false;
+  ///       }
+  ///       // Do something here with the final `result`
+  ///       return true;
+  ///   })
+  /// ```
+  Future<R> compute(P params, {IsolateCallback<R>? callback}) async {
     await start();
 
-    final queue = IsolateQueue<R>(params);
+    final queue = IsolateQueue<R, P>(params, callback);
     _queues.add(queue);
 
     _excuteQueue();
@@ -257,8 +278,48 @@ class IsolateManager<R, P> {
   }
 
   /// Send and recieve value
-  Future<R> _excute(
-      IsolateContactor<R, P> isolate, IsolateQueue<R> queue) async {
+  Future<R> _excute(IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) {
+    if (queue.callback != null) {
+      return _excuteWithCallback(isolate, queue);
+    } else {
+      return _excuteWithoutCallback(isolate, queue);
+    }
+  }
+
+  Future<R> _excuteWithCallback(
+      IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
+    // Mark the current isolate as busy
+    _isolates[isolate] = true;
+
+    StreamSubscription? sub;
+    sub = isolate.onMessage.listen((event) async {
+      // Callbacks on every event
+      final completer = Completer<bool>();
+      completer.complete(queue.callback!(event));
+      if (await completer.future) {
+        sub?.cancel();
+        // Mark the current isolate as free
+        _isolates[isolate] = false;
+        // Send the result back to the main app
+        _streamController.sink.add(event);
+        queue.completer.complete(event);
+      }
+    }, onError: (error, stackTrace) {
+      sub?.cancel();
+      // Mark the current isolate as free
+      _isolates[isolate] = false;
+
+      // Send the exception back to the main app
+      _streamController.sink.addError(error!, stackTrace);
+      queue.completer.completeError(error, stackTrace);
+    });
+    isolate.sendMessage(queue.params);
+
+    return queue.completer.future;
+  }
+
+  Future<R> _excuteWithoutCallback(
+      IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
     // Mark the current isolate as busy
     _isolates[isolate] = true;
 
