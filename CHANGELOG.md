@@ -1,3 +1,9 @@
+## 4.1.0
+
+* Add `callback` parameter to `compute` method to fully control the final result (Useful when you need to send something like the progress value before sending the final result in the same `compute`).
+* Mark `isolateManager.onMessage` as deprecated.
+* Add example that uses `callback` parameter to build a progress bar before getting the final result.
+
 ## 4.0.0
 
 * Add `sendResultError` to `IsolateManagerController` to make it easier to send the Exception from the Isolate to main app.

@@ -64,6 +64,27 @@ You can send even more times then `concurrent` because the plugin will queues th
 final result = await isolateManager.compute([10, 20]);
 ```
 
+You can even manage the final result by using this callback, it's useful when you create your own function that needs to send the progress value before returning the final value (look at the example in method `isolateProgressFunction` for more details):
+
+``` dart
+final result = await isolateManager.compute([10, 20],
+      callback: (value) {
+        // Condition to recognize the progress value. Ex:
+        final decoded = jsonDecode(value);
+        if (decoded.containsKey('progress')) {
+          print(decoded['progress']);
+
+          // Mark this value as not the final result
+          return false;
+        }
+
+        print('The final result is: $value');
+        // Mark this value as the final result and send it into the `result`.
+        return true;
+      }
+    )
+```
+
 You can use `try-catch` to catch the exception:
 
 ``` dart
