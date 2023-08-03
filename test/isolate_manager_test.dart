@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
@@ -181,6 +183,34 @@ void main() {
 
     await isolateManager.stop();
   });
+
+  test('Test with IsolateCallback', () async {
+    final isolateManager = IsolateManager<String, int>.createOwnIsolate(
+      isolateCallbackFunction,
+      concurrent: 1,
+      isDebug: true,
+    );
+    await isolateManager.start();
+
+    final result = await isolateManager.compute(1, callback: (value) {
+      final decoded = jsonDecode(value) as Map;
+      // Do not return this [value] as the final result
+      if (decoded.containsKey('source')) {
+        return false;
+      }
+
+      // Return this [value] as the final result
+      return true;
+    });
+
+    final decoded = jsonDecode(result) as Map;
+    expect(
+      decoded.containsKey('data'),
+      equals(true),
+    );
+
+    await isolateManager.stop();
+  });
 }
 
 @pragma('vm:entry-point')
@@ -211,6 +241,23 @@ void isolateFunction(dynamic params) {
     try {
       final result = fibonacci(message);
       controller.sendResult(result);
+    } catch (err, stack) {
+      controller.sendResultError(IsolateException(err, stack));
+    }
+  });
+}
+
+@pragma('vm:entry-point')
+void isolateCallbackFunction(dynamic params) {
+  final controller = IsolateManagerController<String, int>(params);
+
+  controller.onIsolateMessage.listen((message) {
+    try {
+      for (int i = 0; i < 10; i++) {
+        controller.sendResult(jsonEncode({'source': '$i'}));
+      }
+
+      controller.sendResult(jsonEncode({'data': 'data'}));
     } catch (err, stack) {
       controller.sendResultError(IsolateException(err, stack));
     }
