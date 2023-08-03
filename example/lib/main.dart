@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -81,6 +82,7 @@ int error(int n) {
   return n;
 }
 
+///
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   final channel = IsolateManagerController(params);
@@ -91,6 +93,24 @@ void isolateFunction(dynamic params) {
 
     // Send the result to your [onMessage] stream
     channel.sendResult(result);
+  });
+}
+
+/// Send the progress value before sending the final result
+@pragma('vm:entry-point')
+void isolateProgressFunction(dynamic params) {
+  final channel = IsolateManagerController<String, String>(params);
+  channel.onIsolateMessage.listen((message) async {
+    // Send the progress value
+    for (int i = 0; i < 100; i++) {
+      final progress = {'progress': i};
+      await Future.delayed(const Duration(milliseconds: 100));
+      channel.sendResult(jsonEncode(progress));
+    }
+
+    // Send the result to your [onMessage] stream
+    final result = {'result': message};
+    channel.sendResult(jsonEncode(result));
   });
 }
 
@@ -135,11 +155,18 @@ class _MyAppState extends State<MyApp> {
     isDebug: true,
   );
 
+  final isolateProgress = IsolateManager<String, String>.createOwnIsolate(
+    isolateProgressFunction,
+    isDebug: true,
+  );
+
   int value1 = 2;
   int value2 = 3;
   int value3 = 4;
   int value4 = 5;
   int value5 = 1000000000;
+  int progress = 0;
+  String progressFinalResult = '';
 
   bool isLoading = true;
   Random rad = Random();
@@ -158,6 +185,7 @@ class _MyAppState extends State<MyApp> {
     isolateManager4.stop();
     isolateManager5.stop();
     isolateManager6.stop();
+    isolateProgress.stop();
     super.dispose();
   }
 
@@ -168,6 +196,7 @@ class _MyAppState extends State<MyApp> {
     await isolateManager4.start();
     await isolateManager5.start();
     await isolateManager6.start();
+    await isolateProgress.start();
 
     setState(() => isLoading = false);
   }
@@ -214,6 +243,34 @@ class _MyAppState extends State<MyApp> {
     await Future.delayed(const Duration(seconds: 3));
   }
 
+  void callIsolateProgress() async {
+    setState(() {
+      progress = 0;
+    });
+    bool callback(String value) {
+      final decoded = jsonDecode(value) as Map<String, dynamic>;
+      if (decoded.containsKey('progress')) {
+        int toInt(dynamic value) {
+          if (value is int) return value;
+          return int.parse(value.toString());
+        }
+
+        setState(() {
+          progress = toInt(decoded['progress']);
+        });
+
+        print(value);
+
+        // Mark this value is not the final result
+        return false;
+      }
+
+      return true;
+    }
+
+    await isolateProgress.compute('Done', callback: callback);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -231,7 +288,7 @@ class _MyAppState extends State<MyApp> {
                     children: [
                       const SizedBox(height: 8),
                       StreamBuilder(
-                        stream: isolateManager1.onMessage,
+                        stream: isolateManager1.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             isolateManager1.sendMessage(value1);
@@ -266,7 +323,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateManager2.onMessage,
+                        stream: isolateManager2.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             isolateManager2.sendMessage(value2);
@@ -301,7 +358,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateManager3.onMessage,
+                        stream: isolateManager3.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             isolateManager3.sendMessage(value3);
@@ -336,7 +393,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateManager4.onMessage,
+                        stream: isolateManager4.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             isolateManager4.sendMessage(value4);
@@ -364,6 +421,24 @@ class _MyAppState extends State<MyApp> {
                         title: ElevatedButton(
                           onPressed: callErrorFunction,
                           child: const Text('Error'),
+                        ),
+                      ),
+                      ListTile(
+                        title: ElevatedButton(
+                          onPressed: callIsolateProgress,
+                          child: StreamBuilder(
+                            stream: isolateProgress.stream,
+                            builder: (_, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Text('Isolate Progress');
+                              }
+
+                              return Text('Isolate Progress: ${snapshot.data}');
+                            },
+                          ),
+                        ),
+                        subtitle: LinearProgressIndicator(
+                          value: progress / 100,
                         ),
                       ),
                     ],
