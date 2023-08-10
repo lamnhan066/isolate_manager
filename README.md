@@ -287,6 +287,12 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
 ## Additional
 
+* Use `queuesLength` to get the current number of queued computation.
+
+* Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
+
+* Use `isStarted` to check if the `start` method is completed or not.
+
 * If the `worker.dart` show errors for `js` package, you can add `js` to `dev_dependencies`:
   
   ``` dart

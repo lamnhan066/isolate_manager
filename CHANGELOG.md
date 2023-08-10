@@ -1,3 +1,9 @@
+## 4.1.1
+
+* Add `queuesLength` to get the number of the current queuing elements.
+* Add `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
+* Add `isStarted` to check if the `start` method is completed or not.
+
 ## 4.1.0
 
 * Add `callback` parameter to `compute` method to fully control the final result (Useful when you need to send something like the progress value before sending the final result in the same `compute`).
