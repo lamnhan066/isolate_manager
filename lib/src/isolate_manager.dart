@@ -5,6 +5,7 @@ import 'package:isolate_contactor/isolate_contactor.dart';
 
 import 'utils.dart';
 
+/// Type for the callback of the isolate
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
 
 class IsolateManager<R, P> {
@@ -47,6 +48,16 @@ class IsolateManager<R, P> {
   ///
   /// This function only available in `Worker` mode on Web platform.
   final R Function(dynamic)? workerConverter;
+
+  /// Get current number of queues
+  int get queuesLength => _queues.length;
+
+  /// If you want to call the [start] method manually without `await`, you can `await`
+  /// later by using [ensureStarted] to ensure that all the isolates are started
+  Future<void> get ensureStarted => _startedCompleter.future;
+
+  /// To check if the [start] method is completed or not.
+  bool get isStarted => _startedCompleter.isCompleted;
 
   IsolateManager._({
     required this.concurrent,
@@ -250,7 +261,8 @@ class IsolateManager<R, P> {
   ///         print('progress: $value');
   ///         return false;
   ///       }
-  ///       // Do something here with the final `result`
+  ///
+  ///       // The value is not `int` will be send to the `result`.
   ///       return true;
   ///   })
   /// ```
