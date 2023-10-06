@@ -1,3 +1,7 @@
+## 4.1.2
+
+* Update homepage URL.
+
 ## 4.1.1
 
 * Add `queuesLength` to get the number of the current queuing elements.
