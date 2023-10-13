@@ -1,3 +1,8 @@
+## 4.1.3
+
+* Add example for `worker`.
+* Update README.
+
 ## 4.1.2
 
 * Update homepage URL.
