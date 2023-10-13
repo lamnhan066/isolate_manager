@@ -268,9 +268,9 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
   </details>
 
-* **Step 2:** Modify the function `FutureOr<dynamic> worker(dynamic message)` in the script to serves your purposes. You can also use the `top-level or static function` that you have created above.
+* **Step 2:** Modify the function `FutureOr<dynamic> worker(dynamic message)` in the script to serves your purposes. You can also use the `top-level or static function` that you have created above. Look at this [example](https://github.com/lamnhan066/isolate_manager/tree/main/example/lib/web_workers) to learn more.
 
- **You should copy that function to separated file or copy to `worker.dart` file to prevent the `dart compile js` error because some other functions depend on flutter library.**
+  **You should copy that function to separated file or copy to `worker.dart` file to prevent the `dart compile js` error because some other functions depend on flutter library.**
 
 * **Step 3:** Run `dart compile js worker.dart -o worker.js -O4` to compile dart to js (-O0 to -O4 is the obfuscated level of `js`).
 * **Step 4:** Copy `worker.js` to web folder (the same folder with `index.html`).
@@ -284,6 +284,8 @@ final isolateManager = IsolateManager.createOwnIsolate(
   ```
 
   Now the plugin will handle all other action to make the real isolate works on Web.
+
+  **Note:** If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
 
 ## Additional
 
@@ -321,6 +323,8 @@ final isolateManager = IsolateManager.createOwnIsolate(
   ```
 
   **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
+
+* If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
 
 ## Contributions
 
