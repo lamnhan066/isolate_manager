@@ -268,7 +268,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
   </details>
 
-* **Step 2:** Modify the function `FutureOr<dynamic> worker(dynamic message)` in the script to serves your purposes. You can also use the `top-level or static function` that you have created above. Look at this [example](https://github.com/lamnhan066/isolate_manager/tree/main/example/lib/web_workers) to learn more.
+* **Step 2:** Modify the function `FutureOr<dynamic> worker(dynamic message)` in the script to serves your purposes. You can also use the `top-level or static function` that you have created above. Look at these [examples](https://github.com/lamnhan066/isolate_manager/tree/main/example/lib/web_workers) to learn more.
 
   **You should copy that function to separated file or copy to `worker.dart` file to prevent the `dart compile js` error because some other functions depend on flutter library.**
 

@@ -1,6 +1,10 @@
+## 4.1.4
+
+* Add more complex examples (also for `Worker`).
+
 ## 4.1.3
 
-* Add example for `worker`.
+* Add example for `Worker`.
 * Update README.
 
 ## 4.1.2
