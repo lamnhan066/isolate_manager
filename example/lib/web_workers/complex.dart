@@ -5,15 +5,15 @@ import 'dart:html' as html;
 import 'dart:js' as js;
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager_example/functions.dart';
+import 'package:isolate_manager_example/models/complex_model.dart';
 import 'package:js/js.dart' as pjs;
 import 'package:js/js_util.dart' as js_util;
-
-import '../functions.dart';
 
 @pjs.JS('self')
 external dynamic get globalScopeSelf;
 
-/// dart compile js worker.dart -o worker.js -O4
+/// dart compile js complex.dart -o complex.js -O4
 
 /// In most cases you don't need to modify this function
 main() {
@@ -34,21 +34,11 @@ main() {
   });
 }
 
-/// TODO: Modify your function here:
-///
-///  Do this if you need to throw an exception
-///
-///  You should only throw the `message` instead of a whole Object because it may
-///  not show as expected when sending back to the main app.
-///
-/// ``` dart
-///  return throw 'This is an error that you need to catch in your main app';
-/// ```
+/// This worker will recieve a String data, convert it to [ComplexModelParam] and
+/// use it to create a List of String, then store it in [ComplexModelResult] and
+/// convert it to JSON before sending back to the main app.
 FutureOr<dynamic> worker(dynamic message) {
-  // Best way to use this method is encoding the result to JSON
-  // before sending to the main app, then you can decode it back to
-  // the return type you want with `workerConverter`.
-  return fibonacciRescusiveFuture(message as int);
+  return complexFunction(message);
 }
 
 /// Internal function

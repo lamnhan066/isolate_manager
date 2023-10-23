@@ -13,7 +13,7 @@ import '../functions.dart';
 @pjs.JS('self')
 external dynamic get globalScopeSelf;
 
-/// dart compile js fibonacci.dart -o fibonacci.js -O4
+/// dart compile js fibonacci_rescusive.dart -o fibonacci_rescusive.js -O4
 
 /// In most cases you don't need to modify this function
 main() {
@@ -48,7 +48,7 @@ FutureOr<dynamic> worker(dynamic message) {
   // Best way to use this method is encoding the result to JSON
   // before sending to the main app, then you can decode it back to
   // the return type you want with `workerConverter`.
-  return fibonacci(message as int);
+  return fibonacciRescusiveFuture(message as int);
 }
 
 /// Internal function

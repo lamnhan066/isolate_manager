@@ -2,9 +2,10 @@ import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
 
+import 'models/complex_model.dart';
+
 @pragma('vm:entry-point')
 int countEven(int num) {
-  print('count');
   int count = 0;
   while (num > 0) {
     if (num % 2 == 0) {
@@ -107,3 +108,17 @@ void isolateProgressFunction(dynamic params) {
 
 @pragma('vm:entry-point')
 dynamic functionName(dynamic message) => message;
+
+@pragma('vm:entry-point')
+String complexFunction(String param) {
+  final parsed = ComplexModelParam.fromJson(param);
+  final result = <String>[];
+
+  for (final hobby in parsed.hobbies) {
+    result.add(
+      "My name is ${parsed.name}, I'm ${parsed.age} years old, My hobby is $hobby",
+    );
+  }
+
+  return ComplexModelResult(result).toJson();
+}

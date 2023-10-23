@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager_example/functions.dart';
+import 'package:isolate_manager_example/models/complex_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,6 +53,12 @@ class _MyAppState extends State<MyApp> {
 
   final isolateProgress = IsolateManager<String, String>.createOwnIsolate(
     isolateProgressFunction,
+    isDebug: true,
+  );
+
+  final isolateComplexFunction = IsolateManager.create(
+    complexFunction,
+    workerName: 'complex',
     isDebug: true,
   );
 
@@ -122,6 +129,15 @@ class _MyAppState extends State<MyApp> {
 
   void calculateValue5() {
     isolateManager5.compute(value5);
+  }
+
+  void calculateComplexFunction() {
+    final param = ComplexModelParam(
+      name: 'Lyo',
+      age: 30,
+      hobbies: ['playing games', 'reading books', 'watching TV'],
+    );
+    isolateComplexFunction.sendMessage(param.toJson());
   }
 
   void callErrorFunction() async {
@@ -334,6 +350,24 @@ class _MyAppState extends State<MyApp> {
                         ),
                         subtitle: LinearProgressIndicator(
                           value: progress / 100,
+                        ),
+                      ),
+                      ListTile(
+                        title: ElevatedButton(
+                          onPressed: calculateComplexFunction,
+                          child: StreamBuilder(
+                            stream: isolateComplexFunction.stream,
+                            builder: (_, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Text('Isolate Complex Parameters');
+                              }
+
+                              final result = ComplexModelResult.fromJson(
+                                  snapshot.data as String);
+
+                              return Text(result.messages.join('\n'));
+                            },
+                          ),
                         ),
                       ),
                     ],
