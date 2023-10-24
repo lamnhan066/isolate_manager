@@ -20,7 +20,10 @@ There are multiple ways to use this package, the only thing to notice is that th
 
 ``` dart
 @pragma('vm:entry-point')
-double add(List<double> value) => value[0] + value[1];
+Future<Map<String, dynamic>> fetchAndDecode(String url) async {
+  final response = await http.Client().get(Uri.parse(url));
+  return jsonDecode(response.body);
+}
 ```
 
 **You have to add `@pragma('vm:entry-point')` anotation to all methods that you want to use for isolation since Flutter 3.3.0. Without this annotation, the dart compiler could strip out unused functions, inline them, shrink names, etc, and the native code would fail to call it.**
@@ -28,8 +31,8 @@ double add(List<double> value) => value[0] + value[1];
 ### **Step 2:** Create IsolateManager instance for that function
 
 ``` dart
-final isolateManager = IsolateManager.create(
-  add, // Function that you want to compute
+final isolateFetchAndDecode = IsolateManager.create(
+  fetchAndDecode, // Function that you want to compute
   concurrent: 4, // Number of concurrent isolates. Default is 1
 );
 ```
@@ -44,57 +47,23 @@ You can also run this method when creating the instance:
 
 ``` dart
 final isolateManager = IsolateManager.create(
-  add, // Function that you want to compute
+  fetchAndDecode, // Function that you want to compute
   concurrent: 4, // Number of concurrent isolates. Default is 1
 )..start();
 ```
 
 ### **Step 4:** Send and receive data
 
-You can listen to the result as `stream`
-
 ``` dart
-isolateManager.stream.listen((result) => print(result));
+final result = await isolateManager.compute('https://path/to/json.json');
 ```
 
 You can send even more times then `concurrent` because the plugin will queues the input data and sends it to free isolate later.
 
-``` dart
-// add([10, 20])
-final result = await isolateManager.compute([10, 20]);
-```
-
-You can even manage the final result by using this callback, it's useful when you create your own function that needs to send the progress value before returning the final value (look at the example in method `isolateProgressFunction` for more details):
+You can listen to the result as `stream`
 
 ``` dart
-final result = await isolateManager.compute([10, 20],
-      callback: (value) {
-        // Condition to recognize the progress value. Ex:
-        final decoded = jsonDecode(value);
-        if (decoded.containsKey('progress')) {
-          print(decoded['progress']);
-
-          // Mark this value as not the final result
-          return false;
-        }
-
-        print('The final result is: $value');
-        // Mark this value as the final result and send it into the `result`.
-        return true;
-      }
-    )
-```
-
-You can use `try-catch` to catch the exception:
-
-``` dart
-try {
-  final result = await isolateManager.compute([10, 20]);
-} on Exception catch (e1) {
-  print(e1);
-} catch (e2) {
-  print(e2);
-}
+isolateManager.stream.listen((result) => print(result));
 ```
 
 Build your widget with `StreamBuilder`
@@ -108,7 +77,7 @@ StreamBuilder(
         child: CircularProgressIndicator(),
       );
     }
-    return Text('Result of the `add` function: ${snapshot.data}');
+    return Text('Data: ${snapshot.data}');
   },
 ),
 ```
@@ -136,8 +105,8 @@ You can control everything with this method when you want to create multiple iso
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   // Initial the controller for the child isolate. This function will be declared
-  // with `double` as the return type (.sendResult) and `List<double>` as the parameter type (.sendMessage).
-  final controller = IsolateManagerController<double, List<double>>(
+  // with `Map<String, dynamic>` as the return type (.sendResult) and `String` as the parameter type (.sendMessage).
+  final controller = IsolateManagerController<Map<String, dynamic>, String>(
     params, 
     onDispose: () {
       print('Dispose isolateFunction');
@@ -169,7 +138,7 @@ void isolateFunction(dynamic params) {
     try {
 
       // Do your stuff here. 
-      completer.complete(add(message[0], message[1]));
+      completer.complete(fetchAndDecode(message));
 
     } catch (err, stack) {
       // Send the exception to your main app
@@ -189,7 +158,44 @@ final isolateManager = IsolateManager.createOwnIsolate(
   );
 ```
 
-### **Step 3:** Now you can use everything as above from this step
+### **Step 3:**
+
+Now you can use everything as above from this step
+
+### Additional features
+
+You can use `try-catch` to catch the exception:
+
+``` dart
+try {
+  final result = await isolateManager.compute('https://path/to/json.json');
+} on Exception catch (e1) {
+  print(e1);
+} catch (e2) {
+  print(e2);
+}
+```
+
+You can even manage the final result by using this callback, it's useful when you create your own function that needs to send the progress value before returning the final value (look at the example in method `isolateProgressFunction` for more details):
+
+``` dart
+final result = await isolateManager.compute('https://path/to/json.json',
+      callback: (value) {
+        // Condition to recognize the progress value. Ex:
+        final decoded = jsonDecode(value);
+        if (decoded.containsKey('progress')) {
+          print(decoded['progress']);
+
+          // Mark this value as not the final result
+          return false;
+        }
+
+        print('The final result is: $value');
+        // Mark this value as the final result and send it into the `result`.
+        return true;
+      }
+    )
+```
 
 ## Worker Configuration
 
@@ -307,7 +313,7 @@ final isolateManager = IsolateManager.createOwnIsolate(
   ``` dart
   final isolateManager = IsolateManager.create(
     convertToMap,
-    // Ex: 'map_result' if the name is 'map_result.js'
+    // Ex: 'worker' if the name is 'worker.js'
     workerName: 'worker',
     // Convert the data from worker to fix the issue related to the different data type between dart and js
     workerConverter: (result) {
