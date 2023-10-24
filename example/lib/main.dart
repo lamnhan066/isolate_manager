@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager_example/functions.dart';
@@ -21,31 +22,31 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final isolateManager1 = IsolateManager.create(
+  final isolateFibonacciFuture = IsolateManager.create(
     isDebug: true,
     fibonacciFuture,
     workerName: 'fibonacci',
     concurrent: 2,
   );
-  final isolateManager2 = IsolateManager.createOwnIsolate(
+  final isolateIsolateFunction = IsolateManager.createOwnIsolate(
     concurrent: 2,
     isolateFunction,
     isDebug: true,
   );
-  final isolateManager3 = IsolateManager.create(
+  final isolateFibonacciRescursive = IsolateManager.create(
     fibonacciRescusiveFuture,
     concurrent: 2,
   );
-  final IsolateManager isolateManager4 = IsolateManager.create(
+  final isolateFunctionName = IsolateManager.create(
     functionName,
     workerName: 'function_name',
     isDebug: true,
   );
-  final isolateManager5 = IsolateManager.create(
+  final isolateCountEven = IsolateManager.create(
     countEven,
     isDebug: true,
   );
-  final isolateManager6 = IsolateManager.create(
+  final isolateError = IsolateManager.create(
     error,
     concurrent: 1,
     isDebug: true,
@@ -59,6 +60,11 @@ class _MyAppState extends State<MyApp> {
   final isolateComplexFunction = IsolateManager.create(
     complexFunction,
     workerName: 'complex',
+    isDebug: true,
+  );
+
+  final isolateFetchAndDecode = IsolateManager.create(
+    fetchAndDecode,
     isDebug: true,
   );
 
@@ -81,54 +87,54 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    isolateManager1.stop();
-    isolateManager2.stop();
-    isolateManager3.stop();
-    isolateManager4.stop();
-    isolateManager5.stop();
-    isolateManager6.stop();
+    isolateFibonacciFuture.stop();
+    isolateIsolateFunction.stop();
+    isolateFibonacciRescursive.stop();
+    isolateFunctionName.stop();
+    isolateCountEven.stop();
+    isolateError.stop();
     isolateProgress.stop();
     super.dispose();
   }
 
   Future<void> initial() async {
-    await isolateManager1.start();
-    await isolateManager2.start();
-    await isolateManager3.start();
-    await isolateManager4.start();
-    await isolateManager5.start();
-    await isolateManager6.start();
+    await isolateFibonacciFuture.start();
+    await isolateIsolateFunction.start();
+    await isolateFibonacciRescursive.start();
+    await isolateFunctionName.start();
+    await isolateCountEven.start();
+    await isolateError.start();
     await isolateProgress.start();
 
     setState(() => isLoading = false);
   }
 
-  void calculateValue1([int max = 100]) {
+  void calculateFibonacciFuture([int max = 100]) {
     value1 = rad.nextInt(max);
     print('Isolate 1: Calculate fibonancci at F$value1');
-    isolateManager1.sendMessage(value1);
+    isolateFibonacciFuture.sendMessage(value1);
   }
 
-  void calculateValue2([int max = 100]) {
+  void calculateIsolateFunction([int max = 100]) {
     value2 = rad.nextInt(max);
     print('Isolate 2: Calculate fibonancci at F$value2');
-    isolateManager2.sendMessage(value2);
+    isolateIsolateFunction.sendMessage(value2);
   }
 
-  void calculateValue3([int max = 30]) {
+  void calculateFibonacciRescursive([int max = 30]) {
     value3 = rad.nextInt(max);
     print('Isolate 3: Calculate fibonancci at F$value3');
-    isolateManager3.sendMessage(value3);
+    isolateFibonacciRescursive.sendMessage(value3);
   }
 
-  void calculateValue4([int max = 30]) {
+  void calculateFunctionName([int max = 30]) {
     value4 = rad.nextInt(max);
     print('Isolate 3: Calculate fibonancci at F$value4');
-    isolateManager4.sendMessage(value4);
+    isolateFunctionName.sendMessage(value4);
   }
 
-  void calculateValue5() {
-    isolateManager5.compute(value5);
+  void calculateCountEven() {
+    isolateCountEven.compute(value5);
   }
 
   void calculateComplexFunction() {
@@ -141,10 +147,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   void callErrorFunction() async {
-    await isolateManager6.start();
+    await isolateError.start();
 
     try {
-      await isolateManager6.compute(0);
+      await isolateError.compute(0);
     } on StateError catch (e) {
       print('>> $e');
     } catch (e) {
@@ -182,6 +188,11 @@ class _MyAppState extends State<MyApp> {
     await isolateProgress.compute('Done', callback: callback);
   }
 
+  void callFetchAndDecode() async {
+    const url = 'https://pub.lamnhan.dev/isolate-manager/example-json.json';
+    isolateFetchAndDecode.sendMessage(url);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -199,10 +210,10 @@ class _MyAppState extends State<MyApp> {
                     children: [
                       const SizedBox(height: 8),
                       StreamBuilder(
-                        stream: isolateManager1.stream,
+                        stream: isolateFibonacciFuture.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateManager1.sendMessage(value1);
+                            isolateFibonacciFuture.sendMessage(value1);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -213,14 +224,14 @@ class _MyAppState extends State<MyApp> {
                       ),
                       ListTile(
                         title: ElevatedButton(
-                          onPressed: () => calculateValue1(),
+                          onPressed: () => calculateFibonacciFuture(),
                           child: const Text('Calculate new Fibonacci'),
                         ),
                       ),
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateManager1.restart();
+                            isolateFibonacciFuture.restart();
                           },
                           child: const Text('Restart isolate 1'),
                         ),
@@ -228,16 +239,16 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateManager1.stop();
+                            isolateFibonacciFuture.stop();
                           },
                           child: const Text('Terminate isolate 1'),
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateManager2.stream,
+                        stream: isolateIsolateFunction.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateManager2.sendMessage(value2);
+                            isolateIsolateFunction.sendMessage(value2);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -248,14 +259,14 @@ class _MyAppState extends State<MyApp> {
                       ),
                       ListTile(
                         title: ElevatedButton(
-                          onPressed: () => calculateValue2(),
+                          onPressed: () => calculateIsolateFunction(),
                           child: const Text('Calculate new Fibonacci'),
                         ),
                       ),
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateManager2.restart();
+                            isolateIsolateFunction.restart();
                           },
                           child: const Text('Restart isolate 2'),
                         ),
@@ -263,16 +274,16 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateManager2.stop();
+                            isolateIsolateFunction.stop();
                           },
                           child: const Text('Terminate isolate 2'),
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateManager3.stream,
+                        stream: isolateFibonacciRescursive.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateManager3.sendMessage(value3);
+                            isolateFibonacciRescursive.sendMessage(value3);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -283,14 +294,14 @@ class _MyAppState extends State<MyApp> {
                       ),
                       ListTile(
                         title: ElevatedButton(
-                          onPressed: () => calculateValue3(),
+                          onPressed: () => calculateFibonacciRescursive(),
                           child: const Text('Calculate new Fibonacci'),
                         ),
                       ),
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateManager3.restart();
+                            isolateFibonacciRescursive.restart();
                           },
                           child: const Text('Restart isolate 3'),
                         ),
@@ -298,16 +309,16 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateManager3.stop();
+                            isolateFibonacciRescursive.stop();
                           },
                           child: const Text('Terminate isolate 3'),
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateManager4.stream,
+                        stream: isolateFunctionName.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateManager4.sendMessage(value4);
+                            isolateFunctionName.sendMessage(value4);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -318,13 +329,13 @@ class _MyAppState extends State<MyApp> {
                       ),
                       ListTile(
                         title: ElevatedButton(
-                          onPressed: () => calculateValue4(),
+                          onPressed: () => calculateFunctionName(),
                           child: const Text('Calculate new Fibonacci'),
                         ),
                       ),
                       ListTile(
                         title: ElevatedButton(
-                          onPressed: () => calculateValue5(),
+                          onPressed: () => calculateCountEven(),
                           child: const Text('Count'),
                         ),
                       ),
@@ -370,6 +381,25 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ),
                       ),
+
+                      /// This functions do not Work on the Web
+                      if (!kIsWeb) ...[
+                        ListTile(
+                          title: ElevatedButton(
+                            onPressed: callFetchAndDecode,
+                            child: StreamBuilder(
+                              stream: isolateFetchAndDecode.stream,
+                              builder: (_, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return const Text('Isolate Fetch And Decode');
+                                }
+
+                                return Text(snapshot.data!.toString());
+                              },
+                            ),
+                          ),
+                        ),
+                      ]
                     ],
                   ),
           ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
 import 'package:isolate_manager/isolate_manager.dart';
 
 import 'models/complex_model.dart';
@@ -121,4 +122,10 @@ String complexFunction(String param) {
   }
 
   return ComplexModelResult(result).toJson();
+}
+
+@pragma('vm:entry-point')
+Future<Map<String, dynamic>> fetchAndDecode(String url) async {
+  final response = await http.Client().get(Uri.parse(url));
+  return jsonDecode(response.body);
 }
