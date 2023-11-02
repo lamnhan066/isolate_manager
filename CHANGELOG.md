@@ -1,3 +1,8 @@
+## 4.1.5
+
+* Add `fetchAndDecode` example.
+* Update README to `fetchAndDecode`.
+
 ## 4.1.4
 
 * Add more complex examples (also for `Worker`).
