@@ -2,19 +2,19 @@
 
 ## **Features**
 
-* An easy way to create multiple isolates for a function, also keep it active to send and receive data multiple times.
+- An easy way to create multiple isolates for a function and keep it active to send and receive data multiple times.
 
-* Supports `Worker` on Web (`Worker` is the real Isolate on Web). The plugin will use `Future` (and `Stream`) if `Worker` is unavailable on the working browser or is not configured.
+- Supports `Worker` on the Web (`Worker` is the real Isolate on the Web). The plugin will use `Future` (and `Stream`) if `Worker` is unavailable in the working browser or is not configured.
 
-* Multiple `compute`s are allowed because the plugin will queue the input data and sends it to free isolate later.
+- Multiple `compute` operations are allowed because the plugin will queue the input data and send it to a free isolate later.
 
-* Support `try-catch` block.
+- Supports `try-catch` blocks.
 
-* If you don't need to control your own function, you can use [isolates_helper](https://pub.dev/packages/isolates_helper) - the simple version of this package that will allow you to compute with multiple functions.
+- If you don't need to control your own function, you can use [isolates_helper](https://pub.dev/packages/isolates_helper) - a simpler version of this package that allows you to compute with multiple functions.
 
-## **Basic Usage** (Use build-in function)
+## **Basic Usage** (Use built-in function)
 
-There are multiple ways to use this package, the only thing to notice is that the `function` has to be a `static` or `top-level` function to make it works.
+There are multiple ways to use this package. The only thing to notice is that the `function` has to be a `static` or `top-level` function to work.
 
 ### **Step 1:** Create a top-level or static function
 
@@ -26,18 +26,18 @@ Future<Map<String, dynamic>> fetchAndDecode(String url) async {
 }
 ```
 
-**You have to add `@pragma('vm:entry-point')` anotation to all methods that you want to use for isolation since Flutter 3.3.0. Without this annotation, the dart compiler could strip out unused functions, inline them, shrink names, etc, and the native code would fail to call it.**
+**You must add `@pragma('vm:entry-point')` annotation to all methods that you want to use for isolation since Flutter 3.3.0. Without this annotation, the Dart compiler could strip out unused functions, inline them, shrink names, etc., and the native code would fail to call it.**
 
-### **Step 2:** Create IsolateManager instance for that function
+### **Step 2:** Create an IsolateManager instance for that function
 
 ``` dart
 final isolateFetchAndDecode = IsolateManager.create(
-  fetchAndDecode, // Function that you want to compute
+  fetchAndDecode, // Function you want to compute
   concurrent: 4, // Number of concurrent isolates. Default is 1
 );
 ```
 
-### **Step 3 [Optional]:** Initialize the instance, this step is not required because it's automatically called when you use `.compute` for the first time
+### **Step 3 [Optional]:** Initialize the instance; this step is not required because it's automatically called when you use `.compute` for the first time
 
 ``` dart
 await isolateManager.start();
@@ -47,7 +47,7 @@ You can also run this method when creating the instance:
 
 ``` dart
 final isolateManager = IsolateManager.create(
-  fetchAndDecode, // Function that you want to compute
+  fetchAndDecode, // Function you want to compute
   concurrent: 4, // Number of concurrent isolates. Default is 1
 )..start();
 ```
@@ -58,15 +58,15 @@ final isolateManager = IsolateManager.create(
 final result = await isolateManager.compute('https://path/to/json.json');
 ```
 
-You can send even more times then `concurrent` because the plugin will queues the input data and sends it to free isolate later.
+You can send even more times than `concurrent` because the plugin will queue the input data and send it to a free isolate later.
 
-You can listen to the result as `stream`
+You can listen to the result as a `stream`:
 
 ``` dart
 isolateManager.stream.listen((result) => print(result));
 ```
 
-Build your widget with `StreamBuilder`
+Build your widget with `StreamBuilder`:
 
 ``` dart
 StreamBuilder(
@@ -82,7 +82,7 @@ StreamBuilder(
 ),
 ```
 
-### **Step 5:** Restart the `IsolateManager` if you need it
+### **Step 5:** Restart the `IsolateManager` if needed
 
 ``` dart
 await isolateManager.restart();
@@ -101,10 +101,10 @@ You can control everything with this method when you want to create multiple iso
 ### **Step 1:** Create a function of this form
 
 ``` dart
-/// Create your own function here. This function will be called when your isolate started.
+/// Create your own function here. This function will be called when your isolate starts.
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  // Initial the controller for the child isolate. This function will be declared
+  // Initialize the controller for the child isolate. This function will be declared
   // with `Map<String, dynamic>` as the return type (.sendResult) and `String` as the parameter type (.sendMessage).
   final controller = IsolateManagerController<Map<String, dynamic>, String>(
     params, 
@@ -114,19 +114,19 @@ void isolateFunction(dynamic params) {
   );
 
   // Get your initialParams.
-  // Notice that this `initialParams` different from the `params` above.
+  // Notice that these `initialParams` are different from the `params` above.
   final initialParams = controller.initialParams;
 
-  // Do your one-time stuff here, this area of code will be called only one-time when you `start`
-  // this instance of `IsolateManager`
+  // Do your one-time stuff here; this code will be called only once when you `start`
+  // this instance of `IsolateManager`.
 
-  // Listen to the message receiving from main isolate, this area of code will be called each time
+  // Listen to messages received from the main isolate; this code will be called each time
   // you use `compute` or `sendMessage`.
   controller.onIsolateMessage.listen((message) {
     // Create a completer
     Completer completer = Completer();
 
-    // Handle the result an exceptions
+    // Handle the result and exceptions
     completer.future.then(
       (value) => controller.sendResult(value),
       // Send the exception to your main app
@@ -136,7 +136,6 @@ void isolateFunction(dynamic params) {
 
     // Use try-catch to send the exception to the main app
     try {
-
       // Do your stuff here. 
       completer.complete(fetchAndDecode(message));
 
@@ -148,7 +147,7 @@ void isolateFunction(dynamic params) {
 }
 ```
 
-### **Step 2:** Create IsolateManager instance for your own function
+### **Step 2:** Create an IsolateManager instance for your own function
 
 ``` dart
 final isolateManager = IsolateManager.createOwnIsolate(
@@ -160,11 +159,11 @@ final isolateManager = IsolateManager.createOwnIsolate(
 
 ### **Step 3:**
 
-Now you can use everything as above from this step
+Now you can use everything as above from this step.
 
 ### Additional features
 
-You can use `try-catch` to catch the exception:
+- You can use `try-catch` to catch exceptions:
 
 ``` dart
 try {
@@ -176,7 +175,7 @@ try {
 }
 ```
 
-You can even manage the final result by using this callback, it's useful when you create your own function that needs to send the progress value before returning the final value (look at the example in method `isolateProgressFunction` for more details):
+- You can even manage the final result by using this callback, useful when you create your own function that needs to send the progress value before returning the final result (look at the example in the method `isolateProgressFunction` for more details):
 
 ``` dart
 final result = await isolateManager.compute('https://path/to/json.json',
@@ -199,7 +198,7 @@ final result = await isolateManager.compute('https://path/to/json.json',
 
 ## Worker Configuration
 
-* **Step 1:** Download [isolate_manager/worker/worker.dart](https://raw.githubusercontent.com/vursin/isolate_manager/main/worker/worker.dart) or copy the below code to the file named `worker.dart`:
+- **Step 1:** Download [isolate_manager/worker/worker.dart](https://raw.githubusercontent.com/vursin/isolate_manager/main/worker/worker.dart) or copy the below code to the file named `worker.dart`:
 
   <details>
   
@@ -274,13 +273,13 @@ final result = await isolateManager.compute('https://path/to/json.json',
 
   </details>
 
-* **Step 2:** Modify the function `FutureOr<dynamic> worker(dynamic message)` in the script to serves your purposes. You can also use the `top-level or static function` that you have created above. Look at these [examples](https://github.com/lamnhan066/isolate_manager/tree/main/example/lib/web_workers) to learn more.
+- **Step 2:** Modify the function `FutureOr<dynamic> worker(dynamic message)` in the script to serves your purposes. You can also use the `top-level or static function` that you have created above. Look at these [examples](https://github.com/lamnhan066/isolate_manager/tree/main/example/lib/web_workers) to learn more.
 
   **You should copy that function to separated file or copy to `worker.dart` file to prevent the `dart compile js` error because some other functions depend on flutter library.**
 
-* **Step 3:** Run `dart compile js worker.dart -o worker.js -O4` to compile dart to js (-O0 to -O4 is the obfuscated level of `js`).
-* **Step 4:** Copy `worker.js` to web folder (the same folder with `index.html`).
-* **Step 5:** Now you can add `worker` to `workerName` like below:
+- **Step 3:** Run `dart compile js worker.dart -o worker.js -O4` to compile dart to js (-O0 to -O4 is the obfuscated level of `js`).
+- **Step 4:** Copy `worker.js` to web folder (the same folder with `index.html`).
+- **Step 5:** Now you can add `worker` to `workerName` like below:
 
   ``` dart
   final isolateManager = IsolateManager.create(
@@ -295,20 +294,20 @@ final result = await isolateManager.compute('https://path/to/json.json',
 
 ## Additional
 
-* Use `queuesLength` to get the current number of queued computation.
+- Use `queuesLength` to get the current number of queued computation.
 
-* Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
+- Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
 
-* Use `isStarted` to check if the `start` method is completed or not.
+- Use `isStarted` to check if the `start` method is completed or not.
 
-* If the `worker.dart` show errors for `js` package, you can add `js` to `dev_dependencies`:
+- If the `worker.dart` show errors for `js` package, you can add `js` to `dev_dependencies`:
   
   ``` dart
   dev_dependencies:
     js:
   ```
 
-* The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
+- The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
 
   ``` dart
   final isolateManager = IsolateManager.create(
@@ -330,18 +329,18 @@ final result = await isolateManager.compute('https://path/to/json.json',
 
   **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
 
-* If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
+- If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
 
 ## Contributions
 
-* This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
-* If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
+- This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
+- If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
 
-* If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
+- If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
 </br>
 
 <p align='center'><a href="https://www.buymeacoffee.com/vursin"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=vursin&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" width="200"></a></p>
 
 ## To-do list
 
-* Find the best way to prevent using `dart compile js`.
+- Find the best way to prevent using `dart compile js`.
