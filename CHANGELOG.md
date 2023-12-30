@@ -1,3 +1,7 @@
+## 4.1.5+1
+
+* Improved README.
+
 ## 4.1.5
 
 * Add `fetchAndDecode` example.

@@ -198,7 +198,7 @@ final result = await isolateManager.compute('https://path/to/json.json',
 
 ## Worker Configuration
 
-- **Step 1:** Download [isolate_manager/worker/worker.dart](https://raw.githubusercontent.com/vursin/isolate_manager/main/worker/worker.dart) or copy the below code to the file named `worker.dart`:
+- **Step 1:** Download [isolate_manager/worker/worker.dart](https://raw.githubusercontent.com/lamnhan066/isolate_manager/main/worker/worker.dart) or copy the below code to the file named `worker.dart`:
 
   <details>
   
@@ -333,13 +333,13 @@ final result = await isolateManager.compute('https://path/to/json.json',
 
 ## Contributions
 
-- This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/vursin/isolate_contactor)
+- This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/lamnhan066/isolate_contactor)
 - If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
 
 - If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
 </br>
 
-<p align='center'><a href="https://www.buymeacoffee.com/vursin"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=vursin&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" width="200"></a></p>
+<p align='center'><a href="https://www.buymeacoffee.com/lamnhan066"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=lamnhan066&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a coffee" width="200"></a></p>
 
 ## To-do list
 
