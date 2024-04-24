@@ -32,4 +32,4 @@ jobs:
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: lamnhan066/language_code
+          slug: lamnhan066/isolate_manager
