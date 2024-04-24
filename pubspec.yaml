@@ -1,6 +1,6 @@
 name: isolate_manager
 description: An easy way to create multiple isolates for a function, also keep it active to send and receive data multiple times (also supports Worker on Web).
-version: 4.2.1
+version: 4.2.1+1
 homepage: https://github.com/lamnhan066/isolate_manager
 
 environment:

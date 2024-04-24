@@ -1,9 +1,8 @@
-## 4.2.1
+## 4.2.1+1
 
 * Fixed the issue that causes the `sendMessage` to be unable to throw the `Exception` when the `callback` is set.
 * Easier to create a Worker by using `isolateWorker` method (Detail in README).
 * Remove unused methods of the `IsolateManagerController`.
-* Replace the `html` with the `web` package, so the `wasm` will be supported when the `isolate_contactor` supports it.
 * Improve README.
 * Improve tests.
 * Improve the code coverage.
