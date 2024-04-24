@@ -1,4 +1,4 @@
-## 4.2.0
+## 4.2.1
 
 * Fixed the issue that causes the `sendMessage` to be unable to throw the `Exception` when the `callback` is set.
 * Easier to create a Worker by using `isolateWorker` method (Detail in README).
