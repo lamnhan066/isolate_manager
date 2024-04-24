@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   final isolateFibonacciFuture = IsolateManager.create(
     isDebug: true,
     fibonacciFuture,
-    workerName: 'fibonacci',
+    workerName: 'workers/fibonacci',
     concurrent: 2,
   );
   final isolateIsolateFunction = IsolateManager.createOwnIsolate(
@@ -39,11 +39,12 @@ class _MyAppState extends State<MyApp> {
   );
   final isolateFunctionName = IsolateManager.create(
     functionName,
-    workerName: 'function_name',
+    workerName: 'workers/function_name',
     isDebug: true,
   );
   final isolateCountEven = IsolateManager.create(
     countEven,
+    workerName: 'workers/count_even',
     isDebug: true,
   );
   final isolateError = IsolateManager.create(
@@ -59,7 +60,7 @@ class _MyAppState extends State<MyApp> {
 
   final isolateComplexFunction = IsolateManager.create(
     complexFunction,
-    workerName: 'complex',
+    workerName: 'workers/complex',
     isDebug: true,
   );
 
