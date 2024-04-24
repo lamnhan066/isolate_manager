@@ -96,6 +96,44 @@ await isolateManager.restart();
 await isolateManager.stop();
 ```
 
+## Worker Configuration
+
+### **Step 1:** Create a Worker file
+
+Create a `worker.dart` file with this content
+
+``` dart
+import 'package:isolate_manager/isolate_manager.dart';
+
+main() {
+  // The function `fetchAndDecode` MUST NOT depend on any Flutter library
+  isolateWorker(fetchAndDecode);
+}
+```
+
+### **Step 2:** Compile to JS
+
+Run `dart compile js worker.dart -o worker.js -O4` to compile Dart to JS (The flag `-O4` is the obfuscated level of `JS`, the lowest value is `-O0` and the highest value is `-O4`)
+
+### **Step 3:** Copy to the Web folder
+
+Copy `worker.js` to the `Web` folder (the same folder with `index.html`)
+
+### **Step 4:** Add it to the `IsolateManager`
+
+Update the `isolateManager` like below
+
+``` dart
+final isolateManager = IsolateManager.create(
+    fetchAndDecode,
+    workerName: 'worker', // The name of the file, don't need to add the extension
+  );
+```
+
+Now the plugin will handle all other action to make the real isolate works on Web.
+
+**Note:** If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
+
 ## **Advanced Usage** (Use your own function)
 
 You can control everything with this method when you want to create multiple isolates for a function. With this method, you can also do one-time stuff when the isolate is started or each-time stuff when you call `compute` or `sendMessage`.
@@ -197,36 +235,6 @@ final result = await isolateManager.compute('https://path/to/json.json',
       }
     )
 ```
-
-## Worker Configuration
-
-- **Step 1:** Create a Worker file:
-
-  ``` dart
-  import 'package:isolate_manager/isolate_manager.dart';
-
-  /// dart compile js complex.dart -o complex.js -O4
-
-  main() {
-    // The function `fetchAndDecode` MUST NOT depend on any Flutter library
-    isolateWorker(fetchAndDecode);
-  }
-  ```
-
-- **Step 2:** Run `dart compile js worker.dart -o worker.js -O4` to compile Dart to JS (-O0 to -O4 is the obfuscated level of `js`).
-- **Step 3:** Copy `worker.js` to the `Web` folder (the same folder with `index.html`).
-- **Step 4:** Now you can add `worker` to `workerName` like below:
-
-  ``` dart
-  final isolateManager = IsolateManager.create(
-      fetchAndDecode,
-      workerName: 'worker', // Don't need to add the extension
-    );
-  ```
-
-  Now the plugin will handle all other action to make the real isolate works on Web.
-
-  **Note:** If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
 
 ## Additional
 

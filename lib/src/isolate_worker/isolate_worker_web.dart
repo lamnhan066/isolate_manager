@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'package:web/web.dart';
 import 'dart:js' as js;
 import 'dart:js_util' as js_util;
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:web/web.dart';
 
 /// Create a worker in your `main`.
 ///
 /// ```dart
 /// main() {
-///   worker(myFunction);
+///   isolateWorker(myFunction);
 /// }
 /// ```
 ///
