@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/isolate_worker/isolate_worker_stub.dart'
-    as isolateWorkerStub;
+    as isolate_worker_stub;
 import 'package:test/test.dart';
 
 //  dart test
@@ -12,7 +13,7 @@ void main() {
   group('Test funtions -', () {
     test('isolateWorker stub', () {
       expect(
-        () => isolateWorkerStub.isolateWorker((message) {}),
+        () => isolate_worker_stub.isolateWorker((message) {}),
         throwsUnimplementedError,
       );
     });
@@ -43,8 +44,15 @@ void main() {
       concurrent: 4,
     );
 
+    expect(isolateManager.isStarted, equals(false));
+
     print('Starting IsolateManager instance...');
-    isolateManager.start();
+    await isolateManager.start();
+
+    expect(isolateManager.isStarted, equals(true));
+    await isolateManager.ensureStarted;
+
+    expect(isolateManager.queuesLength, equals(0));
 
     print('Computing IsolateManager instance...');
     await Future.wait([
@@ -72,7 +80,9 @@ void main() {
 
     isolateManager.stream.listen((value) {
       print('Stream: $value');
-    });
+    })
+        // Do not need to catch the error here
+        .onError((error) {});
 
     print('Computing IsolateManager instance...');
     await Future.wait([
@@ -95,6 +105,9 @@ void main() {
           expect(value, fibonacci(i));
         })
     ]);
+
+    print('Exception');
+    expect(() => isolateManager.compute(-1), throwsStateError);
 
     await Future.delayed(Duration(seconds: 3));
 
@@ -149,6 +162,26 @@ void main() {
     await isolateManager.stop();
   });
 
+  test('Test with Exception function with available callback', () async {
+    final isolateManager = IsolateManager.create(
+      errorFunction,
+      concurrent: 1,
+      isDebug: true,
+    );
+    await isolateManager.start();
+
+    expect(
+      () => isolateManager.compute([50, 50], callback: (value) {
+        return true;
+      }),
+      throwsStateError,
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
+  });
+
   test('Test with Exception function with eagerError is true', () async {
     final isolateManager = IsolateManager.create(
       errorFunction,
@@ -172,6 +205,31 @@ void main() {
     await isolateManager.stop();
   });
 
+  test(
+      'Test with Exception function with eagerError is true with available callback',
+      () async {
+    final isolateManager = IsolateManager.create(
+      errorFunction,
+      concurrent: 2,
+      isDebug: true,
+    );
+    await isolateManager.start();
+    final List<Future> futures = [];
+
+    for (var i = 0; i < 100; i++) {
+      futures.add(isolateManager.compute([i, 20], callback: (value) => true));
+    }
+
+    expect(
+      () async => await Future.wait(futures, eagerError: true),
+      throwsStateError,
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
+  });
+
   test('Test with Exception function with eagerError is false', () async {
     final isolateManager = IsolateManager.create(
       errorFunction,
@@ -183,6 +241,31 @@ void main() {
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20]));
+    }
+
+    expect(
+      () async => await Future.wait(futures, eagerError: false),
+      throwsStateError,
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
+  });
+
+  test(
+      'Test with Exception function with eagerError is false with available callback',
+      () async {
+    final isolateManager = IsolateManager.create(
+      errorFunction,
+      concurrent: 2,
+      isDebug: true,
+    );
+    await isolateManager.start();
+    final List<Future> futures = [];
+
+    for (var i = 0; i < 100; i++) {
+      futures.add(isolateManager.compute([i, 20], callback: (value) => true));
     }
 
     expect(
@@ -226,6 +309,7 @@ void main() {
 
 @pragma('vm:entry-point')
 int fibonacci(int n) {
+  if (n < 0) throw StateError('n<0');
   if (n == 0) return 0;
   if (n <= 2) return 1;
 
@@ -242,7 +326,12 @@ int fibonacci(int n) {
 
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  final controller = IsolateManagerController<int, int>(params);
+  final controller = IsolateManagerController<int, int>(
+    params,
+    onDispose: (controller) {
+      controller.close();
+    },
+  );
 
   final initialParams = controller.initialParams;
   print('initialParams 0: ${initialParams[0]}');
@@ -278,7 +367,7 @@ void isolateCallbackFunction(dynamic params) {
 @pragma('vm:entry-point')
 int errorFunction(List<int> value) {
   if (value[0] == 50) {
-    throw StateError('The exception is threw at value[0] = ${value[0]}');
+    return throw StateError('The exception is threw at value[0] = ${value[0]}');
   }
   return value[0] + value[1];
 }
