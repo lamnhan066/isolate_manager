@@ -1,5 +1,7 @@
 # Isolate Manager
 
+[![codecov](https://codecov.io/gh/lamnhan066/isolate_manager/graph/badge.svg?token=MSREWDRA4E)](https://codecov.io/gh/lamnhan066/isolate_manager)
+
 ## **Features**
 
 - An easy way to create multiple isolates for a function and keep it active to send and receive data multiple times.
