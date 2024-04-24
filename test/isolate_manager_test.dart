@@ -107,7 +107,7 @@ void main() {
     ]);
 
     print('Exception');
-    expect(() => isolateManager.compute(-1), throwsStateError);
+    expect(() => isolateManager.sendMessage(-1), throwsStateError);
 
     await Future.delayed(Duration(seconds: 3));
 
