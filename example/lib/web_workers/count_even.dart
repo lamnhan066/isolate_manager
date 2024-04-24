@@ -1,8 +1,8 @@
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager_example/functions.dart';
 
-/// dart compile js complex.dart -o complex.js -O4
+/// dart compile js count_even.dart -o count_even.js -O4
 
-main() {
-  isolateWorker(complexFunction);
+void main(List<String> args) {
+  isolateWorker(countEven);
 }

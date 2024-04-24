@@ -108,7 +108,7 @@ void isolateProgressFunction(dynamic params) {
 }
 
 @pragma('vm:entry-point')
-dynamic functionName(dynamic message) => message;
+Object functionName(Object message) => message;
 
 @pragma('vm:entry-point')
 String complexFunction(String param) {
