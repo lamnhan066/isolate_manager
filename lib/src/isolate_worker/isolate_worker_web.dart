@@ -53,5 +53,5 @@ Stream<T> callbackToStream<J, T>(
 
 /// Internal function
 void jsSendMessage(dynamic m) {
-  js.context.callMethod('postMessage', [js_util.jsify(m)]);
+  js.context.callMethod('postMessage', [m]);
 }
