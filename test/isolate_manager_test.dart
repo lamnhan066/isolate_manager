@@ -326,9 +326,10 @@ int fibonacci(int n) {
 
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  final controller = IsolateManagerController<int, int>(
+  late IsolateManagerController controller;
+  controller = IsolateManagerController<int, int>(
     params,
-    onDispose: (controller) {
+    onDispose: () {
       controller.close();
     },
   );

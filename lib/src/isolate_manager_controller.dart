@@ -10,11 +10,11 @@ class IsolateManagerController<R, P> {
   /// `onDispose` will be called when the controller is disposed.
   IsolateManagerController(
     dynamic params, {
-    Function(IsolateManagerController controller)? onDispose,
+    void Function()? onDispose,
   }) {
     _delegate = IsolateContactorController<R, P>(
       params,
-      onDispose: onDispose == null ? null : () => onDispose(this),
+      onDispose: onDispose,
     );
   }
 
