@@ -26,3 +26,5 @@ doc/api/
 .flutter-plugins-dependencies
 
 test/temp_test.dart
+
+coverage/
