@@ -1,12 +1,23 @@
 import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/isolate_worker/isolate_worker_stub.dart'
+    as isolateWorkerStub;
 import 'package:test/test.dart';
 
 //  dart test
 //  dart test --platform=chrome,vm
 
 void main() {
+  group('Test funtions -', () {
+    test('isolateWorker stub', () {
+      expect(
+        () => isolateWorkerStub.isolateWorker((message) {}),
+        throwsUnimplementedError,
+      );
+    });
+  });
+
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
     print('Create IsolateManager instance');
