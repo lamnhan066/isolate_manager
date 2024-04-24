@@ -30,9 +30,11 @@ class IsolateManager<R, P> {
   /// Allow print debug log
   final bool isDebug;
 
+  // coverage:ignore-start
   /// Similar to `stream`, for who's using IsolateContactor
   @Deprecated('Use [stream] instead')
   Stream<R> get onMessage => _streamController.stream;
+  // coverage:ignore-end
 
   /// Get value as stream
   Stream<R> get stream => _streamController.stream;
@@ -325,7 +327,12 @@ class IsolateManager<R, P> {
       _streamController.sink.addError(error!, stackTrace);
       queue.completer.completeError(error, stackTrace);
     });
-    isolate.sendMessage(queue.params);
+
+    try {
+      await isolate.sendMessage(queue.params);
+    } catch (_, __) {
+      /* Do not need to catch the Exception here because it's catched in the above Stream */
+    }
 
     return queue.completer.future;
   }
