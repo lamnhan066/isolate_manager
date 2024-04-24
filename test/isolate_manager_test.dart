@@ -21,24 +21,20 @@ void main() {
 
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
-    print('Create IsolateManager instance');
     final isolateManager = IsolateManager.create(
       fibonacci,
       concurrent: 4,
     );
 
-    print('Computing IsolateManager instance...');
     final result = await isolateManager.compute(3);
 
     expect(result, fibonacci(3));
 
-    print('Dispose IsolateManager instance.');
     isolateManager.stop();
   });
 
   test('Test IsolateManager.create', () async {
     // Create IsolateContactor
-    print('Create IsolateManager instance');
     final isolateManager = IsolateManager.create(
       fibonacci,
       concurrent: 4,
@@ -46,7 +42,6 @@ void main() {
 
     expect(isolateManager.isStarted, equals(false));
 
-    print('Starting IsolateManager instance...');
     await isolateManager.start();
 
     expect(isolateManager.isStarted, equals(true));
@@ -54,85 +49,69 @@ void main() {
 
     expect(isolateManager.queuesLength, equals(0));
 
-    print('Computing IsolateManager instance...');
     await Future.wait([
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
-          print('Fibonacci $i = $value');
           expect(value, fibonacci(i));
         })
     ]);
 
     await Future.delayed(Duration(seconds: 3));
 
-    print('Dispose IsolateManager instance.');
     isolateManager.stop();
   });
 
   test('Test IsolateManager.createOwnIsolate', () async {
     // Create IsolateContactor
-    print('Create IsolateManager instance');
     final isolateManager = IsolateManager<int, int>.createOwnIsolate(
       isolateFunction,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
     )..start();
 
-    isolateManager.stream.listen((value) {
-      print('Stream: $value');
-    })
+    isolateManager.stream
+        .listen((value) {})
         // Do not need to catch the error here
         .onError((error) {});
 
-    print('Computing IsolateManager instance...');
     await Future.wait([
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
-          print('Fibonacci $i = $value');
           expect(value, fibonacci(i));
         })
     ]);
     await Future.delayed(Duration(seconds: 3));
 
-    print('Restarting IsolateManager instance...');
     await isolateManager.restart();
 
-    print('Computing IsolateManager instance second times...');
     await Future.wait([
       for (int i = 5; i < 13; i++)
         isolateManager.compute(i).then((value) {
-          print('Fibonacci $i = $value');
           expect(value, fibonacci(i));
         })
     ]);
 
-    print('Exception');
     expect(() => isolateManager.sendMessage(-1), throwsStateError);
 
     await Future.delayed(Duration(seconds: 3));
 
-    print('Dispose IsolateManager instance.');
     await isolateManager.stop();
   });
 
   test('Test IsolateManager.create with Worker', () async {
     // Create IsolateContactor
-    print('Create IsolateManager instance');
     final isolateManager = IsolateManager.create(
       fibonacci,
       workerName: 'fibonacci',
       concurrent: 4,
     );
 
-    print('Starting IsolateManager instance...');
     await isolateManager.start();
 
-    print('Computing IsolateManager instance...');
     await Future.wait([
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
           final realFib = fibonacci(i);
-          print('Fibonacci $i = $value == $realFib');
 
           expect(value, realFib);
         })
@@ -140,7 +119,6 @@ void main() {
 
     await Future.delayed(Duration(seconds: 3));
 
-    print('Dispose IsolateManager instance.');
     isolateManager.stop();
   });
 
@@ -148,7 +126,6 @@ void main() {
     final isolateManager = IsolateManager.create(
       errorFunction,
       concurrent: 1,
-      isDebug: true,
     );
     await isolateManager.start();
 
@@ -166,7 +143,6 @@ void main() {
     final isolateManager = IsolateManager.create(
       errorFunction,
       concurrent: 1,
-      isDebug: true,
     );
     await isolateManager.start();
 
@@ -186,7 +162,6 @@ void main() {
     final isolateManager = IsolateManager.create(
       errorFunction,
       concurrent: 2,
-      isDebug: true,
     );
     await isolateManager.start();
     final List<Future> futures = [];
@@ -211,7 +186,6 @@ void main() {
     final isolateManager = IsolateManager.create(
       errorFunction,
       concurrent: 2,
-      isDebug: true,
     );
     await isolateManager.start();
     final List<Future> futures = [];
@@ -234,7 +208,6 @@ void main() {
     final isolateManager = IsolateManager.create(
       errorFunction,
       concurrent: 2,
-      isDebug: true,
     );
     await isolateManager.start();
     final List<Future> futures = [];
@@ -259,7 +232,6 @@ void main() {
     final isolateManager = IsolateManager.create(
       errorFunction,
       concurrent: 2,
-      isDebug: true,
     );
     await isolateManager.start();
     final List<Future> futures = [];
@@ -282,7 +254,6 @@ void main() {
     final isolateManager = IsolateManager<String, int>.createOwnIsolate(
       isolateCallbackFunction,
       concurrent: 1,
-      isDebug: true,
     );
     await isolateManager.start();
 
@@ -334,9 +305,8 @@ void isolateFunction(dynamic params) {
     },
   );
 
-  final initialParams = controller.initialParams;
-  print('initialParams 0: ${initialParams[0]}');
-  print('initialParams 1: ${initialParams[1]}');
+  // Get the `initialParams`.
+  controller.initialParams;
 
   controller.onIsolateMessage.listen((message) {
     try {
