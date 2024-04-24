@@ -3,7 +3,7 @@ import 'package:isolate_contactor/isolate_contactor.dart';
 class IsolateManagerController<R, P>
     implements IsolateContactorController<R, P> {
   /// Delegation of IsolateContactor
-  late IsolateContactorController<R, P> _delegate;
+  final IsolateContactorController<R, P> _delegate;
 
   /// This method only use to create your own isolate.
   ///
@@ -12,12 +12,8 @@ class IsolateManagerController<R, P>
   IsolateManagerController(
     dynamic params, {
     Function()? onDispose,
-  }) {
-    _delegate = IsolateContactorController(
-      params,
-      onDispose: onDispose,
-    );
-  }
+  }) : _delegate =
+            IsolateContactorController<R, P>(params, onDispose: onDispose);
 
   /// Close this `IsolateManagerController`
   @override
