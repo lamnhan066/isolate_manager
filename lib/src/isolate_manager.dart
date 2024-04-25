@@ -8,6 +8,9 @@ import 'utils.dart';
 /// Type for the callback of the isolate
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
 
+/// Callback for the `createCustom`'s `function`.
+typedef IsolateCustomFunction = FutureOr<void> Function(dynamic params);
+
 class IsolateManager<R, P> {
   /// Debug logs prefix
   static String debugLogPrefix = 'Isolate Manager';
@@ -112,7 +115,7 @@ class IsolateManager<R, P> {
   /// Create a new isolate with your own isolate function.
   factory IsolateManager.createCustom(
     /// A function that you want to create an isolate.
-    CustomIsolateFunction isolateFunction, {
+    IsolateCustomFunction isolateFunction, {
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
@@ -152,7 +155,7 @@ class IsolateManager<R, P> {
   @Deprecated('Use `createCustom` instead')
   factory IsolateManager.createOwnIsolate(
     /// A function that you want to create an isolate.
-    CustomIsolateFunction isolateFunction, {
+    IsolateCustomFunction isolateFunction, {
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
