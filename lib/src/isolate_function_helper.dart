@@ -20,7 +20,7 @@ typedef IsolateOnDisposeCallback<T> = void Function(
 typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
     IsolateManagerController controller, P message);
 
-class IsolateFunction {
+class IsolateFunctionHelper {
   /// Create a custom isolate function.
   ///
   /// The [onInitial] and [onDispose] will be executed only one time in the beginning
