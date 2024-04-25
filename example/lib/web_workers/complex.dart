@@ -4,5 +4,5 @@ import 'package:isolate_manager_example/functions.dart';
 /// dart compile js complex.dart -o complex.js -O4
 
 main() {
-  isolateWorker(complexFunction);
+  IsolateFunctionHelper.workerFunction(complexFunction);
 }
