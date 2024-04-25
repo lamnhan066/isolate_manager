@@ -3,9 +3,10 @@ import 'dart:async';
 import 'isolate_worker_web.dart'
     if (dart.library.io) 'isolate_worker_stub.dart';
 
-/// A function for the [isolateWorker].
+/// A function for the `IsolateFunctionHelper.workerFunction`.
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 
+// coverage:ignore-start
 /// Create a worker in your `main`.
 ///
 /// ```dart
@@ -24,7 +25,8 @@ typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 /// ``` dart
 ///  return throw 'This is an error that you need to catch in your main app';
 /// ```
-@Deprecated('Use `IsolateFunction.workerFunction` instead')
+@Deprecated('Use `IsolateFunctionHelper.workerFunction` instead')
 void isolateWorker<R, P>(IsolateWorkerFunction<R, P> function) {
   return isolateWorkerImpl<R, P>(function);
 }
+// coverage:ignore-end

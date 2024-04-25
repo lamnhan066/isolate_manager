@@ -104,7 +104,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 
 main() {
   // The function `fetchAndDecode` MUST NOT depend on any Flutter library
-  IsolateFunction.workerFunction(fetchAndDecode);
+  IsolateFunctionHelper.workerFunction(fetchAndDecode);
 }
 ```
 
@@ -141,7 +141,7 @@ Let it automatically handles the result and the Exception:
 
 ``` dart
 void isolateFunction(dynamic params) {
-  IsolateFunction.isolateCustomFunction<int, int>(
+  IsolateFunctionHelper.isolateCustomFunction<int, int>(
     params,
     onEvent: (controller, message) {
       /* This event will be executed every time the `message` is received from the main isolate */
@@ -161,7 +161,7 @@ Handle the result and the Exception by your self:
 
 ```dart
 void isolateFunction(dynamic params) {
-  IsolateFunction.isolateCustomFunction<int, int>(
+  IsolateFunctionHelper.isolateCustomFunction<int, int>(
     params,
     onEvent: (controller, message) async {
       /* This event will be executed every time the `message` is received from the main isolate */
