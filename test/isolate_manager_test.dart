@@ -9,17 +9,9 @@ import 'package:test/test.dart';
 
 void main() {
   group('Test functions -', () {
-    test('isolateWorker', () {
+    test('IsolateFunctionHelper.isolateWorker', () {
       try {
-        isolateWorker((message) => {});
-      } catch (e) {
-        expect(e, isA<UnimplementedError>());
-      }
-    });
-
-    test('IsolateFunction.isolateWorker', () {
-      try {
-        IsolateFunction.workerFunction((message) => {});
+        IsolateFunctionHelper.workerFunction((message) => {});
       } catch (e) {
         expect(e, isA<UnimplementedError>());
       }
@@ -359,7 +351,7 @@ int fibonacci(int n) {
 
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  IsolateFunction.customFunction<int, int>(
+  IsolateFunctionHelper.customFunction<int, int>(
     params,
     onEvent: (controller, message) {
       try {
@@ -379,7 +371,7 @@ void isolateFunction(dynamic params) {
 
 @pragma('vm:entry-point')
 void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
-  IsolateFunction.customFunction<int, int>(
+  IsolateFunctionHelper.customFunction<int, int>(
     params,
     onEvent: (controller, message) {
       return fibonacci(message);
@@ -393,7 +385,7 @@ void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
 
 @pragma('vm:entry-point')
 void isolateCallbackFunction(dynamic params) {
-  IsolateFunction.customFunction(
+  IsolateFunctionHelper.customFunction(
     params,
     onEvent: (controller, message) {
       try {
