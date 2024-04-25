@@ -2,20 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/isolate_worker/isolate_worker_stub.dart'
-    as isolate_worker_stub;
 import 'package:test/test.dart';
 
 //  dart test
 //  dart test --platform=chrome,vm
 
 void main() {
-  group('Test funtions -', () {
-    test('isolateWorker stub', () {
-      expect(
-        () => isolate_worker_stub.isolateWorker((message) {}),
-        throwsUnimplementedError,
-      );
+  group('Test functions -', () {
+    test('isolateWorker', () {
+      try {
+        isolateWorker((message) => {});
+      } catch (e) {
+        expect(e, isA<UnimplementedError>());
+      }
     });
   });
 
@@ -61,9 +60,9 @@ void main() {
     isolateManager.stop();
   });
 
-  test('Test IsolateManager.createOwnIsolate', () async {
+  test('Test IsolateManager.createCustom', () async {
     // Create IsolateContactor
-    final isolateManager = IsolateManager<int, int>.createOwnIsolate(
+    final isolateManager = IsolateManager<int, int>.createCustom(
       isolateFunction,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
@@ -251,7 +250,7 @@ void main() {
   });
 
   test('Test with IsolateCallback', () async {
-    final isolateManager = IsolateManager<String, int>.createOwnIsolate(
+    final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackFunction,
       concurrent: 1,
     );
