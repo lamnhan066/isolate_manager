@@ -140,8 +140,8 @@ You can control everything with this method when you want to create multiple iso
 Let it automatically handles the result and the Exception:
 
 ``` dart
-void isolateFunction(dynamic params) {
-  IsolateFunctionHelper.isolateCustomFunction<int, int>(
+void customIsolateFunction(dynamic params) {
+  IsolateFunctionHelper.customFunction<int, int>(
     params,
     onEvent: (controller, message) {
       /* This event will be executed every time the `message` is received from the main isolate */
@@ -160,8 +160,8 @@ void isolateFunction(dynamic params) {
 Handle the result and the Exception by your self:
 
 ```dart
-void isolateFunction(dynamic params) {
-  IsolateFunctionHelper.isolateCustomFunction<int, int>(
+void customIsolateFunction(dynamic params) {
+  IsolateFunctionHelper.customFunction<int, int>(
     params,
     onEvent: (controller, message) async {
       /* This event will be executed every time the `message` is received from the main isolate */
@@ -190,8 +190,8 @@ void isolateFunction(dynamic params) {
 ### **Step 2:** Create an IsolateManager instance for your own function
 
 ``` dart
-final isolateManager = IsolateManager.createOwnIsolate(
-    isolateFunction,
+final isolateManager = IsolateManager.createCustom(
+    customIsolateFunction,
     initialParams: 'This is initialParams',
     debugMode: true,
   );
@@ -243,13 +243,6 @@ final result = await isolateManager.compute('https://path/to/json.json',
 - Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
 
 - Use `isStarted` to check if the `start` method is completed or not.
-
-- If the `worker.dart` show errors for `js` package, you can add `js` to `dev_dependencies`:
-  
-  ``` dart
-  dev_dependencies:
-    js:
-  ```
 
 - The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
 
