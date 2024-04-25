@@ -21,14 +21,11 @@ There are multiple ways to use this package. The only thing to notice is that th
 ### **Step 1:** Create a top-level or static function
 
 ``` dart
-@pragma('vm:entry-point')
 Future<Map<String, dynamic>> fetchAndDecode(String url) async {
   final response = await http.Client().get(Uri.parse(url));
   return jsonDecode(response.body);
 }
 ```
-
-**You must add `@pragma('vm:entry-point')` annotation to all methods that you want to use for isolation since Flutter 3.3.0. Without this annotation, the Dart compiler could strip out unused functions, inline them, shrink names, etc., and the native code would fail to call it.**
 
 ### **Step 2:** Create an IsolateManager instance for that function
 
@@ -107,7 +104,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 
 main() {
   // The function `fetchAndDecode` MUST NOT depend on any Flutter library
-  isolateWorker(fetchAndDecode);
+  IsolateFunction.workerFunction(fetchAndDecode);
 }
 ```
 
@@ -140,50 +137,53 @@ You can control everything with this method when you want to create multiple iso
 
 ### **Step 1:** Create a function of this form
 
+Let it automatically handles the result and the Exception:
+
 ``` dart
-/// Create your own function here. This function will be called when your isolate starts.
-@pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  // Initialize the controller for the child isolate. This function will be declared
-  // with `Map<String, dynamic>` as the return type (.sendResult) and `String` as the parameter type (.sendMessage).
-  final controller = IsolateManagerController<Map<String, dynamic>, String>(
-    params, 
-    onDispose: () {
-      print('Dispose isolateFunction');
-    }
+  IsolateFunction.isolateCustomFunction<int, int>(
+    params,
+    onEvent: (controller, message) {
+      /* This event will be executed every time the `message` is received from the main isolate */
+      return fetchAndDecode(message);
+    },
+    onInitial: (controller, initialParams) {
+       /* This event will be excuted before all other events and should not be a `Future` event */
+    },
+    onDispose: (controller) {
+       /* This event will be excuted after all other events and should not be a `Future` event */
+    },
   );
+}
+```
 
-  // Get your initialParams.
-  // Notice that these `initialParams` are different from the `params` above.
-  final initialParams = controller.initialParams;
+Handle the result and the Exception by your self:
 
-  // Do your one-time stuff here; this code will be called only once when you `start`
-  // this instance of `IsolateManager`.
+```dart
+void isolateFunction(dynamic params) {
+  IsolateFunction.isolateCustomFunction<int, int>(
+    params,
+    onEvent: (controller, message) async {
+      /* This event will be executed every time the `message` is received from the main isolate */
+      try {
+        final result = await fetchAndDecode(message);
+        controller.sendResult(result);
+      } catch (err, stack) {
+        controller.sendResultError(IsolateException(err, stack));
+      }
 
-  // Listen to messages received from the main isolate; this code will be called each time
-  // you use `compute` or `sendMessage`.
-  controller.onIsolateMessage.listen((message) {
-    // Create a completer
-    Completer completer = Completer();
-
-    // Handle the result and exceptions
-    completer.future.then(
-      (value) => controller.sendResult(value),
-      // Send the exception to your main app
-      onError: (err, stack) =>
-          controller.sendResultError(IsolateException(err, stack)),
-    );
-
-    // Use try-catch to send the exception to the main app
-    try {
-      // Do your stuff here. 
-      completer.complete(fetchAndDecode(message));
-
-    } catch (err, stack) {
-      // Send the exception to your main app
-      controller.sendResultError(IsolateException(err, stack));
-    }
-  });
+      // Just returns something that unused to complete this method.
+      return 0;
+    },
+    onInitial: (controller, initialParams) {
+       /* This event will be executed before all the other events and should not be a `Future` event */
+    },
+    onDispose: (controller) {
+       /* This event will be executed after all the other events and should not be a `Future` event */
+    },
+    autoHandleException: false,
+    autoHandleResult: false,
+  );
 }
 ```
 
@@ -277,7 +277,6 @@ final result = await isolateManager.compute('https://path/to/json.json',
 
 ## Contributions
 
-- This plugin is an enhanced plugin for `isolate_contactor`: [pub](https://pub.dev/packages/isolate_contactor) | [git](https://github.com/lamnhan066/isolate_contactor)
 - If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
 
 - If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
