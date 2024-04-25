@@ -16,6 +16,14 @@ void main() {
         expect(e, isA<UnimplementedError>());
       }
     });
+
+    test('IsolateFunction.isolateWorker', () {
+      try {
+        IsolateFunction.workerFunction((message) => {});
+      } catch (e) {
+        expect(e, isA<UnimplementedError>());
+      }
+    });
   });
 
   test('Test IsolateManager.create: Basic Usage', () async {
@@ -97,6 +105,44 @@ void main() {
     await isolateManager.stop();
   });
 
+  test('Test IsolateManager.createCustom with automatically handlers',
+      () async {
+    // Create IsolateContactor
+    final isolateManager = IsolateManager<int, int>.createCustom(
+      isolateFunctionWithAutomaticallyHandlers,
+      concurrent: 4,
+      initialParams: ['Test initialParams 0', 'Test initialParams 1'],
+    )..start();
+
+    isolateManager.stream
+        .listen((value) {})
+        // Do not need to catch the error here
+        .onError((error) {});
+
+    await Future.wait([
+      for (int i = 0; i < 10; i++)
+        isolateManager.compute(i).then((value) {
+          expect(value, fibonacci(i));
+        })
+    ]);
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.restart();
+
+    await Future.wait([
+      for (int i = 5; i < 13; i++)
+        isolateManager.compute(i).then((value) {
+          expect(value, fibonacci(i));
+        })
+    ]);
+
+    expect(() => isolateManager.sendMessage(-1), throwsStateError);
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
+  });
+
   test('Test IsolateManager.create with Worker', () async {
     // Create IsolateContactor
     final isolateManager = IsolateManager.create(
@@ -119,6 +165,23 @@ void main() {
     await Future.delayed(Duration(seconds: 3));
 
     isolateManager.stop();
+  });
+
+  test('Test with Exception future function', () async {
+    final isolateManager = IsolateManager.create(
+      errorFunctionFuture,
+      concurrent: 1,
+    );
+    await isolateManager.start();
+
+    expect(
+      () async => await isolateManager.compute([50, 50]),
+      throwsStateError,
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
   });
 
   test('Test with Exception function', () async {
@@ -296,46 +359,70 @@ int fibonacci(int n) {
 
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  late IsolateManagerController controller;
-  controller = IsolateManagerController<int, int>(
+  IsolateFunction.customFunction<int, int>(
     params,
-    onDispose: () {
-      controller.close();
+    onEvent: (controller, message) {
+      try {
+        final result = fibonacci(message);
+        controller.sendResult(result);
+      } catch (err, stack) {
+        controller.sendResultError(IsolateException(err, stack));
+      }
+      return 0;
     },
+    onInitial: (controller, initialParams) {},
+    onDispose: (controller) {},
+    autoHandleException: false,
+    autoHandleResult: false,
   );
+}
 
-  // Get the `initialParams`.
-  controller.initialParams;
-
-  controller.onIsolateMessage.listen((message) {
-    try {
-      final result = fibonacci(message);
-      controller.sendResult(result);
-    } catch (err, stack) {
-      controller.sendResultError(IsolateException(err, stack));
-    }
-  });
+@pragma('vm:entry-point')
+void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
+  IsolateFunction.customFunction<int, int>(
+    params,
+    onEvent: (controller, message) {
+      return fibonacci(message);
+    },
+    onInitial: (controller, initialParams) {},
+    onDispose: (controller) {},
+    autoHandleException: true,
+    autoHandleResult: true,
+  );
 }
 
 @pragma('vm:entry-point')
 void isolateCallbackFunction(dynamic params) {
-  final controller = IsolateManagerController<String, int>(params);
+  IsolateFunction.customFunction(
+    params,
+    onEvent: (controller, message) {
+      try {
+        for (int i = 0; i < 10; i++) {
+          controller.sendResult(jsonEncode({'source': '$i'}));
+        }
 
-  controller.onIsolateMessage.listen((message) {
-    try {
-      for (int i = 0; i < 10; i++) {
-        controller.sendResult(jsonEncode({'source': '$i'}));
+        controller.sendResult(jsonEncode({'data': 'data'}));
+      } catch (err, stack) {
+        controller.sendResultError(IsolateException(err, stack));
       }
-
-      controller.sendResult(jsonEncode({'data': 'data'}));
-    } catch (err, stack) {
-      controller.sendResultError(IsolateException(err, stack));
-    }
-  });
+    },
+    autoHandleException: false,
+    autoHandleResult: false,
+  );
 }
 
 @pragma('vm:entry-point')
 int errorFunction(List<int> value) {
+  if (value[0] == 50) {
+    return throw StateError('The exception is threw at value[0] = ${value[0]}');
+  }
+  return value[0] + value[1];
+}
+
+@pragma('vm:entry-point')
+Future<int> errorFunctionFuture(List<int> value) async {
+  await Future.delayed(Duration(seconds: 1));
+
   if (value[0] == 50) {
     return throw StateError('The exception is threw at value[0] = ${value[0]}');
   }
