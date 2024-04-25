@@ -42,14 +42,14 @@ class IsolateManager<R, P> {
   /// Convert the result received from the isolate before getting real result.
   /// This function useful when the result received from the isolate is different
   /// from the return type.
-  final R Function(dynamic)? converter;
+  final IsolateConverter<R>? converter;
 
   /// Convert the result received from the isolate before getting real result.
   /// This function useful when the result received from the isolate is different
   /// from the return type.
   ///
   /// This function only available in `Worker` mode on Web platform.
-  final R Function(dynamic)? workerConverter;
+  final IsolateConverter<R>? workerConverter;
 
   /// Get current number of queues
   int get queuesLength => _queues.length;
@@ -78,7 +78,7 @@ class IsolateManager<R, P> {
   /// Easy way to create a new isolate.
   factory IsolateManager.create(
     /// A function that you want to create an isolate.
-    FutureOr<R> Function(P params) isolateFunction, {
+    IsolateFunction<R, P> isolateFunction, {
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
@@ -89,13 +89,13 @@ class IsolateManager<R, P> {
     ///
     /// This parameter isn't used for for `Worker` on Web, you can use `workerConverter`
     /// instead if you need to.
-    R Function(dynamic)? converter,
+    IsolateConverter<R>? converter,
 
     /// Convert values before you get the last result.
     ///
     /// This parameter is only used for `Worker` on Web, you can use `converter`
     /// instead if you need to.
-    R Function(dynamic)? workerConverter,
+    IsolateConverter<R>? workerConverter,
 
     /// Print debug information.
     bool isDebug = false,
@@ -110,9 +110,9 @@ class IsolateManager<R, P> {
       );
 
   /// Create a new isolate with your own isolate function.
-  factory IsolateManager.createOwnIsolate(
+  factory IsolateManager.createCustom(
     /// A function that you want to create an isolate.
-    void Function(dynamic) isolateFunction, {
+    CustomIsolateFunction isolateFunction, {
     /// Name of the .js file that you want to create a Worker.
     String workerName = '',
 
@@ -125,13 +125,13 @@ class IsolateManager<R, P> {
     /// Convert the result received from the isolate before getting real result.
     /// This function useful when the result received from the isolate is different
     /// from the return type.
-    R Function(dynamic)? converter,
+    IsolateConverter<R>? converter,
 
     /// Convert values before you get the last result.
     ///
     /// This parameter is only used for `Worker` on Web, you can use `converter`
     /// instead if you need to.
-    R Function(dynamic)? workerConverter,
+    IsolateConverter<R>? workerConverter,
 
     /// Print debug information.
     bool isDebug = false,
@@ -146,6 +146,47 @@ class IsolateManager<R, P> {
         isOwnIsolate: true,
         isDebug: isDebug,
       );
+
+  // coverage:ignore-start
+  /// Create a new isolate with your own isolate function.
+  @Deprecated('Use `createCustom` instead')
+  factory IsolateManager.createOwnIsolate(
+    /// A function that you want to create an isolate.
+    CustomIsolateFunction isolateFunction, {
+    /// Name of the .js file that you want to create a Worker.
+    String workerName = '',
+
+    /// Initial parameters that you want to pass to your function.
+    Object? initialParams,
+
+    /// Number of isolates for this function.
+    int concurrent = 1,
+
+    /// Convert the result received from the isolate before getting real result.
+    /// This function useful when the result received from the isolate is different
+    /// from the return type.
+    IsolateConverter<R>? converter,
+
+    /// Convert values before you get the last result.
+    ///
+    /// This parameter is only used for `Worker` on Web, you can use `converter`
+    /// instead if you need to.
+    IsolateConverter<R>? workerConverter,
+
+    /// Print debug information.
+    bool isDebug = false,
+  }) =>
+      IsolateManager._(
+        concurrent: concurrent,
+        isolateFunction: isolateFunction,
+        workerName: workerName,
+        initialParams: initialParams,
+        converter: converter,
+        workerConverter: workerConverter,
+        isOwnIsolate: true,
+        isDebug: isDebug,
+      );
+  // coverage:ignore-end
 
   /// Queue of isolates
   final Queue<IsolateQueue<R, P>> _queues = Queue();
@@ -184,7 +225,7 @@ class IsolateManager<R, P> {
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
-            IsolateContactor.createOwnIsolate<R, P>(
+            IsolateContactor.createCustom<R, P>(
               isolateFunction as FutureOr<void> Function(dynamic),
               workerName: workerName,
               initialParams: initialParams,
