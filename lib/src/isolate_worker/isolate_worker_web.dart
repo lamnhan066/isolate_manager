@@ -23,7 +23,7 @@ import 'package:web/web.dart';
 /// ``` dart
 ///  return throw 'This is an error that you need to catch in your main app';
 /// ```
-void isolateWorker<R, P>(FutureOr<R> Function(P message) function) {
+void isolateWorkerImpl<R, P>(IsolateWorkerFunction<R, P> function) {
   callbackToStream('onmessage', (MessageEvent e) {
     return js_util.getProperty(e, 'data');
   }).listen((message) {

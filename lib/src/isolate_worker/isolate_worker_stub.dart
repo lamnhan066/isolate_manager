@@ -1,5 +1,5 @@
-import 'dart:async';
+import 'isolate_worker.dart';
 
-void isolateWorker<R, P>(FutureOr<R> Function(P message) function) {
+void isolateWorkerImpl<R, P>(IsolateWorkerFunction<R, P> function) {
   throw UnimplementedError('Use only on the Web platform to create a Worker');
 }
