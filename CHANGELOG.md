@@ -1,3 +1,11 @@
+## 4.2.2
+
+* Bump `isolate_contacter` to `v4.1.0`.
+* Add a class `IsolateFunctionHelper` contains `customFunction` and `workerFunction`.
+* Deprecate the `createOwnIsolate` in favor of the `createCustom`.
+* Deprecate the `isolateWorker` in favor of the `IsolateFunctionHelper.workerFunction`.
+* Improve README.
+
 ## 4.2.1+1
 
 * Fixed the issue that causes the `sendMessage` to be unable to throw the `Exception` when the `callback` is set.
