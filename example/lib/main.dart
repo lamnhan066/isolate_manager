@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
     workerName: 'workers/fibonacci',
     concurrent: 2,
   );
-  final isolateIsolateFunction = IsolateManager.createOwnIsolate(
+  final isolateIsolateFunction = IsolateManager.createCustom(
     concurrent: 2,
     isolateFunction,
     isDebug: true,
@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
     isDebug: true,
   );
 
-  final isolateProgress = IsolateManager<String, String>.createOwnIsolate(
+  final isolateProgress = IsolateManager<String, String>.createCustom(
     isolateProgressFunction,
     isDebug: true,
   );
