@@ -1,7 +1,7 @@
 import 'package:isolate_contactor/isolate_contactor.dart';
 
 class IsolateManagerController<R, P> {
-  /// Delegation of IsolateContactor
+  /// Delegation of IsolateContactor.
   late IsolateContactorController<R, P> _delegate;
 
   /// This method only use to create your own isolate.
@@ -18,10 +18,10 @@ class IsolateManagerController<R, P> {
     );
   }
 
-  /// Close this `IsolateManagerController`
+  /// Close this `IsolateManagerController`.
   Future<void> close() => _delegate.close();
 
-  /// Get initial parameters when you create the IsolateManager
+  /// Get initial parameters when you create the IsolateManager.
   get initialParams => _delegate.initialParams;
 
   /// This parameter is only used for Isolate. Use to listen for values from the main application.

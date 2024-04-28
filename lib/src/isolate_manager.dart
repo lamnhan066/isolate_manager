@@ -5,41 +5,41 @@ import 'package:isolate_contactor/isolate_contactor.dart';
 
 import 'utils.dart';
 
-/// Type for the callback of the isolate
+/// Type for the callback of the isolate.
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
 
 /// Callback for the `createCustom`'s `function`.
 typedef IsolateCustomFunction = FutureOr<void> Function(dynamic params);
 
 class IsolateManager<R, P> {
-  /// Debug logs prefix
+  /// Debug logs prefix.
   static String debugLogPrefix = 'Isolate Manager';
 
-  /// Number of concurrent isolates
+  /// Number of concurrent isolates.
   final int concurrent;
 
-  /// Isolate function
+  /// Isolate function.
   final dynamic isolateFunction;
 
-  /// Worker name
+  /// Worker name.
   final String workerName;
 
-  /// Initial parameters
+  /// Initial parameters.
   final Object? initialParams;
 
-  /// Is using your own isolate function
+  /// Is using your own isolate function.
   final bool isOwnIsolate;
 
-  /// Allow print debug log
+  /// Allow print debug log.
   final bool isDebug;
 
   // coverage:ignore-start
-  /// Similar to `stream`, for who's using IsolateContactor
+  /// Similar to `stream`, for who's using IsolateContactor.
   @Deprecated('Use [stream] instead')
   Stream<R> get onMessage => _streamController.stream;
   // coverage:ignore-end
 
-  /// Get value as stream
+  /// Get value as stream.
   Stream<R> get stream => _streamController.stream;
 
   /// Convert the result received from the isolate before getting real result.
@@ -54,11 +54,11 @@ class IsolateManager<R, P> {
   /// This function only available in `Worker` mode on Web platform.
   final IsolateConverter<R>? workerConverter;
 
-  /// Get current number of queues
+  /// Get current number of queues.
   int get queuesLength => _queues.length;
 
   /// If you want to call the [start] method manually without `await`, you can `await`
-  /// later by using [ensureStarted] to ensure that all the isolates are started
+  /// later by using [ensureStarted] to ensure that all the isolates are started.
   Future<void> get ensureStarted => _startedCompleter.future;
 
   /// To check if the [start] method is completed or not.
@@ -74,7 +74,7 @@ class IsolateManager<R, P> {
     this.isOwnIsolate = false,
     this.isDebug = false,
   }) {
-    // Set the debug log prefix
+    // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
@@ -191,40 +191,40 @@ class IsolateManager<R, P> {
       );
   // coverage:ignore-end
 
-  /// Queue of isolates
+  /// Queue of isolates.
   final Queue<IsolateQueue<R, P>> _queues = Queue();
 
-  /// Map<IsolateContactor instance, isBusy>
+  /// Map<IsolateContactor instance, isBusy>.
   final Map<IsolateContactor<R, P>, bool> _isolates = {};
 
-  /// Controller for stream
+  /// Controller for stream.
   final StreamController<R> _streamController = StreamController.broadcast();
   StreamSubscription<R>? _streamSubscription;
   // final List<StreamSubscription<R>> _streamSubscriptions = [];
 
-  /// Is the `start` method is starting
+  /// Is the `start` method is starting.
   bool _isStarting = false;
 
-  /// Control when the `start` method is completed
+  /// Control when the `start` method is completed.
   Completer<void> _startedCompleter = Completer();
 
   /// Initialize the instance. This method can be called manually or will be
   /// called when the first `compute()` has been made.
   Future<void> start() async {
-    // This instance is stoped
+    // This instance is stoped.
     if (_streamController.isClosed) return;
 
-    // Return here if this method is already completed
+    // Return here if this method is already completed.
     if (_startedCompleter.isCompleted) return;
 
-    // If this method has already been called, it will wait for completion
+    // If this method has already been called, it will wait for completion.
     if (_isStarting) return _startedCompleter.future;
 
-    // Mark as the `start()` is starting
+    // Mark as the `start()` is starting.
     _isStarting = true;
 
     if (isOwnIsolate) {
-      // Create your own isolates
+      // Create the custom isolates.
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
@@ -239,7 +239,7 @@ class IsolateManager<R, P> {
         ],
       );
     } else {
-      // Create isolates with the internal method
+      // Create isolates with the internal method.
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
@@ -257,16 +257,16 @@ class IsolateManager<R, P> {
     _streamSubscription = _streamController.stream.listen((result) {
       _excuteQueue();
     })
-      // Needs to put onError here to make the try-catch work properly
+      // Needs to put onError here to make the try-catch work properly.
       ..onError((error, stack) {});
 
     _excuteQueue();
 
-    // Mark the `start()` to be completed
+    // Mark the `start()` to be completed.
     _startedCompleter.complete();
   }
 
-  /// Stop isolate manager without close streamController
+  /// Stop isolate manager without close streamController.
   Future<void> _tempStop() async {
     _isStarting = false;
     _startedCompleter = Completer();
@@ -277,13 +277,13 @@ class IsolateManager<R, P> {
     _streamSubscription?.cancel();
   }
 
-  /// Stop the isolate
+  /// Stop the isolate.
   Future<void> stop() async {
     await _tempStop();
     await _streamController.close();
   }
 
-  /// Restart the isolate
+  /// Restart the isolate.
   Future<void> restart() async {
     await _tempStop();
     await start();
@@ -300,17 +300,27 @@ class IsolateManager<R, P> {
   /// result will be returned when the callback returns `true`.
   ///
   /// Ex:
+  ///
+  /// Without callback, the first value received from the Isolate is always the
+  /// final value:
+  ///
+  /// ```dart
+  /// final result = await isolate.compute(params); // Get only the first result from the isolate
+  /// ```
+  /// With callback, only the `true` value is the final value, so all other values
+  /// is marked as the progress values:
+  ///
   /// ``` dart
-  /// final result = await compute(params, (value) {
+  /// final result = await isolate.compute(params, (value) {
   ///       if (value is int) {
-  ///         // Do something here with the value that is not returned to the `result`
+  ///         // Do something here with the value that will be not returned to the `result`.
   ///         print('progress: $value');
   ///         return false;
   ///       }
   ///
-  ///       // The value is not `int` will be send to the `result`.
+  ///       // The value is not `int` and will be returned to the `result` as the final result.
   ///       return true;
-  ///   })
+  ///  });
   /// ```
   Future<R> compute(P params, {IsolateCallback<R>? callback}) async {
     await start();
@@ -327,7 +337,7 @@ class IsolateManager<R, P> {
   void _excuteQueue() {
     _print('Number of queues: ${_queues.length}');
     for (final isolate in _isolates.keys) {
-      /// Allow calling `compute` before `start`
+      /// Allow calling `compute` before `start`.
       if (_queues.isNotEmpty && _isolates[isolate] == false) {
         final queue = _queues.removeFirst();
         _excute(isolate, queue);
@@ -335,7 +345,7 @@ class IsolateManager<R, P> {
     }
   }
 
-  /// Send and recieve value
+  /// Send and recieve value.
   Future<R> _excute(IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) {
     if (queue.callback != null) {
       return _excuteWithCallback(isolate, queue);
@@ -346,28 +356,28 @@ class IsolateManager<R, P> {
 
   Future<R> _excuteWithCallback(
       IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
-    // Mark the current isolate as busy
+    // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
     StreamSubscription? sub;
     sub = isolate.onMessage.listen((event) async {
-      // Callbacks on every event
+      // Callbacks on every event.
       final completer = Completer<bool>();
       completer.complete(queue.callback!(event));
       if (await completer.future) {
         sub?.cancel();
-        // Mark the current isolate as free
+        // Mark the current isolate as free.
         _isolates[isolate] = false;
-        // Send the result back to the main app
+        // Send the result back to the main app.
         _streamController.sink.add(event);
         queue.completer.complete(event);
       }
     }, onError: (error, stackTrace) {
       sub?.cancel();
-      // Mark the current isolate as free
+      // Mark the current isolate as free.
       _isolates[isolate] = false;
 
-      // Send the exception back to the main app
+      // Send the exception back to the main app.
       _streamController.sink.addError(error!, stackTrace);
       queue.completer.completeError(error, stackTrace);
     });
@@ -383,22 +393,22 @@ class IsolateManager<R, P> {
 
   Future<R> _excuteWithoutCallback(
       IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
-    // Mark the current isolate as busy
+    // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
-    // Send the `param` to the isolate and wait for the result
+    // Send the `param` to the isolate and wait for the result.
     isolate.sendMessage(queue.params).then((value) {
-      // Mark the current isolate as free
+      // Mark the current isolate as free.
       _isolates[isolate] = false;
 
-      // Send the result back to the main app
+      // Send the result back to the main app.
       _streamController.sink.add(value);
       queue.completer.complete(value);
     }).onError((error, stackTrace) {
-      // Mark the current isolate as free
+      // Mark the current isolate as free.
       _isolates[isolate] = false;
 
-      // Send the exception back to the main app
+      // Send the exception back to the main app.
       _streamController.sink.addError(error!, stackTrace);
       queue.completer.completeError(error, stackTrace);
     });
@@ -406,7 +416,7 @@ class IsolateManager<R, P> {
     return queue.completer.future;
   }
 
-  /// Print debug log
+  /// Print a debug log.
   void _print(String log) {
     if (isDebug) print('[$debugLogPrefix] $log');
   }

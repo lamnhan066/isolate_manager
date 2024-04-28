@@ -6,23 +6,6 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:web/web.dart';
 
 /// Create a worker in your `main`.
-///
-/// ```dart
-/// main() {
-///   isolateWorker(myFunction);
-/// }
-/// ```
-///
-/// Build it with `dart compile js worker.dart -o worker.js -O4` and copy the `worker.js` to
-/// your Web folder.
-///
-/// If you need to throw an exception, you should only throw the `message`
-/// instead of a whole Object because it may not be shown as expected when
-/// sending back to the main app.
-///
-/// ``` dart
-///  return throw 'This is an error that you need to catch in your main app';
-/// ```
 void isolateWorkerImpl<R, P>(IsolateWorkerFunction<R, P> function) {
   callbackToStream('onmessage', (MessageEvent e) {
     return js_util.getProperty(e, 'data');
@@ -41,7 +24,7 @@ void isolateWorkerImpl<R, P>(IsolateWorkerFunction<R, P> function) {
   });
 }
 
-/// Internal function
+/// Internal function.
 Stream<T> callbackToStream<J, T>(
     String name, T Function(J jsValue) unwrapValue) {
   var controller = StreamController<T>.broadcast(sync: true);
@@ -51,7 +34,7 @@ Stream<T> callbackToStream<J, T>(
   return controller.stream;
 }
 
-/// Internal function
+/// Internal function.
 void jsSendMessage(dynamic m) {
   js.context.callMethod('postMessage', [m]);
 }
