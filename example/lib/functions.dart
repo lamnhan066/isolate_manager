@@ -21,15 +21,15 @@ int countEven(int num) {
 ///
 /// This function is very expensive to calculate, so I can test for un-blocking UI feature
 @pragma('vm:entry-point')
-Future<int> fibonacciRescusiveFuture(int n) async {
+Future<int> fibonacciRecursiveFuture(int n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
 
   // Magic code: This is only for non-blocking UI on Web platform
   await Future.delayed(Duration.zero);
 
-  return await fibonacciRescusiveFuture(n - 1) +
-      await fibonacciRescusiveFuture(n - 2);
+  return await fibonacciRecursiveFuture(n - 1) +
+      await fibonacciRecursiveFuture(n - 2);
 }
 
 /// This must be a static or top-level function

@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
     isDebug: true,
   );
   final isolateFibonacciRescursive = IsolateManager.create(
-    fibonacciRescusiveFuture,
+    fibonacciRecursiveFuture,
     concurrent: 2,
   );
   final isolateFunctionName = IsolateManager.create(
