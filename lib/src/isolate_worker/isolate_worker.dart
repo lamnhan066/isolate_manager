@@ -1,3 +1,6 @@
+// coverage:ignore-file
+// Tested by compiling to `js` for the Web Worker.
+
 import 'dart:async';
 
 import 'isolate_worker_web.dart'
@@ -6,7 +9,6 @@ import 'isolate_worker_web.dart'
 /// A function for the `IsolateFunctionHelper.workerFunction`.
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 
-// coverage:ignore-start
 /// Create a worker in your `main`.
 ///
 /// ```dart
@@ -18,6 +20,10 @@ typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 /// Build it with `dart compile js worker.dart -o worker.js -O4` and copy the `worker.js` to
 /// your Web folder.
 ///
+/// When you're using the [onInitial], you have to set the `autoInitialize` parameter
+/// of the `create` and `createCustom` to `false`. Without it, the `Worker` will
+/// be stucked forever.
+///
 /// If you need to throw an exception, you should only throw the `message`
 /// instead of a whole Object because it may not be shown as expected when
 /// sending back to the main app.
@@ -26,7 +32,9 @@ typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 ///  return throw 'This is an error that you need to catch in your main app';
 /// ```
 @Deprecated('Use `IsolateFunctionHelper.workerFunction` instead')
-void isolateWorker<R, P>(IsolateWorkerFunction<R, P> function) {
-  return isolateWorkerImpl<R, P>(function);
+Future<void> isolateWorker<R, P>(
+  IsolateWorkerFunction<R, P> function, {
+  FutureOr<void> Function()? onInitial,
+}) {
+  return isolateWorkerImpl<R, P>(function, onInitial);
 }
-// coverage:ignore-end

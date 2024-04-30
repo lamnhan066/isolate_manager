@@ -9,7 +9,7 @@ import 'utils.dart';
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
 
 /// Callback for the `createCustom`'s `function`.
-typedef IsolateCustomFunction = FutureOr<void> Function(dynamic params);
+typedef IsolateCustomFunction = IsolateFunction<void, dynamic>;
 
 class IsolateManager<R, P> {
   /// Debug logs prefix.
@@ -19,16 +19,71 @@ class IsolateManager<R, P> {
   final int concurrent;
 
   /// Isolate function.
-  final dynamic isolateFunction;
+  final Object isolateFunction;
 
-  /// Worker name.
+  /// Name of the `Worker` without the extension.
+  ///
+  /// Ex: Worker: `worker.js` => workerName: 'worker;
+  ///     Worker: `workers/worker.js` => workerName: 'workers/worker'
   final String workerName;
 
   /// Initial parameters.
   final Object? initialParams;
 
   /// Is using your own isolate function.
-  final bool isOwnIsolate;
+  final bool isCustomIsolate;
+
+  /// Mark an `Isolate` and `Worker` as initialized after spawned.
+  ///
+  /// TODO: Set this value to `false` by default in the next big release `v5.0.0`.
+  ///
+  /// An `Isolate` or a `Worker` need sometimes to be completely executed (ready
+  /// to receive the messages from the main app). If this value is `true`,
+  /// an `Isolate` or a `Worker` will be marked as initialized as soon as it's
+  /// spawned, otherwise, the main app will wait for an `initialized` signal
+  /// sent from the `Isolate` or `Worker` to ensure that it's completely executed and
+  /// ready to receive the messages.
+  ///
+  /// If this value is set to `true`, we need to add a line to the custom function
+  /// and worker to send a signal to the main app:
+  ///
+  ///   * Custom function:
+  ///
+  ///   ```dart
+  ///   void customFunction(dynamic params) {
+  ///     final controller = IsolateManagerController(params);
+  ///     controller.onIsolateMessage.then((value){
+  ///       // ...
+  ///     });
+  ///
+  ///     controller.initialized(); // <--
+  ///   }
+  ///   ```
+  ///
+  ///   * Web worker:
+  ///
+  ///   ```dart
+  ///   void main() {
+  ///     callbackToStream('onmessage', (MessageEvent e) {
+  ///       return js_util.getProperty(e, 'data');
+  ///     }).listen((message) {
+  ///       final Completer completer = Completer();
+  ///       completer.future.then(
+  ///         (value) => jsSendMessage(value),
+  ///         onError: (err, stack) =>
+  ///           jsSendMessage(IsolateException(err, stack).toJson()),
+  ///       );
+  ///       try {
+  ///         completer.complete(function(message as P) as R);
+  ///       } catch (err, stack) {
+  ///         jsSendMessage(IsolateException(err, stack).toJson());
+  ///       }
+  ///     });
+  ///
+  ///     jsSendMessage(IsolateState.initialized.serialization); // <--
+  ///   }
+  ///   ```
+  final bool autoInitialize;
 
   /// Allow print debug log.
   final bool isDebug;
@@ -64,131 +119,52 @@ class IsolateManager<R, P> {
   /// To check if the [start] method is completed or not.
   bool get isStarted => _startedCompleter.isCompleted;
 
-  IsolateManager._({
-    required this.concurrent,
-    required this.isolateFunction,
-    required this.workerName,
+  /// An easy way to create a new isolate.
+  IsolateManager.create(
+    IsolateFunction<R, P> this.isolateFunction, {
+    this.workerName = '',
+    this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    this.initialParams,
-    this.isOwnIsolate = false,
+    this.autoInitialize = true,
     this.isDebug = false,
-  }) {
+  })  : isCustomIsolate = false,
+        initialParams = '' {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
-  /// Easy way to create a new isolate.
-  factory IsolateManager.create(
-    /// A function that you want to create an isolate.
-    IsolateFunction<R, P> isolateFunction, {
-    /// Name of the .js file that you want to create a Worker.
-    String workerName = '',
-
-    /// Number of concurrent isolates for this function.
-    int concurrent = 1,
-
-    /// Convert values before you get the last result.
-    ///
-    /// This parameter isn't used for for `Worker` on Web, you can use `workerConverter`
-    /// instead if you need to.
-    IsolateConverter<R>? converter,
-
-    /// Convert values before you get the last result.
-    ///
-    /// This parameter is only used for `Worker` on Web, you can use `converter`
-    /// instead if you need to.
-    IsolateConverter<R>? workerConverter,
-
-    /// Print debug information.
-    bool isDebug = false,
-  }) =>
-      IsolateManager._(
-        concurrent: concurrent,
-        isolateFunction: isolateFunction,
-        workerName: workerName,
-        converter: converter,
-        workerConverter: workerConverter,
-        isDebug: isDebug,
-      );
-
   /// Create a new isolate with your own isolate function.
-  factory IsolateManager.createCustom(
-    /// A function that you want to create an isolate.
-    IsolateCustomFunction isolateFunction, {
-    /// Name of the .js file that you want to create a Worker.
-    String workerName = '',
-
-    /// Initial parameters that you want to pass to your function.
-    Object? initialParams,
-
-    /// Number of isolates for this function.
-    int concurrent = 1,
-
-    /// Convert the result received from the isolate before getting real result.
-    /// This function useful when the result received from the isolate is different
-    /// from the return type.
-    IsolateConverter<R>? converter,
-
-    /// Convert values before you get the last result.
-    ///
-    /// This parameter is only used for `Worker` on Web, you can use `converter`
-    /// instead if you need to.
-    IsolateConverter<R>? workerConverter,
-
-    /// Print debug information.
-    bool isDebug = false,
-  }) =>
-      IsolateManager._(
-        concurrent: concurrent,
-        isolateFunction: isolateFunction,
-        workerName: workerName,
-        initialParams: initialParams,
-        converter: converter,
-        workerConverter: workerConverter,
-        isOwnIsolate: true,
-        isDebug: isDebug,
-      );
+  IsolateManager.createCustom(
+    IsolateCustomFunction this.isolateFunction, {
+    this.workerName = '',
+    this.initialParams,
+    this.concurrent = 1,
+    this.converter,
+    this.workerConverter,
+    this.autoInitialize = true,
+    this.isDebug = false,
+  }) : isCustomIsolate = true {
+    // Set the debug log prefix.
+    IsolateContactor.debugLogPrefix = debugLogPrefix;
+  }
 
   // coverage:ignore-start
   /// Create a new isolate with your own isolate function.
   @Deprecated('Use `createCustom` instead')
-  factory IsolateManager.createOwnIsolate(
-    /// A function that you want to create an isolate.
-    IsolateCustomFunction isolateFunction, {
-    /// Name of the .js file that you want to create a Worker.
-    String workerName = '',
-
-    /// Initial parameters that you want to pass to your function.
-    Object? initialParams,
-
-    /// Number of isolates for this function.
-    int concurrent = 1,
-
-    /// Convert the result received from the isolate before getting real result.
-    /// This function useful when the result received from the isolate is different
-    /// from the return type.
-    IsolateConverter<R>? converter,
-
-    /// Convert values before you get the last result.
-    ///
-    /// This parameter is only used for `Worker` on Web, you can use `converter`
-    /// instead if you need to.
-    IsolateConverter<R>? workerConverter,
-
-    /// Print debug information.
-    bool isDebug = false,
-  }) =>
-      IsolateManager._(
-        concurrent: concurrent,
-        isolateFunction: isolateFunction,
-        workerName: workerName,
-        initialParams: initialParams,
-        converter: converter,
-        workerConverter: workerConverter,
-        isOwnIsolate: true,
-        isDebug: isDebug,
-      );
+  IsolateManager.createOwnIsolate(
+    IsolateCustomFunction this.isolateFunction, {
+    this.workerName = '',
+    this.initialParams,
+    this.concurrent = 1,
+    this.converter,
+    this.workerConverter,
+    this.autoInitialize = true,
+    this.isDebug = false,
+  }) : isCustomIsolate = true {
+    // Set the debug log prefix.
+    IsolateContactor.debugLogPrefix = debugLogPrefix;
+  }
   // coverage:ignore-end
 
   /// Queue of isolates.
@@ -223,17 +199,18 @@ class IsolateManager<R, P> {
     // Mark as the `start()` is starting.
     _isStarting = true;
 
-    if (isOwnIsolate) {
+    if (isCustomIsolate) {
       // Create the custom isolates.
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
             IsolateContactor.createCustom<R, P>(
-              isolateFunction as FutureOr<void> Function(dynamic),
+              isolateFunction as IsolateCustomFunction,
               workerName: workerName,
               initialParams: initialParams,
               converter: converter,
               workerConverter: workerConverter,
+              autoMarkAsInitialized: autoInitialize,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
@@ -244,10 +221,11 @@ class IsolateManager<R, P> {
         [
           for (int i = 0; i < concurrent; i++)
             IsolateContactor.create<R, P>(
-              isolateFunction as FutureOr<R> Function(P),
+              isolateFunction as IsolateFunction<R, P>,
               workerName: workerName,
               converter: converter,
               workerConverter: workerConverter,
+              autoMarkAsInitialized: autoInitialize,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],

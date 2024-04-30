@@ -1,12 +1,24 @@
+// coverage:ignore-file
+// Tested by compiling to `js` for the Web Worker.
+
 import 'dart:async';
 import 'dart:js' as js;
 import 'dart:js_util' as js_util;
 
+import 'package:isolate_contactor/isolate_contactor.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:web/web.dart';
 
 /// Create a worker in your `main`.
-void isolateWorkerImpl<R, P>(IsolateWorkerFunction<R, P> function) {
+Future<void> isolateWorkerImpl<R, P>(
+  IsolateWorkerFunction<R, P> function,
+  FutureOr<void> Function()? onInitial,
+) async {
+  if (onInitial != null) {
+    final completer = Completer<void>();
+    completer.complete(onInitial());
+    await completer.future;
+  }
   callbackToStream('onmessage', (MessageEvent e) {
     return js_util.getProperty(e, 'data');
   }).listen((message) {
@@ -22,6 +34,7 @@ void isolateWorkerImpl<R, P>(IsolateWorkerFunction<R, P> function) {
       jsSendMessage(IsolateException(err, stack).toJson());
     }
   });
+  jsSendMessage(IsolateState.initialized.toJson());
 }
 
 /// Internal function.

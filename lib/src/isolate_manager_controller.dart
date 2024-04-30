@@ -1,12 +1,14 @@
+import 'dart:async';
+
 import 'package:isolate_contactor/isolate_contactor.dart';
 
 class IsolateManagerController<R, P> {
   /// Delegation of IsolateContactor.
   late IsolateContactorController<R, P> _delegate;
 
-  /// This method only use to create your own isolate.
+  /// This method only use to create a custom isolate.
   ///
-  /// `params` is the params of the function.
+  /// The [params] is a default parameter of a custom isolate function.
   /// `onDispose` will be called when the controller is disposed.
   IsolateManagerController(
     dynamic params, {
@@ -17,6 +19,12 @@ class IsolateManagerController<R, P> {
       onDispose: onDispose,
     );
   }
+
+  /// Mark the isolate as initialized.
+  ///
+  /// This method is automatically applied when using `IsolateFunctionHelper.customFunction`
+  /// and `IsolateFunctionHelper.workerFunction`.
+  void initialized() => _delegate.initialized();
 
   /// Close this `IsolateManagerController`.
   Future<void> close() => _delegate.close();
