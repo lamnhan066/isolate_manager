@@ -1,3 +1,102 @@
+## 4.3.0-rc.1
+
+* Add a benchmark test.
+* **[Experiment]** Able to send an `initialized` signal from the isolate to the main app to ensure that the isolate is ready to receive the messages from the main app. **The Migration Steps:**
+  * If you're using the `IsolateFunctionHelper.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateFunctionHelper.customFunction` is automatically applied.
+  * If you're using the old method:
+    * **Step 1:** Send a `initialized` signal from an `Isolate` and a `Worker`:
+      * Custom function of an `Isolate`: add the `controller.initialized();` to the end of the function.
+        * Before:
+
+        ```dart
+        void customFunction(dynamic params) {
+          final controller = IsolateManagerController(params);
+          controller.onIsolateMessage.then((value){
+            // ...
+          });
+        }
+        ```
+
+        * After:
+
+        ```dart
+        void customFunction(dynamic params) {
+          final controller = IsolateManagerController(params); 
+          controller.onIsolateMessage.then((value){
+            // ...
+          });
+
+          controller.initialized(); // <--
+        }
+        ```
+
+      * On the Web `Worker`: add `jsSendMessage(IsolateState.initialized.toJson());` to the end of the `main` method.
+        * Before:
+
+        ```dart
+        void main() {
+          callbackToStream('onmessage', (MessageEvent e) {
+            return js_util.getProperty(e, 'data');
+          }).listen((message) {
+            final Completer completer = Completer();
+            completer.future.then(
+              (value) => jsSendMessage(value),
+              onError: (err, stack) =>
+                  jsSendMessage(IsolateException(err, stack).toJson()),
+            );
+            try {
+              completer.complete(function(message as P) as R);
+            } catch (err, stack) {
+              jsSendMessage(IsolateException(err, stack).toJson());
+            }
+          });  
+        }
+        ```
+
+        * After:
+
+        ```dart
+        void main() {
+          callbackToStream('onmessage', (MessageEvent e) {
+            return js_util.getProperty(e, 'data');
+          }).listen((message) {
+            final Completer completer = Completer();
+            completer.future.then(
+              (value) => jsSendMessage(value),
+              onError: (err, stack) =>
+                  jsSendMessage(IsolateException(err, stack).toJson()),
+            );
+            try {
+              completer.complete(function(message as P) as R);
+            } catch (err, stack) {
+              jsSendMessage(IsolateException(err, stack).toJson());
+            }
+          });
+
+          jsSendMessage(IsolateState.initialized.toJson()); // <--
+        }
+        ```
+
+    * **Step 2:** Update the `create` and `createCustom` method:
+      * Before:
+
+      ```dart
+      final isolate = await IsolateManager.create(
+        function, 
+        workerName: 'function',
+      );
+        ```
+
+      * After:
+
+      ```dart
+      final isolate = await IsolateManager.create(
+        function, 
+        workerName: 'function',
+        autoInitialize: false, // <--
+      );
+      ```
+
 ## 4.2.2
 
 * Bump `isolate_contacter` to `v4.1.0`.

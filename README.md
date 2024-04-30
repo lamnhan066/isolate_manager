@@ -14,6 +14,26 @@
 
 - If you don't need to control your own function, you can use [isolates_helper](https://pub.dev/packages/isolates_helper) - a simpler version of this package that allows you to compute with multiple functions.
 
+## **Benchmark**
+
+- VM
+
+|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|
+|:-:|-:|-:|-:|-:|
+|30|470941|477477|171081|486789|
+|33|1964361|1985924|706867|2006519|
+|36|8327773|8327912|2994311|8434936|
+
+- Chrome (With `Worker` supported)
+
+|Fibonacci|Main App|One Worker|Three Workers|Isolate.run (Unsupported)|
+|:-:|-:|-:|-:|-:|
+|30|1334900|341799|121000|0|
+|33|5705399|1394500|501401|0|
+|36|24165201|5924900|2115500|0|
+
+[See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for details.
+
 ## **Basic Usage** (Use built-in function)
 
 There are multiple ways to use this package. The only thing to notice is that the `function` has to be a `static` or `top-level` function to work.
@@ -104,7 +124,15 @@ import 'package:isolate_manager/isolate_manager.dart';
 
 main() {
   // The function `fetchAndDecode` MUST NOT depend on any Flutter library
-  IsolateFunctionHelper.workerFunction(fetchAndDecode);
+  IsolateFunctionHelper.workerFunction(
+    fetchAndDecode,
+    onInitial: () {
+      // This is optional.
+      //
+      // You have to set the parameter `autoInitialze` in the `create` and `createCustom` 
+      // to `false` when using this.
+    }
+  );
 }
 ```
 
@@ -124,6 +152,7 @@ Update the `isolateManager` like below
 final isolateManager = IsolateManager.create(
     fetchAndDecode,
     workerName: 'worker', // The name of the file, don't need to add the extension
+    autoInitialize: true, // `true` by default. Set to `false` if you're using the `onInitial` in the Step 1.
   );
 ```
 
@@ -131,9 +160,9 @@ Now the plugin will handle all other action to make the real isolate works on We
 
 **Note:** If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
 
-## **Advanced Usage** (Use your own function)
+## **Advanced Usage** (Use a custom function)
 
-You can control everything with this method when you want to create multiple isolates for a function. With this method, you can also do one-time stuff when the isolate is started or each-time stuff when you call `compute` or `sendMessage`.
+You can control everything with this method when you want to create multiple isolates for a function. With this method, you can also do one-time stuff (`onInitial`) when the isolate is started or each-time stuff when you call `compute` or `sendMessage`.
 
 ### **Step 1:** Create a function of this form
 
@@ -148,10 +177,13 @@ void customIsolateFunction(dynamic params) {
       return fetchAndDecode(message);
     },
     onInitial: (controller, initialParams) {
-       /* This event will be excuted before all other events and should not be a `Future` event */
+       // This event will be executed before all the other events
+       //
+       // This event can be a `Future` but you need to set the `autoInitialize` in
+       // the `create` and `createCustom` to `false` to make it works.
     },
     onDispose: (controller) {
-       /* This event will be excuted after all other events and should not be a `Future` event */
+       /* This event will be executed after all the other events and should NOT be a `Future` event */
     },
   );
 }
@@ -176,10 +208,13 @@ void customIsolateFunction(dynamic params) {
       return 0;
     },
     onInitial: (controller, initialParams) {
-       /* This event will be executed before all the other events and should not be a `Future` event */
+       // This event will be executed before all the other events
+       //
+       // This event can be a `Future` but you need to set the `autoInitialize` in
+       // the `create` and `createCustom` to `false` to make it works.
     },
     onDispose: (controller) {
-       /* This event will be executed after all the other events and should not be a `Future` event */
+       /* This event will be executed after all the other events and should NOT be a `Future` event */
     },
     autoHandleException: false,
     autoHandleResult: false,
@@ -193,13 +228,12 @@ void customIsolateFunction(dynamic params) {
 final isolateManager = IsolateManager.createCustom(
     customIsolateFunction,
     initialParams: 'This is initialParams',
+    autoInitialize: true, // `true` by default. Set to `false` if you're using Future in the `onInitial` in the Step 1.
     debugMode: true,
   );
 ```
 
-### **Step 3:**
-
-Now you can use everything as above from this step.
+Now you can use everything as the **Basic Usage**.
 
 ### Additional features
 
