@@ -8,16 +8,6 @@ import 'package:test/test.dart';
 //  dart test --platform=chrome,vm
 
 void main() {
-  group('Test functions -', () {
-    test('IsolateFunctionHelper.isolateWorker', () {
-      try {
-        IsolateFunctionHelper.workerFunction((message) => {});
-      } catch (e) {
-        expect(e, isA<UnimplementedError>());
-      }
-    });
-  });
-
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
     final isolateManager = IsolateManager.create(

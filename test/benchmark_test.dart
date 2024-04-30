@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
@@ -43,10 +41,9 @@ Future<void> execute(int fibonacciNumber) async {
   final singleIsolate = IsolateManager.create(
     fibonacciRecursive,
     workerName: 'fibonacci_recursive',
+    autoInitialize: false,
   );
   await singleIsolate.start();
-  // Need more time for the Worker on the Web
-  await Future.delayed(Duration(seconds: 3));
   stopWatch.start();
   for (int i = 0; i < 70; i++) {
     await singleIsolate.compute(fibonacciNumber);
@@ -60,10 +57,10 @@ Future<void> execute(int fibonacciNumber) async {
     fibonacciRecursive,
     concurrent: 3,
     workerName: 'fibonacci_recursive',
+    autoInitialize: false,
   );
   await threeIsolates.start();
-  // Need more time for the Worker on the Web
-  await Future.delayed(Duration(seconds: 3));
+
   stopWatch.start();
   await Future.wait(
       [for (int i = 0; i < 70; i++) threeIsolates.compute(fibonacciNumber)]);
@@ -72,18 +69,19 @@ Future<void> execute(int fibonacciNumber) async {
     ..stop()
     ..reset();
 
-  try {
-    stopWatch.start();
-    for (int i = 0; i < 70; i++) {
-      await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
-    }
-    runMethodInIsolate = stopWatch.elapsed;
-    stopWatch
-      ..stop()
-      ..reset();
-  } on UnsupportedError catch (_) {
-    /* Unsupported on the Web platform */
-  }
+  // TODO: Readd this benchmark when updating the min sdk to `2.19.0`.
+  // try {
+  //   stopWatch.start();
+  //   for (int i = 0; i < 70; i++) {
+  //     await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
+  //   }
+  //   runMethodInIsolate = stopWatch.elapsed;
+  //   stopWatch
+  //     ..stop()
+  //     ..reset();
+  // } on UnsupportedError catch (_) {
+  //   /* Unsupported on the Web platform */
+  // }
 
   print(
       '|$fibonacciNumber|${singleInMain.inMicroseconds}|${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}|${runMethodInIsolate.inMicroseconds}|');
