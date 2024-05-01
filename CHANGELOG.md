@@ -1,6 +1,11 @@
+## 4.3.0-rc.3
+
+* Rename from `IsolateFunctionHelper` to `IsolateManagerFunction`.
+
 ## 4.3.0-rc.2
 
 * Support `WASM`.
+* Improve the `IsolateManager.workerFucnr
 
 ## 4.3.0-rc.1
 

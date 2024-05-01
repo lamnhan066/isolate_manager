@@ -4,9 +4,11 @@
 
 ## **Features**
 
-- An easy way to create multiple isolates for a function and keep it active to send and receive data multiple times.
+- An easy way to create multiple long-lived (keep it active to send and receive data) isolates for a function.
 
-- Supports `Worker` on the Web (`Worker` is the real Isolate on the Web). The plugin will use `Future` (and `Stream`) if `Worker` is unavailable in the working browser or is not configured.
+- Supports `Worker` on the Web (`Worker` is the real Isolate on the Web). The plugin will use `Future` (and `Stream`) if  the `Worker` is unavailable in the working browser or is not configured.
+
+- Supports `WASM` on the Web.
 
 - Multiple `compute` operations are allowed because the plugin will queue the input data and send it to a free isolate later.
 
@@ -124,7 +126,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 
 main() {
   // The function `fetchAndDecode` MUST NOT depend on any Flutter library
-  IsolateFunctionHelper.workerFunction(
+  IsolateManagerFunction.workerFunction(
     fetchAndDecode,
     onInitial: () {
       // This is optional.
@@ -170,7 +172,7 @@ Let it automatically handles the result and the Exception:
 
 ``` dart
 void customIsolateFunction(dynamic params) {
-  IsolateFunctionHelper.customFunction<int, int>(
+  IsolateManagerFunction.customFunction<int, int>(
     params,
     onEvent: (controller, message) {
       /* This event will be executed every time the `message` is received from the main isolate */
@@ -193,7 +195,7 @@ Handle the result and the Exception by your self:
 
 ```dart
 void customIsolateFunction(dynamic params) {
-  IsolateFunctionHelper.customFunction<int, int>(
+  IsolateManagerFunction.customFunction<int, int>(
     params,
     onEvent: (controller, message) async {
       /* This event will be executed every time the `message` is received from the main isolate */
