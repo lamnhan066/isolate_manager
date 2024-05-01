@@ -2,12 +2,14 @@
 // Tested by compiling to `js` for the Web Worker.
 
 import 'dart:async';
-import 'dart:js' as js;
-import 'dart:js_util' as js_util;
+import 'dart:js_interop';
 
 import 'package:isolate_contactor/isolate_contactor.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:web/web.dart';
+
+@JS('self')
+external DedicatedWorkerGlobalScope get self;
 
 /// Create a worker in your `main`.
 Future<void> isolateWorkerImpl<R, P>(
@@ -19,9 +21,8 @@ Future<void> isolateWorkerImpl<R, P>(
     completer.complete(onInitial());
     await completer.future;
   }
-  callbackToStream('onmessage', (MessageEvent e) {
-    return js_util.getProperty(e, 'data');
-  }).listen((message) {
+  self.onmessage = (MessageEvent event) {
+    final message = event.data;
     final Completer completer = Completer();
     completer.future.then(
       (value) => jsSendMessage(value),
@@ -29,25 +30,15 @@ Future<void> isolateWorkerImpl<R, P>(
           jsSendMessage(IsolateException(err, stack).toJson()),
     );
     try {
-      completer.complete(function(message as P) as R);
+      completer.complete(function(message as dynamic) as dynamic);
     } catch (err, stack) {
       jsSendMessage(IsolateException(err, stack).toJson());
     }
-  });
+  }.toJS;
   jsSendMessage(IsolateState.initialized.toJson());
 }
 
 /// Internal function.
-Stream<T> callbackToStream<J, T>(
-    String name, T Function(J jsValue) unwrapValue) {
-  var controller = StreamController<T>.broadcast(sync: true);
-  js_util.setProperty(js.context['self'], name, js.allowInterop((J event) {
-    controller.add(unwrapValue(event));
-  }));
-  return controller.stream;
-}
-
-/// Internal function.
 void jsSendMessage(dynamic m) {
-  js.context.callMethod('postMessage', [m]);
+  self.postMessage(m);
 }
