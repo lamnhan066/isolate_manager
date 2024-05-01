@@ -1,3 +1,7 @@
+## 4.3.0-rc.2
+
+* Support `WASM`.
+
 ## 4.3.0-rc.1
 
 * Add a benchmark test.
