@@ -5,7 +5,7 @@
 ## 4.3.0-rc.2
 
 * Support `WASM`.
-* Improve the `IsolateManager.workerFucnr
+* Improve the `IsolateFunctionHelper.workerFunction`.
 
 ## 4.3.0-rc.1
 
