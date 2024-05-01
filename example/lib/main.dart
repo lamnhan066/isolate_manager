@@ -33,8 +33,9 @@ class _MyAppState extends State<MyApp> {
     isolateFunction,
     isDebug: true,
   );
-  final isolateFibonacciRescursive = IsolateManager.create(
+  final isolateFibonacciRecursive = IsolateManager.create(
     fibonacciRecursiveFuture,
+    workerName: 'workers/fibonacci_recursive',
     concurrent: 2,
   );
   final isolateFunctionName = IsolateManager.create(
@@ -90,7 +91,7 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     isolateFibonacciFuture.stop();
     isolateIsolateFunction.stop();
-    isolateFibonacciRescursive.stop();
+    isolateFibonacciRecursive.stop();
     isolateFunctionName.stop();
     isolateCountEven.stop();
     isolateError.stop();
@@ -101,7 +102,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initial() async {
     await isolateFibonacciFuture.start();
     await isolateIsolateFunction.start();
-    await isolateFibonacciRescursive.start();
+    await isolateFibonacciRecursive.start();
     await isolateFunctionName.start();
     await isolateCountEven.start();
     await isolateError.start();
@@ -122,10 +123,10 @@ class _MyAppState extends State<MyApp> {
     isolateIsolateFunction.sendMessage(value2);
   }
 
-  void calculateFibonacciRescursive([int max = 30]) {
+  void calculateFibonacciRecursive([int max = 30]) {
     value3 = rad.nextInt(max);
     print('Isolate 3: Calculate fibonancci at F$value3');
-    isolateFibonacciRescursive.sendMessage(value3);
+    isolateFibonacciRecursive.sendMessage(value3);
   }
 
   void calculateFunctionName([int max = 30]) {
@@ -281,10 +282,10 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       StreamBuilder(
-                        stream: isolateFibonacciRescursive.stream,
+                        stream: isolateFibonacciRecursive.stream,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            isolateFibonacciRescursive.sendMessage(value3);
+                            isolateFibonacciRecursive.sendMessage(value3);
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -295,14 +296,14 @@ class _MyAppState extends State<MyApp> {
                       ),
                       ListTile(
                         title: ElevatedButton(
-                          onPressed: () => calculateFibonacciRescursive(),
+                          onPressed: () => calculateFibonacciRecursive(),
                           child: const Text('Calculate new Fibonacci'),
                         ),
                       ),
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateFibonacciRescursive.restart();
+                            isolateFibonacciRecursive.restart();
                           },
                           child: const Text('Restart isolate 3'),
                         ),
@@ -310,7 +311,7 @@ class _MyAppState extends State<MyApp> {
                       ListTile(
                         title: ElevatedButton(
                           onPressed: () {
-                            isolateFibonacciRescursive.stop();
+                            isolateFibonacciRecursive.stop();
                           },
                           child: const Text('Terminate isolate 3'),
                         ),
