@@ -4,5 +4,5 @@ import 'package:isolate_manager_example/functions.dart';
 /// dart compile js function_name.dart -o function_name.js -O4
 
 void main(List<String> args) {
-  IsolateFunctionHelper.workerFunction(functionName);
+  IsolateManagerFunction.workerFunction(functionName);
 }

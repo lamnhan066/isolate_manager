@@ -22,8 +22,8 @@ class IsolateManagerController<R, P> {
 
   /// Mark the isolate as initialized.
   ///
-  /// This method is automatically applied when using `IsolateFunctionHelper.customFunction`
-  /// and `IsolateFunctionHelper.workerFunction`.
+  /// This method is automatically applied when using `IsolateManagerFunction.customFunction`
+  /// and `IsolateManagerFunction.workerFunction`.
   void initialized() => _delegate.initialized();
 
   /// Close this `IsolateManagerController`.

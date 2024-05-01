@@ -4,5 +4,5 @@ import 'package:isolate_manager_example/functions.dart';
 /// dart compile js count_even.dart -o count_even.js -O4
 
 void main(List<String> args) {
-  IsolateFunctionHelper.workerFunction(countEven);
+  IsolateManagerFunction.workerFunction(countEven);
 }

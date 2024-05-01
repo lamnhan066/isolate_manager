@@ -44,9 +44,9 @@ class IsolateManager<R, P> {
   /// sent from the `Isolate` or `Worker` to ensure that it's completely executed and
   /// ready to receive the messages.
   ///
-  /// When using the [IsolateFunctionHelper], you don't need to do anything when
+  /// When using the `IsolateManagerFunction`, you don't need to do anything when
   /// this value is set to `true`. But when you create a custom function or worker
-  /// (without using the [IsolateFunctionHelper]), we need to add a line to
+  /// (without using the `IsolateManagerFunction`), we need to add a line to
   /// the custom function and worker to send a signal to the main app:
   ///
   ///   * Custom function:

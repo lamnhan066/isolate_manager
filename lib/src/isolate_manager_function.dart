@@ -5,22 +5,22 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'isolate_worker/isolate_worker_web.dart'
     if (dart.library.io) 'isolate_worker/isolate_worker_stub.dart';
 
-/// A callback for the [IsolateFunctionHelper.customFunction] that will be executed only one time
+/// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
 typedef IsolateOnInitialCallback<T> = FutureOr<void> Function(
     IsolateManagerController controller, T initialParams);
 
-/// A callback for the [isolateCustomFunction] that will be executed only one time
+/// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
 typedef IsolateOnDisposeCallback<T> = void Function(
     IsolateManagerController controller);
 
-/// A callback for the [IsolateFunctionHelper.customFunction] that will be executed every time
+/// A callback for the [IsolateManagerFunction.customFunction] that will be executed every time
 /// the [message] is received from the `sendMessage` or `execute` method.
 typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
     IsolateManagerController controller, P message);
 
-class IsolateFunctionHelper {
+class IsolateManagerFunction {
   /// Create a custom isolate function.
   ///
   /// The [onInitial] and [onDispose] will be executed only one time in the beginning
@@ -29,10 +29,7 @@ class IsolateFunctionHelper {
   /// you want to `controller.sendResultError` by yourself, and set the [autoHandleResult]
   /// if you want to `controller.sendResult` yourself. By defaults, when the [onEvent]
   /// was executed, the result will be sent to the main isolate and the `Exception`
-  /// will also be sent. When the [autoInitialize] is `true`, the isolate
-  /// will be automatically marked as initialized when it's completely started, otherwise,
-  /// the isolate will be marked as initialized when it ready to receive a message
-  /// from the main app.
+  /// will also be sent.
   ///
   /// ```dart
   /// void customIsolateFunction(dynamic params) {
@@ -78,13 +75,9 @@ class IsolateFunctionHelper {
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
     controller.onIsolateMessage.listen((message) {
-      // Create a completer
       Completer completer = Completer();
-
-      // Handle the result and exceptions
       completer.future.then(
         (value) => autoHandleResult ? controller.sendResult(value) : null,
-        // Send the exception to your main app
         onError: autoHandleException
             ? (err, stack) =>
                 controller.sendResultError(IsolateException(err, stack))

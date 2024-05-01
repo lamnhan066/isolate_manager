@@ -348,7 +348,7 @@ int fibonacciRecursive(int n) {
 
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  IsolateFunctionHelper.customFunction<int, int>(
+  IsolateManagerFunction.customFunction<int, int>(
     params,
     onEvent: (controller, message) {
       try {
@@ -368,7 +368,7 @@ void isolateFunction(dynamic params) {
 
 @pragma('vm:entry-point')
 void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
-  IsolateFunctionHelper.customFunction<int, int>(
+  IsolateManagerFunction.customFunction<int, int>(
     params,
     onEvent: (controller, message) {
       return fibonacci(message);
@@ -382,7 +382,7 @@ void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
 
 @pragma('vm:entry-point')
 void isolateCallbackFunction(dynamic params) {
-  IsolateFunctionHelper.customFunction(
+  IsolateManagerFunction.customFunction(
     params,
     onEvent: (controller, message) {
       try {

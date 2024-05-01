@@ -6,7 +6,7 @@ import 'dart:async';
 import 'isolate_worker_web.dart'
     if (dart.library.io) 'isolate_worker_stub.dart';
 
-/// A function for the `IsolateFunctionHelper.workerFunction`.
+/// A function for the `IsolateManagerFunction.workerFunction`.
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 
 /// Create a worker in your `main`.
@@ -31,7 +31,7 @@ typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 /// ``` dart
 ///  return throw 'This is an error that you need to catch in your main app';
 /// ```
-@Deprecated('Use `IsolateFunctionHelper.workerFunction` instead')
+@Deprecated('Use `IsolateManagerFunction.workerFunction` instead')
 Future<void> isolateWorker<R, P>(
   IsolateWorkerFunction<R, P> function, {
   FutureOr<void> Function()? onInitial,
