@@ -29,6 +29,7 @@ Future<void> execute(int fibonacciNumber) async {
   Duration threeIsolatesInIsolate = Duration.zero;
   Duration runMethodInIsolate = Duration.zero;
 
+  // Main App
   final stopWatch = Stopwatch()..start();
   for (int i = 0; i < 70; i++) {
     fibonacciRecursive(fibonacciNumber);
@@ -38,6 +39,7 @@ Future<void> execute(int fibonacciNumber) async {
     ..stop()
     ..reset();
 
+  // One Isolate (Worker)
   final singleIsolate = IsolateManager.create(
     fibonacciRecursive,
     workerName: 'fibonacci_recursive',
@@ -53,6 +55,7 @@ Future<void> execute(int fibonacciNumber) async {
     ..stop()
     ..reset();
 
+  // Three Isolates (Workers)
   final threeIsolates = IsolateManager.create(
     fibonacciRecursive,
     concurrent: 3,
@@ -69,6 +72,7 @@ Future<void> execute(int fibonacciNumber) async {
     ..stop()
     ..reset();
 
+  // Isolate.run
   // TODO: Readd this benchmark when updating the min sdk to `2.19.0`.
   // try {
   //   stopWatch.start();
