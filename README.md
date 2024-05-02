@@ -4,9 +4,9 @@
 
 ## **Features**
 
-- An easy way to create multiple long-lived (keep it active to send and receive data) isolates for a function.
+- An easy way to create multiple long-lived isolates for a function (keep it active to send and receive data).
 
-- Supports `Worker` on the Web (`Worker` is the real Isolate on the Web). The plugin will use `Future` (and `Stream`) if  the `Worker` is unavailable in the working browser or is not configured.
+- Supports `Worker` on the Web (If the `Worker` is unavailable in the working browser or is not configured, the `Future` (and `Stream`) will be used instead).
 
 - Supports `WASM` on the Web.
 
@@ -14,25 +14,27 @@
 
 - Supports `try-catch` blocks.
 
-- If you don't need to control your own function, you can use [isolates_helper](https://pub.dev/packages/isolates_helper) - a simpler version of this package that allows you to compute with multiple functions.
+- To compute with multiple functions, you can use the [isolates_helper](https://pub.dev/packages/isolates_helper) instead.
 
 ## **Benchmark**
+
+Execute a recursive Fibonacci function 70 times, computing the sequence for the numbers 30, 33, and 36. The results are in microseconds.
 
 - VM
 
 |Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|
 |:-:|-:|-:|-:|-:|
-|30|470941|477477|171081|486789|
-|33|1964361|1985924|706867|2006519|
-|36|8327773|8327912|2994311|8434936|
+|30|470,941|477,477|171,081|486,789|
+|33|1,964,361|1,985,924|706,867|2,006,519|
+|36|8,327,773|8,327,912|2,994,311|8,434,936|
 
 - Chrome (With `Worker` supported)
 
 |Fibonacci|Main App|One Worker|Three Workers|Isolate.run (Unsupported)|
 |:-:|-:|-:|-:|-:|
-|30|1334900|341799|121000|0|
-|33|5705399|1394500|501401|0|
-|36|24165201|5924900|2115500|0|
+|30|1,334,900|341,799|121,000|0|
+|33|5,705,399|1,394,500|501,401|0|
+|36|24,165,201|5,924,900|2,115,500|0|
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for details.
 

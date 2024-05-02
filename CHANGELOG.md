@@ -1,90 +1,68 @@
-## 4.3.0-rc.3
-
-* Rename from `IsolateFunctionHelper` to `IsolateManagerFunction`.
-
-## 4.3.0-rc.2
+## 4.3.0
 
 * Support `WASM`.
-* Improve the `IsolateFunctionHelper.workerFunction`.
-
-## 4.3.0-rc.1
-
-* Add a benchmark test.
-* **[Experiment]** Able to send an `initialized` signal from the isolate to the main app to ensure that the isolate is ready to receive the messages from the main app. **The Migration Steps:**
-  * If you're using the `IsolateFunctionHelper.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateFunctionHelper.customFunction` is automatically applied.
-  * If you're using the old method:
-    * **Step 1:** Send a `initialized` signal from an `Isolate` and a `Worker`:
+* Add benchmark tests.
+* Deprecate the `IsolateFunctionHelper` in favor of the `IsolateManagerFunction`.
+* Improve the `IsolateManagerFunction.workerFunction`.
+* **[Experiment and Optional]** Able to send an `initialized` signal from the isolate to the main app to ensure that the isolate is ready to receive the messages from the main app. **The Migration Steps:**
+  * **Step 1:**
+    * If you're using the `IsolateManagerFunction.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateManagerFunction.customFunction` will be automatically applied.
+    * If you're using the old method, you need to send a `initialized` signal from an `Isolate` and a `Worker`:
       * Custom function of an `Isolate`: add the `controller.initialized();` to the end of the function.
         * Before:
 
-        ```dart
-        void customFunction(dynamic params) {
-          final controller = IsolateManagerController(params);
-          controller.onIsolateMessage.then((value){
-            // ...
-          });
-        }
-        ```
+          ```dart
+          void customFunction(dynamic params) {
+            final controller = IsolateManagerController(params);
+            controller.onIsolateMessage.then((value){
+              // ...
+            });
+          }
+          ```
 
         * After:
 
-        ```dart
-        void customFunction(dynamic params) {
-          final controller = IsolateManagerController(params); 
-          controller.onIsolateMessage.then((value){
-            // ...
-          });
+          ```dart
+          void customFunction(dynamic params) async {
+            // Do something sync or async here
 
-          controller.initialized(); // <--
-        }
-        ```
+            final controller = IsolateManagerController(params); 
+            controller.onIsolateMessage.then((value){
+              // ...
+            });
+
+            controller.initialized(); // <--
+          }
+          ```
 
       * On the Web `Worker`: add `jsSendMessage(IsolateState.initialized.toJson());` to the end of the `main` method.
         * Before:
 
-        ```dart
-        void main() {
-          callbackToStream('onmessage', (MessageEvent e) {
-            return js_util.getProperty(e, 'data');
-          }).listen((message) {
-            final Completer completer = Completer();
-            completer.future.then(
-              (value) => jsSendMessage(value),
-              onError: (err, stack) =>
-                  jsSendMessage(IsolateException(err, stack).toJson()),
-            );
-            try {
-              completer.complete(function(message as P) as R);
-            } catch (err, stack) {
-              jsSendMessage(IsolateException(err, stack).toJson());
-            }
-          });  
-        }
-        ```
+          ```dart
+          void main() {
+            callbackToStream('onmessage', (MessageEvent e) {
+              return js_util.getProperty(e, 'data');
+            }).listen((message) {
+              // ...
+            });  
+          }
+          ```
 
         * After:
 
-        ```dart
-        void main() {
-          callbackToStream('onmessage', (MessageEvent e) {
-            return js_util.getProperty(e, 'data');
-          }).listen((message) {
-            final Completer completer = Completer();
-            completer.future.then(
-              (value) => jsSendMessage(value),
-              onError: (err, stack) =>
-                  jsSendMessage(IsolateException(err, stack).toJson()),
-            );
-            try {
-              completer.complete(function(message as P) as R);
-            } catch (err, stack) {
-              jsSendMessage(IsolateException(err, stack).toJson());
-            }
-          });
+          ```dart
+          void main() async {
+            // Do something sync or async here
 
-          jsSendMessage(IsolateState.initialized.toJson()); // <--
-        }
-        ```
+            callbackToStream('onmessage', (MessageEvent e) {
+              return js_util.getProperty(e, 'data');
+            }).listen((message) {
+              // ...
+            });
+
+            jsSendMessage(IsolateState.initialized.toJson()); // <--
+          }
+          ```
 
     * **Step 2:** Update the `create` and `createCustom` method:
       * Before:
