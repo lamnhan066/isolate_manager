@@ -1,3 +1,10 @@
+## 5.0.0-rc.1
+
+* Bump sdk to `^3.3.0`.
+* Remove `autoInitialize` parameter.
+* Remove deprecated methods.
+* **BREAKING CHANGE:** All `Worker`'s MUST be re-compiled.
+
 ## 4.3.0
 
 * Support `WASM`.
