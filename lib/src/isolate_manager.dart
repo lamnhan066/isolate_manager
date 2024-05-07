@@ -36,12 +36,6 @@ class IsolateManager<R, P> {
   /// Allow print debug log.
   final bool isDebug;
 
-  // coverage:ignore-start
-  /// Similar to `stream`, for who's using IsolateContactor.
-  @Deprecated('Use [stream] instead')
-  Stream<R> get onMessage => _streamController.stream;
-  // coverage:ignore-end
-
   /// Get value as stream.
   Stream<R> get stream => _streamController.stream;
 
