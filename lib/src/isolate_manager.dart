@@ -33,50 +33,6 @@ class IsolateManager<R, P> {
   /// Is using your own isolate function.
   final bool isCustomIsolate;
 
-  /// Mark an `Isolate` and `Worker` as initialized after spawned.
-  ///
-  /// TODO: Set this value to `false` by default in the next big release `v5.0.0`.
-  ///
-  /// An `Isolate` or a `Worker` need sometimes to be completely executed (ready
-  /// to receive the messages from the main app). If this value is `true`,
-  /// an `Isolate` or a `Worker` will be marked as initialized as soon as it's
-  /// spawned, otherwise, the main app will wait for an `initialized` signal
-  /// sent from the `Isolate` or `Worker` to ensure that it's completely executed and
-  /// ready to receive the messages.
-  ///
-  /// When using the `IsolateManagerFunction`, you don't need to do anything when
-  /// this value is set to `true`. But when you create a custom function or worker
-  /// (without using the `IsolateManagerFunction`), we need to add a line to
-  /// the custom function and worker to send a signal to the main app:
-  ///
-  ///   * Custom function:
-  ///
-  ///   ```dart
-  ///   void customFunction(dynamic params) {
-  ///     final controller = IsolateManagerController(params);
-  ///     controller.onIsolateMessage.then((value){
-  ///       // ...
-  ///     });
-  ///
-  ///     controller.initialized(); // <--
-  ///   }
-  ///   ```
-  ///
-  ///   * Web worker:
-  ///
-  ///   ```dart
-  ///   void main() {
-  ///     callbackToStream('onmessage', (MessageEvent e) {
-  ///       return js_util.getProperty(e, 'data');
-  ///     }).listen((message) {
-  ///       // ...
-  ///     });
-  ///
-  ///     jsSendMessage(IsolateState.initialized.toJson()); // <--
-  ///   }
-  ///   ```
-  final bool autoInitialize;
-
   /// Allow print debug log.
   final bool isDebug;
 
@@ -118,7 +74,6 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    this.autoInitialize = true,
     this.isDebug = false,
   })  : isCustomIsolate = false,
         initialParams = '' {
@@ -134,7 +89,6 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    this.autoInitialize = true,
     this.isDebug = false,
   }) : isCustomIsolate = true {
     // Set the debug log prefix.
@@ -151,7 +105,6 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    this.autoInitialize = true,
     this.isDebug = false,
   }) : isCustomIsolate = true {
     // Set the debug log prefix.
@@ -202,7 +155,7 @@ class IsolateManager<R, P> {
               initialParams: initialParams,
               converter: converter,
               workerConverter: workerConverter,
-              autoMarkAsInitialized: autoInitialize,
+              autoMarkAsInitialized: false,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
@@ -217,7 +170,7 @@ class IsolateManager<R, P> {
               workerName: workerName,
               converter: converter,
               workerConverter: workerConverter,
-              autoMarkAsInitialized: autoInitialize,
+              autoMarkAsInitialized: false,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],

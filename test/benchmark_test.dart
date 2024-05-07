@@ -43,7 +43,6 @@ Future<void> execute(int fibonacciNumber) async {
   final singleIsolate = IsolateManager.create(
     fibonacciRecursive,
     workerName: 'fibonacci_recursive',
-    autoInitialize: false,
   );
   await singleIsolate.start();
   stopWatch.start();
@@ -60,7 +59,6 @@ Future<void> execute(int fibonacciNumber) async {
     fibonacciRecursive,
     concurrent: 3,
     workerName: 'fibonacci_recursive',
-    autoInitialize: false,
   );
   await threeIsolates.start();
 
