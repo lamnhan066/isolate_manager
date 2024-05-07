@@ -4,7 +4,7 @@ version: 4.3.0
 homepage: https://github.com/lamnhan066/isolate_manager
 
 environment:
-  sdk: ">=2.18.0 <4.0.0"
+  sdk: ^3.3.0
 
 dependencies:
   isolate_contactor: ^4.2.0
