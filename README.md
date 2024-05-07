@@ -156,7 +156,6 @@ Update the `isolateManager` like below
 final isolateManager = IsolateManager.create(
     fetchAndDecode,
     workerName: 'worker', // The name of the file, don't need to add the extension
-    autoInitialize: true, // `true` by default. Set to `false` if you're using the `onInitial` in the Step 1.
   );
 ```
 
@@ -183,8 +182,7 @@ void customIsolateFunction(dynamic params) {
     onInitial: (controller, initialParams) {
        // This event will be executed before all the other events
        //
-       // This event can be a `Future` but you need to set the `autoInitialize` in
-       // the `create` and `createCustom` to `false` to make it works.
+       // This event can be a `Future`.
     },
     onDispose: (controller) {
        /* This event will be executed after all the other events and should NOT be a `Future` event */
@@ -214,8 +212,7 @@ void customIsolateFunction(dynamic params) {
     onInitial: (controller, initialParams) {
        // This event will be executed before all the other events
        //
-       // This event can be a `Future` but you need to set the `autoInitialize` in
-       // the `create` and `createCustom` to `false` to make it works.
+       // This event can be a `Future`.
     },
     onDispose: (controller) {
        /* This event will be executed after all the other events and should NOT be a `Future` event */
@@ -232,7 +229,6 @@ void customIsolateFunction(dynamic params) {
 final isolateManager = IsolateManager.createCustom(
     customIsolateFunction,
     initialParams: 'This is initialParams',
-    autoInitialize: true, // `true` by default. Set to `false` if you're using Future in the `onInitial` in the Step 1.
     debugMode: true,
   );
 ```
