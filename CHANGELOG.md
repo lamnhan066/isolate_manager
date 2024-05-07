@@ -1,3 +1,8 @@
+## 5.0.0-rc.2
+
+* Update README.
+* Update homepage for beta version.
+
 ## 5.0.0-rc.1
 
 * Bump sdk to `^3.3.0`.
