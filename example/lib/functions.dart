@@ -78,33 +78,31 @@ int error(int n) {
 /// Write an own function to calculate the `fibonacciFuture`.
 @pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
-  final channel = IsolateManagerController(params);
-  channel.onIsolateMessage.listen((message) async {
-    // Do more stuff here
+  IsolateManagerFunction.customFunction<int, int>(
+    params,
+    onEvent: (controller, message) async {
+      final result = await fibonacciFuture(message);
 
-    final result = await fibonacciFuture(message);
-
-    // Send the result to your [onMessage] stream
-    channel.sendResult(result);
-  });
+      return result;
+    },
+  );
 }
 
 /// Send the progress value before sending the final result
 @pragma('vm:entry-point')
 void isolateProgressFunction(dynamic params) {
-  final channel = IsolateManagerController<String, String>(params);
-  channel.onIsolateMessage.listen((message) async {
-    // Send the progress value
-    for (int i = 0; i < 100; i++) {
-      final progress = {'progress': i};
-      await Future.delayed(const Duration(milliseconds: 100));
-      channel.sendResult(jsonEncode(progress));
-    }
-
-    // Send the result to your [onMessage] stream
-    final result = {'result': message};
-    channel.sendResult(jsonEncode(result));
-  });
+  IsolateManagerFunction.customFunction(
+    params,
+    onEvent: (controller, message) async {
+      for (int i = 0; i < 100; i++) {
+        final progress = {'progress': i};
+        await Future.delayed(const Duration(milliseconds: 100));
+        controller.sendResult(jsonEncode(progress));
+      }
+      final result = {'result': message};
+      return jsonEncode(result);
+    },
+  );
 }
 
 @pragma('vm:entry-point')
