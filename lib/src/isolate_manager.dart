@@ -90,23 +90,6 @@ class IsolateManager<R, P> {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
-  // coverage:ignore-start
-  /// Create a new isolate with your own isolate function.
-  @Deprecated('Use `createCustom` instead')
-  IsolateManager.createOwnIsolate(
-    IsolateCustomFunction this.isolateFunction, {
-    this.workerName = '',
-    this.initialParams,
-    this.concurrent = 1,
-    this.converter,
-    this.workerConverter,
-    this.isDebug = false,
-  }) : isCustomIsolate = true {
-    // Set the debug log prefix.
-    IsolateContactor.debugLogPrefix = debugLogPrefix;
-  }
-  // coverage:ignore-end
-
   /// Queue of isolates.
   final Queue<IsolateQueue<R, P>> _queues = Queue();
 
