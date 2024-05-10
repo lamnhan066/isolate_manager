@@ -25,20 +25,20 @@ Future<void> isolateWorkerImpl<R, P>(
     final message = event.data;
     final Completer completer = Completer();
     completer.future.then(
-      (value) => jsSendMessage(value),
+      (value) => sendResult(value),
       onError: (err, stack) =>
-          jsSendMessage(IsolateException(err, stack).toJson()),
+          sendResult(IsolateException(err, stack).toJson()),
     );
     try {
       completer.complete(function(message as dynamic) as dynamic);
     } catch (err, stack) {
-      jsSendMessage(IsolateException(err, stack).toJson());
+      completer.completeError(err, stack);
     }
   }.toJS;
-  jsSendMessage(IsolateState.initialized.toJson());
+  sendResult(IsolateState.initialized.toJson());
 }
 
 /// Internal function.
-void jsSendMessage(dynamic m) {
+void sendResult(dynamic m) {
   self.postMessage(m);
 }
