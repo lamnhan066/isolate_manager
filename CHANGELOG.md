@@ -1,3 +1,9 @@
+## 5.0.0-rc.3
+
+* Remove deprecated methods.
+* Improve the `IsolateManager.create` behavior (use a new `customFunction`).
+* Imptove the type of the `customFunction` and `workerFunction`.
+
 ## 5.0.0-rc.2
 
 * Update README.
