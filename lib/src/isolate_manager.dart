@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:isolate_contactor/isolate_contactor.dart';
 
+import 'isolate_manager_function.dart';
 import 'utils.dart';
 
 /// Type for the callback of the isolate.
@@ -123,6 +124,15 @@ class IsolateManager<R, P> {
   /// Control when the `start` method is completed.
   Completer<void> _startedCompleter = Completer();
 
+  /// A default function for using the [IsolateManager.create] method.
+  static void _defaultIsolateFunction<R, P>(dynamic params) {
+    IsolateManagerFunction.customFunction<R, P>(params,
+        onEvent: (controller, message) {
+      final function = controller.initialParams;
+      return function(message);
+    });
+  }
+
   /// Initialize the instance. This method can be called manually or will be
   /// called when the first `compute()` has been made.
   Future<void> start() async {
@@ -159,8 +169,9 @@ class IsolateManager<R, P> {
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
-            IsolateContactor.create<R, P>(
-              isolateFunction as IsolateFunction<R, P>,
+            IsolateContactor.createCustom<R, P>(
+              _defaultIsolateFunction<R, P>,
+              initialParams: isolateFunction as IsolateFunction<R, P>,
               workerName: workerName,
               converter: converter,
               workerConverter: workerConverter,
