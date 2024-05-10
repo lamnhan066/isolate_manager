@@ -394,6 +394,9 @@ void isolateCallbackFunction(dynamic params) {
       } catch (err, stack) {
         controller.sendResultError(IsolateException(err, stack));
       }
+
+      // Just returns something that unused to complete this method.
+      return '';
     },
     autoHandleException: false,
     autoHandleResult: false,
