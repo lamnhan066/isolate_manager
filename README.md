@@ -195,7 +195,7 @@ Handle the result and the Exception by your self:
 
 ```dart
 void customIsolateFunction(dynamic params) {
-  IsolateManagerFunction.customFunction<int, int>(
+  IsolateManagerFunction.customFunction<Map<String, dynamic>, String>(
     params,
     onEvent: (controller, message) async {
       /* This event will be executed every time the `message` is received from the main isolate */
@@ -207,7 +207,7 @@ void customIsolateFunction(dynamic params) {
       }
 
       // Just returns something that unused to complete this method.
-      return 0;
+      return {};
     },
     onInitial: (controller, initialParams) {
        // This event will be executed before all the other events
@@ -235,9 +235,9 @@ final isolateManager = IsolateManager.createCustom(
 
 Now you can use everything as the **Basic Usage**.
 
-### Additional features
+## try-catch Block
 
-- You can use `try-catch` to catch exceptions:
+You can use `try-catch` to catch exceptions:
 
 ``` dart
 try {
@@ -249,25 +249,47 @@ try {
 }
 ```
 
-- You can even manage the final result by using this callback, useful when you create your own function that needs to send the progress value before returning the final result (look at the example in the method `isolateProgressFunction` for more details):
+## Progress Values
+
+You can even manage the final result by using this callback, useful when you create your own function that needs to send the progress value before returning the final result:
 
 ``` dart
-final result = await isolateManager.compute('https://path/to/json.json',
-      callback: (value) {
-        // Condition to recognize the progress value. Ex:
-        final decoded = jsonDecode(value);
-        if (decoded.containsKey('progress')) {
-          print(decoded['progress']);
-
-          // Mark this value as not the final result
-          return false;
-        }
-
-        print('The final result is: $value');
-        // Mark this value as the final result and send it into the `result`.
-        return true;
+// This is a progress function
+void progressFunction(dynamic params) {
+  IsolateManagerFunction.customFunction<int, int>(
+    params,
+    onEvent: (controller, message) {
+      // This value is sent as the progress values.
+      for (int i = 0; i < message; i++) {
+        controller.sendResult(i);
       }
-    )
+
+      // This is a final value.
+      return message;
+    },
+  );
+}
+
+// Create an IsolateManager instance.
+final isolateManager = IsolateManager.createCustom(progressFunction);
+
+// Get the result.
+final result = await isolateManager.compute(100, callback: (value) {
+  // Condition to recognize the progress value. Ex:
+  if (value != 100) {
+    print('This is a progress value: $value');
+
+    // Return `false` to mark this value is not the final.
+    return false;
+  }
+
+  print('This is a final value: $value');
+
+  // Return `true` to mark this value is the final.
+  return true;
+});
+
+print(result); // 100
 ```
 
 ## Additional
