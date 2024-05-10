@@ -7,18 +7,18 @@ import 'isolate_worker/isolate_worker_web.dart'
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
-typedef IsolateOnInitialCallback<T> = FutureOr<void> Function(
-    IsolateManagerController controller, T initialParams);
+typedef IsolateOnInitialCallback<R, P, T> = FutureOr<void> Function(
+    IsolateManagerController<R, P> controller, T initialParams);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
-typedef IsolateOnDisposeCallback<T> = void Function(
-    IsolateManagerController controller);
+typedef IsolateOnDisposeCallback<R, P> = void Function(
+    IsolateManagerController<R, P> controller);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed every time
 /// the [message] is received from the `sendMessage` or `execute` method.
 typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
-    IsolateManagerController controller, P message);
+    IsolateManagerController<R, P> controller, P message);
 
 /// A function for the `IsolateManagerFunction.workerFunction`.
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
@@ -31,7 +31,8 @@ class IsolateManagerFunction {
   ///
   /// The [onInitial] and [onDispose] will be executed only one time in the beginning
   /// and at the end. The [onEvent] will be executed every time the `message` is received
-  /// from the main isolate. You can set the [autoHandleException] to `false` if
+  /// from the main isolate, the return type should be specified to avoid
+  /// the `NULL` return type. You can set the [autoHandleException] to `false` if
   /// you want to `controller.sendResultError` by yourself, and set the [autoHandleResult]
   /// if you want to `controller.sendResult` yourself. By defaults, when the [onEvent]
   /// was executed, the result will be sent to the main isolate and the `Exception`
@@ -58,16 +59,17 @@ class IsolateManagerFunction {
   /// }
   /// ```
   static Future<void> customFunction<R, P>(
+    /// A default parameter that used by the package.
     dynamic params, {
     required IsolateOnEventCallback<R, P> onEvent,
-    IsolateOnInitialCallback? onInitial,
-    IsolateOnDisposeCallback? onDispose,
+    IsolateOnInitialCallback<R, P, Object>? onInitial,
+    IsolateOnDisposeCallback<R, P>? onDispose,
     bool autoHandleException = true,
     bool autoHandleResult = true,
   }) async {
     // Initialize the controller for the child isolate. This function will be declared
     // with `Map<String, dynamic>` as the return type (.sendResult) and `String` as the parameter type (.sendMessage).
-    late IsolateManagerController controller;
+    late IsolateManagerController<R, P> controller;
     controller = IsolateManagerController(
       params,
       onDispose: onDispose == null
@@ -80,14 +82,16 @@ class IsolateManagerFunction {
 
     if (onInitial != null) {
       final completer = Completer<void>();
-      completer.complete(onInitial(controller, controller.initialParams));
+      completer
+          .complete(onInitial(controller, controller.initialParams as Object));
       await completer.future;
     }
 
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
     controller.onIsolateMessage.listen((message) {
-      Completer completer = Completer();
+      // Use `R?` to allow
+      final completer = Completer();
       completer.future.then(
         (value) => autoHandleResult ? controller.sendResult(value) : null,
         onError: autoHandleException
