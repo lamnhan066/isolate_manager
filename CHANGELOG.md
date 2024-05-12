@@ -1,3 +1,8 @@
+## 5.0.0-rc.5
+
+* Export the `IsolateState`.
+* Update the CHANGELOG to show the migration guide.
+
 ## 5.0.0-rc.4
 
 * Bring the `isolate_contactor` to this package and make it lighter and easier to maintain.
@@ -20,7 +25,85 @@
 * Bump sdk to `^3.3.0`.
 * Remove `autoInitialize` parameter.
 * Remove deprecated methods.
-* **BREAKING CHANGE:** All `Worker`'s MUST be re-compiled.
+* **MIGRATION:** All `Worker`'s MUST be re-compiled
+  * **Step 1:**
+    * If you're using the `IsolateManagerFunction.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateManagerFunction.customFunction` will be automatically applied.
+    * If you're using the old method, you need to send a `initialized` signal from an `Isolate` and a `Worker`:
+      * Custom function of an `Isolate`: add the `controller.initialized();` to the end of the function.
+        * Before:
+
+            ```dart
+            void customFunction(dynamic params) {
+              final controller = IsolateManagerController(params);
+              controller.onIsolateMessage.then((value){
+                // ...
+              });
+            }
+            ```
+
+        * After:
+
+            ```dart
+            void customFunction(dynamic params) async {
+              // Do something sync or async here
+
+              final controller = IsolateManagerController(params); 
+              controller.onIsolateMessage.then((value){
+                // ...
+              });
+
+              controller.initialized(); // <--
+            }
+            ```
+
+      * On the Web `Worker`: add `jsSendMessage(IsolateState.initialized.toJson());` to the end of the `main` method.
+        * Before:
+
+            ```dart
+            void main() {
+              callbackToStream('onmessage', (MessageEvent e) {
+                return js_util.getProperty(e, 'data');
+              }).listen((message) {
+                // ...
+              });  
+            }
+            ```
+
+        * After:
+
+            ```dart
+            void main() async {
+              // Do something sync or async here
+
+              callbackToStream('onmessage', (MessageEvent e) {
+                return js_util.getProperty(e, 'data');
+              }).listen((message) {
+                // ...
+              });
+
+              jsSendMessage(IsolateState.initialized.toJson()); // <--
+            }
+            ```
+
+    * **Step 2:** Update the `create` and `createCustom` method:
+      * Before:
+
+        ```dart
+        final isolate = await IsolateManager.create(
+          function, 
+          workerName: 'function',
+        );
+          ```
+
+      * After:
+
+        ```dart
+        final isolate = await IsolateManager.create(
+          function, 
+          workerName: 'function',
+          autoInitialize: false, // <--
+        );
+        ```
 
 ## 4.3.0
 
