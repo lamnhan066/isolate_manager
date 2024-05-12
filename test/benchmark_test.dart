@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
@@ -71,19 +73,18 @@ Future<void> execute(int fibonacciNumber) async {
     ..reset();
 
   // Isolate.run
-  // TODO: Readd this benchmark when updating the min sdk to `2.19.0`.
-  // try {
-  //   stopWatch.start();
-  //   for (int i = 0; i < 70; i++) {
-  //     await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
-  //   }
-  //   runMethodInIsolate = stopWatch.elapsed;
-  //   stopWatch
-  //     ..stop()
-  //     ..reset();
-  // } on UnsupportedError catch (_) {
-  //   /* Unsupported on the Web platform */
-  // }
+  try {
+    stopWatch.start();
+    for (int i = 0; i < 70; i++) {
+      await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
+    }
+    runMethodInIsolate = stopWatch.elapsed;
+    stopWatch
+      ..stop()
+      ..reset();
+  } on UnsupportedError catch (_) {
+    /* Unsupported on the Web platform */
+  }
 
   print(
       '|$fibonacciNumber|${singleInMain.inMicroseconds}|${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}|${runMethodInIsolate.inMicroseconds}|');
