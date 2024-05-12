@@ -2,12 +2,29 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/base/src/models/isolate_state.dart';
 import 'package:test/test.dart';
 
 //  dart test
 //  dart test --platform=chrome,vm
 
 void main() {
+  group('Models', () {
+    test('IsolateState', () {
+      for (final state in IsolateState.values) {
+        expect(state.isValidJson(state.toJson()), equals(true));
+      }
+    });
+
+    test('IsolateException', () {
+      final exception =
+          IsolateException('Object', StackTrace.fromString('stackTrace'));
+      final json = exception.toJson();
+      expect(IsolateException.isValidObject(json), equals(true));
+      expect(IsolateException.fromJson(json), isA<IsolateException>());
+    });
+  });
+
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
     final isolateManager = IsolateManager.create(
