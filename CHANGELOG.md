@@ -1,3 +1,9 @@
+## 5.0.0-rc.4
+
+* Bring the `isolate_contactor` to this package and make it lighter and easier to maintain.
+* Update the tests.
+* Remove unneeded platforms in the example.
+
 ## 5.0.0-rc.3
 
 * Remove deprecated methods.
