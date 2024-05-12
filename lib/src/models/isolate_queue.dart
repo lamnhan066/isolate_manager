@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'isolate_manager.dart';
+import 'package:isolate_manager/src/isolate_manager.dart';
 
 /// Use for queuing your `compute`.
 class IsolateQueue<R, P> {

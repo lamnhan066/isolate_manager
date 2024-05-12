@@ -3,7 +3,7 @@ import 'dart:collection';
 
 import 'base/isolate_contactor.dart';
 import 'isolate_manager_function.dart';
-import 'utils.dart';
+import 'models/isolate_queue.dart';
 
 /// Type for the callback of the isolate.
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
 
-import 'base/isolate_contactor.dart';
 import 'isolate_worker/isolate_worker_web.dart'
     if (dart.library.io) 'isolate_worker/isolate_worker_stub.dart';
 
