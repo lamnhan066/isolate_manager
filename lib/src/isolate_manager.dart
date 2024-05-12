@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:isolate_contactor/isolate_contactor.dart';
-
+import 'base/isolate_contactor.dart';
 import 'isolate_manager_function.dart';
 import 'utils.dart';
 

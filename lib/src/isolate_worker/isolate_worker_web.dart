@@ -4,8 +4,8 @@
 import 'dart:async';
 import 'dart:js_interop';
 
-import 'package:isolate_contactor/isolate_contactor.dart';
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/base/src/models/isolate_state.dart';
 import 'package:web/web.dart';
 
 @JS('self')
