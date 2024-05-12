@@ -1,4 +1,12 @@
+## 5.0.0-rc.7
+
+* Update to improve the score.
+
 ## 5.0.0-rc.6
+
+* Update the CHANGELOG to show the migration guide.
+
+## 5.0.0-rc.5
 
 * Export the `IsolateState`.
 * Update the CHANGELOG to show the migration guide.
