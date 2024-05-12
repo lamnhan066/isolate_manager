@@ -131,10 +131,7 @@ main() {
   IsolateManagerFunction.workerFunction(
     fetchAndDecode,
     onInitial: () {
-      // This is optional.
-      //
-      // You have to set the parameter `autoInitialze` in the `create` and `createCustom` 
-      // to `false` when using this.
+      /* Optional. Run before all events */
     }
   );
 }
