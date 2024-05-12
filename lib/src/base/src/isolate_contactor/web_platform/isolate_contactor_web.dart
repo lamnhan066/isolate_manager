@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:isolate_manager/src/base/src/models/isolate_state.dart';
-
 import '../../../isolate_contactor.dart';
 import '../../isolate_contactor_controller/isolate_contactor_controller_web.dart';
 import '../isolate_contactor_web.dart';

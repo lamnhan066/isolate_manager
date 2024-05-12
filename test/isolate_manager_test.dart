@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/base/src/models/isolate_state.dart';
 import 'package:test/test.dart';
 
 //  dart test
