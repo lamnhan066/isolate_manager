@@ -92,6 +92,10 @@
           }
           ```
 
+## 4.3.1
+
+* Export the `IsolateState`.
+
 ## 4.3.0
 
 * Support `WASM`.
