@@ -163,7 +163,7 @@ Future<void> _generateFromAnotatedFunction(
   await sink.close();
 
   final name = function.value != '' ? function.value : function.key;
-  final r = await Process.run(
+  await Process.run(
     'dart',
     [
       'compile',
