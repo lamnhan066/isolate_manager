@@ -122,7 +122,7 @@ String complexFunction(String param) {
   return ComplexModelResult(result).toJson();
 }
 
-@pragma('vm:entry-point')
+@isolateManagerWorker
 Future<Map<String, dynamic>> fetchAndDecode(String url) async {
   final response = await http.Client().get(Uri.parse(url));
   return jsonDecode(response.body);
