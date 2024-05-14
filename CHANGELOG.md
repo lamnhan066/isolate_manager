@@ -1,3 +1,9 @@
+## 5.0.0-rc.10
+
+* Fix issue with null `initialParams` in `createCustom`.
+* Remove unused variable `autoMarkAsInitialized` and related code in the `base`.
+* Update tests.
+
 ## 5.0.0-rc.9
 
 * Able to generate static functions (Classs.function => Class.function.js).
