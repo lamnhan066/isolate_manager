@@ -1,3 +1,9 @@
+## 5.0.0-rc.9
+
+* Able to generate static functions (Classs.function => Class.function.js).
+* Improve the generator (only generate the needed files to reduce time).
+* Improve the generated logs.
+
 ## 5.0.0-rc.8
 
 * Add a generator to generate the Worker JS by adding the `IsolateManagerWorker` and `isolateManagerWorker` annotations.
