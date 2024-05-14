@@ -158,6 +158,8 @@ final isolate = IsolateManager.create(add, workerName: 'add');
 
 If you want to place the generated JS inside a subfolder, you can update the annotation to `@IsolateManagerWorker('workers/add')` and update the `workerName` to `workers/add`.
 
+Static functions are also supported. A function `WorkerFunctions.method` will be compiled to `WorkerFunctions.method.js`, so that the `workerName` will be `WorkerFunctions.method`.
+
 ### Mannually
 
 #### **Step 1:** Create a Worker file
