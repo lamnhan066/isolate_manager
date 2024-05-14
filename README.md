@@ -130,6 +130,16 @@ int add(List<int> params) {
 }
 ```
 
+or
+
+```dart
+@IsolateManagerWorker('add')
+int add(List<int> params) {
+  return params[0] + params[1];
+}
+
+```
+
 Multiple annotated functions inside a file are supported. You need to make sure that all functions across all files will have different names because the generated JS use it to name the files. You can specify the JS's name by using the `@IsolateManagerWorker('modifiedWorkerName')` annotation.
 
 #### Execute the generator

@@ -1,6 +1,6 @@
 name: isolate_manager
 description: Create multiple long-lived isolates for a function (keep it active to send and receive data), supports Worker and WASM on the Web.
-version: 5.0.0-rc.7
+version: 5.0.0-rc.8
 homepage: https://github.com/lamnhan066/isolate_manager/tree/beta
 
 environment:

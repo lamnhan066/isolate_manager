@@ -1,3 +1,8 @@
+## 5.0.0-rc.8
+
+* Add a generator to generate the Worker JS by adding the `IsolateManagerWorker` and `isolateManagerWorker` annotations.
+* Update README.
+
 ## 5.0.0-rc.7
 
 * Update to improve the score.
