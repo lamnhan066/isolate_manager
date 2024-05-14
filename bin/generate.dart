@@ -8,6 +8,9 @@ import 'package:args/args.dart';
 import 'package:isolate_manager/src/isolate_manager.dart';
 import 'package:path/path.dart' as p;
 
+const classAnnotation = 'IsolateManagerWorker';
+const constAnnotation = 'isolateManagerWorker';
+
 void main(List<String> args) async {
   await generate(args);
 }
@@ -46,7 +49,7 @@ Future<void> generate(List<String> args) async {
   };
   final isDebug = argResult['debug'] as bool? ?? false;
 
-  print('Parsing the `IsolateManagerWorker` from directory: $path...');
+  print('Parsing the `IsolateManagerWorker` inside directory: $path...');
 
   final dir = Directory(path);
   if (!dir.existsSync()) {
@@ -62,24 +65,33 @@ Future<void> generate(List<String> args) async {
 
   List<List<dynamic>> params = [];
   for (final file in allFiles) {
-    // Only analyze the file ending with .dart
     if (file is File && file.path.endsWith('.dart')) {
-      // get file path
       final filePath = file.absolute.path;
-
-      params.add([filePath, obfuscate, isDebug]);
+      final content = await file.readAsString();
+      final pattern = RegExp('(@$classAnnotation|@$constAnnotation)');
+      if (content.contains(pattern)) {
+        params.add([filePath, obfuscate, isDebug]);
+      }
     }
   }
 
+  print('Total files to generate: ${params.length}');
+
+  int counter = 0;
   await Future.wait(
-    [for (final param in params) isolateManager.compute(param)],
+    [
+      for (final param in params)
+        isolateManager.compute(param).then((value) => counter += value)
+    ],
   );
+
+  print('Total generated functions: $counter');
 
   await isolateManager.stop();
   print('Done');
 }
 
-Future<void> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
+Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
   String filePath = params[0];
   String obfuscate = params[1];
   bool isDebug = params[2];
@@ -94,6 +106,8 @@ Future<void> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
       isDebug,
     );
   }
+
+  return anotatedFunctions.length;
 }
 
 Future<Map<String, String>> _getAnotatedFunctions(String path) async {
@@ -208,14 +222,14 @@ String? getIsolateManagerWorkerAnnotationValue(Element element) {
     if (annotationElement is ConstructorElement) {
       final enclosingElement = annotationElement.enclosingElement;
       if (enclosingElement is ClassElement &&
-          enclosingElement.name == 'IsolateManagerWorker') {
+          enclosingElement.name == classAnnotation) {
         final annotation = metadata.computeConstantValue();
         final value = annotation?.getField('name')?.toStringValue();
         return value;
       }
     } else if (annotationElement is PropertyAccessorElement) {
       final variable = annotationElement.variable;
-      if (variable.name == 'isolateManagerWorker') {
+      if (variable.name == constAnnotation) {
         return '';
       }
     }
