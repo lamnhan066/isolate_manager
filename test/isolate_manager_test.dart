@@ -103,6 +103,20 @@ void main() {
     await isolateManager.stop();
   });
 
+  test('Test IsolateManager.createCustom with `null` initialParams', () async {
+    // Create IsolateContactor
+    final isolateManager = IsolateManager<int, int>.createCustom(
+      isolateFunction,
+      concurrent: 1,
+    )..start();
+
+    expect(() => isolateManager.sendMessage(-1), throwsStateError);
+
+    await Future.delayed(Duration(seconds: 3));
+
+    await isolateManager.stop();
+  });
+
   test('Test IsolateManager.createCustom with automatically handlers',
       () async {
     // Create IsolateContactor
