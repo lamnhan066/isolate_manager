@@ -1,7 +1,7 @@
-/// A default anotation for the [IsolateManagerWorker] with empty name.
+/// A default annotation for the [IsolateManagerWorker] with empty name.
 const IsolateManagerWorker isolateManagerWorker = IsolateManagerWorker();
 
-/// The anotation to generate a Worker JS for a specific method.
+/// The annotation to generate a Worker JS for a specific method.
 ///
 /// If the [name] is specified, the Worker JS will be named `<name>.js`, otherwise
 /// the name of the function will be used.
