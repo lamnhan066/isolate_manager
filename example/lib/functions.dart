@@ -5,7 +5,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 
 import 'models/complex_model.dart';
 
-@pragma('vm:entry-point')
+@IsolateManagerWorker()
 int countEven(int num) {
   int count = 0;
   while (num > 0) {
@@ -20,7 +20,7 @@ int countEven(int num) {
 /// This must be a static or top-level function
 ///
 /// This function is very expensive to calculate, so I can test for un-blocking UI feature
-@pragma('vm:entry-point')
+@isolateManagerWorker
 Future<int> fibonacciRecursiveFuture(int n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
@@ -33,7 +33,7 @@ Future<int> fibonacciRecursiveFuture(int n) async {
 }
 
 /// This must be a static or top-level function
-@pragma('vm:entry-point')
+@isolateManagerWorker
 Future<int> fibonacciFuture(int n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
@@ -53,7 +53,7 @@ Future<int> fibonacciFuture(int n) async {
 }
 
 /// This must be a static or top-level function
-@pragma('vm:entry-point')
+@isolateManagerWorker
 int fibonacci(int n) {
   if (n == 0) return 0;
   if (n == 1 || n == 2) return 1;
@@ -89,7 +89,7 @@ void isolateFunction(dynamic params) {
 }
 
 /// Send the progress value before sending the final result
-@pragma('vm:entry-point')
+@isolateManagerWorker
 void isolateProgressFunction(dynamic params) {
   IsolateManagerFunction.customFunction(
     params,
@@ -105,10 +105,10 @@ void isolateProgressFunction(dynamic params) {
   );
 }
 
-@pragma('vm:entry-point')
+@isolateManagerWorker
 Object functionName(Object message) => message;
 
-@pragma('vm:entry-point')
+@isolateManagerWorker
 String complexFunction(String param) {
   final parsed = ComplexModelParam.fromJson(param);
   final result = <String>[];
@@ -122,7 +122,7 @@ String complexFunction(String param) {
   return ComplexModelResult(result).toJson();
 }
 
-@pragma('vm:entry-point')
+@isolateManagerWorker
 Future<Map<String, dynamic>> fetchAndDecode(String url) async {
   final response = await http.Client().get(Uri.parse(url));
   return jsonDecode(response.body);

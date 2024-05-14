@@ -320,7 +320,7 @@
 
 ## 2.1.1
 
-* On Flutter >3.3.0 - `@pragma('vm:entry-point')` anotation must be added to all methods that you want to use for isolation. Read README for more information.
+* On Flutter >3.3.0 - `@pragma('vm:entry-point')` annotation must be added to all methods that you want to use for isolation. Read README for more information.
 
 ## 2.1.0
 
