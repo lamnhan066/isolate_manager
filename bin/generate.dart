@@ -149,8 +149,10 @@ Future<void> _generateFromAnotatedFunction(
   String obfuscate,
   bool isDebug,
 ) async {
-  String inputPath =
-      p.join(p.dirname(sourceFilePath), 'tempFile.${function.hashCode}.dart');
+  String inputPath = p.join(
+    p.dirname(sourceFilePath),
+    '.IsolateManagerWorker.${function.key}.${function.hashCode}.dart',
+  );
   inputPath = p.absolute(inputPath);
   final file = File(inputPath);
   final sink = file.openWrite();
