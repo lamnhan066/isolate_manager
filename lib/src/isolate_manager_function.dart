@@ -62,7 +62,7 @@ class IsolateManagerFunction {
     /// A default parameter that used by the package.
     dynamic params, {
     required IsolateOnEventCallback<R, P> onEvent,
-    IsolateOnInitialCallback<R, P, Object>? onInitial,
+    IsolateOnInitialCallback<R, P, Object?>? onInitial,
     IsolateOnDisposeCallback<R, P>? onDispose,
     bool autoHandleException = true,
     bool autoHandleResult = true,
@@ -82,8 +82,7 @@ class IsolateManagerFunction {
 
     if (onInitial != null) {
       final completer = Completer<void>();
-      completer
-          .complete(onInitial(controller, controller.initialParams as Object));
+      completer.complete(onInitial(controller, controller.initialParams));
       await completer.future;
     }
 
