@@ -119,17 +119,48 @@ await isolateManager.stop();
 
 ## Worker Configuration
 
-### **Step 1:** Create a Worker file
+### Use The Generator
 
-Create a `worker.dart` file with this content
+#### Add the annotation
+
+```dart
+@isolateManagerWorker
+int add(List<int> params) {
+  return params[0] + params[1];
+}
+```
+
+Multiple annotated functions inside a file are supported. You need to make sure that all functions across all files will have different names because the generated JS use it to name the files. You can specify the JS's name by using the `@IsolateManagerWorker('modifiedWorkerName')` annotation.
+
+#### Execute the generator
+
+```console
+dart run isolate_manager:generate
+```
+
+After running those command, a file named `add.js` will be generated inside the `web` folder.
+
+#### Update the `IsolateManager`
+
+```dart
+final isolate = IsolateManager.create(add, workerName: 'add');
+```
+
+If you want to place the generated JS inside a subfolder, you can update the annotation to `@IsolateManagerWorker('workers/add')` and update the `workerName` to `workers/add`.
+
+### Mannually
+
+#### **Step 1:** Create a Worker file
+
+Create a `add.dart` file with this content
 
 ``` dart
 import 'package:isolate_manager/isolate_manager.dart';
 
 main() {
-  // The function `fetchAndDecode` MUST NOT depend on any Flutter library
+  // The function `add` MUST NOT depend on any Flutter library
   IsolateManagerFunction.workerFunction(
-    fetchAndDecode,
+    add,
     onInitial: () {
       /* Optional. Run before all events */
     }
@@ -137,22 +168,22 @@ main() {
 }
 ```
 
-### **Step 2:** Compile to JS
+#### **Step 2:** Compile to JS
 
-Run `dart compile js worker.dart -o worker.js -O4` to compile Dart to JS (The flag `-O4` is the obfuscated level of `JS`, the lowest value is `-O0` and the highest value is `-O4`)
+Run `dart compile js add.dart -o add.js -O4` to compile Dart to JS (The flag `-O4` is the obfuscated level of `JS`, the lowest value is `-O0` and the highest value is `-O4`)
 
-### **Step 3:** Copy to the Web folder
+#### **Step 3:** Copy to the Web folder
 
-Copy `worker.js` to the `Web` folder (the same folder with `index.html`)
+Copy the `add.js` to the `Web` folder (the same folder with `index.html`)
 
-### **Step 4:** Add it to the `IsolateManager`
+#### **Step 4:** Add it to the `IsolateManager`
 
 Update the `isolateManager` like below
 
 ``` dart
 final isolateManager = IsolateManager.create(
-    fetchAndDecode,
-    workerName: 'worker', // The name of the file, don't need to add the extension
+    add,
+    workerName: 'add', // The name of the file, don't need to add the extension
   );
 ```
 
