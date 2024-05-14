@@ -57,7 +57,7 @@ class IsolateContactorInternalWorker<R, P>
   }
 
   /// Create modified isolate function
-  static Future<IsolateContactorInternalWorker<R, P>> createOwnIsolate<R, P>({
+  static Future<IsolateContactorInternalWorker<R, P>> createCustom<R, P>({
     required void Function(dynamic) isolateFunction,
     required String workerName,
     required Object? initialParams,

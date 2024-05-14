@@ -57,7 +57,7 @@ class IsolateContactorInternal<R, P> implements IsolateContactor<R, P> {
   }
 
   /// Create an instance with your own function
-  static Future<IsolateContactorInternal<R, P>> createOwnIsolate<R, P>({
+  static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
     required CustomIsolateFunction isolateFunction,
     required Object? initialParams,
     required String workerName,

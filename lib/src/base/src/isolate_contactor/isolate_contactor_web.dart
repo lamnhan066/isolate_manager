@@ -7,7 +7,7 @@ import 'web_platform/isolate_contactor_web_worker.dart';
 abstract class IsolateContactorInternal<R, P>
     implements IsolateContactor<R, P> {
   /// Create modified isolate function
-  static Future<IsolateContactorInternal<R, P>> createOwnIsolate<R, P>({
+  static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
     required CustomIsolateFunction isolateFunction,
     required String workerName,
     required Object? initialParams,
@@ -19,7 +19,7 @@ abstract class IsolateContactorInternal<R, P>
     /// If browser is not supported Worker then use Future
     if (workerName != '') {
       try {
-        return IsolateContactorInternalWorker.createOwnIsolate(
+        return IsolateContactorInternalWorker.createCustom(
           isolateFunction: isolateFunction,
           workerName: workerName,
           initialParams: initialParams,
@@ -35,7 +35,7 @@ abstract class IsolateContactorInternal<R, P>
         }
       }
     }
-    return IsolateContactorInternalFuture.createOwnIsolate(
+    return IsolateContactorInternalFuture.createCustom(
       isolateFunction: isolateFunction,
       isolateFunctionName: workerName,
       initialParams: initialParams,

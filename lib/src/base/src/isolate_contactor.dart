@@ -68,7 +68,7 @@ abstract class IsolateContactor<R, P> {
     R tempConverter(dynamic value) => value as R;
     converter ??= tempConverter;
     workerConverter ??= tempConverter;
-    return IsolateContactorInternal.createOwnIsolate<R, P>(
+    return IsolateContactorInternal.createCustom<R, P>(
       isolateFunction: function,
       workerName: workerName,
       converter: converter,

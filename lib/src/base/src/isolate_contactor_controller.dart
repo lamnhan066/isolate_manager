@@ -38,7 +38,7 @@ abstract class IsolateContactorController<R, P> {
   /// `IsolateChannel` on other platforms
   // dynamic get controller => throw UnimplementedError();
 
-  /// Get initial params for `createOwnIsolate`
+  /// Get initial params for `createCustom`
   dynamic get initialParams;
 
   /// Listen to result from the isolate

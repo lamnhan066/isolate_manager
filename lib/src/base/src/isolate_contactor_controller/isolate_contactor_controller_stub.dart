@@ -78,7 +78,7 @@ class IsolateContactorControllerImpl<R, P>
     }
   }
 
-  /// Get initial params for `createOwnIsolate`
+  /// Get initial params for `createCustom`
   @override
   dynamic get initialParams => _initialParams;
 
