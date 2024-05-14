@@ -12,13 +12,14 @@ void main(List<String> args) async {
   await generate(args);
 }
 
+/// --path "path/to/generate" --obfuscate 0->4 --debug
 Future<void> generate(List<String> args) async {
   final parser = ArgParser()
     ..addOption(
       'path',
       abbr: 'p',
       help:
-          'Path to the main folder that you want to to generate the Workers. Default is `./lib`.',
+          'Path to the main folder that you want to to generate the Workers. Default is set to `lib`.',
       valueHelp: 'lib',
       defaultsTo: 'lib',
     )
@@ -84,7 +85,6 @@ Future<void> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
   bool isDebug = params[2];
 
   final anotatedFunctions = await _getAnotatedFunctions(filePath);
-  print('${p.relative(filePath)} => $anotatedFunctions');
 
   if (anotatedFunctions.isNotEmpty) {
     await _generateFromAnotatedFunctions(
@@ -182,18 +182,19 @@ Future<void> _generateFromAnotatedFunction(
   );
 
   if (await File('web/$name.js').exists()) {
+    print(
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: $name.js');
     if (!isDebug) {
       await File('web/$name.js.deps').delete();
       await File('web/$name.js.map').delete();
     }
   } else {
-    print('');
-    print(''.padRight(80, '='));
-    print('Errors occur while generating the "$name.js":');
-    print('');
-    print(result.stdout);
-    print(''.padRight(80, '='));
-    print('');
+    print(
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: $name.js');
+    final r = result.stdout.toString().split('\n');
+    for (var element in r) {
+      print('     $element');
+    }
   }
 
   await file.delete();
