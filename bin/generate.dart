@@ -183,14 +183,14 @@ Future<void> _generateFromAnotatedFunction(
 
   if (await File('web/$name.js').exists()) {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: $name.js');
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: web/$name.js');
     if (!isDebug) {
       await File('web/$name.js.deps').delete();
       await File('web/$name.js.map').delete();
     }
   } else {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: $name.js');
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: web/$name.js');
     final r = result.stdout.toString().split('\n');
     for (var element in r) {
       print('     $element');
