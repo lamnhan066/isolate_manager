@@ -342,22 +342,22 @@ void main() {
 int fibonacci(int n) {
   if (n < 0) throw StateError('n<0');
   if (n == 0) return 0;
-  if (n <= 2) return 1;
+  if (n == 1) return 1;
 
-  double n1 = 0, n2 = 1, n3 = 1;
+  int f1 = 0, f2 = 1, r = 1;
 
   for (int i = 2; i <= n; i++) {
-    n3 = n1 + n2;
-    n1 = n2;
-    n2 = n3;
+    r = f1 + f2;
+    f1 = f2;
+    f2 = r;
   }
 
-  return n3.round();
+  return r;
 }
 
 int fibonacciRecursive(int n) {
   if (n == 0) return 0;
-  if (n <= 2) return 1;
+  if (n == 1) return 1;
 
   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
 }
