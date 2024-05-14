@@ -163,7 +163,13 @@ Future<void> _generateFromAnotatedFunction(
   await sink.close();
 
   final name = function.value != '' ? function.value : function.key;
-  await Process.run(
+  final output = File('web/$name.js');
+
+  if (await output.exists()) {
+    await output.delete();
+  }
+
+  final result = await Process.run(
     'dart',
     [
       'compile',
@@ -174,9 +180,20 @@ Future<void> _generateFromAnotatedFunction(
       obfuscate,
     ],
   );
-  if (!isDebug) {
-    await File('web/$name.js.deps').delete();
-    await File('web/$name.js.map').delete();
+
+  if (await File('web/$name.js').exists()) {
+    if (!isDebug) {
+      await File('web/$name.js.deps').delete();
+      await File('web/$name.js.map').delete();
+    }
+  } else {
+    print('');
+    print(''.padRight(80, '='));
+    print('Errors occur while generating the "$name.js":');
+    print('');
+    print(result.stdout);
+    print(''.padRight(80, '='));
+    print('');
   }
 
   await file.delete();
