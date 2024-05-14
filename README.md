@@ -138,7 +138,7 @@ Multiple annotated functions inside a file are supported. You need to make sure 
 dart run isolate_manager:generate
 ```
 
-After running those command, a file named `add.js` will be generated inside the `web` folder.
+After running the command, a file named `add.js` will be generated inside the `web` folder.
 
 #### Update the `IsolateManager`
 
