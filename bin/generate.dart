@@ -132,6 +132,20 @@ Future<Map<String, String>> _getAnotatedFunctions(String path) async {
           annotatedFunctions[element.name] = annotationNameValue;
         }
       }
+    } else if (declaration is ClassDeclaration) {
+      for (final member in declaration.members) {
+        if (member is MethodDeclaration && member.isStatic) {
+          final element = member.declaredElement;
+          if (element != null) {
+            final annotationNameValue =
+                getIsolateManagerWorkerAnnotationValue(element);
+            if (annotationNameValue != null) {
+              annotatedFunctions['${declaration.name}.${element.name}'] =
+                  annotationNameValue;
+            }
+          }
+        }
+      }
     }
   }
 
