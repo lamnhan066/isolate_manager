@@ -47,10 +47,9 @@ class IsolateManagerFunction {
   ///       return fetchAndDecode(message);
   ///     },
   ///     onInitial: (controller, initialParams) {
-  ///        // This event will be executed before all the other events
+  ///        // This event will be executed before all the other events.
   ///        //
-  ///        // This event can be a `Future` but you need to set the `autoInitialize` in
-  ///        // the `create` and `createCustom` to `false` to make it works.
+  ///        // This event can be a `Future` function.
   ///     },
   ///     onDispose: (controller) {
   ///        /* This event will be executed after all the other events and should NOT be a `Future` event */
@@ -129,9 +128,6 @@ class IsolateManagerFunction {
   ///     fetchAndDecode,
   ///     onInitial: () {
   ///       // This is optional.
-  ///       //
-  ///       // You have to set the parameter `autoInitialze` in the `create` and `createCustom`
-  ///       // to `false` when using this.
   ///     }
   ///   );
   /// }
