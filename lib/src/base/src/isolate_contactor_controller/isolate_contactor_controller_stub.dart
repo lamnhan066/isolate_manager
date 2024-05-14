@@ -17,8 +17,6 @@ class IsolateContactorControllerImpl<R, P>
       StreamController.broadcast();
   final StreamController<P> _isolateStreamController =
       StreamController.broadcast();
-
-  final bool autoMarkAsInitialized;
   final void Function()? onDispose;
   final IsolateConverter<R>? converter;
   dynamic _initialParams;
@@ -28,7 +26,6 @@ class IsolateContactorControllerImpl<R, P>
 
   IsolateContactorControllerImpl(
     dynamic params, {
-    required this.autoMarkAsInitialized,
     required this.onDispose,
     required this.converter, // Converter for native
     required IsolateConverter<R>?
@@ -71,11 +68,6 @@ class IsolateContactorControllerImpl<R, P>
         }
       });
     });
-
-    // Compatible with version `<=4.1.0`.
-    if (autoMarkAsInitialized && !ensureInitialized.isCompleted) {
-      ensureInitialized.complete();
-    }
   }
 
   /// Get initial params for `createCustom`

@@ -35,7 +35,6 @@ class IsolateContactorInternalWorker<R, P>
 
   late IsolateConverter<R> _converter;
   late IsolateConverter<R> _workerConverter;
-  late bool _autoMarkAsInitialized;
 
   /// Create an instance
   IsolateContactorInternalWorker._({
@@ -44,7 +43,6 @@ class IsolateContactorInternalWorker<R, P>
     required String workerName,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
-    required bool autoMarkAsInitialized,
     bool debugMode = false,
   }) {
     _debugMode = debugMode;
@@ -53,7 +51,6 @@ class IsolateContactorInternalWorker<R, P>
     _converter = converter;
     _workerConverter = workerConverter;
     _isolateParam = isolateParam;
-    _autoMarkAsInitialized = autoMarkAsInitialized;
   }
 
   /// Create modified isolate function
@@ -63,7 +60,6 @@ class IsolateContactorInternalWorker<R, P>
     required Object? initialParams,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
-    required bool autoMarkAsInitialized,
     bool debugMode = false,
   }) async {
     IsolateContactorInternalWorker<R, P> isolateContactor =
@@ -73,7 +69,6 @@ class IsolateContactorInternalWorker<R, P>
       isolateParam: initialParams,
       converter: converter,
       workerConverter: workerConverter,
-      autoMarkAsInitialized: autoMarkAsInitialized,
       debugMode: debugMode,
     );
 
@@ -88,7 +83,6 @@ class IsolateContactorInternalWorker<R, P>
       Worker("$_workerName.js"),
       converter: _converter,
       workerConverter: _workerConverter,
-      autoMarkAsInitialized: _autoMarkAsInitialized,
       onDispose: null,
     );
     _isolateContactorController!.onMessage.listen((message) {

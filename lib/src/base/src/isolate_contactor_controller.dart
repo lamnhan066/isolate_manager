@@ -22,7 +22,6 @@ abstract class IsolateContactorController<R, P> {
     R converter(dynamic value) => value; // coverage:ignore-line
     return IsolateContactorControllerImpl<R, P>(
       params,
-      autoMarkAsInitialized: true,
       onDispose: onDispose,
       converter: converter,
       workerConverter: converter,

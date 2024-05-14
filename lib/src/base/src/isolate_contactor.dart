@@ -48,14 +48,6 @@ abstract class IsolateContactor<R, P> {
     /// `workerConverter` (for Worker on Web) convert result before sending to to the result.
     IsolateConverter<R>? workerConverter,
 
-    /// Auto mark as initialized.
-    ///
-    /// When this value is `false`, you have to call the [initialized] at the below
-    /// of the isolate function. Without it, the isolate will be stucked forever.
-    /// It's also applied with the Web `Worker`, you MUST add `jsSendMessage(IsolateState.initialized.serialization);`
-    /// to the end of the `main` method.
-    bool autoMarkAsInitialized = true,
-
     /// `isolateParams` is the list of parameters that you want to add to your [isolateFunction]
     /// `debugMode` allow printing debug data in console. Default is set to false.
     Object? initialParams,
@@ -74,7 +66,6 @@ abstract class IsolateContactor<R, P> {
       converter: converter,
       workerConverter: workerConverter,
       initialParams: initialParams,
-      autoMarkAsInitialized: autoMarkAsInitialized,
       debugMode: debugMode,
     );
   }

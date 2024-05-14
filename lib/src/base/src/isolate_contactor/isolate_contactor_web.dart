@@ -13,7 +13,6 @@ abstract class IsolateContactorInternal<R, P>
     required Object? initialParams,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
-    required bool autoMarkAsInitialized,
     bool debugMode = false,
   }) async {
     /// If browser is not supported Worker then use Future
@@ -25,7 +24,6 @@ abstract class IsolateContactorInternal<R, P>
           initialParams: initialParams,
           converter: converter,
           workerConverter: workerConverter,
-          autoMarkAsInitialized: autoMarkAsInitialized,
           debugMode: debugMode,
         );
       } catch (_) {
@@ -41,7 +39,6 @@ abstract class IsolateContactorInternal<R, P>
       initialParams: initialParams,
       converter: converter,
       workerConverter: workerConverter,
-      autoMarkAsInitialized: autoMarkAsInitialized,
       debugMode: debugMode,
     );
   }

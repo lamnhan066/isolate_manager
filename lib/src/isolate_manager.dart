@@ -141,7 +141,6 @@ class IsolateManager<R, P> {
               initialParams: initialParams,
               converter: converter,
               workerConverter: workerConverter,
-              autoMarkAsInitialized: false,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
@@ -157,7 +156,6 @@ class IsolateManager<R, P> {
               workerName: workerName,
               converter: converter,
               workerConverter: workerConverter,
-              autoMarkAsInitialized: false,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],

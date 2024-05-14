@@ -17,7 +17,6 @@ class IsolateContactorControllerImplWorker<R, P>
   final StreamController<P> _isolateStreamController =
       StreamController.broadcast();
 
-  final bool autoMarkAsInitialized;
   final void Function()? onDispose;
   final IsolateConverter<R> workerConverter;
   dynamic _initialParams;
@@ -27,7 +26,6 @@ class IsolateContactorControllerImplWorker<R, P>
 
   IsolateContactorControllerImplWorker(
     dynamic params, {
-    required this.autoMarkAsInitialized,
     required this.onDispose,
     required IsolateConverter<R> converter, // Converter for native
     required this.workerConverter, // Converter for Worker (Web Only)
@@ -63,11 +61,6 @@ class IsolateContactorControllerImplWorker<R, P>
       // Decode json from string which sent from isolate
       _mainStreamController.add(workerConverter(event.data));
     }.toJS;
-
-    // Compatible with version `<=4.1.0`.
-    if (autoMarkAsInitialized && !ensureInitialized.isCompleted) {
-      ensureInitialized.complete();
-    }
   }
 
   /// Get this Worker
