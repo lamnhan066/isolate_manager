@@ -1,3 +1,15 @@
+## 5.0.0
+
+* Bump sdk to `^3.3.0`.
+* Add a generator to generate the Web Worker by adding the `IsolateManagerWorker` and `isolateManagerWorker` annotations (See more in README).
+* Implement the `call` method to the `IsolateManager`.
+* Improve the `IsolateManager.create` behavior (use a new custom function).
+* Improve the type of the `customFunction` and `workerFunction`.
+* Remove `autoInitialize` parameter.
+* Remove deprecated methods.
+* Bring the `isolate_contactor` to this package to make it lighter and easier to maintain.
+* **BREAKING CHANGE:** All isolate functions MUST be updated and all Workers MUST be recompiled. See the migration guide at the bottom of the README or at the changelog of the version `5.0.0-rc.1`.
+
 ## 5.0.0-rc.11
 
 * Implement the `call` method.
@@ -43,7 +55,7 @@
 
 * Remove deprecated methods.
 * Improve the `IsolateManager.create` behavior (use a new `customFunction`).
-* Imptove the type of the `customFunction` and `workerFunction`.
+* Improve the type of the `customFunction` and `workerFunction`.
 
 ## 5.0.0-rc.2
 
@@ -55,7 +67,7 @@
 * Bump sdk to `^3.3.0`.
 * Remove `autoInitialize` parameter.
 * Remove deprecated methods.
-* **MIGRATION:** All `Worker`'s MUST be re-compiled
+* **MIGRATION:** All isolate functions MUST be update and all Workers MUST be recompiled:
   * If you're using the `IsolateManagerFunction.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateManagerFunction.customFunction` will be automatically applied.
   * If you're using the old method, you need to send a `initialized` signal from an `Isolate` and a `Worker`:
     * Custom function of an `Isolate`: add the `controller.initialized();` to the end of the function.

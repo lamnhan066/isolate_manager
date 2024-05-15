@@ -379,9 +379,9 @@ print(result); // 100
 
 ### v5.0.0
 
-All `Worker`'s MUST be re-compiled with the following changes:
+All isolate functions MUST be update and all Workers MUST be recompiled with the following changes:
 
-- If you're using the `IsolateManagerFunction.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateManagerFunction.customFunction` will be automatically applied.
+- If you're using the `IsolateManagerFunction.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). If you're using the `IsolateManagerFunction.customFunction`, it will be automatically updated.
 
 - If you're using the old method, you need to send a `initialized` signal from an `Isolate` and a `Worker`:
   - Custom function of an `Isolate`: add the `controller.initialized();` to the end of the function.
