@@ -1,11 +1,17 @@
 import 'dart:convert';
 
 class IsolateException implements Exception {
+  /// Error object.
   final Object error;
+
+  /// StackTrace.
   final StackTrace stack;
 
+  /// This [IsolateException] mainly use to transfer an [Exception] between an `Isolate` and
+  /// the main app.
   IsolateException(this.error, [this.stack = StackTrace.empty]);
 
+  /// Convert to JSON.
   String toJson() => jsonEncode({
         r'$IsolateException': {
           'error': error.toString(),
@@ -13,6 +19,7 @@ class IsolateException implements Exception {
         }
       });
 
+  /// Convert from JSON.
   factory IsolateException.fromJson(dynamic json) {
     assert(isValidObject(json),
         'json should be checked by `isValidObject` before using');
@@ -26,6 +33,7 @@ class IsolateException implements Exception {
     );
   }
 
+  /// Check if the [json] is a valid [IsolateException].
   static bool isValidObject(dynamic json) {
     try {
       final decoded = jsonDecode(json.toString()) as Map;
