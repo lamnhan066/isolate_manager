@@ -35,7 +35,12 @@ Future<void> generate(List<String> args) async {
     ..addFlag(
       'debug',
       defaultsTo: false,
-      help: 'Export the debug files like *.js.deps and *.js.map',
+      help: 'Export the debug files like *.js.deps, *.js.map and *.unopt.wasm',
+    )
+    ..addFlag(
+      'wasm',
+      defaultsTo: false,
+      help: 'Compile to wasm',
     );
   final argResult = parser.parse(args);
   final path = argResult['path'] as String;
@@ -48,6 +53,7 @@ Future<void> generate(List<String> args) async {
     _ => '-O2',
   };
   final isDebug = argResult['debug'] as bool? ?? false;
+  final isWasm = argResult['wasm'] as bool? ?? false;
 
   print('Parsing the `IsolateManagerWorker` inside directory: $path...');
 
@@ -70,7 +76,7 @@ Future<void> generate(List<String> args) async {
       final content = await file.readAsString();
       final pattern = RegExp('(@$classAnnotation|@$constAnnotation)');
       if (content.contains(pattern)) {
-        params.add([filePath, obfuscate, isDebug]);
+        params.add([filePath, obfuscate, isDebug, isWasm]);
       }
     }
   }
@@ -95,6 +101,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
   String filePath = params[0];
   String obfuscate = params[1];
   bool isDebug = params[2];
+  bool isWasm = params[3];
 
   final anotatedFunctions = await _getAnotatedFunctions(filePath);
 
@@ -104,6 +111,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
       anotatedFunctions,
       obfuscate,
       isDebug,
+      isWasm,
     );
   }
 
@@ -157,6 +165,7 @@ Future<void> _generateFromAnotatedFunctions(
   Map<String, String> anotatedFunctions,
   String obfuscate,
   bool isDebug,
+  bool isWasm,
 ) async {
   await Future.wait(
     [
@@ -166,6 +175,7 @@ Future<void> _generateFromAnotatedFunctions(
           function,
           obfuscate,
           isDebug,
+          isWasm,
         )
     ],
   );
@@ -176,6 +186,7 @@ Future<void> _generateFromAnotatedFunction(
   MapEntry<String, String> function,
   String obfuscate,
   bool isDebug,
+  bool isWasm,
 ) async {
   String inputPath = p.join(
     p.dirname(sourceFilePath),
@@ -192,8 +203,10 @@ Future<void> _generateFromAnotatedFunction(
   sink.writeln('}');
   await sink.close();
 
+  final extension = isWasm ? 'wasm' : 'js';
+
   final name = function.value != '' ? function.value : function.key;
-  final output = File('web/$name.js');
+  final output = File('web/$name.$extension');
 
   if (await output.exists()) {
     await output.delete();
@@ -203,27 +216,31 @@ Future<void> _generateFromAnotatedFunction(
     'dart',
     [
       'compile',
-      'js',
+      extension,
       inputPath,
       '-o',
-      p.join('web', '$name.js'),
+      p.join('web', '$name.$extension'),
       obfuscate,
     ],
   );
 
-  if (await File('web/$name.js').exists()) {
+  if (await File('web/$name.$extension').exists()) {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: web/$name.js');
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: web/$name.$extension');
     if (!isDebug) {
-      await File('web/$name.js.deps').delete();
-      await File('web/$name.js.map').delete();
+      if (isWasm) {
+        await File('web/$name.unopt.wasm').delete();
+      } else {
+        await File('web/$name.js.deps').delete();
+        await File('web/$name.js.map').delete();
+      }
     }
   } else {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: web/$name.js');
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: web/$name.$extension');
     final r = result.stdout.toString().split('\n');
     for (var element in r) {
-      print('     $element');
+      print('   > $element');
     }
   }
 
