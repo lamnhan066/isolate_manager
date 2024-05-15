@@ -4,6 +4,8 @@
 
 ## **Features**
 
+- A generator to generate all Workers by using the `@isolateManagerWorker` annotation.
+
 - An easy way to create multiple long-lived isolates for a function (keep it active to send and receive data).
 
 - Supports `Worker` on the Web (If the `Worker` is unavailable in the working browser or is not configured, the `Future` (and `Stream`) will be used instead).
@@ -372,7 +374,3 @@ print(result); // 100
 </br>
 
 <p align='center'><a href="https://www.buymeacoffee.com/lamnhan066"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=lamnhan066&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a coffee" width="200"></a></p>
-
-## To-do list
-
-- Find the best way to prevent using `dart compile js`.

@@ -1,3 +1,8 @@
+## 5.0.0-rc.11
+
+* Implement the `call` method.
+* Able to generate to WASM with `--wasm` flag (But unusable right now).
+
 ## 5.0.0-rc.10
 
 * Fix issue with null `initialParams` in `createCustom`.
