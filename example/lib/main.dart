@@ -132,7 +132,7 @@ class _MyAppState extends State<MyApp> {
   void calculateFunctionName([int max = 30]) {
     value4 = rad.nextInt(max);
     print('Isolate 3: Calculate fibonancci at F$value4');
-    isolateFunctionName.sendMessage(value4);
+    isolateFunctionName(value4);
   }
 
   void calculateCountEven() {

@@ -110,7 +110,7 @@ void main() {
       concurrent: 1,
     )..start();
 
-    expect(() => isolateManager.sendMessage(-1), throwsStateError);
+    expect(() => isolateManager(-1), throwsStateError);
 
     await Future.delayed(Duration(seconds: 3));
 
