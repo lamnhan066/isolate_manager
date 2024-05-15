@@ -19,12 +19,20 @@ void main(List<String> args) async {
 Future<void> generate(List<String> args) async {
   final parser = ArgParser()
     ..addOption(
-      'path',
-      abbr: 'p',
+      'input',
+      abbr: 'i',
       help:
-          'Path to the main folder that you want to to generate the Workers. Default is set to `lib`.',
+          'Path of the folder to generate the Workers. Default is set to `lib`.',
       valueHelp: 'lib',
       defaultsTo: 'lib',
+    )
+    ..addOption(
+      'output',
+      abbr: 'o',
+      help:
+          'Path of the folder to save the generated files. Default is set to `web`.',
+      valueHelp: 'web',
+      defaultsTo: 'web',
     )
     ..addOption(
       'obfuscate',
@@ -43,7 +51,8 @@ Future<void> generate(List<String> args) async {
       help: 'Compile to wasm',
     );
   final argResult = parser.parse(args);
-  final path = argResult['path'] as String;
+  final input = argResult['input'] as String;
+  final output = argResult['output'] as String;
   final obfuscate = switch (argResult['obfuscate']) {
     '0' => '-O0',
     '1' => '-O1',
@@ -55,15 +64,15 @@ Future<void> generate(List<String> args) async {
   final isDebug = argResult['debug'] as bool? ?? false;
   final isWasm = argResult['wasm'] as bool? ?? false;
 
-  print('Parsing the `IsolateManagerWorker` inside directory: $path...');
+  print('Parsing the `IsolateManagerWorker` inside directory: $input...');
 
-  final dir = Directory(path);
+  final dir = Directory(input);
   if (!dir.existsSync()) {
     print('The command run in the wrong directory.');
     return;
   }
 
-  final List<FileSystemEntity> allFiles = _listAllFiles(Directory(path), []);
+  final List<FileSystemEntity> allFiles = _listAllFiles(Directory(input), []);
   final isolateManager = IsolateManager.create(
     _getAndGenerateFromAnotatedFunctions,
     concurrent: 3,
@@ -76,7 +85,7 @@ Future<void> generate(List<String> args) async {
       final content = await file.readAsString();
       final pattern = RegExp('(@$classAnnotation|@$constAnnotation)');
       if (content.contains(pattern)) {
-        params.add([filePath, obfuscate, isDebug, isWasm]);
+        params.add([filePath, obfuscate, isDebug, isWasm, output]);
       }
     }
   }
@@ -102,6 +111,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
   String obfuscate = params[1];
   bool isDebug = params[2];
   bool isWasm = params[3];
+  String output = params[4];
 
   final anotatedFunctions = await _getAnotatedFunctions(filePath);
 
@@ -112,6 +122,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
       obfuscate,
       isDebug,
       isWasm,
+      output,
     );
   }
 
@@ -166,6 +177,7 @@ Future<void> _generateFromAnotatedFunctions(
   String obfuscate,
   bool isDebug,
   bool isWasm,
+  String output,
 ) async {
   await Future.wait(
     [
@@ -176,6 +188,7 @@ Future<void> _generateFromAnotatedFunctions(
           obfuscate,
           isDebug,
           isWasm,
+          output,
         )
     ],
   );
@@ -187,6 +200,7 @@ Future<void> _generateFromAnotatedFunction(
   String obfuscate,
   bool isDebug,
   bool isWasm,
+  String output,
 ) async {
   String inputPath = p.join(
     p.dirname(sourceFilePath),
@@ -206,10 +220,11 @@ Future<void> _generateFromAnotatedFunction(
   final extension = isWasm ? 'wasm' : 'js';
 
   final name = function.value != '' ? function.value : function.key;
-  final output = File('web/$name.$extension');
+  final outputPath = p.join(output, '$name.$extension');
+  final outputFile = File(outputPath);
 
-  if (await output.exists()) {
-    await output.delete();
+  if (await outputFile.exists()) {
+    await outputFile.delete();
   }
 
   final result = await Process.run(
@@ -219,25 +234,25 @@ Future<void> _generateFromAnotatedFunction(
       extension,
       inputPath,
       '-o',
-      p.join('web', '$name.$extension'),
+      outputPath,
       obfuscate,
     ],
   );
 
-  if (await File('web/$name.$extension').exists()) {
+  if (await outputFile.exists()) {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: web/$name.$extension');
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: ${p.relative(outputPath)}');
     if (!isDebug) {
       if (isWasm) {
-        await File('web/$name.unopt.wasm').delete();
+        await File('$output/$name.unopt.wasm').delete();
       } else {
-        await File('web/$name.js.deps').delete();
-        await File('web/$name.js.map').delete();
+        await File('$output/$name.js.deps').delete();
+        await File('$output/$name.js.map').delete();
       }
     }
   } else {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: web/$name.$extension');
+        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: ${p.relative(outputPath)}');
     final r = result.stdout.toString().split('\n');
     for (var element in r) {
       print('   > $element');
