@@ -374,3 +374,68 @@ print(result); // 100
 </br>
 
 <p align='center'><a href="https://www.buymeacoffee.com/lamnhan066"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=lamnhan066&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a coffee" width="200"></a></p>
+
+## Migrations
+
+### v5.0.0
+
+All `Worker`'s MUST be re-compiled with the following changes:
+
+- If you're using the `IsolateManagerFunction.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateManagerFunction.customFunction` will be automatically applied.
+
+- If you're using the old method, you need to send a `initialized` signal from an `Isolate` and a `Worker`:
+  - Custom function of an `Isolate`: add the `controller.initialized();` to the end of the function.
+    - Before:
+
+        ```dart
+        void customFunction(dynamic params) {
+          final controller = IsolateManagerController(params);
+          controller.onIsolateMessage.then((value){
+            // ...
+          });
+        }
+        ```
+
+    - After:
+
+        ```dart
+        void customFunction(dynamic params) async {
+          // Do something sync or async here
+
+          final controller = IsolateManagerController(params); 
+          controller.onIsolateMessage.then((value){
+            // ...
+          });
+
+          controller.initialized(); // <--
+        }
+        ```
+
+  - On the Web `Worker`: add `jsSendMessage(IsolateState.initialized.toJson());` to the end of the `main` method.
+    - Before:
+
+        ```dart
+        void main() {
+          callbackToStream('onmessage', (MessageEvent e) {
+            return js_util.getProperty(e, 'data');
+          }).listen((message) {
+            // ...
+          });  
+        }
+        ```
+
+    - After:
+
+        ```dart
+        void main() async {
+          // Do something sync or async here
+
+          callbackToStream('onmessage', (MessageEvent e) {
+            return js_util.getProperty(e, 'data');
+          }).listen((message) {
+            // ...
+          });
+
+          jsSendMessage(IsolateState.initialized.toJson()); // <--
+        }
+        ```
