@@ -1,3 +1,119 @@
+## 5.0.0-rc.11
+
+* Implement the `call` method.
+* Able to generate to WASM with `--wasm` flag (But unusable right now).
+
+## 5.0.0-rc.10
+
+* Fix issue with null `initialParams` in `createCustom`.
+* Remove unused variable `autoMarkAsInitialized` and related code in the `base`.
+* Update tests.
+
+## 5.0.0-rc.9
+
+* Able to generate static functions (Classs.function => Class.function.js).
+* Improve the generator (only generate the needed files to reduce time).
+* Improve the generated logs.
+
+## 5.0.0-rc.8
+
+* Add a generator to generate the Worker JS by adding the `IsolateManagerWorker` and `isolateManagerWorker` annotations.
+* Update README.
+
+## 5.0.0-rc.7
+
+* Update to improve the score.
+
+## 5.0.0-rc.6
+
+* Update the CHANGELOG to show the migration guide.
+
+## 5.0.0-rc.5
+
+* Export the `IsolateState`.
+* Update the CHANGELOG to show the migration guide.
+
+## 5.0.0-rc.4
+
+* Bring the `isolate_contactor` to this package and make it lighter and easier to maintain.
+* Update the tests.
+* Remove unneeded platforms in the example.
+
+## 5.0.0-rc.3
+
+* Remove deprecated methods.
+* Improve the `IsolateManager.create` behavior (use a new `customFunction`).
+* Imptove the type of the `customFunction` and `workerFunction`.
+
+## 5.0.0-rc.2
+
+* Update README.
+* Update homepage for beta version.
+
+## 5.0.0-rc.1
+
+* Bump sdk to `^3.3.0`.
+* Remove `autoInitialize` parameter.
+* Remove deprecated methods.
+* **MIGRATION:** All `Worker`'s MUST be re-compiled
+  * If you're using the `IsolateManagerFunction.workerFunction`, you need to re-generate the `JS` for the Web Worker (compile from `Dart` to `JS`). The `IsolateManagerFunction.customFunction` will be automatically applied.
+  * If you're using the old method, you need to send a `initialized` signal from an `Isolate` and a `Worker`:
+    * Custom function of an `Isolate`: add the `controller.initialized();` to the end of the function.
+      * Before:
+
+          ```dart
+          void customFunction(dynamic params) {
+            final controller = IsolateManagerController(params);
+            controller.onIsolateMessage.then((value){
+              // ...
+            });
+          }
+          ```
+
+      * After:
+
+          ```dart
+          void customFunction(dynamic params) async {
+            // Do something sync or async here
+
+            final controller = IsolateManagerController(params); 
+            controller.onIsolateMessage.then((value){
+              // ...
+            });
+
+            controller.initialized(); // <--
+          }
+          ```
+
+    * On the Web `Worker`: add `jsSendMessage(IsolateState.initialized.toJson());` to the end of the `main` method.
+      * Before:
+
+          ```dart
+          void main() {
+            callbackToStream('onmessage', (MessageEvent e) {
+              return js_util.getProperty(e, 'data');
+            }).listen((message) {
+              // ...
+            });  
+          }
+          ```
+
+      * After:
+
+          ```dart
+          void main() async {
+            // Do something sync or async here
+
+            callbackToStream('onmessage', (MessageEvent e) {
+              return js_util.getProperty(e, 'data');
+            }).listen((message) {
+              // ...
+            });
+
+            jsSendMessage(IsolateState.initialized.toJson()); // <--
+          }
+          ```
+
 ## 4.3.1
 
 * Export the `IsolateState`.
@@ -226,7 +342,7 @@
 
 ## 2.1.1
 
-* On Flutter >3.3.0 - `@pragma('vm:entry-point')` anotation must be added to all methods that you want to use for isolation. Read README for more information.
+* On Flutter >3.3.0 - `@pragma('vm:entry-point')` annotation must be added to all methods that you want to use for isolation. Read README for more information.
 
 ## 2.1.0
 

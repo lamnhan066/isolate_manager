@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:isolate_contactor/isolate_contactor.dart';
+import 'base/isolate_contactor.dart';
 
 class IsolateManagerController<R, P> {
   /// Delegation of IsolateContactor.

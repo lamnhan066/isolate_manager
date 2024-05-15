@@ -3,7 +3,7 @@
 
 import 'dart:async';
 
-import 'isolate_worker.dart';
+import '../isolate_manager_function.dart';
 
 /// No-op on `io`.
 Future<void> isolateWorkerImpl<R, P>(

@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   final isolateFibonacciFuture = IsolateManager.create(
     isDebug: true,
     fibonacciFuture,
-    workerName: 'workers/fibonacci',
+    workerName: 'fibonacci',
     concurrent: 2,
   );
   final isolateIsolateFunction = IsolateManager.createCustom(
@@ -35,17 +35,17 @@ class _MyAppState extends State<MyApp> {
   );
   final isolateFibonacciRecursive = IsolateManager.create(
     fibonacciRecursiveFuture,
-    workerName: 'workers/fibonacci_recursive',
+    workerName: 'fibonacciRecursiveFuture',
     concurrent: 2,
   );
   final isolateFunctionName = IsolateManager.create(
     functionName,
-    workerName: 'workers/function_name',
+    workerName: 'functionName',
     isDebug: true,
   );
   final isolateCountEven = IsolateManager.create(
     countEven,
-    workerName: 'workers/count_even',
+    workerName: 'countEven',
     isDebug: true,
   );
   final isolateError = IsolateManager.create(
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
 
   final isolateComplexFunction = IsolateManager.create(
     complexFunction,
-    workerName: 'workers/complex',
+    workerName: 'complexFunction',
     isDebug: true,
   );
 
@@ -132,7 +132,7 @@ class _MyAppState extends State<MyApp> {
   void calculateFunctionName([int max = 30]) {
     value4 = rad.nextInt(max);
     print('Isolate 3: Calculate fibonancci at F$value4');
-    isolateFunctionName.sendMessage(value4);
+    isolateFunctionName(value4);
   }
 
   void calculateCountEven() {

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:isolate_contactor/isolate_contactor.dart';
-
-import 'utils.dart';
+import 'base/isolate_contactor.dart';
+import 'isolate_manager_function.dart';
+import 'models/isolate_queue.dart';
 
 /// Type for the callback of the isolate.
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
@@ -33,58 +33,8 @@ class IsolateManager<R, P> {
   /// Is using your own isolate function.
   final bool isCustomIsolate;
 
-  /// Mark an `Isolate` and `Worker` as initialized after spawned.
-  ///
-  /// TODO: Set this value to `false` by default in the next big release `v5.0.0`.
-  ///
-  /// An `Isolate` or a `Worker` need sometimes to be completely executed (ready
-  /// to receive the messages from the main app). If this value is `true`,
-  /// an `Isolate` or a `Worker` will be marked as initialized as soon as it's
-  /// spawned, otherwise, the main app will wait for an `initialized` signal
-  /// sent from the `Isolate` or `Worker` to ensure that it's completely executed and
-  /// ready to receive the messages.
-  ///
-  /// When using the `IsolateManagerFunction`, you don't need to do anything when
-  /// this value is set to `true`. But when you create a custom function or worker
-  /// (without using the `IsolateManagerFunction`), we need to add a line to
-  /// the custom function and worker to send a signal to the main app:
-  ///
-  ///   * Custom function:
-  ///
-  ///   ```dart
-  ///   void customFunction(dynamic params) {
-  ///     final controller = IsolateManagerController(params);
-  ///     controller.onIsolateMessage.then((value){
-  ///       // ...
-  ///     });
-  ///
-  ///     controller.initialized(); // <--
-  ///   }
-  ///   ```
-  ///
-  ///   * Web worker:
-  ///
-  ///   ```dart
-  ///   void main() {
-  ///     callbackToStream('onmessage', (MessageEvent e) {
-  ///       return js_util.getProperty(e, 'data');
-  ///     }).listen((message) {
-  ///       // ...
-  ///     });
-  ///
-  ///     jsSendMessage(IsolateState.initialized.toJson()); // <--
-  ///   }
-  ///   ```
-  final bool autoInitialize;
-
   /// Allow print debug log.
   final bool isDebug;
-
-  // coverage:ignore-start
-  /// Similar to `stream`, for who's using IsolateContactor.
-  @Deprecated('Use [stream] instead')
-  Stream<R> get onMessage => _streamController.stream;
-  // coverage:ignore-end
 
   /// Get value as stream.
   Stream<R> get stream => _streamController.stream;
@@ -118,7 +68,6 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    this.autoInitialize = true,
     this.isDebug = false,
   })  : isCustomIsolate = false,
         initialParams = '' {
@@ -134,30 +83,11 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    this.autoInitialize = true,
     this.isDebug = false,
   }) : isCustomIsolate = true {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
-
-  // coverage:ignore-start
-  /// Create a new isolate with your own isolate function.
-  @Deprecated('Use `createCustom` instead')
-  IsolateManager.createOwnIsolate(
-    IsolateCustomFunction this.isolateFunction, {
-    this.workerName = '',
-    this.initialParams,
-    this.concurrent = 1,
-    this.converter,
-    this.workerConverter,
-    this.autoInitialize = true,
-    this.isDebug = false,
-  }) : isCustomIsolate = true {
-    // Set the debug log prefix.
-    IsolateContactor.debugLogPrefix = debugLogPrefix;
-  }
-  // coverage:ignore-end
 
   /// Queue of isolates.
   final Queue<IsolateQueue<R, P>> _queues = Queue();
@@ -175,6 +105,15 @@ class IsolateManager<R, P> {
 
   /// Control when the `start` method is completed.
   Completer<void> _startedCompleter = Completer();
+
+  /// A default function for using the [IsolateManager.create] method.
+  static void _defaultIsolateFunction<R, P>(dynamic params) {
+    IsolateManagerFunction.customFunction<R, P>(params,
+        onEvent: (controller, message) {
+      final function = controller.initialParams;
+      return function(message);
+    });
+  }
 
   /// Initialize the instance. This method can be called manually or will be
   /// called when the first `compute()` has been made.
@@ -202,7 +141,6 @@ class IsolateManager<R, P> {
               initialParams: initialParams,
               converter: converter,
               workerConverter: workerConverter,
-              autoMarkAsInitialized: autoInitialize,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
@@ -212,12 +150,12 @@ class IsolateManager<R, P> {
       await Future.wait(
         [
           for (int i = 0; i < concurrent; i++)
-            IsolateContactor.create<R, P>(
-              isolateFunction as IsolateFunction<R, P>,
+            IsolateContactor.createCustom<R, P>(
+              _defaultIsolateFunction<R, P>,
+              initialParams: isolateFunction as IsolateFunction<R, P>,
               workerName: workerName,
               converter: converter,
               workerConverter: workerConverter,
-              autoMarkAsInitialized: autoInitialize,
               debugMode: isDebug,
             ).then((value) => _isolates.addAll({value: false}))
         ],
@@ -259,6 +197,39 @@ class IsolateManager<R, P> {
     await start();
   }
 
+  /// Compute isolate manager with [R] is return type.
+  ///
+  /// You can use [callback] to be able to receive many values before receiving
+  /// the final result that is returned from the [call] method. The final
+  /// result will be returned when the callback returns `true`.
+  ///
+  /// Ex:
+  ///
+  /// Without callback, the first value received from the Isolate is always the
+  /// final value:
+  ///
+  /// ```dart
+  /// final result = await isolate(params); // Get only the first result from the isolate
+  /// ```
+  ///
+  /// With callback, only the `true` value is the final value, so all other values
+  /// is marked as the progress values:
+  ///
+  /// ``` dart
+  /// final result = await isolate.compute(params, (value) {
+  ///       if (value is int) {
+  ///         // Do something here with the value that will be not returned to the `result`.
+  ///         print('progress: $value');
+  ///         return false;
+  ///       }
+  ///
+  ///       // The value is not `int` and will be returned to the `result` as the final result.
+  ///       return true;
+  ///  });
+  /// ```
+  Future<R> call(P params, {IsolateCallback<R>? callback}) =>
+      compute(params, callback: callback);
+
   ///  Similar to the [compute], for who's using IsolateContactor.
   Future<R> sendMessage(P params, {IsolateCallback<R>? callback}) =>
       compute(params, callback: callback);
@@ -277,6 +248,7 @@ class IsolateManager<R, P> {
   /// ```dart
   /// final result = await isolate.compute(params); // Get only the first result from the isolate
   /// ```
+  ///
   /// With callback, only the `true` value is the final value, so all other values
   /// is marked as the progress values:
   ///

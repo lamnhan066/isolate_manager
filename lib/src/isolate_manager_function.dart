@@ -7,18 +7,21 @@ import 'isolate_worker/isolate_worker_web.dart'
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
-typedef IsolateOnInitialCallback<T> = FutureOr<void> Function(
-    IsolateManagerController controller, T initialParams);
+typedef IsolateOnInitialCallback<R, P, T> = FutureOr<void> Function(
+    IsolateManagerController<R, P> controller, T initialParams);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
-typedef IsolateOnDisposeCallback<T> = void Function(
-    IsolateManagerController controller);
+typedef IsolateOnDisposeCallback<R, P> = void Function(
+    IsolateManagerController<R, P> controller);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed every time
 /// the [message] is received from the `sendMessage` or `execute` method.
 typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
-    IsolateManagerController controller, P message);
+    IsolateManagerController<R, P> controller, P message);
+
+/// A function for the `IsolateManagerFunction.workerFunction`.
+typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 
 class IsolateManagerFunction {
   /// No-op
@@ -28,7 +31,8 @@ class IsolateManagerFunction {
   ///
   /// The [onInitial] and [onDispose] will be executed only one time in the beginning
   /// and at the end. The [onEvent] will be executed every time the `message` is received
-  /// from the main isolate. You can set the [autoHandleException] to `false` if
+  /// from the main isolate, the return type should be specified to avoid
+  /// the `NULL` return type. You can set the [autoHandleException] to `false` if
   /// you want to `controller.sendResultError` by yourself, and set the [autoHandleResult]
   /// if you want to `controller.sendResult` yourself. By defaults, when the [onEvent]
   /// was executed, the result will be sent to the main isolate and the `Exception`
@@ -43,10 +47,9 @@ class IsolateManagerFunction {
   ///       return fetchAndDecode(message);
   ///     },
   ///     onInitial: (controller, initialParams) {
-  ///        // This event will be executed before all the other events
+  ///        // This event will be executed before all the other events.
   ///        //
-  ///        // This event can be a `Future` but you need to set the `autoInitialize` in
-  ///        // the `create` and `createCustom` to `false` to make it works.
+  ///        // This event can be a `Future` function.
   ///     },
   ///     onDispose: (controller) {
   ///        /* This event will be executed after all the other events and should NOT be a `Future` event */
@@ -55,16 +58,17 @@ class IsolateManagerFunction {
   /// }
   /// ```
   static Future<void> customFunction<R, P>(
+    /// A default parameter that used by the package.
     dynamic params, {
     required IsolateOnEventCallback<R, P> onEvent,
-    IsolateOnInitialCallback? onInitial,
-    IsolateOnDisposeCallback? onDispose,
+    IsolateOnInitialCallback<R, P, Object?>? onInitial,
+    IsolateOnDisposeCallback<R, P>? onDispose,
     bool autoHandleException = true,
     bool autoHandleResult = true,
   }) async {
     // Initialize the controller for the child isolate. This function will be declared
     // with `Map<String, dynamic>` as the return type (.sendResult) and `String` as the parameter type (.sendMessage).
-    late IsolateManagerController controller;
+    late IsolateManagerController<R, P> controller;
     controller = IsolateManagerController(
       params,
       onDispose: onDispose == null
@@ -84,7 +88,8 @@ class IsolateManagerFunction {
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
     controller.onIsolateMessage.listen((message) {
-      Completer completer = Completer();
+      // Use `R?` to allow
+      final completer = Completer();
       completer.future.then(
         (value) => autoHandleResult ? controller.sendResult(value) : null,
         onError: autoHandleException
@@ -123,9 +128,6 @@ class IsolateManagerFunction {
   ///     fetchAndDecode,
   ///     onInitial: () {
   ///       // This is optional.
-  ///       //
-  ///       // You have to set the parameter `autoInitialze` in the `create` and `createCustom`
-  ///       // to `false` when using this.
   ///     }
   ///   );
   /// }
@@ -153,96 +155,3 @@ class IsolateManagerFunction {
   }
   // coverage:ignore-end
 }
-
-// coverage:ignore-start
-@Deprecated('Use `IsolateManagerFunction` instead')
-class IsolateFunctionHelper {
-  /// Create a custom isolate function.
-  ///
-  /// The [onInitial] and [onDispose] will be executed only one time in the beginning
-  /// and at the end. The [onEvent] will be executed every time the `message` is received
-  /// from the main isolate. You can set the [autoHandleException] to `false` if
-  /// you want to `controller.sendResultError` by yourself, and set the [autoHandleResult]
-  /// if you want to `controller.sendResult` yourself. By defaults, when the [onEvent]
-  /// was executed, the result will be sent to the main isolate and the `Exception`
-  /// will also be sent.
-  ///
-  /// ```dart
-  /// void customIsolateFunction(dynamic params) {
-  ///   IsolateFunctionHelper.customFunction<int, int>(
-  ///     params,
-  ///     onEvent: (controller, message) {
-  ///       /* This event will be executed every time the `message` is received from the main isolate */
-  ///       return fetchAndDecode(message);
-  ///     },
-  ///     onInitial: (controller, initialParams) {
-  ///        // This event will be executed before all the other events
-  ///        //
-  ///        // This event can be a `Future` but you need to set the `autoInitialize` in
-  ///        // the `create` and `createCustom` to `false` to make it works.
-  ///     },
-  ///     onDispose: (controller) {
-  ///        /* This event will be executed after all the other events and should NOT be a `Future` event */
-  ///     },
-  ///   );
-  /// }
-  /// ```
-  @Deprecated('Use `IsolateManagerFunction.customFunction` instead')
-  static Future<void> customFunction<R, P>(
-    dynamic params, {
-    required IsolateOnEventCallback<R, P> onEvent,
-    IsolateOnInitialCallback? onInitial,
-    IsolateOnDisposeCallback? onDispose,
-    bool autoHandleException = true,
-    bool autoHandleResult = true,
-  }) =>
-      IsolateManagerFunction.customFunction(
-        params,
-        onEvent: onEvent,
-        onInitial: onInitial,
-        onDispose: onDispose,
-        autoHandleException: autoHandleException,
-        autoHandleResult: autoHandleResult,
-      );
-
-  // Tested by compiling to `js` for the Web Worker.
-  //
-  /// Create a worker in your `main`.
-  ///
-  /// ```dart
-  /// main() {
-  ///   // The function `fetchAndDecode` MUST NOT depend on any Flutter library
-  ///   IsolateFunctionHelper.workerFunction(
-  ///     fetchAndDecode,
-  ///     onInitial: () {
-  ///       // This is optional.
-  ///       //
-  ///       // You have to set the parameter `autoInitialze` in the `create` and `createCustom`
-  ///       // to `false` when using this.
-  ///     }
-  ///   );
-  /// }
-  /// ```
-  ///
-  /// Build it with `dart compile js worker.dart -o worker.js -O4` and copy the `worker.js` to
-  /// your Web folder.
-  ///
-  /// When you're using the [onInitial], you have to set the `autoInitialize` parameter
-  /// of the `create` and `createCustom` to `false`. Without it, the `Worker` will
-  /// be stucked forever.
-  ///
-  /// If you need to throw an exception, you should only throw the `message`
-  /// instead of a whole Object because it may not be shown as expected when
-  /// sending back to the main app.
-  ///
-  /// ``` dart
-  ///  return throw 'This is an error that you need to catch in your main app';
-  /// ```
-  @Deprecated('Use `IsolateManagerFunction.workerFunction` instead')
-  static Future<void> workerFunction<R, P>(
-    IsolateWorkerFunction<R, P> function, {
-    FutureOr<void> Function()? onInitial,
-  }) =>
-      IsolateManagerFunction.workerFunction(function, onInitial: onInitial);
-}
-// coverage:ignore-end
