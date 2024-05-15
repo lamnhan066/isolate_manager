@@ -352,7 +352,7 @@ void main() {
   });
 }
 
-@pragma('vm:entry-point')
+@isolateManagerWorker
 int fibonacci(int n) {
   if (n < 0) throw StateError('n<0');
   if (n == 0) return 0;
@@ -369,6 +369,7 @@ int fibonacci(int n) {
   return r;
 }
 
+@isolateManagerWorker
 int fibonacciRecursive(int n) {
   if (n == 0) return 0;
   if (n == 1) return 1;
@@ -376,7 +377,6 @@ int fibonacciRecursive(int n) {
   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
 }
 
-@pragma('vm:entry-point')
 void isolateFunction(dynamic params) {
   IsolateManagerFunction.customFunction<int, int>(
     params,
