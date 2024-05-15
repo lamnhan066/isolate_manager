@@ -121,9 +121,9 @@ await isolateManager.stop();
 
 ## Worker Configuration
 
-### Use The Generator
+### **Use The Generator**
 
-#### Add the annotation
+**Step 1:** Add the annotation
 
 ```dart
 @isolateManagerWorker
@@ -139,12 +139,11 @@ or
 int add(List<int> params) {
   return params[0] + params[1];
 }
-
 ```
 
 Multiple annotated functions inside a file are supported. You need to make sure that all functions across all files will have different names because the generated JS use it to name the files. You can specify the JS's name by using the `@IsolateManagerWorker('modifiedWorkerName')` annotation.
 
-#### Execute the generator
+**Step 2:** Execute the generator
 
 ```console
 dart run isolate_manager:generate
@@ -152,7 +151,7 @@ dart run isolate_manager:generate
 
 After running the command, a file named `add.js` will be generated inside the `web` folder.
 
-#### Update the `IsolateManager`
+**Step 3:** Update the `IsolateManager`:
 
 ```dart
 final isolate = IsolateManager.create(add, workerName: 'add');
@@ -162,9 +161,9 @@ If you want to place the generated JS inside a subfolder, you can update the ann
 
 Static functions are also supported. A function `WorkerFunctions.method` will be compiled to `WorkerFunctions.method.js`, so that the `workerName` will be `WorkerFunctions.method`.
 
-### Mannually
+### **Manually**
 
-#### **Step 1:** Create a Worker file
+**Step 1:** Create a Worker file
 
 Create a `add.dart` file with this content
 
@@ -182,15 +181,15 @@ main() {
 }
 ```
 
-#### **Step 2:** Compile to JS
+**Step 2:** Compile to JS
 
 Run `dart compile js add.dart -o add.js -O4` to compile Dart to JS (The flag `-O4` is the obfuscated level of `JS`, the lowest value is `-O0` and the highest value is `-O4`)
 
-#### **Step 3:** Copy to the Web folder
+**Step 3:** Copy to the Web folder
 
 Copy the `add.js` to the `Web` folder (the same folder with `index.html`)
 
-#### **Step 4:** Add it to the `IsolateManager`
+**Step 4:** Add it to the `IsolateManager`
 
 Update the `isolateManager` like below
 
