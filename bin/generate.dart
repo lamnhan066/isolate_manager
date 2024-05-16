@@ -236,6 +236,8 @@ Future<void> _generateFromAnotatedFunction(
       '-o',
       outputPath,
       obfuscate,
+      if (!isWasm) '--omit-implicit-checks',
+      if (!isDebug && !isWasm) '--no-source-maps',
     ],
   );
 
@@ -247,7 +249,6 @@ Future<void> _generateFromAnotatedFunction(
         await File('$output/$name.unopt.wasm').delete();
       } else {
         await File('$output/$name.js.deps').delete();
-        await File('$output/$name.js.map').delete();
       }
     }
   } else {
