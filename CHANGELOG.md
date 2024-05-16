@@ -1,3 +1,9 @@
+## 5.0.1
+
+* Add `--omit-implicit-checks` flag when compiling to `js` to avoid type check issues.
+* Add comments to the `IsolateException`.
+* Update README.
+
 ## 5.0.0
 
 * Bump sdk to `^3.3.0`.
