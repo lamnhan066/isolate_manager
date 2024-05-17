@@ -1,6 +1,10 @@
 # Isolate Manager
 
 [![codecov](https://codecov.io/gh/lamnhan066/isolate_manager/graph/badge.svg?token=MSREWDRA4E)](https://codecov.io/gh/lamnhan066/isolate_manager)
+![Pub Version](https://img.shields.io/pub/v/isolate_manager)
+![Pub Points](https://img.shields.io/pub/points/isolate_manager)
+![Pub Popularity](https://img.shields.io/pub/popularity/isolate_manager)
+![Pub Likes](https://img.shields.io/pub/likes/isolate_manager)
 
 ## **Features**
 
@@ -204,7 +208,7 @@ Now the plugin will handle all other action to make the real isolate works on We
 
 **Note:** If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
 
-## **Advanced Usage** (Use a custom function)
+## **Advanced Usage**
 
 You can control everything with this method when you want to create multiple isolates for a function. With this method, you can also do one-time stuff (`onInitial`) when the isolate is started or each-time stuff when you call `compute` or `sendMessage`.
 
