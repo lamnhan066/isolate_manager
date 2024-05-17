@@ -1,10 +1,13 @@
 # Isolate Manager
 
 [![codecov](https://codecov.io/gh/lamnhan066/isolate_manager/graph/badge.svg?token=MSREWDRA4E)](https://codecov.io/gh/lamnhan066/isolate_manager)
-![Pub Version](https://img.shields.io/pub/v/isolate_manager)
-![Pub Points](https://img.shields.io/pub/points/isolate_manager)
-![Pub Popularity](https://img.shields.io/pub/popularity/isolate_manager)
-![Pub Likes](https://img.shields.io/pub/likes/isolate_manager)
+
+[![Pub Version](https://img.shields.io/pub/v/isolate_manager)](https://pub.dev/packages/isolate_manager)
+[![Pub Points](https://img.shields.io/pub/points/isolate_manager)](https://pub.dev/packages/isolate_manager)
+[![Pub Popularity](https://img.shields.io/pub/popularity/isolate_manager)](https://pub.dev/packages/isolate_manager)
+[![Pub Likes](https://img.shields.io/pub/likes/isolate_manager)](https://pub.dev/packages/isolate_manager)
+
+[![Discord](https://img.shields.io/discord/1240864619342594048)](https://discord.gg/V6ykuZgy)
 
 ## **Features**
 
