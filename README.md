@@ -9,21 +9,30 @@
 
 [![Discord](https://img.shields.io/discord/1240864619342594048)](https://discord.gg/V6ykuZgy)
 
+[![BMC QR](https://raw.githubusercontent.com/lamnhan066/isolate_manager/main/assets/images/bmc_qr.png)](https://www.buymeacoffee.com/lamnhan066)
+
 ## **Features**
 
 - A generator to generate all Workers by using the `@isolateManagerWorker` annotation.
-
 - An easy way to create multiple long-lived isolates for a function (keep it active to send and receive data).
-
 - Supports `Worker` on the Web (If the `Worker` is unavailable in the working browser or is not configured, the `Future` (and `Stream`) will be used instead).
-
-- Supports `WASM` on the Web.
-
+- Supports `WASM` compilation on the Web.
 - Multiple `compute` operations are allowed because the plugin will queue the input data and send it to a free isolate later.
-
 - Supports `try-catch` blocks.
-
 - To compute with multiple functions, you can use the [isolates_helper](https://pub.dev/packages/isolates_helper) instead.
+
+## **Table Of Contents**
+
+- [Benchmark](#benchmark)
+- [Basic Usage](#basic-usage)
+- [Basic Usage (With The Web Worker)](#basic-usage-with-the-web-worker)
+- [Custom Function Usage](#custom-function-usage)
+- [Custom Worker Usage](#custom-worker-usage)
+- [Try Catch Block](#try-catch-block)
+- [Progress Values (Receives multiple values in a single `compute`)](#progress-values)
+- [Addtional Information](#additional-information)
+- [Contributions](#contributions)
+- [Migrations](#migrations)
 
 ## **Benchmark**
 
@@ -47,171 +56,81 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for the test details.
 
-## **Basic Usage** (Use built-in function)
+## **Basic Usage
 
-There are multiple ways to use this package. The only thing to notice is that the `function` has to be a `static` or `top-level` function to work.
-
-### **Step 1:** Create a top-level or static function
+There are multiple ways to use this package. The only thing to notice is that the `function` has to be a `static` or `top-level` function.
 
 ``` dart
-Future<Map<String, dynamic>> fetchAndDecode(String url) async {
-  final response = await http.Client().get(Uri.parse(url));
-  return jsonDecode(response.body);
+main() async {
+  final isolate = IsolateManager.create(
+      fibonacci, 
+      concurrent: 4
+    );
+
+  isolate.stream.listen((value) {
+    print(value);
+  });
+
+  final fibo = await isolate(55);
+}
+
+int fibonacci(int n) {
+  if (n == 0) return 0;
+  if (n == 1) return 1;
+
+  return fibonacci(n - 1) + fibonacci(n - 2);
 }
 ```
 
-### **Step 2:** Create an IsolateManager instance for that function
-
-``` dart
-final isolateFetchAndDecode = IsolateManager.create(
-  fetchAndDecode, // Function you want to compute
-  concurrent: 4, // Number of concurrent isolates. Default is 1
-);
-```
-
-### **Step 3 [Optional]:** Initialize the instance; this step is not required because it's automatically called when you use `.compute` for the first time
-
-``` dart
-await isolateManager.start();
-```
-
-You can also run this method when creating the instance:
-
-``` dart
-final isolateManager = IsolateManager.create(
-  fetchAndDecode, // Function you want to compute
-  concurrent: 4, // Number of concurrent isolates. Default is 1
-)..start();
-```
-
-### **Step 4:** Send and receive data
-
-``` dart
-final result = await isolateManager.compute('https://path/to/json.json');
-```
-
-You can send even more times than `concurrent` because the plugin will queue the input data and send it to a free isolate later.
-
-You can listen to the result as a `stream`:
-
-``` dart
-isolateManager.stream.listen((result) => print(result));
-```
-
-Build your widget with `StreamBuilder`:
-
-``` dart
-StreamBuilder(
-  stream: isolateManager.stream,
-  builder: (context, snapshot) {
-    if (!snapshot.hasData) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-    return Text('Data: ${snapshot.data}');
-  },
-),
-```
-
-### **Step 5:** Restart the `IsolateManager` if needed
+You can restart or stop the isolate using this method:
 
 ``` dart
 await isolateManager.restart();
-```
-
-### **Step 6:** Stop `IsolateManager` when it finishes work
-
-``` dart
 await isolateManager.stop();
 ```
 
-## Worker Configuration
+## **Basic Usage (With The Web Worker)**
 
-### **Use The Generator**
+There are multiple ways to use this package. The only thing to notice is that the `function` has to be a `static` or `top-level` function.
 
-**Step 1:** Add the annotation
+``` dart
+main() async {
+  final isolate = IsolateManager.create(
+      fibonacci, 
+      workerName: 'fibonacci', // Add this line
+      concurrent: 4
+    );
 
-```dart
-@isolateManagerWorker
-int add(List<int> params) {
-  return params[0] + params[1];
+  isolate.stream.listen((value) {
+    print(value);
+  });
+
+  final fibo = await isolate(55);
+}
+
+@isolateManagerWorker // Add this anotation
+int fibonacci(int n) {
+  if (n == 0) return 0;
+  if (n == 1) return 1;
+
+  return fibonacci(n - 1) + fibonacci(n - 2);
 }
 ```
 
-or
-
-```dart
-@IsolateManagerWorker('add')
-int add(List<int> params) {
-  return params[0] + params[1];
-}
-```
-
-Multiple annotated functions inside a file are supported. You need to make sure that all functions across all files will have different names because the generated JS use it to name the files. You can specify the JS's name by using the `@IsolateManagerWorker('modifiedWorkerName')` annotation.
-
-**Step 2:** Execute the generator
+Run this command to generate a Javascript Worker if you need to use it:
 
 ```console
 dart run isolate_manager:generate
 ```
 
-After running the command, a file named `add.js` will be generated inside the `web` folder.
-
-**Step 3:** Update the `IsolateManager`:
-
-```dart
-final isolate = IsolateManager.create(add, workerName: 'add');
-```
-
-If you want to place the generated JS inside a subfolder, you can update the annotation to `@IsolateManagerWorker('workers/add')` and update the `workerName` to `workers/add`.
-
-Static functions are also supported. A function `WorkerFunctions.method` will be compiled to `WorkerFunctions.method.js`, so that the `workerName` will be `WorkerFunctions.method`.
-
-### **Manually**
-
-**Step 1:** Create a Worker file
-
-Create a `add.dart` file with this content
+You can restart or stop the isolate using this method:
 
 ``` dart
-import 'package:isolate_manager/isolate_manager.dart';
-
-main() {
-  // The function `add` MUST NOT depend on any Flutter library
-  IsolateManagerFunction.workerFunction(
-    add,
-    onInitial: () {
-      /* Optional. Run before all events */
-    }
-  );
-}
+await isolateManager.restart();
+await isolateManager.stop();
 ```
 
-**Step 2:** Compile to JS
-
-Run `dart compile js add.dart -o add.js -O4` to compile Dart to JS (The flag `-O4` is the obfuscated level of `JS`, the lowest value is `-O0` and the highest value is `-O4`)
-
-**Step 3:** Copy to the Web folder
-
-Copy the `add.js` to the `Web` folder (the same folder with `index.html`)
-
-**Step 4:** Add it to the `IsolateManager`
-
-Update the `isolateManager` like below
-
-``` dart
-final isolateManager = IsolateManager.create(
-    add,
-    workerName: 'add', // The name of the file, don't need to add the extension
-  );
-```
-
-Now the plugin will handle all other action to make the real isolate works on Web.
-
-**Note:** If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
-
-## **Advanced Usage**
+## **Custom Function Usage**
 
 You can control everything with this method when you want to create multiple isolates for a function. With this method, you can also do one-time stuff (`onInitial`) when the isolate is started or each-time stuff when you call `compute` or `sendMessage`.
 
@@ -225,7 +144,7 @@ void customIsolateFunction(dynamic params) {
     params,
     onEvent: (controller, message) {
       /* This event will be executed every time the `message` is received from the main isolate */
-      return fetchAndDecode(message);
+      return fibonacci(message);
     },
     onInitial: (controller, initialParams) {
        // This event will be executed before all the other events
@@ -245,25 +164,29 @@ Handle the result and the Exception by your self:
 void customIsolateFunction(dynamic params) {
   IsolateManagerFunction.customFunction<Map<String, dynamic>, String>(
     params,
-    onEvent: (controller, message) async {
-      /* This event will be executed every time the `message` is received from the main isolate */
+    onEvent: (controller, message) {
+      // This event will be executed every time the `message` is received from the main isolate.
+      //
+      // This event can be a `Future`.
       try {
-        final result = await fetchAndDecode(message);
+        final result = fibonacci(message);
         controller.sendResult(result);
       } catch (err, stack) {
         controller.sendResultError(IsolateException(err, stack));
       }
 
       // Just returns something that unused to complete this method.
-      return {};
+      return 0;
     },
     onInitial: (controller, initialParams) {
-       // This event will be executed before all the other events
+       // This event will be executed before all the other events.
        //
        // This event can be a `Future`.
     },
     onDispose: (controller) {
-       /* This event will be executed after all the other events and should NOT be a `Future` event */
+       // This event will be executed after all the other events.
+       //
+       // This event should NOT be a `Future` event */
     },
     autoHandleException: false,
     autoHandleResult: false,
@@ -276,12 +199,87 @@ void customIsolateFunction(dynamic params) {
 ``` dart
 final isolateManager = IsolateManager.createCustom(
     customIsolateFunction,
-    initialParams: 'This is initialParams',
+    initialParams: 'This is the initialParams',
     debugMode: true,
   );
 ```
 
 Now you can use everything as the **Basic Usage**.
+
+## **Custom Worker Usage**
+
+### **Use The Generator**
+
+**Step 1:** Use a modifiable annotation
+
+```dart
+@IsolateManagerWorker('RecursiveFibonacci')
+int fibonacci(int n) {
+  if (n == 0) return 0;
+  if (n == 1) return 1;
+
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+```
+
+**Step 2:** Execute the generator
+
+```console
+dart run isolate_manager:generate
+```
+
+**Step 3:** Update the `IsolateManager`:
+
+```dart
+final isolate = IsolateManager.create(fibonacci, workerName: 'RecursiveFibonacci');
+```
+
+If you want to place the generated JS inside a subfolder, you can update the annotation to `@IsolateManagerWorker('workers/RecursiveFibonacci')` and update the `workerName` to `workers/RecursiveFibonacci`.
+
+Static functions are also supported. A function `WorkerFunctions.method` will be compiled to `WorkerFunctions.method.js`, so that the `workerName` will be `WorkerFunctions.method`.
+
+### **Manually**
+
+**Step 1:** Create a Worker file
+
+Create a `fibonacci.dart` file with this content
+
+``` dart
+import 'package:isolate_manager/isolate_manager.dart';
+
+main() {
+  // The function `fibonacci` MUST NOT depend on any Flutter library
+  IsolateManagerFunction.workerFunction(
+    fibonacci,
+    onInitial: () {
+      /* Optional. Run before all events */
+    }
+  );
+}
+```
+
+**Step 2:** Compile to JS
+
+Run `dart compile js fibonacci.dart -o fibonacci.js -O4` to compile Dart to JS (The flag `-O4` is the obfuscated level of `JS`, the lowest value is `-O0` and the highest value is `-O4`)
+
+**Step 3:** Copy to the Web folder
+
+Copy the `fibonacci.js` to the `Web` folder (the same folder with `index.html`)
+
+**Step 4:** Add it to the `IsolateManager`
+
+Update the `isolateManager` like below
+
+``` dart
+final isolateManager = IsolateManager.create(
+    fibonacci,
+    workerName: 'fibonacci', // The name of the file, don't need to add the extension
+  );
+```
+
+Now the plugin will handle all other action to make the real isolate works on Web.
+
+**Note:** If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
 
 ## try-catch Block
 
@@ -289,8 +287,8 @@ You can use `try-catch` to catch exceptions:
 
 ``` dart
 try {
-  final result = await isolateManager.compute('https://path/to/json.json');
-} on Exception catch (e1) {
+  final result = await isolate(-10);
+} on SomeException catch (e1) {
   print(e1);
 } catch (e2) {
   print(e2);
@@ -302,6 +300,29 @@ try {
 You can even manage the final result by using this callback, useful when you create your own function that needs to send the progress value before returning the final result:
 
 ``` dart
+main() {
+  // Create an IsolateManager instance.
+  final isolateManager = IsolateManager.createCustom(progressFunction);
+
+  // Get the result.
+  final result = await isolateManager.compute(100, callback: (value) {
+    // Condition to recognize the progress value. Ex:
+    if (value != 100) {
+      print('This is a progress value: $value');
+
+      // Return `false` to mark this value is not the final.
+      return false;
+    }
+
+    print('This is a final value: $value');
+
+    // Return `true` to mark this value is the final.
+    return true;
+  });
+
+  print(result); // 100
+}
+
 // This is a progress function
 void progressFunction(dynamic params) {
   IsolateManagerFunction.customFunction<int, int>(
@@ -317,37 +338,14 @@ void progressFunction(dynamic params) {
     },
   );
 }
-
-// Create an IsolateManager instance.
-final isolateManager = IsolateManager.createCustom(progressFunction);
-
-// Get the result.
-final result = await isolateManager.compute(100, callback: (value) {
-  // Condition to recognize the progress value. Ex:
-  if (value != 100) {
-    print('This is a progress value: $value');
-
-    // Return `false` to mark this value is not the final.
-    return false;
-  }
-
-  print('This is a final value: $value');
-
-  // Return `true` to mark this value is the final.
-  return true;
-});
-
-print(result); // 100
 ```
 
-## Additional
+## Additional Information
 
+- The function has to be a `static` or `top-level` function.
 - Use `queuesLength` to get the current number of queued computation.
-
 - Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
-
 - Use `isStarted` to check if the `start` method is completed or not.
-
 - The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
 
   ``` dart
