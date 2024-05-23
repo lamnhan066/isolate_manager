@@ -117,7 +117,7 @@ int fibonacci(int n) {
 }
 ```
 
-Run this command to generate a Javascript Worker if you need to use it:
+Run this command to generate a Javascript Worker:
 
 ```console
 dart run isolate_manager:generate
