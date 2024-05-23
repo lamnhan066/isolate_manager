@@ -1,3 +1,8 @@
+## 5.0.1+1
+
+* Re-organize the README.
+* Update the description.
+
 ## 5.0.1
 
 * Add `--omit-implicit-checks` flag when compiling to `js` to avoid type check issues.
