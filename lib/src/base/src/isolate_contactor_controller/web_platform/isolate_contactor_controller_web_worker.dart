@@ -82,20 +82,12 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolate(P message) {
-    try {
-      _delegate.postMessage(message as dynamic);
-    } catch (_) {
-      // The delegate may be closed
-    }
+    _delegate.postMessage(message as dynamic);
   }
 
   @override
   void sendIsolateState(IsolateState state) {
-    try {
-      _delegate.postMessage(state.toJson().toJS);
-    } catch (_) {
-      // The delegate may be closed
-    }
+    _delegate.postMessage(state.toJson().toJS);
   }
 
   @override

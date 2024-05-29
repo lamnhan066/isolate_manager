@@ -87,38 +87,22 @@ class IsolateContactorControllerImplFuture<R, P>
 
   @override
   void sendIsolate(P message) {
-    try {
-      _delegate.sink.add({IsolatePort.isolate: message});
-    } catch (_) {
-      // The delegate may be closed
-    }
+    _delegate.sink.add({IsolatePort.isolate: message});
   }
 
   @override
   void sendIsolateState(IsolateState state) {
-    try {
-      _delegate.sink.add({IsolatePort.isolate: state});
-    } catch (_) {
-      // The delegate may be closed
-    }
+    _delegate.sink.add({IsolatePort.isolate: state});
   }
 
   @override
   void sendResult(R message) {
-    try {
-      _delegate.sink.add({IsolatePort.main: message});
-    } catch (_) {
-      // The delegate may be closed
-    }
+    _delegate.sink.add({IsolatePort.main: message});
   }
 
   @override
   void sendResultError(IsolateException exception) {
-    try {
-      _delegate.sink.add({IsolatePort.main: exception});
-    } catch (_) {
-      // The delegate may be closed
-    }
+    _delegate.sink.add({IsolatePort.main: exception});
   }
 
   @override
