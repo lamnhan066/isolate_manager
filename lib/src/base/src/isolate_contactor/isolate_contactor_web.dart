@@ -18,7 +18,7 @@ abstract class IsolateContactorInternal<R, P>
     /// If browser is not supported Worker then use Future
     if (workerName != '') {
       try {
-        return IsolateContactorInternalWorker.createCustom(
+        return IsolateContactorInternalWorker.createCustom<R, P>(
           isolateFunction: isolateFunction,
           workerName: workerName,
           initialParams: initialParams,
@@ -33,7 +33,7 @@ abstract class IsolateContactorInternal<R, P>
         }
       }
     }
-    return IsolateContactorInternalFuture.createCustom(
+    return IsolateContactorInternalFuture.createCustom<R, P>(
       isolateFunction: isolateFunction,
       isolateFunctionName: workerName,
       initialParams: initialParams,

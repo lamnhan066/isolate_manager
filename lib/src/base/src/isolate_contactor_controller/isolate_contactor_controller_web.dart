@@ -19,7 +19,7 @@ abstract class IsolateContactorControllerImpl<R, P>
   }) {
     if (params is StreamController ||
         params is List && params.last.controller is StreamController) {
-      return IsolateContactorControllerImplFuture(
+      return IsolateContactorControllerImplFuture<R, P>(
         params,
         onDispose: onDispose,
         converter: converter,
@@ -27,7 +27,7 @@ abstract class IsolateContactorControllerImpl<R, P>
       );
     }
 
-    return IsolateContactorControllerImplWorker(
+    return IsolateContactorControllerImplWorker<R, P>(
       params,
       onDispose: onDispose,
       converter: converter,
