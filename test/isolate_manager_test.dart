@@ -350,6 +350,36 @@ void main() {
 
     await isolateManager.stop();
   });
+
+  test('Test with returning a List<String>', () async {
+    final isolate = IsolateManager.create(
+      aStringList,
+      workerName: 'aStringList',
+      // Cast to List<String>
+      workerConverter: (value) => value.cast<String>() as List<String>,
+      isDebug: true,
+    );
+    await isolate.start();
+
+    final listString = ['a', 'b', 'c'];
+    final result = await isolate.compute(listString);
+
+    expect(result, listString);
+  });
+
+  test('Test with returning a Map<String, int>', () async {
+    final isolate = IsolateManager.create(
+      aStringIntMap,
+      workerName: 'aStringIntMap',
+      isDebug: true,
+    );
+    await isolate.start();
+
+    final map = {'a': 1, 'b': 2, 'c': 3};
+    final result = await isolate.compute(jsonEncode(map));
+
+    expect(jsonDecode(result), map);
+  });
 }
 
 @isolateManagerWorker
@@ -375,6 +405,16 @@ int fibonacciRecursive(int n) {
   if (n == 1) return 1;
 
   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+}
+
+@isolateManagerWorker
+List<String> aStringList(List<String> params) {
+  return params;
+}
+
+@isolateManagerWorker
+String aStringIntMap(String params) {
+  return params;
 }
 
 void isolateFunction(dynamic params) {
