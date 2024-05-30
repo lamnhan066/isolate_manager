@@ -1,28 +1,25 @@
 import 'dart:isolate';
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:test/test.dart';
 
-import 'isolate_manager_test.dart';
+import '../test/isolate_manager_test.dart';
 
 //  dart test
 //  dart test --platform=vm "test/benchmark_test.dart"
 //  dart test --platform=chrome "test/benchmark_test.dart"
 
-void main() {
-  test('Benchmark', () async {
-    print('|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|');
-    print('|:-:|-:|-:|-:|-:|');
+void main() async {
+  print('|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|');
+  print('|:-:|-:|-:|-:|-:|');
 
-    // Fibonacci 30
-    await execute(30);
+  // Fibonacci 30
+  await execute(30);
 
-    // Fibonacci 33
-    await execute(33);
+  // Fibonacci 33
+  await execute(33);
 
-    // Fibonacci 36
-    await execute(36);
-  }, timeout: Timeout(Duration(seconds: 90)));
+  // Fibonacci 36
+  await execute(36);
 }
 
 Future<void> execute(int fibonacciNumber) async {
