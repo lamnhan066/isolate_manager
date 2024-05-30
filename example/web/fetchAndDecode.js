@@ -5623,11 +5623,12 @@ cB(){var s=t.N
 return B.k.cg(A.eK(["$IsolateException",A.eK(["error",J.aU(this.a),"stack",this.b.i(0)],s,s)],s,t.f),null)},
 $iP:1}
 A.hr.prototype={
-$1(a){var s,r,q,p=a.data,o=new A.an(new A.l($.m,t.c),t.b3)
+$1(a){var s,r,q,p,o=new A.an(new A.l($.m,t.c),t.b3)
 o.a.aX(new A.hp(),new A.hq(),t.H)
-try{o.an(this.a.$1(p))}catch(q){s=A.S(q)
-r=A.a3(q)
-o.ae(s,r)}},
+try{s=a.data
+o.an(this.a.$1(s))}catch(p){r=A.S(p)
+q=A.a3(p)
+o.ae(r,q)}},
 $S:4}
 A.hp.prototype={
 $1(a){A.i_(self.self,"postMessage",[a])

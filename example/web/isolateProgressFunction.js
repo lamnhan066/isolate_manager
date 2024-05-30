@@ -3249,11 +3249,12 @@ s===$&&A.y()
 return s.ar(new A.aa(a,b))},
 $S:9}
 A.dC.prototype={
-$1(a){var s,r,q,p=a.data,o=new A.K(new A.e($.d,t.c),t.r)
+$1(a){var s,r,q,p,o=new A.K(new A.e($.d,t.c),t.r)
 o.a.H(new A.dA(),new A.dB(),t.H)
-try{o.K(this.a.$1(p))}catch(q){s=A.v(q)
-r=A.B(q)
-o.W(s,r)}},
+try{s=a.data
+o.K(this.a.$1(s))}catch(p){r=A.v(p)
+q=A.B(p)
+o.W(r,q)}},
 $S:8}
 A.dA.prototype={
 $1(a){A.dX(self.self,"postMessage",[a])

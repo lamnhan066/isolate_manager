@@ -2669,11 +2669,12 @@ A.bH.prototype={
 a2(){var s=t.N
 return B.c.I(A.b5(["$IsolateException",A.b5(["error",J.a9(this.a),"stack",this.b.h(0)],s,s)],s,t.f),null)}}
 A.cH.prototype={
-$1(a){var s,r,q,p=a.data,o=new A.aA(new A.o($.k,t.c),t.r)
+$1(a){var s,r,q,p,o=new A.aA(new A.o($.k,t.c),t.r)
 o.a.J(new A.cF(),new A.cG(),t.n)
-try{o.Y(this.a.$1(p))}catch(q){s=A.A(q)
-r=A.Q(q)
-o.Z(s,r)}},
+try{s=a.data
+o.Y(this.a.$1(s))}catch(p){r=A.A(p)
+q=A.Q(p)
+o.Z(r,q)}},
 $S:16}
 A.cF.prototype={
 $1(a){A.d0(self.self,"postMessage",[a])
