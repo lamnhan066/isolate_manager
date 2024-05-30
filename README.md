@@ -56,7 +56,7 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for the test details.
 
-## **Basic Usage
+## **Basic Usage**
 
 There are multiple ways to use this package. The only thing to notice is that the `function` has to be a `static` or `top-level` function.
 
