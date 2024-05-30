@@ -348,23 +348,50 @@ void progressFunction(dynamic params) {
 - Use `isStarted` to check if the `start` method is completed or not.
 - The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
 
-  ``` dart
-  final isolateManager = IsolateManager.create(
-    convertToMap,
-    // Ex: 'worker' if the name is 'worker.js'
-    workerName: 'worker',
-    // Convert the data from worker to fix the issue related to the different data type between dart and js
-    workerConverter: (result) {
-      final Map<int, double> convert = {};
+  1. `List<String>`
 
-      // Convert Map<String, String> (received from Worker) to Map<int, double>
-      final decodedMap = jsonDecode(result) as Map;
-      decodedMap.forEach((key, value) => convert.addAll({int.parse(key): double.parse(value)}));
+      ```dart
+      main() async {
+        final isolate = IsolateManager.create(
+          aStringList,
+          workerName: 'aStringList',
+          // Cast to List<String>
+          workerConverter: (value) => value.cast<String>() as List<String>,
+          isDebug: true,
+        );
 
-      return convert;
-    },
-  );
-  ```
+        final listString = ['a', 'b', 'c'];
+        final result = await isolate.compute(listString);
+        expect(result, listString);
+      }
+
+      @isolateManagerWorker
+      List<String> aStringList(List<String> params) {
+        return params;
+      }
+      ```
+
+  2. `Map<String, int>`: Use `json` for the complicated cases
+
+      ``` dart
+      main() async {
+        final isolate = IsolateManager.create(
+          aStringIntMap,
+          workerName: 'aStringIntMap',
+          isDebug: true,
+        );
+        await isolate.start();
+
+        final map = {'a': 1, 'b': 2, 'c': 3};
+        final result = await isolate.compute(jsonEncode(map));
+        expect(jsonDecode(result), map);
+      }
+
+      @isolateManagerWorker
+      String aStringIntMap(String params) {
+        return params;
+      }
+      ```
 
   **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
 
