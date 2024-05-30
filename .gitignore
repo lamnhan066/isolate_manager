@@ -28,3 +28,6 @@ doc/api/
 test/temp_test.dart
 
 coverage/
+
+# FVM Version Cache
+.fvm/
