@@ -36,8 +36,8 @@ Future<void> generate(List<String> args) async {
     )
     ..addOption(
       'obfuscate',
-      valueHelp: '2',
-      defaultsTo: '2',
+      valueHelp: '4',
+      defaultsTo: '4',
       help: 'JS obfuscation level (0 to 4). Default is set to 2',
     )
     ..addFlag(
