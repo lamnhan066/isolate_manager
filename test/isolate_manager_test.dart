@@ -61,8 +61,6 @@ void main() {
         })
     ]);
 
-    await Future.delayed(Duration(seconds: 3));
-
     isolateManager.stop();
   });
 
@@ -85,7 +83,6 @@ void main() {
           expect(value, fibonacci(i));
         })
     ]);
-    await Future.delayed(Duration(seconds: 3));
 
     await isolateManager.restart();
 
@@ -96,10 +93,7 @@ void main() {
         })
     ]);
 
-    expect(() => isolateManager.sendMessage(-1), throwsStateError);
-
-    await Future.delayed(Duration(seconds: 3));
-
+    await expectLater(() => isolateManager.sendMessage(-1), throwsStateError);
     await isolateManager.stop();
   });
 
@@ -110,10 +104,7 @@ void main() {
       concurrent: 1,
     )..start();
 
-    expect(() => isolateManager(-1), throwsStateError);
-
-    await Future.delayed(Duration(seconds: 3));
-
+    await expectLater(() => isolateManager(-1), throwsStateError);
     await isolateManager.stop();
   });
 
@@ -137,7 +128,6 @@ void main() {
           expect(value, fibonacci(i));
         })
     ]);
-    await Future.delayed(Duration(seconds: 3));
 
     await isolateManager.restart();
 
@@ -148,10 +138,7 @@ void main() {
         })
     ]);
 
-    expect(() => isolateManager.sendMessage(-1), throwsStateError);
-
-    await Future.delayed(Duration(seconds: 3));
-
+    await expectLater(() => isolateManager.sendMessage(-1), throwsStateError);
     await isolateManager.stop();
   });
 
@@ -174,9 +161,7 @@ void main() {
         })
     ]);
 
-    await Future.delayed(Duration(seconds: 3));
-
-    isolateManager.stop();
+    await isolateManager.stop();
   });
 
   test('Test with Exception future function', () async {
@@ -186,13 +171,10 @@ void main() {
     );
     await isolateManager.start();
 
-    expect(
+    await expectLater(
       () async => await isolateManager.compute([50, 50]),
       throwsStateError,
     );
-
-    await Future.delayed(Duration(seconds: 3));
-
     await isolateManager.stop();
   });
 
@@ -203,13 +185,10 @@ void main() {
     );
     await isolateManager.start();
 
-    expect(
+    await expectLater(
       () async => await isolateManager.compute([50, 50]),
       throwsStateError,
     );
-
-    await Future.delayed(Duration(seconds: 3));
-
     await isolateManager.stop();
   });
 
@@ -220,15 +199,12 @@ void main() {
     );
     await isolateManager.start();
 
-    expect(
+    await expectLater(
       () => isolateManager.compute([50, 50], callback: (value) {
         return true;
       }),
       throwsStateError,
     );
-
-    await Future.delayed(Duration(seconds: 3));
-
     await isolateManager.stop();
   });
 
@@ -244,13 +220,10 @@ void main() {
       futures.add(isolateManager.compute([i, 20]));
     }
 
-    expect(
+    await expectLater(
       () async => await Future.wait(futures, eagerError: true),
       throwsStateError,
     );
-
-    await Future.delayed(Duration(seconds: 3));
-
     await isolateManager.stop();
   });
 
@@ -268,13 +241,10 @@ void main() {
       futures.add(isolateManager.compute([i, 20], callback: (value) => true));
     }
 
-    expect(
+    await expectLater(
       () async => await Future.wait(futures, eagerError: true),
       throwsStateError,
     );
-
-    await Future.delayed(Duration(seconds: 3));
-
     await isolateManager.stop();
   });
 
@@ -290,13 +260,10 @@ void main() {
       futures.add(isolateManager.compute([i, 20]));
     }
 
-    expect(
+    await expectLater(
       () async => await Future.wait(futures, eagerError: false),
       throwsStateError,
     );
-
-    await Future.delayed(Duration(seconds: 3));
-
     await isolateManager.stop();
   });
 
@@ -314,13 +281,10 @@ void main() {
       futures.add(isolateManager.compute([i, 20], callback: (value) => true));
     }
 
-    expect(
+    await expectLater(
       () async => await Future.wait(futures, eagerError: false),
       throwsStateError,
     );
-
-    await Future.delayed(Duration(seconds: 3));
-
     await isolateManager.stop();
   });
 
@@ -357,7 +321,6 @@ void main() {
       workerName: 'aStringList',
       // Cast to List<String>
       workerConverter: (value) => value.cast<String>() as List<String>,
-      isDebug: true,
     );
     await isolate.start();
 
@@ -371,7 +334,6 @@ void main() {
     final isolate = IsolateManager.create(
       aStringIntMap,
       workerName: 'aStringIntMap',
-      isDebug: true,
     );
     await isolate.start();
 
