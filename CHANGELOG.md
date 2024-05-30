@@ -1,3 +1,12 @@
+## 5.0.2
+
+* Change the default generated js to level `O4` (Default level when using `flutter build web`).
+* Remove try catch to avoid unknown issues.
+* Add more test cases and improve tests.
+* Update the Worker base code.
+* Update missed types.
+* Update README.
+
 ## 5.0.1+1
 
 * Re-organize the README.
