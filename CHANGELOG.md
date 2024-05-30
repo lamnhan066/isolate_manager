@@ -1,3 +1,8 @@
+## 5.0.2+1
+
+* Update some comments and fix some TYPO.
+* Rename from `benchmarks` to `benchmark`.
+
 ## 5.0.2
 
 * Change the default generated js to level `O4` (Default level when using `flutter build web`).

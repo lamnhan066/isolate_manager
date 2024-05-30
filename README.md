@@ -9,8 +9,6 @@
 
 [![Discord](https://img.shields.io/discord/1240864619342594048)](https://discord.gg/V6ykuZgy)
 
-[![BMC QR](https://raw.githubusercontent.com/lamnhan066/isolate_manager/main/assets/images/bmc_qr.png)](https://www.buymeacoffee.com/lamnhan066)
-
 ## **Features**
 
 - A generator to generate all Workers by using the `@isolateManagerWorker` annotation.
@@ -402,9 +400,8 @@ void progressFunction(dynamic params) {
 - If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
 
 - If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
-</br>
 
-<p align='center'><a href="https://www.buymeacoffee.com/lamnhan066"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=lamnhan066&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a coffee" width="200"></a></p>
+  [![BMC QR](https://raw.githubusercontent.com/lamnhan066/isolate_manager/main/assets/images/bmc_qr.png)](https://www.buymeacoffee.com/lamnhan066)
 
 ## Migrations
 
