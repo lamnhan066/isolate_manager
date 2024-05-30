@@ -21,15 +21,15 @@ Future<void> isolateWorkerImpl<R, P>(
     await completer.future;
   }
   self.onmessage = (MessageEvent event) {
-    final message = event.data;
-    final Completer completer = Completer();
+    final completer = Completer();
     completer.future.then(
       (value) => sendResult(value),
       onError: (err, stack) =>
           sendResult(IsolateException(err, stack).toJson()),
     );
     try {
-      completer.complete(function(message as dynamic) as dynamic);
+      final message = event.data as dynamic;
+      completer.complete(function(message) as dynamic);
     } catch (err, stack) {
       completer.completeError(err, stack);
     }
