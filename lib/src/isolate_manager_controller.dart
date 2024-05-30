@@ -2,6 +2,10 @@ import 'dart:async';
 
 import 'base/isolate_contactor.dart';
 
+/// This method only use to create a custom isolate.
+///
+/// The [params] is a default parameter of a custom isolate function.
+/// `onDispose` will be called when the controller is disposed.
 class IsolateManagerController<R, P> {
   /// Delegation of IsolateContactor.
   late IsolateContactorController<R, P> _delegate;

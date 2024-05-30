@@ -23,6 +23,7 @@ typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
 /// A function for the `IsolateManagerFunction.workerFunction`.
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 
+/// The helper functions for the [IsolateManager].
 class IsolateManagerFunction {
   /// No-op
   IsolateManagerFunction._(); // coverage:ignore-line

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+/// This [IsolateException] mainly use to transfer an [Exception] between an `Isolate` and
+/// the main app.
 class IsolateException implements Exception {
   /// Error object.
   final Object error;

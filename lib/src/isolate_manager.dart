@@ -11,6 +11,8 @@ typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
 /// Callback for the `createCustom`'s `function`.
 typedef IsolateCustomFunction = IsolateFunction<void, dynamic>;
 
+/// Create a new [IsolateManager] instance by using [IsolateManager.create] or
+/// [IsolateManager.createCustom].
 class IsolateManager<R, P> {
   /// Debug logs prefix.
   static String debugLogPrefix = 'Isolate Manager';
