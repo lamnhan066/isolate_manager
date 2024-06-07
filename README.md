@@ -7,8 +7,6 @@
 [![Pub Popularity](https://img.shields.io/pub/popularity/isolate_manager)](https://pub.dev/packages/isolate_manager)
 [![Pub Likes](https://img.shields.io/pub/likes/isolate_manager)](https://pub.dev/packages/isolate_manager)
 
-[![Discord](https://img.shields.io/discord/1240864619342594048)](https://discord.gg/V6ykuZgy)
-
 ## **Features**
 
 - A generator to generate all Workers by using the `@isolateManagerWorker` annotation.
