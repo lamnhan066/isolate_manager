@@ -1,18 +1,18 @@
 name: isolate_manager
 description: Create multiple long-lived isolates for a function (keep it active to send and receive data), supports Worker on the Web and WASM compilation.
-version: 5.0.2+1
+version: 5.0.3-rc
 homepage: https://github.com/lamnhan066/isolate_manager
 
 environment:
   sdk: ^3.3.0
 
 dependencies:
-  stream_channel: ^2.1.1
+  stream_channel: ^2.1.2
   web: ^0.5.1
-  analyzer: ">=5.0.0 <7.0.0"
+  analyzer: ">=5.12.0 <7.0.0"
   path: ^1.9.0
-  args: ^2.4.2
+  args: ^2.5.0
 
 dev_dependencies:
-  test: ^1.25.4
+  test: ^1.25.7
   lints: ^4.0.0
