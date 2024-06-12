@@ -29,6 +29,7 @@ void main() {
     final isolateManager = IsolateManager.create(
       fibonacci,
       concurrent: 4,
+      isDebug: true,
     );
 
     final result = await isolateManager.compute(3);
