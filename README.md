@@ -34,23 +34,22 @@
 
 ## **Benchmark**
 
-Execute a recursive Fibonacci function 70 times, computing the sequence for the numbers 30, 33, and 36. The results are in microseconds.
+Execute a recursive Fibonacci function 70 times, computing the sequence for the numbers 30, 33, and 36. The results are in microseconds (On Macbook M1 Pro 14-inch).
 
 - VM
 
 |Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|
 |:-:|-:|-:|-:|-:|
-|30|470,941|477,477|171,081|486,789|
-|33|1,964,361|1,985,924|706,867|2,006,519|
-|36|8,327,773|8,327,912|2,994,311|8,434,936|
+|30|751,364|771,142|274,854|769,588|
+|33|3,189,873|3,185,798|1,152,083|3,214,685|
+|36|13,510,136|13,540,763|4,873,100|13,766,930|
 
 - Chrome (With `Worker` supported)
 
 |Fibonacci|Main App|One Worker|Three Workers|Isolate.run (Unsupported)|
-|:-:|-:|-:|-:|-:|
-|30|1,334,900|341,799|121,000|0|
-|33|5,705,399|1,394,500|501,401|0|
-|36|24,165,201|5,924,900|2,115,500|0|
+|30|2,125,101|547,800|195,101|0|
+|33|9,083,800|2,286,899|803,599|0|
+|36|38,083,500|9,575,899|3,383,299|0|
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for the test details.
 
