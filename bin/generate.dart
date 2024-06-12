@@ -38,7 +38,7 @@ Future<void> generate(List<String> args) async {
       'obfuscate',
       valueHelp: '4',
       defaultsTo: '4',
-      help: 'JS obfuscation level (0 to 4). Default is set to 2',
+      help: 'JS obfuscation level (0 to 4). Default is set to 4',
     )
     ..addFlag(
       'debug',
@@ -59,7 +59,7 @@ Future<void> generate(List<String> args) async {
     '2' => '-O2',
     '3' => '-O3',
     '4' => '-O4',
-    _ => '-O2',
+    _ => '-O4',
   };
   final isDebug = argResult['debug'] as bool? ?? false;
   final isWasm = argResult['wasm'] as bool? ?? false;
