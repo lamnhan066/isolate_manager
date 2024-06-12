@@ -1,3 +1,8 @@
+## 5.0.4
+
+* Update the log printer to increase the performances.
+* Update benchmark.
+
 ## 5.0.3
 
 * Improve pub score.
