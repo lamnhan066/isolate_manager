@@ -19,6 +19,9 @@ abstract class IsolateContactor<R, P> {
   /// Ex: 'Isolate Contactor' => [Isolate Contactor]: there is log.
   static String debugLogPrefix = 'Isolate Contactor';
 
+  /// Debug mode.
+  static bool _debug = false;
+
   /// Create an instance with your custom isolate function.
   ///
   /// `function` is You can take a look at the example to see what you need to do
@@ -48,13 +51,14 @@ abstract class IsolateContactor<R, P> {
     /// `workerConverter` (for Worker on Web) convert result before sending to to the result.
     IsolateConverter<R>? workerConverter,
 
-    /// `isolateParams` is the list of parameters that you want to add to your [isolateFunction]
+    /// `isolateParams` is the list of parameters that you want to add to your [function]
     /// `debugMode` allow printing debug data in console. Default is set to false.
     Object? initialParams,
 
     /// `debugMode` allow printing debug data in console. Default is set to false.
     bool debugMode = false,
   }) async {
+    _debug = debugMode;
     // The `workerConverter` is not covered when running `flutter test --coverage`
     // so this is just a hack to make it covered.
     R tempConverter(dynamic value) => value as R;
@@ -80,4 +84,11 @@ abstract class IsolateContactor<R, P> {
 
   /// Dispose current isolate
   Future<void> dispose();
+
+  /// Print if [_debug] is true
+  static void printDebug(Object? Function() object) {
+    if (_debug) {
+      print('[${IsolateContactor.debugLogPrefix}]: ${object()}');
+    }
+  }
 }

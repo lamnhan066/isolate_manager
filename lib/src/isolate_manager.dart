@@ -279,7 +279,7 @@ class IsolateManager<R, P> {
 
   /// Exccute the element in the queues.
   void _excuteQueue() {
-    _print('Number of queues: ${_queues.length}');
+    IsolateContactor.printDebug(() => 'Number of queues: ${_queues.length}');
     for (final isolate in _isolates.keys) {
       /// Allow calling `compute` before `start`.
       if (_queues.isNotEmpty && _isolates[isolate] == false) {
@@ -358,10 +358,5 @@ class IsolateManager<R, P> {
     });
 
     return queue.completer.future;
-  }
-
-  /// Print a debug log.
-  void _print(String log) {
-    if (isDebug) print('[$debugLogPrefix] $log');
   }
 }
