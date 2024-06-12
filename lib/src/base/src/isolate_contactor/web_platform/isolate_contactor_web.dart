@@ -5,7 +5,7 @@ import '../../isolate_contactor_controller/isolate_contactor_controller_web.dart
 import '../isolate_contactor_web.dart';
 
 class IsolateContactorInternalFuture<R, P>
-    implements IsolateContactorInternal<R, P> {
+    extends IsolateContactorInternal<R, P> {
   /// Check for current cumputing state in enum with listener
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
@@ -32,9 +32,8 @@ class IsolateContactorInternalFuture<R, P>
     required Object? isolateParam,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
-    d,
     bool debugMode = false,
-  }) {
+  }) : super(debugMode) {
     _isolateFunction = isolateFunction;
     _workerName = workerName;
     _converter = converter;
@@ -75,12 +74,12 @@ class IsolateContactorInternalFuture<R, P>
       onDispose: null,
     );
     _isolateContactorController!.onMessage.listen((message) {
-      IsolateContactor.printDebug(
+      printDebug(
         () => '[Main Stream] Message received from Future: $message',
       );
       _mainStreamController.sink.add(message);
     }).onError((err, stack) {
-      IsolateContactor.printDebug(
+      printDebug(
         () => '[Main Stream] Error message received from Future: $err',
       );
       _mainStreamController.sink.addError(err, stack);
@@ -90,7 +89,7 @@ class IsolateContactorInternalFuture<R, P>
 
     await _isolateContactorController!.ensureInitialized.future;
 
-    IsolateContactor.printDebug(() => 'Initialized');
+    printDebug(() => 'Initialized');
   }
 
   /// Get current message as stream
@@ -107,7 +106,7 @@ class IsolateContactorInternalFuture<R, P>
 
     _isolateContactorController = null;
 
-    IsolateContactor.printDebug(() => 'Disposed');
+    printDebug(() => 'Disposed');
   }
 
   /// Send message to child isolate [function].
@@ -116,7 +115,7 @@ class IsolateContactorInternalFuture<R, P>
   @override
   Future<R> sendMessage(P message) {
     if (_isolateContactorController == null) {
-      IsolateContactor.printDebug(() => '! This isolate has been terminated');
+      printDebug(() => '! This isolate has been terminated');
       return throw IsolateException(
         'This isolate was terminated',
         StackTrace.empty,
@@ -136,7 +135,7 @@ class IsolateContactorInternalFuture<R, P>
         await sub?.cancel();
       });
 
-    IsolateContactor.printDebug(() => 'Message send to isolate: $message');
+    printDebug(() => 'Message send to isolate: $message');
 
     _isolateContactorController!.sendIsolate(message);
 

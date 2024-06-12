@@ -4,8 +4,10 @@ import '../isolate_contactor.dart';
 import 'web_platform/isolate_contactor_web.dart';
 import 'web_platform/isolate_contactor_web_worker.dart';
 
-abstract class IsolateContactorInternal<R, P>
-    implements IsolateContactor<R, P> {
+abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
+  /// Constructer.
+  const IsolateContactorInternal(super.debugMode);
+
   /// Create modified isolate function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
     required CustomIsolateFunction isolateFunction,

@@ -6,7 +6,7 @@ import 'package:isolate_manager/src/base/src/models/isolate_state.dart';
 import '../isolate_contactor.dart';
 import '../isolate_contactor_controller/isolate_contactor_controller_stub.dart';
 
-class IsolateContactorInternal<R, P> implements IsolateContactor<R, P> {
+class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   /// Create receive port
   late ReceivePort _receivePort;
 
@@ -41,7 +41,7 @@ class IsolateContactorInternal<R, P> implements IsolateContactor<R, P> {
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
     bool debugMode = false,
-  }) {
+  }) : super(debugMode) {
     _isolateFunction = isolateFunction;
     _workerName = workerName;
     _converter = converter;
@@ -83,12 +83,10 @@ class IsolateContactorInternal<R, P> implements IsolateContactor<R, P> {
       onDispose: null,
     );
     _isolateContactorController.onMessage.listen((message) {
-      IsolateContactor.printDebug(
-          () => 'Message received from Isolate: $message');
+      printDebug(() => 'Message received from Isolate: $message');
       _mainStreamController.sink.add(message);
     }).onError((err, stack) {
-      IsolateContactor.printDebug(
-          () => 'Error message received from Isolate: $err');
+      printDebug(() => 'Error message received from Isolate: $err');
       _mainStreamController.sink.addError(err, stack);
     });
 
@@ -96,7 +94,7 @@ class IsolateContactorInternal<R, P> implements IsolateContactor<R, P> {
         _isolateFunction, [_isolateParam, _receivePort.sendPort]);
 
     await _isolateContactorController.ensureInitialized.future;
-    IsolateContactor.printDebug(() => 'Initialized');
+    printDebug(() => 'Initialized');
   }
 
   Future<void> _dispose() async {
@@ -116,7 +114,7 @@ class IsolateContactorInternal<R, P> implements IsolateContactor<R, P> {
   Future<void> dispose() async {
     await _dispose();
     await _mainStreamController.close();
-    IsolateContactor.printDebug(() => 'Disposed');
+    printDebug(() => 'Disposed');
   }
 
   /// Send message to child isolate [function]
@@ -137,7 +135,7 @@ class IsolateContactorInternal<R, P> implements IsolateContactor<R, P> {
         await sub?.cancel();
       });
 
-    IsolateContactor.printDebug(() => 'Message send to isolate: $message');
+    printDebug(() => 'Message send to isolate: $message');
 
     _isolateContactorController.sendIsolate(message);
 
