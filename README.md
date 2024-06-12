@@ -47,6 +47,7 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 - Chrome (With `Worker` supported)
 
 |Fibonacci|Main App|One Worker|Three Workers|Isolate.run (Unsupported)|
+|:-:|-:|-:|-:|-:|
 |30|2,125,101|547,800|195,101|0|
 |33|9,083,800|2,286,899|803,599|0|
 |36|38,083,500|9,575,899|3,383,299|0|
