@@ -1,3 +1,7 @@
+## 5.0.5
+
+* Avoid using static function for the log printer.
+
 ## 5.0.4
 
 * Update the log printer to increase the performances.
