@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:isolate_manager/src/base/src/models/isolate_contactor_controller_web_controller_mixin.dart';
+import 'package:isolate_manager/src/base/contactor/models/isolate_contactor_controller_web_controller_mixin.dart';
 
 import '../isolate_contactor.dart';
 import '../isolate_contactor_controller.dart';

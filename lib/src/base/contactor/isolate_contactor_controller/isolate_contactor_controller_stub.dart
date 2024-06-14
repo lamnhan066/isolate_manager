@@ -1,42 +1,44 @@
 import 'dart:async';
 
-import 'package:isolate_manager/src/base/src/models/isolate_port.dart';
-import 'package:isolate_manager/src/base/src/models/isolate_state.dart';
+import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
+import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:stream_channel/isolate_channel.dart';
 
-import '../../isolate_contactor.dart';
-import '../../models/exception.dart';
-import '../isolate_contactor_controller_web.dart';
+import '../isolate_contactor.dart';
+import '../isolate_contactor_controller.dart';
+import '../models/exception.dart';
 
-class IsolateContactorControllerImplFuture<R, P>
-    implements IsolateContactorControllerImpl<R, P> {
-  late StreamController _delegate;
+class IsolateContactorControllerImpl<R, P>
+    implements IsolateContactorController<R, P> {
+  late IsolateChannel _delegate;
+  late StreamSubscription _delegateSubscription;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
   final StreamController<P> _isolateStreamController =
       StreamController.broadcast();
-
   final void Function()? onDispose;
-  final IsolateConverter<R> converter;
+  final IsolateConverter<R>? converter;
   dynamic _initialParams;
 
   @override
   Completer<void> ensureInitialized = Completer();
 
-  IsolateContactorControllerImplFuture(
+  IsolateContactorControllerImpl(
     dynamic params, {
     required this.onDispose,
-    required this.converter,
-    required IsolateConverter<R> workerConverter,
+    required this.converter, // Converter for native
+    required IsolateConverter<R>?
+        workerConverter, // Converter for Worker (Web Only)
   }) {
     if (params is List) {
-      _delegate = params.last.controller as StreamController;
+      _delegate = IsolateChannel.connectSend(params.last);
       _initialParams = params.first;
     } else {
-      _delegate = params;
+      _delegate = IsolateChannel.connectReceive(params);
     }
 
-    _delegate.stream.listen((event) {
+    _delegateSubscription = _delegate.stream.listen((event) {
       (event as Map<IsolatePort, dynamic>).forEach((key, value) {
         switch (key) {
           case IsolatePort.main:
@@ -52,7 +54,8 @@ class IsolateContactorControllerImplFuture<R, P>
               break;
             }
 
-            _mainStreamController.add(converter(value));
+            _mainStreamController
+                .add(converter == null ? value : converter!(value));
             break;
           case IsolatePort.isolate:
             if (value == IsolateState.dispose) {
@@ -66,10 +69,6 @@ class IsolateContactorControllerImplFuture<R, P>
       });
     });
   }
-
-  /// Get this StreamController
-  @override
-  StreamController get controller => _delegate;
 
   /// Get initial params for `createCustom`
   @override
@@ -108,7 +107,7 @@ class IsolateContactorControllerImplFuture<R, P>
   @override
   Future<void> close() async {
     await Future.wait([
-      _delegate.close(),
+      _delegateSubscription.cancel(),
       _mainStreamController.close(),
       _isolateStreamController.close(),
     ]);
