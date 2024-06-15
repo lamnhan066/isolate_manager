@@ -1,0 +1,118 @@
+import 'dart:async';
+
+import 'package:isolate_manager/isolate_manager.dart';
+
+import 'function.dart';
+
+/// Default shared worker name.
+const kSharedWorkerName = r'$shared_worker';
+
+class IsolateManagerShared {
+  /// The instance of the [IsolateManager].
+  final IsolateManager<Object, List<Object>> _manager;
+
+  /// Check that the [IsolateManager] is started or not.
+  bool get isStarted => _manager.isStarted;
+
+  /// Ensure that the [IsolateManagerShared] was already started.
+  Future<void> get ensureStarted => _manager.ensureStarted;
+
+  /// Create multiple long live isolates for computation. This method can be used
+  /// to compute multiple functions.
+  ///
+  /// [concurrent] is a number of isolates that you want to create.
+  ///
+  /// Set [useWorker] to `true` if you want to use the Worker on the Web.
+  ///
+  /// [workerConverter] is a converter for the worker, the data from the worker
+  /// will be directly sent to this method to convert to the result format that
+  /// you want to.
+  ///
+  /// Set [autoStart] to `false` if you want to call the `start()` method manually.
+  ///
+  /// Set [isDebug] to `true` if you want to print the debug log.
+  IsolateManagerShared({
+    int concurrent = 1,
+    bool useWorker = false,
+    Object Function(dynamic)? workerConverter,
+    bool autoStart = true,
+    bool isDebug = false,
+  }) : _manager = IsolateManager.create(
+          internalFunction,
+          workerName: useWorker ? kSharedWorkerName : '',
+          workerConverter: workerConverter,
+          concurrent: concurrent,
+          isDebug: isDebug,
+        ) {
+    if (autoStart) _manager.start();
+  }
+
+  /// Compute the given [function] with given [params].
+  ///
+  /// [workerFunction] is the name of the function that have created in `worker.dart`.
+  ///
+  /// [workerParams] is specific params for `Worker`, [params] will be use if this value is null.
+  ///
+  /// Equavient of [compute].
+  Future<R> call<R extends Object, P extends Object>(
+    FutureOr<R> Function(P) function,
+    P params, {
+    String? workerFunction,
+    Object? workerParams,
+  }) {
+    return _excute(
+      function,
+      params,
+      workerFunction: workerFunction,
+      workerParams: workerParams,
+    );
+  }
+
+  /// Compute the given [function] with given [params].
+  ///
+  /// [workerFunction] is the name of the function that have created in `worker.dart`.
+  ///
+  /// [workerParams] is specific params for `Worker`, [params] will be use if this value is null.
+  Future<R> compute<R extends Object, P extends Object>(
+    FutureOr<R> Function(P) function,
+    P params, {
+    String? workerFunction,
+    Object? workerParams,
+  }) {
+    return _excute(
+      function,
+      params,
+      workerFunction: workerFunction,
+      workerParams: workerParams,
+    );
+  }
+
+  /// Execute the given [function] with its' [params].
+  Future<R> _excute<R extends Object, P extends Object>(
+    FutureOr<R> Function(P) function,
+    P params, {
+    String? workerFunction,
+    Object? workerParams,
+  }) async {
+    return platformExecute<R, P>(
+      manager: _manager,
+      function: function,
+      params: params,
+      workerFunction: workerFunction,
+      workerParams: workerParams,
+    );
+  }
+
+  /// Get the result as stream.
+  Stream<Object> get stream => _manager.stream;
+
+  /// Start all the isolates. This method is optional because it will be started
+  /// automatically when it needs to calculate.
+  Future<void> start() => _manager.start();
+
+  /// Restart all the isolates.
+  Future<void> restart() => _manager.restart();
+
+  /// Stop all the isolates.
+  Future<void> stop() => _manager.stop();
+}

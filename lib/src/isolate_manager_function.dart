@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
 
+import 'base/shared/function.dart';
 import 'isolate_worker/isolate_worker_web.dart'
     if (dart.library.io) 'isolate_worker/isolate_worker_stub.dart';
 
@@ -153,6 +154,32 @@ class IsolateManagerFunction {
     FutureOr<void> Function()? onInitial,
   }) {
     return isolateWorkerImpl<R, P>(function, onInitial);
+  }
+
+  /// Create a worker in your `main`.
+  ///
+  /// ```dart
+  /// main() {
+  ///   /* Mapping between your function as String and real `Function`.
+  ///   This function MUST NOT depends on any Flutter library. */
+  ///   IsolateManagerFunction.sharedWorkerFunction({
+  ///     'add' : add,
+  ///   });
+  /// }
+  /// ```
+  ///
+  /// Build it with `dart compile js worker.dart -o worker.js -O4` and copy the `worker.js` to
+  /// your Web folder.
+  ///
+  /// If you need to throw an exception, you should only throw the `message`
+  /// instead of a whole Object because it may not be shown as expected when
+  /// sending back to the main app.
+  ///
+  /// ``` dart
+  ///  return throw 'This is an error that you need to catch in your main app';
+  /// ```
+  static void sharedWorkerFunction(Map<String, Function> map) {
+    return sharedWorkerFunctionImpl(map);
   }
   // coverage:ignore-end
 }

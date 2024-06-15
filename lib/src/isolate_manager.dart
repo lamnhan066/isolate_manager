@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'base/isolate_contactor.dart';
+import 'base/isolate_manager_shared.dart';
 import 'isolate_manager_function.dart';
 import 'models/isolate_queue.dart';
 
@@ -90,6 +91,35 @@ class IsolateManager<R, P> {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
+
+  /// Create multiple long live isolates for computation. This method can be used
+  /// to compute multiple functions.
+  ///
+  /// [concurrent] is a number of isolates that you want to create.
+  ///
+  /// Set [useWorker] to `true` if you want to use the Worker on the Web.
+  ///
+  /// [workerConverter] is a converter for the worker, the data from the worker
+  /// will be directly sent to this method to convert to the result format that
+  /// you want to.
+  ///
+  /// Set [autoStart] to `false` if you want to call the `start()` method manually.
+  ///
+  /// Set [isDebug] to `true` if you want to print the debug log.
+  static IsolateManagerShared createShared({
+    int concurrent = 1,
+    bool useWorker = false,
+    Object Function(dynamic)? workerConverter,
+    bool autoStart = true,
+    bool isDebug = false,
+  }) =>
+      IsolateManagerShared(
+        concurrent: concurrent,
+        useWorker: useWorker,
+        workerConverter: workerConverter,
+        autoStart: autoStart,
+        isDebug: isDebug,
+      );
 
   /// Queue of isolates.
   final Queue<IsolateQueue<R, P>> _queues = Queue();
