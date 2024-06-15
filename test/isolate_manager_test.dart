@@ -293,6 +293,7 @@ void main() {
     final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackFunction,
       concurrent: 1,
+      workerName: 'isolateCallbackFunction',
     );
     await isolateManager.start();
 
@@ -413,7 +414,7 @@ void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
   );
 }
 
-@pragma('vm:entry-point')
+@isolateManagerCustomWorker
 void isolateCallbackFunction(dynamic params) {
   IsolateManagerFunction.customFunction(
     params,
