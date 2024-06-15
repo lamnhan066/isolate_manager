@@ -15,17 +15,19 @@ Future<void> isolateWorkerImpl<R, P>(
   IsolateWorkerFunction<R, P> function,
   FutureOr<void> Function()? onInitial,
 ) async {
+  final controller = IsolateManagerController<R, MessageEvent>(
+      ['DedicatedWorkerGlobalScope', self]);
   if (onInitial != null) {
     final completer = Completer<void>();
     completer.complete(onInitial());
     await completer.future;
   }
-  self.onmessage = (MessageEvent event) {
+  controller.onIsolateMessage.listen((event) {
     final completer = Completer();
     completer.future.then(
-      (value) => sendResult(value),
+      (value) => controller.sendResult(value),
       onError: (err, stack) =>
-          sendResult(IsolateException(err, stack).toJson()),
+          controller.sendResultError(IsolateException(err, stack)),
     );
     try {
       final message = event.data as dynamic;
@@ -33,11 +35,11 @@ Future<void> isolateWorkerImpl<R, P>(
     } catch (err, stack) {
       completer.completeError(err, stack);
     }
-  }.toJS;
-  sendResult(IsolateState.initialized.toJson());
+  });
+  controller.initialized();
 }
 
-/// Internal function.
-void sendResult(dynamic m) {
-  self.postMessage(m);
+/// Create a custom worker in your `main`.
+void customWorkerFunctionImpl(IsolateWorkerFunction<void, dynamic> function) {
+  function(['DedicatedWorkerGlobalScope', self]);
 }

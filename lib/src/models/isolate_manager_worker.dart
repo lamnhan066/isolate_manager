@@ -1,6 +1,9 @@
 /// A default annotation for the [IsolateManagerWorker] with empty name.
 const IsolateManagerWorker isolateManagerWorker = IsolateManagerWorker();
 
+/// An annotation that you want to use for the custom function.
+const isolateManagerCustomWorker = IsolateManagerWorker();
+
 /// The annotation to generate a Worker JS for a specific method.
 ///
 /// If the [name] is specified, the Worker JS will be named `<name>.js`, otherwise

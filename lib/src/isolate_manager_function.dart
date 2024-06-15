@@ -156,6 +156,39 @@ class IsolateManagerFunction {
     return isolateWorkerImpl<R, P>(function, onInitial);
   }
 
+  /// Create a custom Worker function.
+  ///
+  ///
+  /// ```dart
+  /// void main() {
+  ///   IsolateManagerFunction.customWorkerFunction(customFunction);
+  /// }
+  ///
+  /// void customFunction(dynamic params) {
+  ///   IsolateManagerFunction.customFunction<int, int>(
+  ///     onEvent: (controller, message) {
+  ///       /* This event will be executed every time the `message` is received from the main isolate */
+  ///       return fetchAndDecode(message);
+  ///     },
+  ///     onInitial: (controller, initialParams) {
+  ///        // This event will be executed before all the other events.
+  ///        //
+  ///        // This event can be a `Future` function.
+  ///     },
+  ///     onDispose: (controller) {
+  ///        /* This event will be executed after all the other events and should NOT be a `Future` event */
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// Build it with `dart compile js worker.dart -o worker.js -O4` and copy the `worker.js` to
+  /// your Web folder.
+  static void customWorkerFunction(
+    IsolateWorkerFunction<void, dynamic> function,
+  ) {
+    return customWorkerFunctionImpl(function);
+  }
+
   /// Create a worker in your `main`.
   ///
   /// ```dart

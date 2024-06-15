@@ -12,3 +12,10 @@ Future<void> isolateWorkerImpl<R, P>(
 ) {
   throw UnimplementedError('Use only on the Web platform to create a Worker');
 }
+
+/// No-op on `io`.
+void customWorkerFunctionImpl<R, P>(
+  IsolateWorkerFunction<void, dynamic> function,
+) {
+  throw UnimplementedError('Use only on the Web platform to create a Worker');
+}
