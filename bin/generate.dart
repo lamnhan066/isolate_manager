@@ -8,8 +8,11 @@ import 'package:args/args.dart';
 import 'package:isolate_manager/src/isolate_manager.dart';
 import 'package:path/path.dart' as p;
 
+import 'model/annotation_result.dart';
+
 const classAnnotation = 'IsolateManagerWorker';
 const constAnnotation = 'isolateManagerWorker';
+const constCustomWorkerAnnotation = 'isolateManagerCustomWorker';
 
 void main(List<String> args) async {
   await generate(args);
@@ -83,7 +86,8 @@ Future<void> generate(List<String> args) async {
     if (file is File && file.path.endsWith('.dart')) {
       final filePath = file.absolute.path;
       final content = await file.readAsString();
-      final pattern = RegExp('(@$classAnnotation|@$constAnnotation)');
+      final pattern = RegExp(
+          '(@$classAnnotation|@$constAnnotation|@$constCustomWorkerAnnotation)');
       if (content.contains(pattern)) {
         params.add([filePath, obfuscate, isDebug, isWasm, output]);
       }
@@ -129,7 +133,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
   return anotatedFunctions.length;
 }
 
-Future<Map<String, String>> _getAnotatedFunctions(String path) async {
+Future<Map<String, AnnotationResult>> _getAnotatedFunctions(String path) async {
   final sourceFilePath = p.absolute(path);
   final result = await resolveFile2(path: sourceFilePath);
 
@@ -139,7 +143,7 @@ Future<Map<String, String>> _getAnotatedFunctions(String path) async {
   }
 
   final unit = result.unit;
-  final annotatedFunctions = <String, String>{};
+  final annotatedFunctions = <String, AnnotationResult>{};
 
   for (final declaration in unit.declarations) {
     if (declaration is FunctionDeclaration) {
@@ -173,7 +177,7 @@ Future<Map<String, String>> _getAnotatedFunctions(String path) async {
 
 Future<void> _generateFromAnotatedFunctions(
   String sourceFilePath,
-  Map<String, String> anotatedFunctions,
+  Map<String, AnnotationResult> anotatedFunctions,
   String obfuscate,
   bool isDebug,
   bool isWasm,
@@ -196,7 +200,7 @@ Future<void> _generateFromAnotatedFunctions(
 
 Future<void> _generateFromAnotatedFunction(
   String sourceFilePath,
-  MapEntry<String, String> function,
+  MapEntry<String, AnnotationResult> function,
   String obfuscate,
   bool isDebug,
   bool isWasm,
@@ -213,13 +217,20 @@ Future<void> _generateFromAnotatedFunction(
   sink.writeln("import 'package:isolate_manager/isolate_manager.dart';");
   sink.writeln();
   sink.writeln('main() {');
-  sink.writeln('  IsolateManagerFunction.workerFunction(${function.key});');
+  if (function.value.isCustomWorker) {
+    sink.writeln(
+        '  IsolateManagerFunction.customWorkerFunction(${function.key});');
+  } else {
+    sink.writeln('  IsolateManagerFunction.workerFunction(${function.key});');
+  }
   sink.writeln('}');
   await sink.close();
 
   final extension = isWasm ? 'wasm' : 'js';
 
-  final name = function.value != '' ? function.value : function.key;
+  final name = function.value.workerName != ''
+      ? function.value.workerName
+      : function.key;
   final outputPath = p.join(output, '$name.$extension');
   final outputFile = File(outputPath);
 
@@ -260,10 +271,12 @@ Future<void> _generateFromAnotatedFunction(
     }
   }
 
-  await file.delete();
+  if (!isDebug) {
+    await file.delete();
+  }
 }
 
-String? getIsolateManagerWorkerAnnotationValue(Element element) {
+AnnotationResult? getIsolateManagerWorkerAnnotationValue(Element element) {
   for (final metadata in element.metadata) {
     final annotationElement = metadata.element;
     if (annotationElement is ConstructorElement) {
@@ -272,14 +285,25 @@ String? getIsolateManagerWorkerAnnotationValue(Element element) {
           enclosingElement.name == classAnnotation) {
         final annotation = metadata.computeConstantValue();
         final value = annotation?.getField('name')?.toStringValue();
-        return value;
+        return AnnotationResult(
+          workerName: value ?? '',
+          isCustomWorker: false,
+        );
       }
     } else if (annotationElement is PropertyAccessorElement) {
       // TODO: Change to `variable2` when bumping the `analyzer` to `^6.0.0`
       // ignore: deprecated_member_use
       final variable = annotationElement.variable;
       if (variable.name == constAnnotation) {
-        return '';
+        return AnnotationResult(
+          workerName: '',
+          isCustomWorker: false,
+        );
+      } else if (variable.name == constCustomWorkerAnnotation) {
+        return AnnotationResult(
+          workerName: '',
+          isCustomWorker: true,
+        );
       }
     }
   }
