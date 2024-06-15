@@ -5,7 +5,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 
 import 'models/complex_model.dart';
 
-@IsolateManagerWorker()
+@isolateManagerSharedWorker
 int countEven(int num) {
   int count = 0;
   while (num > 0) {
@@ -20,7 +20,7 @@ int countEven(int num) {
 /// This must be a static or top-level function
 ///
 /// This function is very expensive to calculate, so I can test for un-blocking UI feature
-@isolateManagerWorker
+@isolateManagerSharedWorker
 Future<int> fibonacciRecursiveFuture(int n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
@@ -33,7 +33,7 @@ Future<int> fibonacciRecursiveFuture(int n) async {
 }
 
 /// This must be a static or top-level function
-@isolateManagerWorker
+@isolateManagerSharedWorker
 Future<int> fibonacciFuture(int n) async {
   if (n == 0) return 0;
   if (n <= 2) return 1;
@@ -53,7 +53,7 @@ Future<int> fibonacciFuture(int n) async {
 }
 
 /// This must be a static or top-level function
-@isolateManagerWorker
+@isolateManagerSharedWorker
 int fibonacci(int n) {
   if (n == 0) return 0;
   if (n == 1 || n == 2) return 1;
@@ -70,7 +70,7 @@ int fibonacci(int n) {
 }
 
 @pragma('vm:entry-point')
-int error(int n) {
+int errorFunction(int n) {
   if (n == 0) throw StateError('n == 0');
   return n;
 }
@@ -91,7 +91,7 @@ void isolateFunction(dynamic params) {
 /// Send the progress value before sending the final result
 @isolateManagerWorker
 void isolateProgressFunction(dynamic params) {
-  IsolateManagerFunction.customFunction(
+  IsolateManagerFunction.customFunction<String?, String?>(
     params,
     onEvent: (controller, message) async {
       for (int i = 0; i < 100; i++) {

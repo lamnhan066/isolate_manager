@@ -22,40 +22,33 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final isolateFibonacciFuture = IsolateManager.create(
+  final isolates = IsolateManager.createShared(
+    concurrent: 3,
+    useWorker: true,
     isDebug: true,
-    fibonacciFuture,
-    workerName: 'fibonacci',
-    concurrent: 2,
-  );
+  )..start();
+
   final isolateIsolateFunction = IsolateManager.createCustom(
     concurrent: 2,
     isolateFunction,
     isDebug: true,
   );
-  final isolateFibonacciRecursive = IsolateManager.create(
-    fibonacciRecursiveFuture,
-    workerName: 'fibonacciRecursiveFuture',
-    concurrent: 2,
-  );
+
   final isolateFunctionName = IsolateManager.create(
     functionName,
     workerName: 'functionName',
     isDebug: true,
   );
-  final isolateCountEven = IsolateManager.create(
-    countEven,
-    workerName: 'countEven',
-    isDebug: true,
-  );
+
   final isolateError = IsolateManager.create(
-    error,
+    errorFunction,
     concurrent: 1,
     isDebug: true,
   );
 
-  final isolateProgress = IsolateManager<String, String>.createCustom(
+  final isolateProgress = IsolateManager<String?, String?>.createCustom(
     isolateProgressFunction,
+    workerName: 'isolateProgressFunction',
     isDebug: true,
   );
 
@@ -70,10 +63,19 @@ class _MyAppState extends State<MyApp> {
     isDebug: true,
   );
 
-  int value1 = 2;
+  int fibonacciFutureParam = 2;
+  int fibonacciFutureResult = 0;
+
   int value2 = 3;
-  int value3 = 4;
-  int value4 = 5;
+
+  int fibonacciRecursiveParam = 4;
+  int fibonacciRecursiveResult = 0;
+
+  int countEventResult = 0;
+
+  String errorResult = '';
+
+  int functionNameParam = 5;
   int value5 = 1000000000;
   int progress = 0;
   String progressFinalResult = '';
@@ -89,54 +91,66 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    isolateFibonacciFuture.stop();
     isolateIsolateFunction.stop();
-    isolateFibonacciRecursive.stop();
     isolateFunctionName.stop();
-    isolateCountEven.stop();
     isolateError.stop();
     isolateProgress.stop();
     super.dispose();
   }
 
   Future<void> initial() async {
-    await isolateFibonacciFuture.start();
     await isolateIsolateFunction.start();
-    await isolateFibonacciRecursive.start();
     await isolateFunctionName.start();
-    await isolateCountEven.start();
     await isolateError.start();
     await isolateProgress.start();
 
     setState(() => isLoading = false);
   }
 
-  void calculateFibonacciFuture([int max = 100]) {
-    value1 = rad.nextInt(max);
-    print('Isolate 1: Calculate fibonancci at F$value1');
-    isolateFibonacciFuture.sendMessage(value1);
+  void calculateFibonacciFuture([int max = 100]) async {
+    fibonacciFutureParam = rad.nextInt(max);
+
+    final result = await isolates.compute(
+      fibonacciFuture,
+      fibonacciFutureParam,
+      workerFunction: 'fibonacciFuture',
+    );
+    setState(() {
+      fibonacciFutureResult = result;
+    });
   }
 
   void calculateIsolateFunction([int max = 100]) {
     value2 = rad.nextInt(max);
-    print('Isolate 2: Calculate fibonancci at F$value2');
     isolateIsolateFunction.sendMessage(value2);
   }
 
-  void calculateFibonacciRecursive([int max = 30]) {
-    value3 = rad.nextInt(max);
-    print('Isolate 3: Calculate fibonancci at F$value3');
-    isolateFibonacciRecursive.sendMessage(value3);
+  void calculateFibonacciRecursive([int max = 30]) async {
+    fibonacciRecursiveParam = rad.nextInt(max);
+    final result = await isolates.compute(
+      fibonacciRecursiveFuture,
+      fibonacciFutureParam,
+      workerFunction: 'fibonacciRecursiveFuture',
+    );
+    setState(() {
+      fibonacciRecursiveResult = result;
+    });
   }
 
   void calculateFunctionName([int max = 30]) {
-    value4 = rad.nextInt(max);
-    print('Isolate 3: Calculate fibonancci at F$value4');
-    isolateFunctionName(value4);
+    functionNameParam = rad.nextInt(max);
+    isolateFunctionName(functionNameParam);
   }
 
-  void calculateCountEven() {
-    isolateCountEven.compute(value5);
+  void calculateCountEven() async {
+    final result = await isolates.compute(
+      countEven,
+      fibonacciFutureParam,
+      workerFunction: 'countEven',
+    );
+    setState(() {
+      countEventResult = result;
+    });
   }
 
   void calculateComplexFunction() {
@@ -154,9 +168,13 @@ class _MyAppState extends State<MyApp> {
     try {
       await isolateError.compute(0);
     } on StateError catch (e) {
-      print('>> $e');
+      setState(() {
+        errorResult = e.toString();
+      });
     } catch (e) {
-      print('>>> $e');
+      setState(() {
+        errorResult = e.toString();
+      });
     }
 
     await Future.delayed(const Duration(seconds: 3));
@@ -166,8 +184,13 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       progress = 0;
     });
-    bool callback(String value) {
-      final decoded = jsonDecode(value) as Map<String, dynamic>;
+    bool callback(String? value) {
+      if (value == null) {
+        print(value);
+        return false;
+      }
+
+      final decoded = jsonDecode(value);
       if (decoded.containsKey('progress')) {
         int toInt(dynamic value) {
           if (value is int) return value;
@@ -177,8 +200,6 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           progress = toInt(decoded['progress']);
         });
-
-        print(value);
 
         // Mark this value is not the final result
         return false;
@@ -211,140 +232,129 @@ class _MyAppState extends State<MyApp> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 8),
-                      StreamBuilder(
-                        stream: isolateFibonacciFuture.stream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            isolateFibonacciFuture.sendMessage(value1);
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          return Text(
-                              'Isolate1: Fibonacci at F$value1 = ${snapshot.data}');
-                        },
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () => calculateFibonacciFuture(),
-                          child: const Text('Calculate new Fibonacci'),
+                      Card(
+                        child: ListTile(
+                          title: Column(
+                            children: [
+                              Text(
+                                'Fibonacci Future: F$fibonacciFutureParam = $fibonacciFutureResult',
+                              ),
+                              ElevatedButton(
+                                onPressed: () => calculateFibonacciFuture(),
+                                child: const Text('Calculate'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () {
-                            isolateFibonacciFuture.restart();
-                          },
-                          child: const Text('Restart isolate 1'),
+                      Card(
+                        child: ListTile(
+                          title: Column(
+                            children: [
+                              StreamBuilder(
+                                stream: isolateIsolateFunction.stream,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) {
+                                    isolateIsolateFunction.sendMessage(value2);
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return Text(
+                                    'Isolate Function: F$value2 = ${snapshot.data}',
+                                  );
+                                },
+                              ),
+                              ElevatedButton(
+                                onPressed: () => calculateIsolateFunction(),
+                                child: const Text('Calculate'),
+                              ),
+                              const SizedBox(height: 6),
+                              ElevatedButton(
+                                onPressed: () {
+                                  isolateIsolateFunction.restart();
+                                },
+                                child: const Text('Restart'),
+                              ),
+                              const SizedBox(height: 6),
+                              ElevatedButton(
+                                onPressed: () {
+                                  isolateIsolateFunction.stop();
+                                },
+                                child: const Text('Terminate'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () {
-                            isolateFibonacciFuture.stop();
-                          },
-                          child: const Text('Terminate isolate 1'),
+                      Card(
+                        child: ListTile(
+                          title: Column(
+                            children: [
+                              Text(
+                                'Fibonacci Recursive: F$fibonacciRecursiveParam = $fibonacciRecursiveResult',
+                              ),
+                              ElevatedButton(
+                                onPressed: () => calculateFibonacciRecursive(),
+                                child: const Text('Calculate'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      StreamBuilder(
-                        stream: isolateIsolateFunction.stream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            isolateIsolateFunction.sendMessage(value2);
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          return Text(
-                              'Isolate2: Fibonacci at F$value2 = ${snapshot.data}');
-                        },
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () => calculateIsolateFunction(),
-                          child: const Text('Calculate new Fibonacci'),
+                      Card(
+                        child: ListTile(
+                          title: Column(
+                            children: [
+                              StreamBuilder(
+                                stream: isolateFunctionName.stream,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) {
+                                    isolateFunctionName
+                                        .sendMessage(functionNameParam);
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return Text(
+                                    'Function Name: $functionNameParam = ${snapshot.data}',
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                title: ElevatedButton(
+                                  onPressed: () => calculateFunctionName(),
+                                  child: const Text('Calculate'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () {
-                            isolateIsolateFunction.restart();
-                          },
-                          child: const Text('Restart isolate 2'),
+                      Card(
+                        child: ListTile(
+                          title: Column(
+                            children: [
+                              Text('Count Even: $countEventResult'),
+                              ElevatedButton(
+                                onPressed: () => calculateCountEven(),
+                                child: const Text('Count Even'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () {
-                            isolateIsolateFunction.stop();
-                          },
-                          child: const Text('Terminate isolate 2'),
-                        ),
-                      ),
-                      StreamBuilder(
-                        stream: isolateFibonacciRecursive.stream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            isolateFibonacciRecursive.sendMessage(value3);
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          return Text(
-                              'Isolate3: Fibonacci at F$value3 = ${snapshot.data}');
-                        },
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () => calculateFibonacciRecursive(),
-                          child: const Text('Calculate new Fibonacci'),
-                        ),
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () {
-                            isolateFibonacciRecursive.restart();
-                          },
-                          child: const Text('Restart isolate 3'),
-                        ),
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () {
-                            isolateFibonacciRecursive.stop();
-                          },
-                          child: const Text('Terminate isolate 3'),
-                        ),
-                      ),
-                      StreamBuilder(
-                        stream: isolateFunctionName.stream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            isolateFunctionName.sendMessage(value4);
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          return Text(
-                              'Isolate4: Value of $value4 = ${snapshot.data}');
-                        },
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () => calculateFunctionName(),
-                          child: const Text('Calculate new Fibonacci'),
-                        ),
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: () => calculateCountEven(),
-                          child: const Text('Count'),
-                        ),
-                      ),
-                      ListTile(
-                        title: ElevatedButton(
-                          onPressed: callErrorFunction,
-                          child: const Text('Error'),
+                      Card(
+                        child: ListTile(
+                          title: Column(
+                            children: [
+                              Text('Error: $errorResult'),
+                              ElevatedButton(
+                                onPressed: callErrorFunction,
+                                child: const Text('Error'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       ListTile(
