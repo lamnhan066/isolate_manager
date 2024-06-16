@@ -15,8 +15,7 @@ Future<void> isolateWorkerImpl<R, P>(
   IsolateWorkerFunction<R, P> function,
   FutureOr<void> Function()? onInitial,
 ) async {
-  final controller = IsolateManagerController<R, MessageEvent>(
-      ['DedicatedWorkerGlobalScope', self]);
+  final controller = IsolateManagerController<R, MessageEvent>(self);
   if (onInitial != null) {
     final completer = Completer<void>();
     completer.complete(onInitial());
@@ -41,5 +40,5 @@ Future<void> isolateWorkerImpl<R, P>(
 
 /// Create a custom worker in your `main`.
 void customWorkerFunctionImpl(IsolateWorkerFunction<void, dynamic> function) {
-  function(['DedicatedWorkerGlobalScope', self]);
+  function(self);
 }

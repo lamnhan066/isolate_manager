@@ -23,8 +23,8 @@ class IsolateManagerControllerImpl<R, P>
     dynamic params, {
     void Function()? onDispose,
   }) {
-    if (params is List && params[0] == 'DedicatedWorkerGlobalScope') {
-      _delegate = _IsolateManagerWorkerController<R, P>(params[1]);
+    if (params.runtimeType == DedicatedWorkerGlobalScope) {
+      _delegate = _IsolateManagerWorkerController<R, P>(params);
     } else {
       _delegate = IsolateContactorController<R, P>(
         params,
