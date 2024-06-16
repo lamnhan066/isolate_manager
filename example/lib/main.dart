@@ -25,6 +25,12 @@ class _MyAppState extends State<MyApp> {
   final isolates = IsolateManager.createShared(
     concurrent: 3,
     useWorker: true,
+    workerMappings: {
+      countEven: 'countEven',
+      fibonacciRecursiveFuture: 'fibonacciRecursiveFuture',
+      fibonacciFuture: 'fibonacciFuture',
+      fibonacci: 'fibonacci',
+    },
     isDebug: true,
   )..start();
 
@@ -113,7 +119,6 @@ class _MyAppState extends State<MyApp> {
     final result = await isolates.compute(
       fibonacciFuture,
       fibonacciFutureParam,
-      workerFunction: 'fibonacciFuture',
     );
     setState(() {
       fibonacciFutureResult = result;
@@ -130,7 +135,6 @@ class _MyAppState extends State<MyApp> {
     final result = await isolates.compute(
       fibonacciRecursiveFuture,
       fibonacciFutureParam,
-      workerFunction: 'fibonacciRecursiveFuture',
     );
     setState(() {
       fibonacciRecursiveResult = result;
@@ -146,7 +150,6 @@ class _MyAppState extends State<MyApp> {
     final result = await isolates.compute(
       countEven,
       fibonacciFutureParam,
-      workerFunction: 'countEven',
     );
     setState(() {
       countEventResult = result;
@@ -190,7 +193,7 @@ class _MyAppState extends State<MyApp> {
         return false;
       }
 
-      final decoded = jsonDecode(value);
+      final decoded = jsonDecode(value) as Map;
       if (decoded.containsKey('progress')) {
         int toInt(dynamic value) {
           if (value is int) return value;
