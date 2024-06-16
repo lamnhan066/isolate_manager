@@ -89,9 +89,9 @@ void isolateFunction(dynamic params) {
 }
 
 /// Send the progress value before sending the final result
-@isolateManagerWorker
+@isolateManagerCustomWorker
 void isolateProgressFunction(dynamic params) {
-  IsolateManagerFunction.customFunction<String?, String?>(
+  IsolateManagerFunction.customFunction<String, String>(
     params,
     onEvent: (controller, message) async {
       for (int i = 0; i < 100; i++) {
