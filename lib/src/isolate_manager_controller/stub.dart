@@ -26,6 +26,9 @@ class IsolateManagerControllerImpl<R, P> implements IsolateManagerController {
     );
   }
 
+  @override
+  P getMessage(dynamic message) => message;
+
   /// Mark the isolate as initialized.
   ///
   /// This method is automatically applied when using `IsolateManagerFunction.customFunction`

@@ -24,6 +24,11 @@ class IsolateManagerController<R, P> {
           onDispose: onDispose,
         );
 
+  /// Get message from a message that recieved from the main app.
+  ///
+  /// A `MessageEvent` on the Web Worker and normal type on the others.
+  P getMessage(dynamic message) => _delegate.getMessage(message);
+
   /// Mark the isolate as initialized.
   ///
   /// This method is automatically applied when using `IsolateManagerFunction.customFunction`

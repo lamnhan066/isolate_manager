@@ -15,7 +15,7 @@ Future<void> isolateWorkerImpl<R, P>(
   IsolateWorkerFunction<R, P> function,
   FutureOr<void> Function()? onInitial,
 ) async {
-  final controller = IsolateManagerController<R, MessageEvent>(self);
+  final controller = IsolateManagerController<R, P>(self);
   if (onInitial != null) {
     final completer = Completer<void>();
     completer.complete(onInitial());
@@ -29,7 +29,7 @@ Future<void> isolateWorkerImpl<R, P>(
           controller.sendResultError(IsolateException(err, stack)),
     );
     try {
-      final message = event.data as dynamic;
+      final message = controller.getMessage(event);
       completer.complete(function(message) as dynamic);
     } catch (err, stack) {
       completer.completeError(err, stack);

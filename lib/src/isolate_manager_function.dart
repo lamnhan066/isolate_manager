@@ -90,7 +90,6 @@ class IsolateManagerFunction {
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
     controller.onIsolateMessage.listen((message) {
-      // Use `R?` to allow
       final completer = Completer();
       completer.future.then(
         (value) => autoHandleResult ? controller.sendResult(value) : null,
@@ -102,7 +101,7 @@ class IsolateManagerFunction {
 
       // Use try-catch to send the exception to the main app
       try {
-        completer.complete(onEvent(controller, message));
+        completer.complete(onEvent(controller, controller.getMessage(message)));
       } catch (err, stack) {
         // Send the exception to your main app
         if (autoHandleException) {

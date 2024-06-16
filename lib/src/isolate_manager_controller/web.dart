@@ -15,6 +15,9 @@ class IsolateManagerControllerImpl<R, P>
   /// Delegation of IsolateContactor.
   late IsolateContactorController<R, P> _delegate;
 
+  /// Is on the Web Worker
+  bool _isWorker = false;
+
   /// This method only use to create a custom isolate.
   ///
   /// The [params] is a default parameter of a custom isolate function.
@@ -25,6 +28,7 @@ class IsolateManagerControllerImpl<R, P>
   }) {
     if (params.runtimeType == DedicatedWorkerGlobalScope) {
       _delegate = _IsolateManagerWorkerController<R, P>(params);
+      _isWorker = true;
     } else {
       _delegate = IsolateContactorController<R, P>(
         params,
@@ -32,6 +36,10 @@ class IsolateManagerControllerImpl<R, P>
       );
     }
   }
+
+  @override
+  P getMessage(dynamic message) =>
+      _isWorker ? (message as MessageEvent).data : message;
 
   /// Mark the isolate as initialized.
   ///
