@@ -103,6 +103,10 @@ class IsolateManager<R, P> {
   /// will be directly sent to this method to convert to the result format that
   /// you want to.
   ///
+  /// Predefine the mapping between a function and a name of worker function
+  /// using the [workerMappings], so we can ignore the `workerName` parameter
+  /// when we compute a function multiple times.
+  ///
   /// Set [autoStart] to `false` if you want to call the `start()` method manually.
   ///
   /// Set [isDebug] to `true` if you want to print the debug log.
@@ -110,6 +114,7 @@ class IsolateManager<R, P> {
     int concurrent = 1,
     bool useWorker = false,
     Object Function(dynamic)? workerConverter,
+    Map<Function, String> workerMappings = const {},
     bool autoStart = true,
     bool isDebug = false,
   }) =>
@@ -117,6 +122,7 @@ class IsolateManager<R, P> {
         concurrent: concurrent,
         useWorker: useWorker,
         workerConverter: workerConverter,
+        workerMappings: workerMappings,
         autoStart: autoStart,
         isDebug: isDebug,
       );

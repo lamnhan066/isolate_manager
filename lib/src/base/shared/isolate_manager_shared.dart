@@ -11,6 +11,11 @@ class IsolateManagerShared {
   /// The instance of the [IsolateManager].
   final IsolateManager<Object, List<Object>> _manager;
 
+  /// Predefine the mapping between a function and a name of worker function,
+  /// so we can ignore the `workerName` parameter when we compute a function
+  /// multiple times.
+  final Map<Function, String> workerMappings;
+
   /// Check that the [IsolateManager] is started or not.
   bool get isStarted => _manager.isStarted;
 
@@ -28,6 +33,10 @@ class IsolateManagerShared {
   /// will be directly sent to this method to convert to the result format that
   /// you want to.
   ///
+  /// Predefine the mapping between a function and a name of worker function
+  /// using the [workerMappings], so we can ignore the `workerName` parameter
+  /// when we compute a function multiple times.
+  ///
   /// Set [autoStart] to `false` if you want to call the `start()` method manually.
   ///
   /// Set [isDebug] to `true` if you want to print the debug log.
@@ -35,6 +44,7 @@ class IsolateManagerShared {
     int concurrent = 1,
     bool useWorker = false,
     Object Function(dynamic)? workerConverter,
+    this.workerMappings = const {},
     bool autoStart = true,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
@@ -49,7 +59,8 @@ class IsolateManagerShared {
 
   /// Compute the given [function] with given [params].
   ///
-  /// [workerFunction] is the name of the function that have created in `worker.dart`.
+  /// The [workerFunction] is the name of the function that have created in `worker.dart`.
+  /// You can ignore this parameter when the [workerMappings] is specified.
   ///
   /// [workerParams] is specific params for `Worker`, [params] will be use if this value is null.
   ///
@@ -71,6 +82,7 @@ class IsolateManagerShared {
   /// Compute the given [function] with given [params].
   ///
   /// [workerFunction] is the name of the function that have created in `worker.dart`.
+  /// You can ignore this parameter when the [workerMappings] is specified.
   ///
   /// [workerParams] is specific params for `Worker`, [params] will be use if this value is null.
   Future<R> compute<R extends Object, P extends Object>(
@@ -98,7 +110,7 @@ class IsolateManagerShared {
       manager: _manager,
       function: function,
       params: params,
-      workerFunction: workerFunction,
+      workerFunction: workerFunction ?? workerMappings[function],
       workerParams: workerParams,
     );
   }
