@@ -317,6 +317,34 @@ void main() {
     await isolateManager.stop();
   });
 
+  test('Test with IsolateCallback with simpler function', () async {
+    final isolateManager = IsolateManager<String, int>.createCustom(
+      isolateCallbackSimpleFunction,
+      concurrent: 1,
+      workerName: 'isolateCallbackSimpleFunction',
+    );
+    await isolateManager.start();
+
+    final result = await isolateManager.compute(1, callback: (value) {
+      final decoded = jsonDecode(value) as Map;
+      // Do not return this [value] as the final result
+      if (decoded.containsKey('source')) {
+        return false;
+      }
+
+      // Return this [value] as the final result
+      return true;
+    });
+
+    final decoded = jsonDecode(result) as Map;
+    expect(
+      decoded.containsKey('data'),
+      equals(true),
+    );
+
+    await isolateManager.stop();
+  });
+
   test('Test with returning a List<String>', () async {
     final isolate = IsolateManager.create(
       aStringList,
@@ -434,6 +462,20 @@ void isolateCallbackFunction(dynamic params) {
     },
     autoHandleException: false,
     autoHandleResult: false,
+  );
+}
+
+@isolateManagerCustomWorker
+void isolateCallbackSimpleFunction(dynamic params) {
+  IsolateManagerFunction.customFunction(
+    params,
+    onEvent: (controller, message) {
+      for (int i = 0; i < 10; i++) {
+        controller.sendResult(jsonEncode({'source': '$i'}));
+      }
+
+      return jsonEncode({'data': 'data'});
+    },
   );
 }
 
