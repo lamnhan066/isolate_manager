@@ -50,6 +50,52 @@ void main() async {
     });
   });
 
+  test('Test with worker mappings', () {
+    // Create 3 isolates to solve the problems
+    final isolates = IsolateManager.createShared(
+      concurrent: 3,
+      useWorker: true,
+      workerMappings: {
+        addFuture: 'addFuture',
+        add: 'add',
+        concat: 'concat',
+      },
+    );
+
+    isolates.stream.listen((result) {
+      if (result is double) {
+        // print('Stream get addFuture: $result');
+      } else if (result is String) {
+        // print('Stream get concat: $result');
+      } else {
+        // print('Stream get add: $result');
+      }
+    });
+
+    for (double i = 0; i < 10; i++) {
+      isolates.compute(addFuture, [i, i]).then((value) async {
+        expect(value, equals(await addFuture([i, i])));
+      });
+    }
+
+    for (int i = 0; i < 10; i++) {
+      isolates(add, [i, i]).then((value) {
+        expect(value, equals(add([i, i])));
+      });
+    }
+
+    for (int i = 0; i < 10; i++) {
+      isolates.compute(concat, ['$i', '$i']).then((value) {
+        expect(value, equals(concat(['$i', '$i'])));
+      });
+    }
+
+    // Stop the usolate after 5 seconds
+    Timer(Duration(seconds: 5), () {
+      isolates.stop();
+    });
+  });
+
   test('test try-catch', () async {
     // Create 3 isolates to solve the problems
     final isolates =
