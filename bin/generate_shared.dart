@@ -10,66 +10,21 @@ import 'package:path/path.dart' as p;
 
 const constAnnotation = 'isolateManagerSharedWorker';
 
-void main(List<String> args) async {
-  await generate(args);
-}
-
 /// --path "path/to/generate" --obfuscate 0->4 --debug
-Future<void> generate(List<String> args) async {
-  final parser = ArgParser()
-    ..addOption(
-      'input',
-      abbr: 'i',
-      help:
-          'Path of the folder to generate the Workers. Default is set to `lib`.',
-      valueHelp: 'lib',
-      defaultsTo: 'lib',
-    )
-    ..addOption(
-      'output',
-      abbr: 'o',
-      help:
-          'Path of the folder to save the generated files. Default is set to `web`.',
-      valueHelp: 'web',
-      defaultsTo: 'web',
-    )
-    ..addOption(
-      'obfuscate',
-      valueHelp: '4',
-      defaultsTo: '4',
-      help: 'JS obfuscation level (0 to 4). Default is set to 4',
-    )
-    ..addOption(
-      'name',
-      abbr: 'n',
-      valueHelp: kSharedWorkerName,
-      defaultsTo: kSharedWorkerName,
-      help: 'Name of the generated JS. Default is set to `$kSharedWorkerName`.',
-    )
-    ..addFlag(
-      'debug',
-      defaultsTo: false,
-      help: 'Export the debug files like *.js.deps, *.js.map and *.unopt.wasm',
-    )
-    ..addFlag(
-      'wasm',
-      defaultsTo: false,
-      help: 'Compile to wasm',
-    );
-  final argResult = parser.parse(args);
-  final input = argResult['input'] as String;
-  final output = argResult['output'] as String;
-  final obfuscate = switch (argResult['obfuscate']) {
+Future<void> generate(ArgResults argResults) async {
+  final input = argResults['input'] as String;
+  final output = argResults['output'] as String;
+  final obfuscate = switch (argResults['obfuscate']) {
     '0' => '-O0',
     '1' => '-O1',
     '2' => '-O2',
     '3' => '-O3',
     '4' => '-O4',
-    _ => '-O2',
+    _ => '-O4',
   };
-  final isDebug = argResult['debug'] as bool? ?? false;
-  final isWasm = argResult['wasm'] as bool? ?? false;
-  final name = argResult['name'] as String;
+  final isDebug = argResults['debug'] as bool? ?? false;
+  final isWasm = argResults['wasm'] as bool? ?? false;
+  final name = argResults['name'] as String;
 
   print('Parsing the `IsolateManagerWorker` inside directory: $input...');
 
