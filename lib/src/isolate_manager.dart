@@ -109,6 +109,9 @@ class IsolateManager<R, P> {
   ///
   /// Set [autoStart] to `false` if you want to call the `start()` method manually.
   ///
+  /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
+  /// needs to be set to `workers`.
+  ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   static IsolateManagerShared createShared({
     int concurrent = 1,
@@ -116,6 +119,7 @@ class IsolateManager<R, P> {
     Object Function(dynamic)? workerConverter,
     Map<Function, String> workerMappings = const {},
     bool autoStart = true,
+    String subPath = '',
     bool isDebug = false,
   }) =>
       IsolateManagerShared(
@@ -124,6 +128,7 @@ class IsolateManager<R, P> {
         workerConverter: workerConverter,
         workerMappings: workerMappings,
         autoStart: autoStart,
+        subPath: subPath,
         isDebug: isDebug,
       );
 

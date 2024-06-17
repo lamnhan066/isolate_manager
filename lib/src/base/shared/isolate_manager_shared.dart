@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:path/path.dart';
 
 import 'function.dart';
 
@@ -39,6 +40,9 @@ class IsolateManagerShared {
   ///
   /// Set [autoStart] to `false` if you want to call the `start()` method manually.
   ///
+  /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
+  /// needs to be set to `workers`.
+  ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   IsolateManagerShared({
     int concurrent = 1,
@@ -46,10 +50,11 @@ class IsolateManagerShared {
     Object Function(dynamic)? workerConverter,
     this.workerMappings = const {},
     bool autoStart = true,
+    String subPath = '',
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
           internalFunction,
-          workerName: useWorker ? kSharedWorkerName : '',
+          workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
           workerConverter: workerConverter,
           concurrent: concurrent,
           isDebug: isDebug,
