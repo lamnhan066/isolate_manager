@@ -293,7 +293,7 @@ void main() {
     final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackFunction,
       concurrent: 1,
-      workerName: 'isolateCallbackFunction',
+      workerName: 'workers/isolateCallbackFunction',
     );
     await isolateManager.start();
 
@@ -321,7 +321,7 @@ void main() {
     final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackSimpleFunction,
       concurrent: 1,
-      workerName: 'isolateCallbackSimpleFunction',
+      workerName: 'workers/isolateCallbackSimpleFunction',
     );
     await isolateManager.start();
 
@@ -406,7 +406,7 @@ void main() {
   test('Test with returning a List<String>', () async {
     final isolate = IsolateManager.create(
       aStringList,
-      workerName: 'aStringList',
+      workerName: 'workers/aStringList',
       // Cast to List<String>
       workerConverter: (value) => value.cast<String>() as List<String>,
     );

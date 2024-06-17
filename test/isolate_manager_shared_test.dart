@@ -9,8 +9,11 @@ import 'package:test/test.dart';
 void main() async {
   test('test', () {
     // Create 3 isolates to solve the problems
-    final isolates =
-        IsolateManager.createShared(concurrent: 3, useWorker: true);
+    final isolates = IsolateManager.createShared(
+      concurrent: 3,
+      useWorker: true,
+      subPath: 'workers',
+    );
 
     isolates.stream.listen((result) {
       if (result is double) {
@@ -55,6 +58,7 @@ void main() async {
     final isolates = IsolateManager.createShared(
       concurrent: 3,
       useWorker: true,
+      subPath: 'workers',
       workerMappings: {
         addFuture: 'addFuture',
         add: 'add',
@@ -130,8 +134,11 @@ void main() async {
   // This test will work better if the `autoInitialized` is set to `false`.
   test('Ensure started', () async {
     // The first `compute` will ensure started automatically
-    final isolates1 =
-        IsolateManager.createShared(concurrent: 1, useWorker: true);
+    final isolates1 = IsolateManager.createShared(
+      concurrent: 1,
+      useWorker: true,
+      subPath: 'workers',
+    );
 
     final stopWatch = Stopwatch()..start();
     expect(isolates1.isStarted, equals(false));
