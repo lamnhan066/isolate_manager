@@ -134,7 +134,7 @@ class _MyAppState extends State<MyApp> {
     fibonacciRecursiveParam = rad.nextInt(max);
     final result = await isolates.compute(
       fibonacciRecursiveFuture,
-      fibonacciFutureParam,
+      fibonacciRecursiveParam,
     );
     setState(() {
       fibonacciRecursiveResult = result;
@@ -158,7 +158,7 @@ class _MyAppState extends State<MyApp> {
 
   void calculateComplexFunction() {
     final param = ComplexModelParam(
-      name: 'Lyo',
+      name: 'lamnhan.dev',
       age: 30,
       hobbies: ['playing games', 'reading books', 'watching TV'],
     );
@@ -324,11 +324,9 @@ class _MyAppState extends State<MyApp> {
                                   );
                                 },
                               ),
-                              ListTile(
-                                title: ElevatedButton(
-                                  onPressed: () => calculateFunctionName(),
-                                  child: const Text('Calculate'),
-                                ),
+                              ElevatedButton(
+                                onPressed: () => calculateFunctionName(),
+                                child: const Text('Calculate'),
                               ),
                             ],
                           ),
