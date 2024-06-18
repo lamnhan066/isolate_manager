@@ -43,7 +43,7 @@ class IsolateContactorInternalFuture<R, P>
 
   /// Create modified isolate function
   static Future<IsolateContactorInternalFuture<R, P>> createCustom<R, P>({
-    required void Function(dynamic) isolateFunction,
+    required CustomIsolateFunction isolateFunction,
     required String isolateFunctionName,
     required dynamic initialParams,
     required IsolateConverter<R> converter,
