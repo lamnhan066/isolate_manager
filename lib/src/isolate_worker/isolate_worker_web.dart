@@ -21,7 +21,7 @@ Future<void> isolateWorkerImpl<R, P>(
     completer.complete(onInitial());
     await completer.future;
   }
-  controller.onIsolateMessage.listen((event) {
+  controller.onIsolateMessage.listen((message) {
     final completer = Completer();
     completer.future.then(
       (value) => controller.sendResult(value),
@@ -29,7 +29,6 @@ Future<void> isolateWorkerImpl<R, P>(
           controller.sendResultError(IsolateException(err, stack)),
     );
     try {
-      final message = controller.getMessage(event);
       completer.complete(function(message) as dynamic);
     } catch (err, stack) {
       completer.completeError(err, stack);

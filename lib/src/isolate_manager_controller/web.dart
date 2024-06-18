@@ -13,10 +13,7 @@ import '../base/isolate_contactor.dart';
 class IsolateManagerControllerImpl<R, P>
     implements IsolateManagerController<R, P> {
   /// Delegation of IsolateContactor.
-  late IsolateContactorController<R, P> _delegate;
-
-  /// Is on the Web Worker
-  bool _isWorker = false;
+  final IsolateContactorController<R, P> _delegate;
 
   /// This method only use to create a custom isolate.
   ///
@@ -25,21 +22,9 @@ class IsolateManagerControllerImpl<R, P>
   IsolateManagerControllerImpl(
     dynamic params, {
     void Function()? onDispose,
-  }) {
-    if (params.runtimeType == DedicatedWorkerGlobalScope) {
-      _delegate = _IsolateManagerWorkerController<R, P>(params);
-      _isWorker = true;
-    } else {
-      _delegate = IsolateContactorController<R, P>(
-        params,
-        onDispose: onDispose,
-      );
-    }
-  }
-
-  @override
-  P getMessage(dynamic message) =>
-      _isWorker ? (message as MessageEvent).data : message;
+  }) : _delegate = params.runtimeType == DedicatedWorkerGlobalScope
+            ? _IsolateManagerWorkerController<R, P>(params)
+            : IsolateContactorController<R, P>(params, onDispose: onDispose);
 
   /// Mark the isolate as initialized.
   ///
@@ -77,7 +62,7 @@ class _IsolateManagerWorkerController<R, P>
 
   _IsolateManagerWorkerController(this.self) {
     self.onmessage = (MessageEvent event) {
-      _streamController.sink.add(event.data as P);
+      _streamController.sink.add(event.data as dynamic);
     }.toJS;
   }
 
@@ -85,7 +70,7 @@ class _IsolateManagerWorkerController<R, P>
   Stream<P> get onIsolateMessage => _streamController.stream;
 
   @override
-  get initialParams => null;
+  Object? get initialParams => null;
 
   /// Send result to the main app
   @override
