@@ -76,8 +76,8 @@ class _IsolateManagerWorkerController<R, P>
   final _streamController = StreamController<P>.broadcast();
 
   _IsolateManagerWorkerController(this.self) {
-    self.onmessage = (P event) {
-      _streamController.sink.add(event);
+    self.onmessage = (MessageEvent event) {
+      _streamController.sink.add(event.data as P);
     }.toJS;
   }
 
