@@ -9,12 +9,13 @@
 
 ## **Features**
 
-- Supports to create multiple Isolates for **a single Function** or **multiple Functions**.
-- A generator to generate all Workers by using the `@isolateManagerWorker` and `@isolateManagerCustomWorker` annotations for **a single Function** or `@isolateManagerSharedWorker` annotation for **multiple Functions**.
-- Supports `Worker` on the Web (If the `Worker` is unavailable in the working browser or is not configured, the `Future` (and `Stream`) will be used).
+- Supports to create multiple Isolates for:
+  - **A single Function:** One `IsolateManager` instance can be used for only one Function, so that the `stream` can be used easily when using something like a `StreamBuilder` (Use the`@isolateManagerWorker` and `@isolateManagerCustomWorker` annotations).
+  - **Multiple Functions:** One `IsolateManagerShared` instance can be used for multiple Functions, it's good for computing multiple Functions and doesn't care much about the `stream` (Use the `@isolateManagerSharedWorker` annotation).
+- Supports `Worker` on the Web. If the `Worker` is unavailable in the working browser or is not configured, the `Future` (and `Stream`) will be used.
 - Supports `WASM` compilation on the Web.
-- Multiple `compute` operations are allowed because the plugin will queue the input data and send it to a free isolate later.
 - Supports `try-catch` blocks.
+- Multiple `compute` operations are allowed because the plugin will queue the input data and send it to a free isolate later.
 
 ## **Table Of Contents**
 
