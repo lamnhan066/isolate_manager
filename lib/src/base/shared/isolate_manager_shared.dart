@@ -59,7 +59,7 @@ class IsolateManagerShared {
           concurrent: concurrent,
           isDebug: isDebug,
         ) {
-    if (autoStart) _manager.start();
+    if (autoStart) start();
   }
 
   /// Compute the given [function] with given [params].
