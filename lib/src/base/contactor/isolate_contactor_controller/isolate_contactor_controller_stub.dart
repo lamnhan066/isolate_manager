@@ -10,8 +10,8 @@ import '../models/exception.dart';
 
 class IsolateContactorControllerImpl<R, P>
     implements IsolateContactorController<R, P> {
-  late IsolateChannel _delegate;
-  late StreamSubscription _delegateSubscription;
+  final IsolateChannel _delegate;
+  StreamSubscription? _delegateSubscription;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
@@ -19,7 +19,7 @@ class IsolateContactorControllerImpl<R, P>
       StreamController.broadcast();
   final void Function()? onDispose;
   final IsolateConverter<R>? converter;
-  dynamic _initialParams;
+  final dynamic _initialParams;
 
   @override
   Completer<void> ensureInitialized = Completer();
@@ -30,14 +30,10 @@ class IsolateContactorControllerImpl<R, P>
     required this.converter, // Converter for native
     required IsolateConverter<R>?
         workerConverter, // Converter for Worker (Web Only)
-  }) {
-    if (params is List) {
-      _delegate = IsolateChannel.connectSend(params.last);
-      _initialParams = params.first;
-    } else {
-      _delegate = IsolateChannel.connectReceive(params);
-    }
-
+  })  : _delegate = params is List
+            ? IsolateChannel.connectSend(params.last)
+            : IsolateChannel.connectReceive(params),
+        _initialParams = params is List ? params.first : null {
     _delegateSubscription = _delegate.stream.listen((event) {
       (event as Map<IsolatePort, dynamic>).forEach((key, value) {
         switch (key) {
@@ -107,7 +103,7 @@ class IsolateContactorControllerImpl<R, P>
   @override
   Future<void> close() async {
     await Future.wait([
-      _delegateSubscription.cancel(),
+      _delegateSubscription!.cancel(),
       _mainStreamController.close(),
       _isolateStreamController.close(),
     ]);

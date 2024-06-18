@@ -9,7 +9,7 @@ import '../isolate_contactor_controller_web.dart';
 
 class IsolateContactorControllerImplFuture<R, P>
     implements IsolateContactorControllerImpl<R, P> {
-  late StreamController _delegate;
+  final StreamController _delegate;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
@@ -18,7 +18,7 @@ class IsolateContactorControllerImplFuture<R, P>
 
   final void Function()? onDispose;
   final IsolateConverter<R> converter;
-  dynamic _initialParams;
+  final dynamic _initialParams;
 
   @override
   Completer<void> ensureInitialized = Completer();
@@ -28,14 +28,10 @@ class IsolateContactorControllerImplFuture<R, P>
     required this.onDispose,
     required this.converter,
     required IsolateConverter<R> workerConverter,
-  }) {
-    if (params is List) {
-      _delegate = params.last.controller as StreamController;
-      _initialParams = params.first;
-    } else {
-      _delegate = params;
-    }
-
+  })  : _delegate = params is List
+            ? params.last.controller as StreamController
+            : params,
+        _initialParams = params is List ? params.first : null {
     _delegate.stream.listen((event) {
       (event as Map<IsolatePort, dynamic>).forEach((key, value) {
         switch (key) {

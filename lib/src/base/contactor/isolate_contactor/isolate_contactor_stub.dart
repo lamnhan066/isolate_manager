@@ -8,10 +8,10 @@ import '../isolate_contactor_controller/isolate_contactor_controller_stub.dart';
 
 class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   /// Create receive port
-  late ReceivePort _receivePort;
+  final ReceivePort _receivePort;
 
   /// Create isolate channel
-  late IsolateContactorControllerImpl<R, P> _isolateContactorController;
+  final IsolateContactorControllerImpl<R, P> _isolateContactorController;
 
   /// Create isolate
   Isolate? _isolate;
@@ -21,17 +21,14 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
       StreamController.broadcast();
 
   /// Control the function of isolate
-  late void Function(dynamic) _isolateFunction;
+  final void Function(dynamic) _isolateFunction;
 
   /// Control the parameters of isolate
-  late Object? _isolateParam;
+  final Object? _isolateParam;
 
   /// Only for web platform
   // ignore: unused_field
-  late String _workerName;
-
-  IsolateConverter<R>? _converter;
-  IsolateConverter<R>? _workerConverter;
+  final String _workerName;
 
   /// Internal instance
   IsolateContactorInternal._({
@@ -40,14 +37,19 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     required String workerName,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    required ReceivePort receivePort,
     bool debugMode = false,
-  }) : super(debugMode) {
-    _isolateFunction = isolateFunction;
-    _workerName = workerName;
-    _converter = converter;
-    _workerConverter = workerConverter;
-    _isolateParam = isolateParam;
-  }
+  })  : _isolateFunction = isolateFunction,
+        _workerName = workerName,
+        _isolateParam = isolateParam,
+        _receivePort = receivePort,
+        _isolateContactorController = IsolateContactorControllerImpl(
+          receivePort,
+          converter: converter,
+          workerConverter: workerConverter,
+          onDispose: null,
+        ),
+        super(debugMode);
 
   /// Create an instance with your own function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
@@ -66,6 +68,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
       converter: converter,
       workerConverter: workerConverter,
       debugMode: debugMode,
+      receivePort: ReceivePort(),
     );
 
     await isolateContactor._initial();
@@ -75,13 +78,6 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
 
   /// Initialize
   Future<void> _initial() async {
-    _receivePort = ReceivePort();
-    _isolateContactorController = IsolateContactorControllerImpl(
-      _receivePort,
-      converter: _converter,
-      workerConverter: _workerConverter,
-      onDispose: null,
-    );
     _isolateContactorController.onMessage.listen((message) {
       printDebug(() => 'Message received from Isolate: $message');
       _mainStreamController.sink.add(message);

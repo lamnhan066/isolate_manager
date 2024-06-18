@@ -10,16 +10,14 @@ import '../isolate_contactor_controller_web.dart';
 
 class IsolateContactorControllerImplWorker<R, P>
     implements IsolateContactorControllerImpl<R, P> {
-  late Worker _delegate;
+  final Worker _delegate;
 
   final StreamController<R> _mainStreamController =
-      StreamController.broadcast();
-  final StreamController<P> _isolateStreamController =
       StreamController.broadcast();
 
   final void Function()? onDispose;
   final IsolateConverter<R> workerConverter;
-  dynamic _initialParams;
+  final dynamic _initialParams;
 
   @override
   Completer<void> ensureInitialized = Completer();
@@ -29,14 +27,10 @@ class IsolateContactorControllerImplWorker<R, P>
     required this.onDispose,
     required IsolateConverter<R> converter, // Converter for native
     required this.workerConverter, // Converter for Worker (Web Only)
-  }) {
-    if (params is List) {
-      _delegate = params.last.controller as Worker;
-      _initialParams = params.first;
-    } else {
-      _delegate = params as Worker;
-    }
-
+  })  : _delegate = params is List
+            ? params.last.controller as Worker
+            : params as Worker,
+        _initialParams = params is List ? params.first : null {
     _delegate.onmessage = (MessageEvent event) {
       if (IsolateState.dispose.isValidJson(event.data)) {
         onDispose!();
@@ -75,7 +69,7 @@ class IsolateContactorControllerImplWorker<R, P>
   Stream<R> get onMessage => _mainStreamController.stream;
 
   @override
-  Stream<P> get onIsolateMessage => _isolateStreamController.stream;
+  Stream<P> get onIsolateMessage => throw UnimplementedError();
 
   @override
   Future<void> initialized() => throw UnimplementedError();
@@ -100,9 +94,6 @@ class IsolateContactorControllerImplWorker<R, P>
   @override
   Future<void> close() async {
     _delegate.terminate();
-    await Future.wait([
-      _mainStreamController.close(),
-      _isolateStreamController.close(),
-    ]);
+    await _mainStreamController.close();
   }
 }

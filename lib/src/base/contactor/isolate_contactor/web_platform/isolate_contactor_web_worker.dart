@@ -22,16 +22,11 @@ class IsolateContactorInternalWorker<R, P>
 
   /// Control the function of isolate
   // ignore: unused_field
-  late void Function(dynamic) _isolateFunction;
+  final void Function(dynamic) _isolateFunction;
 
   /// Control the parameters of isolate
   // ignore: unused_field
-  late dynamic _isolateParam;
-
-  late String _workerName;
-
-  late IsolateConverter<R> _converter;
-  late IsolateConverter<R> _workerConverter;
+  final dynamic _isolateParam;
 
   /// Create an instance
   IsolateContactorInternalWorker._({
@@ -41,13 +36,15 @@ class IsolateContactorInternalWorker<R, P>
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
     bool debugMode = false,
-  }) : super(debugMode) {
-    _isolateFunction = isolateFunction;
-    _workerName = workerName;
-    _converter = converter;
-    _workerConverter = workerConverter;
-    _isolateParam = isolateParam;
-  }
+  })  : _isolateFunction = isolateFunction,
+        _isolateParam = isolateParam,
+        _isolateContactorController = IsolateContactorControllerImpl(
+          Worker("$workerName.js"),
+          converter: converter,
+          workerConverter: workerConverter,
+          onDispose: null,
+        ),
+        super(debugMode);
 
   /// Create modified isolate function
   static Future<IsolateContactorInternalWorker<R, P>> createCustom<R, P>({
@@ -75,12 +72,6 @@ class IsolateContactorInternalWorker<R, P>
 
   /// Initialize
   Future<void> _initial() async {
-    _isolateContactorController = IsolateContactorControllerImpl(
-      Worker("$_workerName.js"),
-      converter: _converter,
-      workerConverter: _workerConverter,
-      onDispose: null,
-    );
     _isolateContactorController!.onMessage.listen((message) {
       printDebug(
         () => '[Main Stream] Message received from Worker: $message',
