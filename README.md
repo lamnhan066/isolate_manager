@@ -23,14 +23,14 @@
 - [Isolate Manager (For A Single Function)](#isolatemanager-method)
   - [Basic Usage](#basic-usage)
   - [Custom Function Usage](#custom-function-usage)
-  - [Progress Values (Receives multiple values in a single `compute`)](#progress-values)
+  - [Progress Values (Receives multiple values from a single `compute`)](#progress-values)
 - [Try Catch Block](#try-catch-block)
 - [Addtional Information](#additional-information)
 - [Contributions](#contributions)
 
 ## **Benchmark**
 
-Execute a recursive Fibonacci function 70 times, computing the sequence for the numbers 30, 33, and 36. The results are in microseconds (On Macbook M1 Pro 14-inch).
+Execute a recursive Fibonacci function 70 times, computing the sequence for the numbers 30, 33, and 36. The results are in microseconds (On Macbook M1 Pro 14-inch 16Gb RAM).
 
 - VM
 
@@ -69,39 +69,24 @@ void main() async {
     }  
   );
 
-  // Listen for the results from the stream.
-  isolateShared.stream.listen((result) {
-    if (result is double) {
-      print('Stream get addFuture: $result');
-    } else {
-      print('Stream get add: $result');
-    }
-  });
 
   // Compute the values. The return type and parameter type will respect the type
   // of the function.
   final added = await isolateShared.compute(
-    addFuture, [1.1, 2.2], 
-    workerFunction: 'addFuture', // Ignore this if the `workerMappings` is specified
+    addFuture, 
+    [1.1, 2.2], 
+    // workerFunction: 'addFuture', // Ignored because the `workerMappings` is specified
   );
-  print('add: 1.1 + 2.2 = $added');
+  print('addFuture: 1.1 + 2.2 = $added');
 
-  // Multiple computations at the same time are allowed. It will be queued
-  // automatically.
-  for (int i = 0; i < 10; i++) {
-    isolateShared(
-      add, 
-      [i, i], 
-      workerFunction: 'add', // Ignore this if the `workerMappings` is specified
-    ).then((value) async {
-      print('add: $i + $i = $value');
-    });
-  }
-
-  // Stop the IsolateHelper instance after 5 seconds
-  Timer(Duration(seconds: 5), () {
-    isolateShared.stop();
-  });
+  // Compute the values. The return type and parameter type will respect the type
+  // of the function.
+  final added = await isolateShared.compute(
+    add, 
+    [1, 2], 
+    // workerFunction: 'add', // Ignored because the `workerMappings` is specified
+  );
+  print('add: 1 + 2 = $added');
 }
 
 @isolateManagerSharedWorker
@@ -118,7 +103,7 @@ int add(List<int> values) {
 Run this command to generate a Javascript Worker (named `$shared_worker.js` inside the `web` folder):
 
 ```console
-dart run isolate_manager:generate_shared
+dart run isolate_manager:generate
 ```
 
 ## **IsolateManager Method**
@@ -354,6 +339,14 @@ void progressFunction(dynamic params) {
   **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
 
 - If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
+
+- The generator options and flags:
+  - `--single`: Generates single Functions only.
+  - `--shared`: Generates shared Functions only.
+  - `--in <path>` (or `-i <path>`): Inputted folder.
+  - `--out <path>` (or `-o <path>`): Outputted folder.
+  - `--obfuscate <level>`: The obfuscated level of JS (0 to 4). Default is set to `4`.
+  - `--debug`: Keeps the temp files for debugging.
 
 ## Contributions
 

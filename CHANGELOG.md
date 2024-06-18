@@ -1,3 +1,18 @@
+## 5.1.0-rc
+
+* Add `IsolateManagerShared` to be able to compute the multiple Functions.
+* Generate the shared Workers by using the `@isolateManagerSharedWorker` annotation.
+* Able to generate a custom Worker from a `customFunction` by using the `@isolateManagerCustomWorker` annotation.
+* Improve the README.
+* Various improvements and optimizations.
+
+* The generator:
+  * The default `dart run isolate_manager:generate` command will generates both single and shared Workers.
+  * Use `dart run isolate_manager:generate --single` to generate only the single functions (`@isolateManagerWorker` and `@isolateManagerCustomWorker` annotations).
+  * Use `dart run isolate_manager:generate_shared --shared` to generate only the shared functions (`@isolateManagerSharedWorker` annotation).
+
+* *This is an `rc` version because the various improvements may affect some edge cases so I want to make sure it's fully backward-compatible*
+  
 ## 5.0.5+1
 
 * Improve README.
