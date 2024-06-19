@@ -107,6 +107,8 @@ Run this command to generate a Javascript Worker (named `$shared_worker.js` insi
 dart run isolate_manager:generate
 ```
 
+Add flag `--shared` if you want to generate only for the `IsolateManagerShared`.
+
 ## **IsolateManager Method**
 
 ### **Basic Usage**
@@ -142,6 +144,8 @@ Run this command to generate a Javascript Worker:
 ```console
 dart run isolate_manager:generate
 ```
+
+Add flag `--single` if you want to generate only for the `IsolateManager`.
 
 You can restart or stop the isolate using this method:
 

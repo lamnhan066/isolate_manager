@@ -1,3 +1,7 @@
+## 5.1.0-rc.1
+
+* Improve README.
+
 ## 5.1.0-rc
 
 * Add `IsolateManagerShared` to be able to compute the multiple Functions.
