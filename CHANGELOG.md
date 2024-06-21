@@ -1,3 +1,7 @@
+## 5.1.0
+
+* Stable now.
+
 ## 5.1.0-rc.1
 
 * Improve README.
