@@ -101,6 +101,8 @@ int add(List<int> values) {
 }
 ```
 
+**Important Note:** If you want to build functions into `js` for Workers, these functions MUST NOT depend on any Flutter library like `dart:ui`, `material`,... The best way is moving these functions into a separated file so we can control the imports easily.
+
 Run this command to generate a Javascript Worker (named `$shared_worker.js` inside the `web` folder):
 
 ```console
@@ -138,6 +140,8 @@ int fibonacci(int n) {
   return fibonacci(n - 1) + fibonacci(n - 2);
 }
 ```
+
+**Important Note:** If you want to build functions into `js` for Workers, these functions MUST NOT depend on any Flutter library like `dart:ui`, `material`,... The best way is moving these functions into a separated file so we can control the imports easily.
 
 Run this command to generate a Javascript Worker:
 
