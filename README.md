@@ -291,6 +291,7 @@ void progressFunction(dynamic params) {
 ## Additional Information
 
 - The function has to be a `static` or `top-level` function.
+- If you want to build functions into `js` for Workers, these functions MUST NOT depend on any Flutter library like `dart:ui`, `material`,... The best way is moving these functions into a separated file so we can control the imports easily.
 - Use `queuesLength` to get the current number of queued computation.
 - Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
 - Use `isStarted` to check if the `start` method is completed or not.
