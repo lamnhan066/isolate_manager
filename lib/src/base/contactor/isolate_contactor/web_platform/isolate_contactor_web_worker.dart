@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
 import 'package:web/web.dart';
@@ -39,7 +40,7 @@ class IsolateContactorInternalWorker<R, P>
   })  : _isolateFunction = isolateFunction,
         _isolateParam = isolateParam,
         _isolateContactorController = IsolateContactorControllerImpl(
-          Worker("$workerName.js"),
+          Worker("$workerName.js".toJS),
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,

@@ -4,15 +4,15 @@ version: 5.1.0
 homepage: https://github.com/lamnhan066/isolate_manager
 
 environment:
-  sdk: ^3.3.0
+  sdk: ^3.4.0
 
 dependencies:
   stream_channel: ^2.1.2
-  web: ^0.5.1
+  web: ^1.0.0
   analyzer: ">=5.12.0 <7.0.0"
   path: ^1.9.0
   args: ^2.5.0
 
 dev_dependencies:
-  test: ^1.25.7
+  test: ^1.25.8
   lints: ^4.0.0
