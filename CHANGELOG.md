@@ -1,3 +1,8 @@
+## 5.2.0
+
+* Bump the `web` to v1.0.0.
+* Update `README`.
+
 ## 5.1.0
 
 * Stable now.
