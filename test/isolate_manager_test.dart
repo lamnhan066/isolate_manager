@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
+//  dart run isolate_manager:generate -i test -o test
 //  dart test
 //  dart test --platform=chrome,vm
 
