@@ -53,14 +53,12 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 ## **IsolateManagerShared Method**
 
-*This method currently doesn't support the `IsolateManagerFunction.customFunction`.*
-
 ```dart
 void main() async {
   // Create 3 isolateShared to solve the problems
   final isolateShared = IsolateManager.createShared(
     concurrent: 3, 
-    useWorker: true
+    useWorker: true, // Remove this line (or set it to `false`) if you don't want to use the Worker
 
     // Add this mappings so we can ignore the `workerName` parameter 
     // when using the `compute` method.
@@ -121,7 +119,10 @@ There are multiple ways to use this package. The only thing to notice is that th
 main() async {
   final isolate = IsolateManager.create(
       fibonacci, 
-      workerName: 'fibonacci', // Add this line
+
+      // And the name of the function if you want to use the Worker.
+      // Otherwise, you can ignore this parameter.
+      workerName: 'fibonacci',
       concurrent: 2,
     );
 
@@ -132,7 +133,7 @@ main() async {
   final fibo = await isolate(20);
 }
 
-@isolateManagerWorker // Add this anotation
+@isolateManagerWorker // Remove this annotation if you don't want to use the Worker
 int fibonacci(int n) {
   if (n == 0) return 0;
   if (n == 1) return 1;
@@ -167,7 +168,7 @@ You can control everything with this method when you want to create multiple iso
 Let it automatically handles the result and the Exception:
 
 ``` dart
-@isolateManagerCustomWorker // Add this anotation for a custom function
+@isolateManagerCustomWorker // Remove this line if you don't want to use the Worker
 void customIsolateFunction(dynamic params) {
   IsolateManagerFunction.customFunction<int, int>(
     params,
@@ -188,7 +189,7 @@ void customIsolateFunction(dynamic params) {
 Handle the result and the Exception by your self:
 
 ```dart
-@isolateManagerCustomWorker // Add this anotation for a custom function
+@isolateManagerCustomWorker // Remove this line if you don't want to use the Worker
 void customIsolateFunction(dynamic params) {
   IsolateManagerFunction.customFunction<Map<String, dynamic>, String>(
     params,
@@ -222,6 +223,9 @@ void customIsolateFunction(dynamic params) {
 final isolateManager = IsolateManager.createCustom(
     customIsolateFunction,
     initialParams: 'This is the initialParams',
+
+    // And the name of the function if you want to use the Worker.
+    // Otherwise, you can ignore this parameter.
     workerName: 'customIsolateFunction',
     debugMode: true,
   );
