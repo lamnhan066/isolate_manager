@@ -58,7 +58,9 @@ void main() async {
   // Create 3 isolateShared to solve the problems
   final isolateShared = IsolateManager.createShared(
     concurrent: 3, 
-    useWorker: true, // Remove this line (or set it to `false`) if you don't want to use the Worker
+
+    // Remove this line (or set it to `false`) if you don't want to use the Worker
+    useWorker: true, 
 
     // Add this mappings so we can ignore the `workerName` parameter 
     // when using the `compute` method.
