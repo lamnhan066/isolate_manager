@@ -1,3 +1,7 @@
+## 5.2.1+1
+
+* Improve README.
+
 ## 5.2.1
 
 * Update the package `web` version to support a wider range (">=0.5.1 <2.0.0").
