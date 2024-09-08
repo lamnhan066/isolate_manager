@@ -101,7 +101,10 @@ int add(List<int> values) {
 }
 ```
 
-**Important Note:** If you want to build functions into `js` for Workers, these functions MUST NOT depend on any Flutter library like `dart:ui`, `material`,... The best way is moving these functions into a separated file so we can control the imports easily.
+> **Important Note:** If you want to build functions into `js` for the `Worker`s:
+>
+> - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
+> - The input parameters and the return type of these functions should be a `JSON` (or primitive types) to make the `Worker` work properly.
 
 Run this command to generate a Javascript Worker (named `$shared_worker.js` inside the `web` folder):
 
@@ -144,7 +147,10 @@ int fibonacci(int n) {
 }
 ```
 
-**Important Note:** If you want to build functions into `js` for Workers, these functions MUST NOT depend on any Flutter library like `dart:ui`, `material`,... The best way is moving these functions into a separated file so we can control the imports easily.
+> **Important Note:** If you want to build functions into `js` for the `Worker`s:
+>
+> - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
+> - The input parameters and the return type of these functions should be a `JSON` (or primitive types) to make the `Worker` work properly.
 
 Run this command to generate a Javascript Worker:
 
@@ -301,7 +307,7 @@ void progressFunction(dynamic params) {
 ## Additional Information
 
 - The function has to be a `static` or `top-level` function.
-- If you want to build functions into `js` for Workers, these functions MUST NOT depend on any Flutter library like `dart:ui`, `material`,... The best way is moving these functions into a separated file so we can control the imports easily.
+- If you want to build functions into `js` for the `Worker`s, these functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily. In addition, The input parameters and the return type of these functions should be a `JSON` (or primitive types) to make the `Worker` work properly
 - Use `queuesLength` to get the current number of queued computation.
 - Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
 - Use `isStarted` to check if the `start` method is completed or not.
