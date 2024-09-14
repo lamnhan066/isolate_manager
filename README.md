@@ -20,6 +20,7 @@
 ## **Table Of Contents**
 
 - [Benchmark](#benchmark)
+- [Setup](#setup)
 - [Isolate Manager Shared (For Multiple Functions)](#isolatemanagershared-method)
 - [Isolate Manager (For A Single Function)](#isolatemanager-method)
   - [Basic Usage](#basic-usage)
