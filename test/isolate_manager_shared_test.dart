@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
@@ -199,6 +200,50 @@ void main() async {
     } catch (e) {
       expect(e, isA<UnimplementedError>());
     }
+  });
+
+  group('Test IsolatePriority -', () {
+    test('IsolatePriority.high', () async {
+      final isolate = IsolateManager.createShared();
+      await isolate.start();
+
+      final result = <int>[];
+      isolate.stream.listen((value) {
+        result.add(value as int);
+      });
+
+      await Future.wait([
+        isolate.compute(add, [1, 1]),
+        isolate.compute(add, [4, 4]),
+        isolate.compute(add, [2, 2], priority: IsolatePriority.high),
+        isolate.compute(add, [3, 3], priority: IsolatePriority.high),
+      ]);
+
+      // The result in order of [1, 1] -> [2, 2] -> [3, 3] -> [4, 4]
+      final expected = [2, 4, 6, 8];
+      expect(ListEquality().equals(result, expected), equals(true));
+    });
+
+    test('IsolatePriority.low', () async {
+      final isolate = IsolateManager.createShared(workerMappings: {add: 'add'});
+      await isolate.start();
+
+      final result = <int>[];
+      isolate.stream.listen((value) {
+        result.add(value as int);
+      });
+
+      await Future.wait([
+        isolate.compute(add, [1, 1]),
+        isolate.compute(add, [3, 3], priority: IsolatePriority.low),
+        isolate.compute(add, [4, 4], priority: IsolatePriority.low),
+        isolate.compute(add, [2, 2]),
+      ]);
+
+      // The result in order of [1, 1] -> [2, 2] -> [3, 3] -> [4, 4]
+      final expected = [2, 4, 6, 8];
+      expect(ListEquality().equals(result, expected), equals(true));
+    });
   });
 }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
@@ -430,6 +431,52 @@ void main() {
     final result = await isolate.compute(jsonEncode(map));
 
     expect(jsonDecode(result), map);
+  });
+
+  group('Test IsolatePriority -', () {
+    test('IsolatePriority.high', () async {
+      final isolate = IsolateManager.create(fibonacci, workerName: 'fibonacci');
+      await isolate.start();
+
+      final result = <int>[];
+      isolate.stream.listen((value) {
+        result.add(value);
+      });
+
+      await Future.wait([
+        isolate.compute(4),
+        isolate.compute(7),
+        isolate.compute(5, priority: IsolatePriority.high),
+        isolate.compute(6, priority: IsolatePriority.high),
+      ]);
+
+      // The result in order of 4 -> 5 -> 6 -> 7
+      final expected = [3, 5, 8, 13];
+      expect(ListEquality().equals(result, expected), equals(true));
+    });
+
+    test('IsolatePriority.low', () async {
+      final isolate = IsolateManager.create(fibonacci, workerName: 'fibonacci');
+      await isolate.start();
+
+      final result = <int>[];
+      isolate.stream.listen((value) {
+        result.add(value);
+      });
+
+      await Future.wait([
+        isolate.compute(4),
+        // This value will be computed after `5`.
+        isolate.compute(6, priority: IsolatePriority.low),
+        // This value will be computed after `6` with the same high priority.
+        isolate.compute(7, priority: IsolatePriority.low),
+        isolate.compute(5),
+      ]);
+
+      // The result in order of 4 -> 5 -> 6 -> 7
+      final expected = [3, 5, 8, 13];
+      expect(ListEquality().equals(result, expected), equals(true));
+    });
   });
 }
 

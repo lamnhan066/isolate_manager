@@ -21,3 +21,4 @@ dependencies:
 dev_dependencies:
   test: ^1.25.8
   lints: ^4.0.0
+  collection: ^1.19.0
