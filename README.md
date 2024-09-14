@@ -27,6 +27,7 @@
   - [Custom Function Usage](#custom-function-usage)
   - [Progress Values (Receives multiple values from a single `compute`)](#progress-values)
 - [Try Catch Block](#try-catch-block)
+- [Priority Computation](#priority-computation)
 - [Addtional Information](#additional-information)
 - [Contributions](#contributions)
 
@@ -310,6 +311,32 @@ void progressFunction(dynamic params) {
   );
 }
 ```
+
+## Priority Computation
+
+The `priority` parameter in the `compute` method is useful when there are a lot of `compute`s in the Queue and you want to add a new `compute` on top of it to execute as soon as possible.
+
+All the `compute`s have a `IsolatePriority.medium` by default, so when you want to increase the priority of a new `compute`, you can use:
+
+```dart
+// IsolateManager
+isolate.compute(params, priority: IsolatePriority.high);
+
+// IsolateManagerShared
+isolateShared.compute(function, params, priority: IsolatePriority.high);
+```
+
+And if you want to add a new low priority `compute`, you can use:
+
+```dart
+// IsolateManager
+isolate.compute(params, priority: IsolatePriority.low);
+
+// IsolateManagerShared
+isolateShared.compute(function, params, priority: IsolatePriority.low);
+```
+
+The Queue uses `First In, First Out (FIFO)` method. So if there are mutiple queued functions with the same priority, the oldest one will be executed first.
 
 ## Additional Information
 
