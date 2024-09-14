@@ -1,6 +1,6 @@
 name: isolate_manager
 description: Create multiple long-lived isolates for the Functions, supports Worker on the Web (with the effective generator) and WASM compilation.
-version: 5.2.1+2
+version: 5.2.1+3
 homepage: https://github.com/lamnhan066/isolate_manager
 
 topics:
