@@ -51,6 +51,22 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for the test details.
 
+## **Setup**
+
+A function used for the Isolate **MUST BE** a `static` or `top-level` function.
+
+### Mobile and Desktop
+
+- No additional setup.
+
+### Web
+
+- Compiling to a Javascript Worker is required to use a real Isolate (via Worker) on the Web platform. Without it, the function will be run as an asynchronous function so the UI can be frozen.
+- In this instruction, the built-in generator will be used to compile the annotated function into Javascript Worker automatically.
+- **Required Note:** If you want to build functions into Javascript Worker:
+  - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
+  - The input parameters and the return type of these functions should be a `JSON` (or Dart primitive types) to make the `Worker` work properly.
+
 ## **IsolateManagerShared Method**
 
 ```dart
@@ -101,11 +117,6 @@ int add(List<int> values) {
 }
 ```
 
-> **Important Note:** If you want to build functions into `js` for the `Worker`s:
->
-> - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
-> - The input parameters and the return type of these functions should be a `JSON` (or primitive types) to make the `Worker` work properly.
-
 Run this command to generate a Javascript Worker (named `$shared_worker.js` inside the `web` folder):
 
 ```console
@@ -146,11 +157,6 @@ int fibonacci(int n) {
   return fibonacci(n - 1) + fibonacci(n - 2);
 }
 ```
-
-> **Important Note:** If you want to build functions into `js` for the `Worker`s:
->
-> - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
-> - The input parameters and the return type of these functions should be a `JSON` (or primitive types) to make the `Worker` work properly.
 
 Run this command to generate a Javascript Worker:
 
@@ -306,8 +312,6 @@ void progressFunction(dynamic params) {
 
 ## Additional Information
 
-- The function has to be a `static` or `top-level` function.
-- If you want to build functions into `js` for the `Worker`s, these functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily. In addition, The input parameters and the return type of these functions should be a `JSON` (or primitive types) to make the `Worker` work properly
 - Use `queuesLength` to get the current number of queued computation.
 - Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
 - Use `isStarted` to check if the `start` method is completed or not.
@@ -369,6 +373,26 @@ void progressFunction(dynamic params) {
   - `--out <path>` (or `-o <path>`): Outputted folder.
   - `--obfuscate <level>`: The obfuscated level of JS (0 to 4). Default is set to `4`.
   - `--debug`: Keeps the temp files for debugging.
+
+- All above examples use `top-level` functions so the `workerName` will be the same as the function name. If you use `static` functions, you have to add the class name like `ClassName.functionName` to the `workerName` parameter. For instance:
+
+  ```dart
+  class MyIsolateFuncs {
+    @isolateManagerWorker
+    static String isolateFunc(String params) {
+      return params;
+    }
+  }
+  ```
+
+  Then the `IsolateManager` should be:
+
+  ```dart
+  final isolate = IsolateManager.create(
+    MyIsolateFuncs.isolateFunc,
+    workerName: 'MyIsolateFuncs.isolateFunc',
+  );
+  ```
 
 ## Contributions
 
