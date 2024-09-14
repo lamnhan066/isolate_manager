@@ -336,7 +336,7 @@ isolate.compute(params, priority: IsolatePriority.low);
 isolateShared.compute(function, params, priority: IsolatePriority.low);
 ```
 
-The Queue uses `First In, First Out (FIFO)` method. So if there are mutiple queued functions with the same priority, the oldest one will be executed first.
+The Queue uses the `First In, First Out (FIFO)` method. So if multiple queued functions have the same priority, the oldest one will be executed first.
 
 ## Additional Information
 
