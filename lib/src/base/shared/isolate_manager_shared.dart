@@ -75,12 +75,14 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    IsolatePriority priority = IsolatePriority.medium,
   }) {
     return _excute(
       function,
       params,
       workerFunction: workerFunction,
       workerParams: workerParams,
+      priority: priority,
     );
   }
 
@@ -95,12 +97,14 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    IsolatePriority priority = IsolatePriority.medium,
   }) {
     return _excute(
       function,
       params,
       workerFunction: workerFunction,
       workerParams: workerParams,
+      priority: priority,
     );
   }
 
@@ -110,6 +114,7 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    required IsolatePriority priority,
   }) async {
     return platformExecute<R, P>(
       manager: _manager,
@@ -117,6 +122,7 @@ class IsolateManagerShared {
       params: params,
       workerFunction: workerFunction ?? workerMappings[function],
       workerParams: workerParams,
+      priority: priority,
     );
   }
 

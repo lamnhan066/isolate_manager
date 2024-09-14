@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:isolate_manager/src/models/isolate_priority.dart';
+
 import 'base/isolate_contactor.dart';
 import 'base/isolate_manager_shared.dart';
 import 'isolate_manager_function.dart';
@@ -55,7 +57,13 @@ class IsolateManager<R, P> {
   final IsolateConverter<R>? workerConverter;
 
   /// Get current number of queues.
-  int get queuesLength => _queues.length;
+  int get queuesLength {
+    int length = 0;
+    for (final queue in _mapQueues.values) {
+      length += queue.length;
+    }
+    return length;
+  }
 
   /// If you want to call the [start] method manually without `await`, you can `await`
   /// later by using [ensureStarted] to ensure that all the isolates are started.
@@ -133,7 +141,7 @@ class IsolateManager<R, P> {
       );
 
   /// Queue of isolates.
-  final Queue<IsolateQueue<R, P>> _queues = Queue();
+  final Map<IsolatePriority, Queue<IsolateQueue<R, P>>> _mapQueues = {};
 
   /// Map<IsolateContactor instance, isBusy>.
   final Map<IsolateContactor<R, P>, bool> _isolates = {};
@@ -169,6 +177,11 @@ class IsolateManager<R, P> {
 
     // If this method has already been called, it will wait for completion.
     if (_isStarting) return _startedCompleter.future;
+
+    // Initial queues.
+    for (final priority in IsolatePriority.values) {
+      _mapQueues[priority] = Queue<IsolateQueue<R, P>>();
+    }
 
     // Mark as the `start()` is starting.
     _isStarting = true;
@@ -221,7 +234,9 @@ class IsolateManager<R, P> {
   Future<void> _tempStop() async {
     _isStarting = false;
     _startedCompleter = Completer();
-    _queues.clear();
+    for (final queue in _mapQueues.values) {
+      queue.clear();
+    }
     await Future.wait(
         [for (IsolateContactor isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
@@ -307,11 +322,15 @@ class IsolateManager<R, P> {
   ///       return true;
   ///  });
   /// ```
-  Future<R> compute(P params, {IsolateCallback<R>? callback}) async {
+  Future<R> compute(
+    P params, {
+    IsolateCallback<R>? callback,
+    IsolatePriority priority = IsolatePriority.medium,
+  }) async {
     await start();
 
     final queue = IsolateQueue<R, P>(params, callback);
-    _queues.add(queue);
+    _addQueue(queue, priority);
 
     _excuteQueue();
 
@@ -320,12 +339,21 @@ class IsolateManager<R, P> {
 
   /// Exccute the element in the queues.
   void _excuteQueue() {
-    printDebug(() => 'Number of queues: ${_queues.length}');
+    if (isDebug) {
+      printDebug(() => 'Number of queues:');
+      for (final map in _mapQueues.entries) {
+        printDebug(() => '> ${map.key}: ${map.value.length}');
+      }
+    }
     for (final isolate in _isolates.keys) {
       /// Allow calling `compute` before `start`.
-      if (_queues.isNotEmpty && _isolates[isolate] == false) {
-        final queue = _queues.removeFirst();
-        _excute(isolate, queue);
+      if (_isolates[isolate] == false) {
+        for (final queue in _mapQueues.values) {
+          if (queue.isNotEmpty) {
+            _excute(isolate, queue.removeFirst());
+            break;
+          }
+        }
       }
     }
   }
@@ -399,6 +427,11 @@ class IsolateManager<R, P> {
     });
 
     return queue.completer.future;
+  }
+
+  /// Add a new compute to Queue
+  void _addQueue(IsolateQueue<R, P> queue, IsolatePriority priority) {
+    _mapQueues[priority]!.add(queue);
   }
 
   /// Print logs if [isDebug] is true
