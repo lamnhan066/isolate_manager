@@ -178,13 +178,13 @@ class IsolateManager<R, P> {
     // If this method has already been called, it will wait for completion.
     if (_isStarting) return _startedCompleter.future;
 
+    // Mark as the `start()` is starting.
+    _isStarting = true;
+
     // Initial queues.
     for (final priority in IsolatePriority.values) {
       _mapQueues[priority] = Queue<IsolateQueue<R, P>>();
     }
-
-    // Mark as the `start()` is starting.
-    _isStarting = true;
 
     if (isCustomIsolate) {
       // Create the custom isolates.
