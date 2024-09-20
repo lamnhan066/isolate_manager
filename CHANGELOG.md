@@ -1,6 +1,7 @@
 ## 5.3.0
 
 * Able to add options and flags directly into to Dart to Js Compiler.
+* Able to print the debug logs for the dart to js compiler (only if the `--debug` flag is `true`).
 
 ## 5.2.1+3
 
