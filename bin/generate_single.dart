@@ -15,7 +15,7 @@ const constAnnotation = 'isolateManagerWorker';
 const constCustomWorkerAnnotation = 'isolateManagerCustomWorker';
 
 /// --path "path/to/generate" --obfuscate 0->4 --debug
-Future<void> generate(ArgResults argResults) async {
+Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   final input = argResults['input'] as String;
   final output = argResults['output'] as String;
   final obfuscate = switch (argResults['obfuscate']) {
@@ -51,7 +51,7 @@ Future<void> generate(ArgResults argResults) async {
       final pattern = RegExp(
           '(@$classAnnotation|@$constAnnotation|@$constCustomWorkerAnnotation)');
       if (content.contains(pattern)) {
-        params.add([filePath, obfuscate, isDebug, isWasm, output]);
+        params.add([filePath, obfuscate, isDebug, isWasm, output, dartArgs]);
       }
     }
   }
@@ -78,6 +78,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
   bool isDebug = params[2];
   bool isWasm = params[3];
   String output = params[4];
+  List<String> dartArgs = params[5];
 
   final anotatedFunctions = await _getAnotatedFunctions(filePath);
 
@@ -89,6 +90,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
       isDebug,
       isWasm,
       output,
+      dartArgs,
     );
   }
 
@@ -144,6 +146,7 @@ Future<void> _generateFromAnotatedFunctions(
   bool isDebug,
   bool isWasm,
   String output,
+  List<String> dartArgs,
 ) async {
   await Future.wait(
     [
@@ -155,6 +158,7 @@ Future<void> _generateFromAnotatedFunctions(
           isDebug,
           isWasm,
           output,
+          dartArgs,
         )
     ],
   );
@@ -167,6 +171,7 @@ Future<void> _generateFromAnotatedFunction(
   bool isDebug,
   bool isWasm,
   String output,
+  List<String> dartArgs,
 ) async {
   String inputPath = p.join(
     p.dirname(sourceFilePath),
@@ -200,7 +205,7 @@ Future<void> _generateFromAnotatedFunction(
     await outputFile.delete();
   }
 
-  final result = await Process.run(
+  final process = Process.run(
     'dart',
     [
       'compile',
@@ -211,8 +216,17 @@ Future<void> _generateFromAnotatedFunction(
       obfuscate,
       if (!isWasm) '--omit-implicit-checks',
       if (!isDebug && !isWasm) '--no-source-maps',
+      ...dartArgs,
     ],
   );
+
+  if (isDebug) {
+    process.asStream().listen((data) {
+      print(data.stdout);
+    });
+  }
+
+  final result = await process;
 
   if (await outputFile.exists()) {
     print(

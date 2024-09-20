@@ -5,6 +5,13 @@ import 'generate_shared.dart' as shared;
 import 'generate_single.dart' as single;
 
 void main(List<String> args) async {
+  final separator = args.indexOf('--');
+  List<String> dartArgs = [];
+  if (separator != -1) {
+    dartArgs = args.sublist(separator + 1);
+    args = args.sublist(0, separator);
+  }
+
   final parser = ArgParser()
     ..addFlag(
       'single',
@@ -68,13 +75,13 @@ void main(List<String> args) async {
 
   if (isSingle) {
     print('>> Generating the single Workers...');
-    await single.generate(argResults);
+    await single.generate(argResults, dartArgs);
     print('>> Generated.');
   }
 
   if (isShared) {
     print('>> Generating the shared Worker...');
-    await shared.generate(argResults);
+    await shared.generate(argResults, dartArgs);
     print('>> Generated.');
   }
 }

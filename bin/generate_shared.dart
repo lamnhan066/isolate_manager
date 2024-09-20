@@ -11,7 +11,7 @@ import 'package:path/path.dart' as p;
 const constAnnotation = 'isolateManagerSharedWorker';
 
 /// --path "path/to/generate" --obfuscate 0->4 --debug
-Future<void> generate(ArgResults argResults) async {
+Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   final input = argResults['input'] as String;
   final output = argResults['output'] as String;
   final obfuscate = switch (argResults['obfuscate']) {
@@ -74,6 +74,7 @@ Future<void> generate(ArgResults argResults) async {
       isWasm,
       output,
       name,
+      dartArgs,
     );
   }
 
@@ -137,6 +138,7 @@ Future<void> _generateFromAnotatedFunctions(
   bool isWasm,
   String output,
   String name,
+  List<String> dartArgs,
 ) async {
   final file = File('.IsolateManagerShared.${anotatedFunctions.hashCode}.dart');
   final sink = file.openWrite();
@@ -174,6 +176,7 @@ Future<void> _generateFromAnotatedFunctions(
       obfuscate,
       if (!isWasm) '--omit-implicit-checks',
       if (!isDebug && !isWasm) '--no-source-maps',
+      ...dartArgs,
     ],
   );
 
