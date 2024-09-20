@@ -165,7 +165,7 @@ Future<void> _generateFromAnotatedFunctions(
     await outputFile.delete();
   }
 
-  final result = await Process.run(
+  final process = Process.run(
     'dart',
     [
       'compile',
@@ -179,6 +179,14 @@ Future<void> _generateFromAnotatedFunctions(
       ...dartArgs,
     ],
   );
+
+  if (isDebug) {
+    process.asStream().listen((data) {
+      print(data.stdout);
+    });
+  }
+
+  final result = await process;
 
   if (await outputFile.exists()) {
     print('Compiled: ${p.relative(outputPath)}');
