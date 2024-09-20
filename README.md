@@ -374,6 +374,11 @@ void progressFunction(dynamic params) {
   - `--out <path>` (or `-o <path>`): Outputted folder.
   - `--obfuscate <level>`: The obfuscated level of JS (0 to 4). Default is set to `4`.
   - `--debug`: Keeps the temp files for debugging.
+  - If you want to add options or flags to the Dart to Js Compiler, you can add a `--` flag before adding those options and flags. Please note that all the arguments after the `--` flag will be passed directly into the Dart to Js Compiler. For instance:
+
+    ```shell
+    dart run isolate_manager:generate --single -i test -out test -- -Dkey1=value1 -Dkey2=value2
+    ```
 
 - All above examples use `top-level` functions so the `workerName` will be the same as the function name. If you use `static` functions, you have to add the class name like `ClassName.functionName` to the `workerName` parameter. For instance:
 
