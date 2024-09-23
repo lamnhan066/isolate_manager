@@ -269,23 +269,23 @@ When creating a new `IsolateManager` or `IsolateManagerShared`, you can specify 
 
 ```dart
 /// Remove the newest computation if the [maxCount] is exceeded (default).
-IsolateQueueStrategyRemoveNewest();
+QueueStrategyRemoveNewest();
 
 /// Remove the oldest computation if the [maxCount] is exceeded.
-IsolateQueueStrategyRemoveOldest()
+QueueStrategyRemoveOldest()
 
 /// Discard the new incoming computation if the [maxCount] is exceeded.
-IsolateQueueStrategyDiscardIncoming()
+QueueStrategyDiscardIncoming()
 ```
 
 ### Create a custom strategy
 
-You can extend the `IsolateQueueStrategy` to create your own strategy. For instances:
+You can extend the `QueueStrategy` to create your own strategy. For instances:
 
 ```dart
-class IsolateQueueStrategyRemoveNewest<R, P> extends IsolateQueueStrategy<R, P> {
+class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   /// Remove the newest computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyRemoveNewest({super.maxCount = 0});
+  QueueStrategyRemoveNewest({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
@@ -296,9 +296,9 @@ class IsolateQueueStrategyRemoveNewest<R, P> extends IsolateQueueStrategy<R, P> 
   }
 }
 
-class IsolateQueueStrategyRemoveOldest<R, P> extends IsolateQueueStrategy<R, P> {
+class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   /// Remove the oldest computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyRemoveOldest({super.maxCount = 0});
+  QueueStrategyRemoveOldest({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
@@ -309,9 +309,9 @@ class IsolateQueueStrategyRemoveOldest<R, P> extends IsolateQueueStrategy<R, P> 
   }
 }
 
-class IsolateQueueStrategyDiscardIncoming<R, P> extends IsolateQueueStrategy<R, P> {
+class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
   /// Discard the new incoming computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyDiscardIncoming({super.maxCount = 0,});
+  QueueStrategyDiscardIncoming({super.maxCount = 0,});
 
   @override
   bool continueIfMaxCountExceeded() {

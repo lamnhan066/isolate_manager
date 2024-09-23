@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:isolate_manager/src/models/isolate_queue_strategy.dart';
+import 'package:isolate_manager/src/models/queue_strategy.dart';
 
 import 'base/isolate_contactor.dart';
 import 'base/isolate_manager_shared.dart';
@@ -59,7 +59,7 @@ class IsolateManager<R, P> {
   int get queuesLength => isolateQueueStrategy.queuesCount;
 
   /// Strategy to control a new (incoming) computation.
-  final IsolateQueueStrategy<R, P> isolateQueueStrategy;
+  final QueueStrategy<R, P> isolateQueueStrategy;
 
   /// If you want to call the [start] method manually without `await`, you can `await`
   /// later by using [ensureStarted] to ensure that all the isolates are started.
@@ -75,12 +75,12 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    IsolateQueueStrategy<R, P>? isolateQueueStrategy,
+    QueueStrategy<R, P>? isolateQueueStrategy,
     this.isDebug = false,
   })  : isCustomIsolate = false,
         initialParams = '',
         isolateQueueStrategy =
-            isolateQueueStrategy ?? IsolateQueueStrategyRemoveOldest() {
+            isolateQueueStrategy ?? QueueStrategyRemoveOldest() {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -93,11 +93,11 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    IsolateQueueStrategy<R, P>? isolateQueueStrategy,
+    QueueStrategy<R, P>? isolateQueueStrategy,
     this.isDebug = false,
   })  : isCustomIsolate = true,
         isolateQueueStrategy =
-            isolateQueueStrategy ?? IsolateQueueStrategyRemoveOldest() {
+            isolateQueueStrategy ?? QueueStrategyRemoveOldest() {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -131,7 +131,7 @@ class IsolateManager<R, P> {
     bool autoStart = true,
     String subPath = '',
     int maxQueueCount = 0,
-    IsolateQueueStrategy<Object, List<Object>>? queueStrategy,
+    QueueStrategy<Object, List<Object>>? queueStrategy,
     bool isDebug = false,
   }) =>
       IsolateManagerShared(

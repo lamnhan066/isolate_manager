@@ -6,10 +6,10 @@ import 'package:isolate_manager/src/models/isolate_queue.dart';
 /// is reached.
 ///
 /// Some of strategies:
-///   - [IsolateQueueStrategyRemoveNewest] is default.
-///   - [IsolateQueueStrategyRemoveOldest]
-///   - [IsolateQueueStrategyDiscardIncoming]
-abstract class IsolateQueueStrategy<R, P> {
+///   - [QueueStrategyRemoveNewest] is default.
+///   - [QueueStrategyRemoveOldest]
+///   - [QueueStrategyDiscardIncoming]
+abstract class QueueStrategy<R, P> {
   /// Queue of isolates.
   final Queue<IsolateQueue<R, P>> _queues = Queue();
 
@@ -25,10 +25,10 @@ abstract class IsolateQueueStrategy<R, P> {
   /// is reached. The maximum number is unlimited if [maxCount] <= 0 (by default).
   ///
   /// Some of strategies:
-  ///   - [IsolateQueueStrategyRemoveNewest] is default.
-  ///   - [IsolateQueueStrategyRemoveOldest]
-  ///   - [IsolateQueueStrategyDiscardIncoming]
-  IsolateQueueStrategy({this.maxCount = 0});
+  ///   - [QueueStrategyRemoveNewest] is default.
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  QueueStrategy({this.maxCount = 0});
 
   /// Run this method before adding a new computation to the Queue if the max
   /// queue count is exceeded. If this method returns `false`, the new computation
@@ -65,10 +65,9 @@ abstract class IsolateQueueStrategy<R, P> {
   void clear() => _queues.clear();
 }
 
-class IsolateQueueStrategyRemoveNewest<R, P>
-    extends IsolateQueueStrategy<R, P> {
+class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   /// Remove the newest computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyRemoveNewest({super.maxCount = 0});
+  QueueStrategyRemoveNewest({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
@@ -79,10 +78,9 @@ class IsolateQueueStrategyRemoveNewest<R, P>
   }
 }
 
-class IsolateQueueStrategyRemoveOldest<R, P>
-    extends IsolateQueueStrategy<R, P> {
+class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   /// Remove the oldest computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyRemoveOldest({super.maxCount = 0});
+  QueueStrategyRemoveOldest({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
@@ -93,10 +91,9 @@ class IsolateQueueStrategyRemoveOldest<R, P>
   }
 }
 
-class IsolateQueueStrategyDiscardIncoming<R, P>
-    extends IsolateQueueStrategy<R, P> {
+class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
   /// Discard the new incoming computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyDiscardIncoming({
+  QueueStrategyDiscardIncoming({
     super.maxCount = 0,
   });
 

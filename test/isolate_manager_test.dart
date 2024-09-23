@@ -434,8 +434,8 @@ void main() {
   });
 
   group('Isolate Queue Strategy -', () {
-    test('IsolateQueueStrategyRemoveNewest with unlimited queue count', () {
-      final queueStrategies = IsolateQueueStrategyRemoveNewest<int, int>();
+    test('QueueStrategyRemoveNewest with unlimited queue count', () {
+      final queueStrategies = QueueStrategyRemoveNewest<int, int>();
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -447,8 +447,8 @@ void main() {
       expect(result.length, equals(0));
     });
 
-    test('IsolateQueueStrategyRemoveNewest with addToTop is true', () {
-      final queueStrategies = IsolateQueueStrategyRemoveNewest<int, int>();
+    test('QueueStrategyRemoveNewest with addToTop is true', () {
+      final queueStrategies = QueueStrategyRemoveNewest<int, int>();
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
@@ -460,9 +460,8 @@ void main() {
       expect(result.length, equals(0));
     });
 
-    test('IsolateQueueStrategyRemoveNewest', () {
-      final queueStrategies =
-          IsolateQueueStrategyRemoveNewest<int, int>(maxCount: 3);
+    test('QueueStrategyRemoveNewest', () {
+      final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3);
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -474,9 +473,8 @@ void main() {
       expect(result.length, equals(0));
     });
 
-    test('IsolateQueueStrategyRemoveNewest with addToTop is true', () {
-      final queueStrategies =
-          IsolateQueueStrategyRemoveNewest<int, int>(maxCount: 3);
+    test('QueueStrategyRemoveNewest with addToTop is true', () {
+      final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3);
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
@@ -488,9 +486,8 @@ void main() {
       expect(result.length, equals(0));
     });
 
-    test('IsolateQueueStrategyRemoveOldest', () {
-      final queueStrategies =
-          IsolateQueueStrategyRemoveOldest<int, int>(maxCount: 3);
+    test('QueueStrategyRemoveOldest', () {
+      final queueStrategies = QueueStrategyRemoveOldest<int, int>(maxCount: 3);
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -502,9 +499,8 @@ void main() {
       expect(result.length, equals(0));
     });
 
-    test('IsolateQueueStrategyRemoveOldest with addToTop is true', () {
-      final queueStrategies =
-          IsolateQueueStrategyRemoveOldest<int, int>(maxCount: 3);
+    test('QueueStrategyRemoveOldest with addToTop is true', () {
+      final queueStrategies = QueueStrategyRemoveOldest<int, int>(maxCount: 3);
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
@@ -516,9 +512,9 @@ void main() {
       expect(result.length, equals(0));
     });
 
-    test('IsolateQueueStrategyDiscardIncoming', () {
+    test('QueueStrategyDiscardIncoming', () {
       final queueStrategies =
-          IsolateQueueStrategyDiscardIncoming<int, int>(maxCount: 3);
+          QueueStrategyDiscardIncoming<int, int>(maxCount: 3);
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -530,9 +526,9 @@ void main() {
       expect(result.length, equals(0));
     });
 
-    test('IsolateQueueStrategyDiscardIncoming with addToTop is true', () {
+    test('QueueStrategyDiscardIncoming with addToTop is true', () {
       final queueStrategies =
-          IsolateQueueStrategyDiscardIncoming<int, int>(maxCount: 3);
+          QueueStrategyDiscardIncoming<int, int>(maxCount: 3);
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
