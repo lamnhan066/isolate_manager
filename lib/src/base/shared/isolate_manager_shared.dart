@@ -58,7 +58,7 @@ class IsolateManagerShared {
           workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
           workerConverter: workerConverter,
           concurrent: concurrent,
-          isolateQueueStrategy: queueStrategy,
+          queueStrategy: queueStrategy,
           isDebug: isDebug,
         ) {
     if (autoStart) start();
