@@ -274,6 +274,49 @@ You can set the `maxCount` (the max number of the queued computations) of an `Is
 
 When you have a computation that you want to compute as soon as possible, you can change the `priority` parameter to `true` to promote it to the top of the Queue.
 
+### Create a custom strategy
+
+You can extend the `IsolateQueueStrategy` to create your own strategy. For instances:
+
+```dart
+class IsolateQueueStrategyRemoveNewest<R, P> extends IsolateQueueStrategy<R, P> {
+  /// Remove the newest computation if the [maxCount] is exceeded.
+  IsolateQueueStrategyRemoveNewest({super.maxCount = 0});
+
+  @override
+  bool continueIfMaxCountExceeded() {
+    // Remove the last computation if the Queue (mean the newest one).
+    _queues.removeLast();
+    // It means the current computation should be added to the Queue.
+    return true; 
+  }
+}
+
+class IsolateQueueStrategyRemoveOldest<R, P> extends IsolateQueueStrategy<R, P> {
+  /// Remove the oldest computation if the [maxCount] is exceeded.
+  IsolateQueueStrategyRemoveOldest({super.maxCount = 0});
+
+  @override
+  bool continueIfMaxCountExceeded() {
+    // Remove the first computation if the Queue (mean the oldest one).
+    _queues.removeFirst();
+    // It means the current computation should be added to the Queue.
+    return true;
+  }
+}
+
+class IsolateQueueStrategyDiscardIncoming<R, P> extends IsolateQueueStrategy<R, P> {
+  /// Discard the new incoming computation if the [maxCount] is exceeded.
+  IsolateQueueStrategyDiscardIncoming({super.maxCount = 0,});
+
+  @override
+  bool continueIfMaxCountExceeded() {
+    // It means the current computation should NOT be added to the Queue.
+    return false;
+  }
+}
+```
+
 ## Try-Catch Block
 
 You can use `try-catch` to catch exceptions:
