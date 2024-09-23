@@ -9,8 +9,9 @@ Future<R> platformExecuteImpl<R extends Object, P extends Object>({
   required P params,
   required String? workerFunction,
   required Object? workerParams,
+  required bool priority,
 }) async {
-  return (await manager.compute([function, params])) as R;
+  return (await manager.compute([function, params], priority: priority)) as R;
 }
 
 /// Create a Worker on Web.

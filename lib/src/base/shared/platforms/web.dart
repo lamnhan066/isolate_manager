@@ -11,6 +11,7 @@ Future<R> platformExecuteImpl<R extends Object, P extends Object>({
   required P params,
   required String? workerFunction,
   required Object? workerParams,
+  required bool priority,
 }) async {
   final isWorker = manager.workerName != '';
   final isDebug = manager.isDebug;
@@ -19,14 +20,9 @@ Future<R> platformExecuteImpl<R extends Object, P extends Object>({
         'so `Future` will be used instead');
   }
 
-  if (isWorker && workerFunction != null) {
-    final finalParams = workerParams ?? params;
-    return (await manager.compute([workerFunction, finalParams])) as R;
-  } else {
-    final completer = Completer<R>();
-    completer.complete(function(params));
-    return completer.future;
-  }
+  final func = (isWorker && workerFunction != null) ? workerFunction : function;
+  final finalParams = workerParams ?? params;
+  return (await manager.compute([func, finalParams], priority: priority)) as R;
 }
 
 /// Create a Worker on Web.

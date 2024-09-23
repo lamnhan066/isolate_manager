@@ -51,12 +51,14 @@ class IsolateManagerShared {
     this.workerMappings = const {},
     bool autoStart = true,
     String subPath = '',
+    IsolateQueueStrategy<Object, List<Object>>? queueStrategy,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
           internalFunction,
           workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
           workerConverter: workerConverter,
           concurrent: concurrent,
+          isolateQueueStrategy: queueStrategy,
           isDebug: isDebug,
         ) {
     if (autoStart) start();
@@ -75,12 +77,14 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool priority = false,
   }) {
     return _excute(
       function,
       params,
       workerFunction: workerFunction,
       workerParams: workerParams,
+      priority: priority,
     );
   }
 
@@ -95,12 +99,14 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool priority = false,
   }) {
     return _excute(
       function,
       params,
       workerFunction: workerFunction,
       workerParams: workerParams,
+      priority: priority,
     );
   }
 
@@ -110,6 +116,7 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool priority = false,
   }) async {
     return platformExecute<R, P>(
       manager: _manager,
@@ -117,6 +124,7 @@ class IsolateManagerShared {
       params: params,
       workerFunction: workerFunction ?? workerMappings[function],
       workerParams: workerParams,
+      priority: priority,
     );
   }
 
