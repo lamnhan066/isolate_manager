@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:test/test.dart';
 
 //  dart run isolate_manager:generate -i test -o test
@@ -430,6 +431,118 @@ void main() {
     final result = await isolate.compute(jsonEncode(map));
 
     expect(jsonDecode(result), map);
+  });
+
+  group('Isolate Queue Strategy -', () {
+    test('IsolateQueueStrategyRemoveNewest with unlimited queue count', () {
+      final queueStrategies = IsolateQueueStrategyRemoveNewest<int, int>();
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null));
+      }
+      expect(queueStrategies.queuesCount, equals(10));
+      List result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
+
+    test('IsolateQueueStrategyRemoveNewest with addToTop is true', () {
+      final queueStrategies = IsolateQueueStrategyRemoveNewest<int, int>();
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
+      }
+      expect(queueStrategies.queuesCount, equals(10));
+      final result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reversed.toList();
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
+
+    test('IsolateQueueStrategyRemoveNewest', () {
+      final queueStrategies =
+          IsolateQueueStrategyRemoveNewest<int, int>(maxCount: 3);
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null));
+      }
+      expect(queueStrategies.queuesCount, equals(3));
+      List result = [0, 1, 9];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
+
+    test('IsolateQueueStrategyRemoveNewest with addToTop is true', () {
+      final queueStrategies =
+          IsolateQueueStrategyRemoveNewest<int, int>(maxCount: 3);
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
+      }
+      expect(queueStrategies.queuesCount, equals(3));
+      List result = [9, 8, 7];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
+
+    test('IsolateQueueStrategyRemoveOldest', () {
+      final queueStrategies =
+          IsolateQueueStrategyRemoveOldest<int, int>(maxCount: 3);
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null));
+      }
+      expect(queueStrategies.queuesCount, equals(3));
+      List result = [7, 8, 9];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
+
+    test('IsolateQueueStrategyRemoveOldest with addToTop is true', () {
+      final queueStrategies =
+          IsolateQueueStrategyRemoveOldest<int, int>(maxCount: 3);
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
+      }
+      expect(queueStrategies.queuesCount, equals(3));
+      List result = [9, 1, 0];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
+
+    test('IsolateQueueStrategyDiscardIncoming', () {
+      final queueStrategies =
+          IsolateQueueStrategyDiscardIncoming<int, int>(maxCount: 3);
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null));
+      }
+      expect(queueStrategies.queuesCount, equals(3));
+      List result = [0, 1, 2];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
+
+    test('IsolateQueueStrategyDiscardIncoming with addToTop is true', () {
+      final queueStrategies =
+          IsolateQueueStrategyDiscardIncoming<int, int>(maxCount: 3);
+      for (int i = 0; i < 10; i++) {
+        queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
+      }
+      expect(queueStrategies.queuesCount, equals(3));
+      List result = [2, 1, 0];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result.length, equals(0));
+    });
   });
 }
 
