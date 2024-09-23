@@ -26,6 +26,9 @@
   - [Basic Usage](#basic-usage)
   - [Custom Function Usage](#custom-function-usage)
   - [Progress Values (Receives multiple values from a single `compute`)](#progress-values)
+- [Strategy Of The Queue](#strategy-of-the-queue)
+  - [Control how a new computation is added to the Queue](#control-how-a-new-computation-is-added-to-the-queue)
+  - [Compute a priority computation](#compute-a-priority-computation)
 - [Try Catch Block](#try-catch-block)
 - [Addtional Information](#additional-information)
 - [Contributions](#contributions)
@@ -248,7 +251,30 @@ final isolateManager = IsolateManager.createCustom(
 
 Now you can use everything as the **Basic Usage**.
 
-## try-catch Block
+## Strategy Of The Queue
+
+### Control how a new computation is added to the Queue
+
+When creating a new `IsolateManager` or `IsolateManagerShared`, you can specify the `queueStrategy` to control the way that a new computation is added or a computation is got from the Queue. There are 3 base strategies:
+
+```dart
+/// Remove the newest computation if the [maxCount] is exceeded (default).
+IsolateQueueStrategyRemoveNewest();
+
+/// Remove the oldest computation if the [maxCount] is exceeded.
+IsolateQueueStrategyRemoveOldest()
+
+/// Discard the new incoming computation if the [maxCount] is exceeded.
+IsolateQueueStrategyDiscardIncoming()
+```
+
+You can set the `maxCount` (the max number of the queued computations) of an `IsolateManager` or `IsolateManagerShared`, if this value is <= 0, the number of queues is unlimited.
+
+### Compute a priority computation
+
+When you have a computation that you want to compute as soon as possible, you can change the `priority` parameter to `true` to promote it to the top of the Queue.
+
+## Try-Catch Block
 
 You can use `try-catch` to catch exceptions:
 
