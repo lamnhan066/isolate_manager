@@ -435,11 +435,12 @@ void main() {
 
   group('Isolate Queue Strategy -', () {
     test('QueueStrategyRemoveNewest with unlimited queue count', () {
-      final queueStrategies = QueueStrategyRemoveNewest<int, int>();
+      final queueStrategies = QueueStrategyUnlimited<int, int>();
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(10));
+      expect(queueStrategies.continueIfMaxCountExceeded(), true);
       List result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
@@ -448,7 +449,7 @@ void main() {
     });
 
     test('QueueStrategyRemoveNewest with addToTop is true', () {
-      final queueStrategies = QueueStrategyRemoveNewest<int, int>();
+      final queueStrategies = QueueStrategyUnlimited<int, int>();
       for (int i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }

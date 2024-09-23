@@ -6,7 +6,8 @@ import 'package:isolate_manager/src/models/isolate_queue.dart';
 /// is reached.
 ///
 /// Some of strategies:
-///   - [QueueStrategyRemoveNewest] is default.
+///   - [QueueStrategyUnlimited] - is default.
+///   - [QueueStrategyRemoveNewest]
 ///   - [QueueStrategyRemoveOldest]
 ///   - [QueueStrategyDiscardIncoming]
 abstract class QueueStrategy<R, P> {
@@ -25,7 +26,8 @@ abstract class QueueStrategy<R, P> {
   /// is reached. The maximum number is unlimited if [maxCount] <= 0 (by default).
   ///
   /// Some of strategies:
-  ///   - [QueueStrategyRemoveNewest] is default.
+  ///   - [QueueStrategyUnlimited] is default.
+  ///   - [QueueStrategyRemoveNewest]
   ///   - [QueueStrategyRemoveOldest]
   ///   - [QueueStrategyDiscardIncoming]
   QueueStrategy({this.maxCount = 0});
@@ -63,6 +65,14 @@ abstract class QueueStrategy<R, P> {
 
   /// Clear all queues.
   void clear() => _queues.clear();
+}
+
+class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
+  /// Unlimited queued computations.
+  QueueStrategyUnlimited();
+
+  @override
+  bool continueIfMaxCountExceeded() => true;
 }
 
 class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {

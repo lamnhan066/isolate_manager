@@ -268,7 +268,10 @@ You can set the `maxCount` (the max number of the queued computations) of an `Is
 When creating a new `IsolateManager` or `IsolateManagerShared`, you can specify the `queueStrategy` to control the way that a new computation is added or a computation is got from the Queue. There are 3 base strategies:
 
 ```dart
-/// Remove the newest computation if the [maxCount] is exceeded (default).
+/// Unlimited queued computations (default).
+QueueStrategyUnlimited()
+
+/// Remove the newest computation if the [maxCount] is exceeded.
 QueueStrategyRemoveNewest();
 
 /// Remove the oldest computation if the [maxCount] is exceeded.
@@ -283,6 +286,14 @@ QueueStrategyDiscardIncoming()
 You can extend the `QueueStrategy` to create your own strategy. For instances:
 
 ```dart
+class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
+  /// Unlimited queued computations.
+  QueueStrategyUnlimited();
+
+  @override
+  bool continueIfMaxCountExceeded() => true;
+}
+
 class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   /// Remove the newest computation if the [maxCount] is exceeded.
   QueueStrategyRemoveNewest({super.maxCount = 0});

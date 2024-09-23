@@ -56,10 +56,16 @@ class IsolateManager<R, P> {
   final IsolateConverter<R>? workerConverter;
 
   /// Get current number of queues.
-  int get queuesLength => isolateQueueStrategy.queuesCount;
+  int get queuesLength => queueStrategy.queuesCount;
 
   /// Strategy to control a new (incoming) computation.
-  final QueueStrategy<R, P> isolateQueueStrategy;
+  ///
+  /// Basic strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  final QueueStrategy<R, P> queueStrategy;
 
   /// If you want to call the [start] method manually without `await`, you can `await`
   /// later by using [ensureStarted] to ensure that all the isolates are started.
@@ -75,12 +81,11 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    QueueStrategy<R, P>? isolateQueueStrategy,
+    QueueStrategy<R, P>? queueStrategy,
     this.isDebug = false,
   })  : isCustomIsolate = false,
         initialParams = '',
-        isolateQueueStrategy =
-            isolateQueueStrategy ?? QueueStrategyRemoveOldest() {
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -93,11 +98,10 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
-    QueueStrategy<R, P>? isolateQueueStrategy,
+    QueueStrategy<R, P>? queueStrategy,
     this.isDebug = false,
   })  : isCustomIsolate = true,
-        isolateQueueStrategy =
-            isolateQueueStrategy ?? QueueStrategyRemoveOldest() {
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -122,6 +126,12 @@ class IsolateManager<R, P> {
   /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
   /// needs to be set to `workers`.
   ///
+  /// Control the Queue strategy via [queueStrategy] with the following basic
+  /// strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
   /// Set [isDebug] to `true` if you want to print the debug log.
   static IsolateManagerShared createShared({
     int concurrent = 1,
@@ -231,7 +241,7 @@ class IsolateManager<R, P> {
   Future<void> _tempStop() async {
     _isStarting = false;
     _startedCompleter = Completer();
-    isolateQueueStrategy.clear();
+    queueStrategy.clear();
     await Future.wait(
         [for (IsolateContactor isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
@@ -328,7 +338,7 @@ class IsolateManager<R, P> {
     await start();
 
     final queue = IsolateQueue<R, P>(params, callback);
-    isolateQueueStrategy.add(queue, addToTop: priority);
+    queueStrategy.add(queue, addToTop: priority);
     _excuteQueue();
 
     return queue.completer.future;
@@ -336,11 +346,11 @@ class IsolateManager<R, P> {
 
   /// Exccute the element in the queues.
   void _excuteQueue() {
-    printDebug(() => 'Number of queues: ${isolateQueueStrategy.queuesCount}');
+    printDebug(() => 'Number of queues: ${queueStrategy.queuesCount}');
     for (final isolate in _isolates.keys) {
       /// Allow calling `compute` before `start`.
-      if (isolateQueueStrategy.hasNext() && _isolates[isolate] == false) {
-        final queue = isolateQueueStrategy.getNext();
+      if (queueStrategy.hasNext() && _isolates[isolate] == false) {
+        final queue = queueStrategy.getNext();
         _excute(isolate, queue);
       }
     }
