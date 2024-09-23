@@ -68,13 +68,13 @@ abstract class IsolateQueueStrategy<R, P> {
 class IsolateQueueStrategyRemoveNewest<R, P>
     extends IsolateQueueStrategy<R, P> {
   /// Remove the newest computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyRemoveNewest({
-    super.maxCount = 0,
-  });
+  IsolateQueueStrategyRemoveNewest({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
+    // Remove the last computation if the Queue (mean the newest one).
     _queues.removeLast();
+    // It means the current computation should be added to the Queue.
     return true;
   }
 }
@@ -82,13 +82,13 @@ class IsolateQueueStrategyRemoveNewest<R, P>
 class IsolateQueueStrategyRemoveOldest<R, P>
     extends IsolateQueueStrategy<R, P> {
   /// Remove the oldest computation if the [maxCount] is exceeded.
-  IsolateQueueStrategyRemoveOldest({
-    super.maxCount = 0,
-  });
+  IsolateQueueStrategyRemoveOldest({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
+    // Remove the first computation if the Queue (mean the oldest one).
     _queues.removeFirst();
+    // It means the current computation should be added to the Queue.
     return true;
   }
 }
@@ -102,6 +102,7 @@ class IsolateQueueStrategyDiscardIncoming<R, P>
 
   @override
   bool continueIfMaxCountExceeded() {
+    // It means the current computation should NOT be added to the Queue.
     return false;
   }
 }
