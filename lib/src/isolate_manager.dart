@@ -131,7 +131,7 @@ class IsolateManager<R, P> {
     bool autoStart = true,
     String subPath = '',
     int maxQueueCount = 0,
-    IsolateQueueStrategy<Object, List<Object>>? isolateStrategy,
+    IsolateQueueStrategy<Object, List<Object>>? queueStrategy,
     bool isDebug = false,
   }) =>
       IsolateManagerShared(
@@ -141,7 +141,7 @@ class IsolateManager<R, P> {
         workerMappings: workerMappings,
         autoStart: autoStart,
         subPath: subPath,
-        queueStrategy: isolateStrategy,
+        queueStrategy: queueStrategy,
         isDebug: isDebug,
       );
 

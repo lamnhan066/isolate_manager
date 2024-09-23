@@ -67,7 +67,7 @@ abstract class IsolateQueueStrategy<R, P> {
 
 class IsolateQueueStrategyRemoveNewest<R, P>
     extends IsolateQueueStrategy<R, P> {
-  /// Remove the first (newest) computation if the [maxQueueCount] is exceeded.
+  /// Remove the newest computation if the [maxCount] is exceeded.
   IsolateQueueStrategyRemoveNewest({
     super.maxCount = 0,
   });
@@ -81,7 +81,7 @@ class IsolateQueueStrategyRemoveNewest<R, P>
 
 class IsolateQueueStrategyRemoveOldest<R, P>
     extends IsolateQueueStrategy<R, P> {
-  /// Remove the last (oldest) computation if the [maxQueueCount] is exceeded.
+  /// Remove the oldest computation if the [maxCount] is exceeded.
   IsolateQueueStrategyRemoveOldest({
     super.maxCount = 0,
   });
@@ -95,7 +95,7 @@ class IsolateQueueStrategyRemoveOldest<R, P>
 
 class IsolateQueueStrategyDiscardIncoming<R, P>
     extends IsolateQueueStrategy<R, P> {
-  /// Discard the new incoming computation if the [maxQueueCount] is exceeded.
+  /// Discard the new incoming computation if the [maxCount] is exceeded.
   IsolateQueueStrategyDiscardIncoming({
     super.maxCount = 0,
   });
