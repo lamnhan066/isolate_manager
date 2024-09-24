@@ -1,4 +1,4 @@
-## 5.4.0
+## 5.4.0-rc
 
 * Set the max number of the queued computations.
 * Control how a new computation is added to the Queue.
