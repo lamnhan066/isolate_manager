@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:collection';
+
+import 'package:isolate_manager/src/models/queue_strategy.dart';
 
 import 'base/isolate_contactor.dart';
 import 'base/isolate_manager_shared.dart';
@@ -55,7 +56,16 @@ class IsolateManager<R, P> {
   final IsolateConverter<R>? workerConverter;
 
   /// Get current number of queues.
-  int get queuesLength => _queues.length;
+  int get queuesLength => queueStrategy.queuesCount;
+
+  /// Strategy to control a new (incoming) computation.
+  ///
+  /// Basic strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  final QueueStrategy<R, P> queueStrategy;
 
   /// If you want to call the [start] method manually without `await`, you can `await`
   /// later by using [ensureStarted] to ensure that all the isolates are started.
@@ -71,9 +81,11 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
+    QueueStrategy<R, P>? queueStrategy,
     this.isDebug = false,
   })  : isCustomIsolate = false,
-        initialParams = '' {
+        initialParams = '',
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -86,8 +98,10 @@ class IsolateManager<R, P> {
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
+    QueueStrategy<R, P>? queueStrategy,
     this.isDebug = false,
-  }) : isCustomIsolate = true {
+  })  : isCustomIsolate = true,
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -112,6 +126,13 @@ class IsolateManager<R, P> {
   /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
   /// needs to be set to `workers`.
   ///
+  /// Control the Queue strategy via [queueStrategy] with the following basic
+  /// strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   static IsolateManagerShared createShared({
     int concurrent = 1,
@@ -120,6 +141,8 @@ class IsolateManager<R, P> {
     Map<Function, String> workerMappings = const {},
     bool autoStart = true,
     String subPath = '',
+    int maxQueueCount = 0,
+    QueueStrategy<Object, List<Object>>? queueStrategy,
     bool isDebug = false,
   }) =>
       IsolateManagerShared(
@@ -129,11 +152,9 @@ class IsolateManager<R, P> {
         workerMappings: workerMappings,
         autoStart: autoStart,
         subPath: subPath,
+        queueStrategy: queueStrategy,
         isDebug: isDebug,
       );
-
-  /// Queue of isolates.
-  final Queue<IsolateQueue<R, P>> _queues = Queue();
 
   /// Map<IsolateContactor instance, isBusy>.
   final Map<IsolateContactor<R, P>, bool> _isolates = {};
@@ -221,7 +242,7 @@ class IsolateManager<R, P> {
   Future<void> _tempStop() async {
     _isStarting = false;
     _startedCompleter = Completer();
-    _queues.clear();
+    queueStrategy.clear();
     await Future.wait(
         [for (IsolateContactor isolate in _isolates.keys) isolate.dispose()]);
     _isolates.clear();
@@ -244,7 +265,9 @@ class IsolateManager<R, P> {
   ///
   /// You can use [callback] to be able to receive many values before receiving
   /// the final result that is returned from the [call] method. The final
-  /// result will be returned when the callback returns `true`.
+  /// result will be returned when the callback returns `true`. If you want a
+  /// computation runs as soon as possible, you can set the [priority] to `true`
+  /// to promote it to the top of the Queue.
   ///
   /// Ex:
   ///
@@ -270,18 +293,22 @@ class IsolateManager<R, P> {
   ///       return true;
   ///  });
   /// ```
-  Future<R> call(P params, {IsolateCallback<R>? callback}) =>
-      compute(params, callback: callback);
+  Future<R> call(P params,
+          {IsolateCallback<R>? callback, bool priority = false}) =>
+      compute(params, callback: callback, priority: priority);
 
   ///  Similar to the [compute], for who's using IsolateContactor.
-  Future<R> sendMessage(P params, {IsolateCallback<R>? callback}) =>
-      compute(params, callback: callback);
+  Future<R> sendMessage(P params,
+          {IsolateCallback<R>? callback, bool priority = false}) =>
+      compute(params, callback: callback, priority: priority);
 
   /// Compute isolate manager with [R] is return type.
   ///
   /// You can use [callback] to be able to receive many values before receiving
   /// the final result that is returned from the [compute] method. The final
-  /// result will be returned when the callback returns `true`.
+  /// result will be returned when the callback returns `true`. If you want a
+  /// computation runs as soon as possible, you can set the [priority] to `true`
+  /// to promote it to the top of the Queue.
   ///
   /// Ex:
   ///
@@ -307,12 +334,12 @@ class IsolateManager<R, P> {
   ///       return true;
   ///  });
   /// ```
-  Future<R> compute(P params, {IsolateCallback<R>? callback}) async {
+  Future<R> compute(P params,
+      {IsolateCallback<R>? callback, bool priority = false}) async {
     await start();
 
     final queue = IsolateQueue<R, P>(params, callback);
-    _queues.add(queue);
-
+    queueStrategy.add(queue, addToTop: priority);
     _excuteQueue();
 
     return queue.completer.future;
@@ -320,11 +347,11 @@ class IsolateManager<R, P> {
 
   /// Exccute the element in the queues.
   void _excuteQueue() {
-    printDebug(() => 'Number of queues: ${_queues.length}');
+    printDebug(() => 'Number of queues: ${queueStrategy.queuesCount}');
     for (final isolate in _isolates.keys) {
       /// Allow calling `compute` before `start`.
-      if (_queues.isNotEmpty && _isolates[isolate] == false) {
-        final queue = _queues.removeFirst();
+      if (queueStrategy.hasNext() && _isolates[isolate] == false) {
+        final queue = queueStrategy.getNext();
         _excute(isolate, queue);
       }
     }

@@ -43,6 +43,13 @@ class IsolateManagerShared {
   /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
   /// needs to be set to `workers`.
   ///
+  /// Control the Queue strategy via [queueStrategy] with the following basic
+  /// strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   IsolateManagerShared({
     int concurrent = 1,
@@ -51,12 +58,14 @@ class IsolateManagerShared {
     this.workerMappings = const {},
     bool autoStart = true,
     String subPath = '',
+    QueueStrategy<Object, List<Object>>? queueStrategy,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
           internalFunction,
           workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
           workerConverter: workerConverter,
           concurrent: concurrent,
+          queueStrategy: queueStrategy,
           isDebug: isDebug,
         ) {
     if (autoStart) start();
@@ -75,12 +84,14 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool priority = false,
   }) {
     return _excute(
       function,
       params,
       workerFunction: workerFunction,
       workerParams: workerParams,
+      priority: priority,
     );
   }
 
@@ -95,12 +106,14 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool priority = false,
   }) {
     return _excute(
       function,
       params,
       workerFunction: workerFunction,
       workerParams: workerParams,
+      priority: priority,
     );
   }
 
@@ -110,6 +123,7 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool priority = false,
   }) async {
     return platformExecute<R, P>(
       manager: _manager,
@@ -117,6 +131,7 @@ class IsolateManagerShared {
       params: params,
       workerFunction: workerFunction ?? workerMappings[function],
       workerParams: workerParams,
+      priority: priority,
     );
   }
 

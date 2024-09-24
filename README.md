@@ -26,7 +26,12 @@
   - [Basic Usage](#basic-usage)
   - [Custom Function Usage](#custom-function-usage)
   - [Progress Values (Receives multiple values from a single `compute`)](#progress-values)
+- [Strategy Of The Queue](#strategy-of-the-queue)
+  - [Compute a priority computation](#compute-a-priority-computation)
+  - [Max number of Queues](#max-number-of-queues)
+  - [How a new computation is added if the max queues is exceeded](#how-a-new-computation-is-added-if-the-max-queues-is-exceeded)
 - [Try Catch Block](#try-catch-block)
+- [The Generator Options And Flags](#the-generator-options-and-flags)
 - [Addtional Information](#additional-information)
 - [Contributions](#contributions)
 
@@ -248,7 +253,86 @@ final isolateManager = IsolateManager.createCustom(
 
 Now you can use everything as the **Basic Usage**.
 
-## try-catch Block
+## Strategy Of The Queue
+
+### Compute a priority computation
+
+When you have a computation that you want to compute as soon as possible, you can change the `priority` parameter to `true` to promote it to the top of the Queue.
+
+### Max number of Queues
+
+You can set the `maxCount` (the max number of the queued computations) of an `IsolateManager` or `IsolateManagerShared`, if this value is <= 0, the number of queues is unlimited.
+
+### How a new computation is added if the max queues is exceeded
+
+When creating a new `IsolateManager` or `IsolateManagerShared`, you can specify the `queueStrategy` to control the way that a new computation is added or a computation is got from the Queue. There are 3 base strategies:
+
+```dart
+/// Unlimited queued computations (default).
+QueueStrategyUnlimited()
+
+/// Remove the newest computation if the [maxCount] is exceeded.
+QueueStrategyRemoveNewest();
+
+/// Remove the oldest computation if the [maxCount] is exceeded.
+QueueStrategyRemoveOldest()
+
+/// Discard the new incoming computation if the [maxCount] is exceeded.
+QueueStrategyDiscardIncoming()
+```
+
+### Create a custom strategy
+
+You can extend the `QueueStrategy` to create your own strategy. For instances:
+
+```dart
+class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
+  /// Unlimited queued computations.
+  QueueStrategyUnlimited();
+
+  @override
+  bool continueIfMaxCountExceeded() => true;
+}
+
+class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
+  /// Remove the newest computation if the [maxCount] is exceeded.
+  QueueStrategyRemoveNewest({super.maxCount = 0});
+
+  @override
+  bool continueIfMaxCountExceeded() {
+    // Remove the last computation if the Queue (mean the newest one).
+    _queues.removeLast();
+    // It means the current computation should be added to the Queue.
+    return true; 
+  }
+}
+
+class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
+  /// Remove the oldest computation if the [maxCount] is exceeded.
+  QueueStrategyRemoveOldest({super.maxCount = 0});
+
+  @override
+  bool continueIfMaxCountExceeded() {
+    // Remove the first computation if the Queue (mean the oldest one).
+    _queues.removeFirst();
+    // It means the current computation should be added to the Queue.
+    return true;
+  }
+}
+
+class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
+  /// Discard the new incoming computation if the [maxCount] is exceeded.
+  QueueStrategyDiscardIncoming({super.maxCount = 0,});
+
+  @override
+  bool continueIfMaxCountExceeded() {
+    // It means the current computation should NOT be added to the Queue.
+    return false;
+  }
+}
+```
+
+## Try-Catch Block
 
 You can use `try-catch` to catch exceptions:
 
@@ -311,6 +395,20 @@ void progressFunction(dynamic params) {
 }
 ```
 
+## The Generator Options And Flags
+
+- `--single`: Generates single Functions only.
+- `--shared`: Generates shared Functions only.
+- `--in <path>` (or `-i <path>`): Inputted folder.
+- `--out <path>` (or `-o <path>`): Outputted folder.
+- `--obfuscate <level>`: The obfuscated level of JS (0 to 4). The default is set to `4`.
+- `--debug`: Keeps the temp files for debugging.
+- If you want to add options or flags to the Dart to Js Compiler, you can add a `--` flag before adding those options and flags. Please note that all the arguments after the `--` flag will be passed directly into the Dart to Js Compiler. For instance:
+
+  ```shell
+  dart run isolate_manager:generate --single -i test -out test -- -Dkey1=value1 -Dkey2=value2
+  ```
+
 ## Additional Information
 
 - Use `queuesLength` to get the current number of queued computation.
@@ -364,21 +462,6 @@ void progressFunction(dynamic params) {
       ```
 
   **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
-
-- If you want to use Worker more effectively, convert all parameters and results to JSON (or String) before sending them.
-
-- The generator options and flags:
-  - `--single`: Generates single Functions only.
-  - `--shared`: Generates shared Functions only.
-  - `--in <path>` (or `-i <path>`): Inputted folder.
-  - `--out <path>` (or `-o <path>`): Outputted folder.
-  - `--obfuscate <level>`: The obfuscated level of JS (0 to 4). Default is set to `4`.
-  - `--debug`: Keeps the temp files for debugging.
-  - If you want to add options or flags to the Dart to Js Compiler, you can add a `--` flag before adding those options and flags. Please note that all the arguments after the `--` flag will be passed directly into the Dart to Js Compiler. For instance:
-
-    ```shell
-    dart run isolate_manager:generate --single -i test -out test -- -Dkey1=value1 -Dkey2=value2
-    ```
 
 - All above examples use `top-level` functions so the `workerName` will be the same as the function name. If you use `static` functions, you have to add the class name like `ClassName.functionName` to the `workerName` parameter. For instance:
 

@@ -1,3 +1,9 @@
+## 5.4.0
+
+* Set the max number of the queued computations.
+* Control how a new computation is added to the Queue.
+* Compute a priority computation (promote a computation to the top of the Queue).
+
 ## 5.3.0
 
 * Able to add options and flags directly into to Dart to Js Compiler.
