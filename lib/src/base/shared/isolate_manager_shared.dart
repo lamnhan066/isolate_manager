@@ -43,6 +43,13 @@ class IsolateManagerShared {
   /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
   /// needs to be set to `workers`.
   ///
+  /// Control the Queue strategy via [queueStrategy] with the following basic
+  /// strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   IsolateManagerShared({
     int concurrent = 1,

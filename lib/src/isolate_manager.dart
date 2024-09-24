@@ -132,6 +132,7 @@ class IsolateManager<R, P> {
   ///   - [QueueStrategyRemoveNewest]
   ///   - [QueueStrategyRemoveOldest]
   ///   - [QueueStrategyDiscardIncoming]
+  ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   static IsolateManagerShared createShared({
     int concurrent = 1,
