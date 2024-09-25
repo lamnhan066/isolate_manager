@@ -1,4 +1,4 @@
-## 5.4.0-rc.3
+## 5.4.0-rc.4
 
 * Improve README.
 
