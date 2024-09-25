@@ -64,8 +64,8 @@ A function used for the Isolate **MUST BE** a `static` or `top-level` function. 
 
 ```dart
 @pragma('vm:entry-point')
-Future<int> add(List<int> params) {
-  return params[0] + params[1];
+int add(List<int> values) {
+  return values[0] + values[1];
 }
 ```
 
