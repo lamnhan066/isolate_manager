@@ -12,7 +12,7 @@ import 'package:isolate_manager/src/models/isolate_queue.dart';
 ///   - [QueueStrategyDiscardIncoming]
 abstract class QueueStrategy<R, P> {
   /// Queue of isolates.
-  final Queue<IsolateQueue<R, P>> _queues = Queue();
+  final Queue<IsolateQueue<R, P>> queues = Queue();
 
   /// Max number of queued computations.
   ///
@@ -20,7 +20,7 @@ abstract class QueueStrategy<R, P> {
   final int maxCount;
 
   /// Number of the current queues.
-  int get queuesCount => _queues.length;
+  int get queuesCount => queues.length;
 
   /// Strategy to control a new (incoming) computation if the maximum number of Queues
   /// is reached. The maximum number is unlimited if [maxCount] <= 0 (by default).
@@ -46,25 +46,25 @@ abstract class QueueStrategy<R, P> {
       if (!continueIfMaxCountExceeded()) return;
     }
     if (addToTop) {
-      _queues.addFirst(queue);
+      queues.addFirst(queue);
     } else {
-      _queues.add(queue);
+      queues.add(queue);
     }
   }
 
   /// Check if the Queue is not empty.
   bool hasNext() {
-    return _queues.isNotEmpty;
+    return queues.isNotEmpty;
   }
 
   /// Get the next computation.
   IsolateQueue<R, P> getNext() {
     assert(hasNext());
-    return _queues.removeFirst();
+    return queues.removeFirst();
   }
 
   /// Clear all queues.
-  void clear() => _queues.clear();
+  void clear() => queues.clear();
 }
 
 class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
@@ -82,7 +82,7 @@ class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   @override
   bool continueIfMaxCountExceeded() {
     // Remove the last computation if the Queue (mean the newest one).
-    _queues.removeLast();
+    queues.removeLast();
     // It means the current computation should be added to the Queue.
     return true;
   }
@@ -95,7 +95,7 @@ class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   @override
   bool continueIfMaxCountExceeded() {
     // Remove the first computation if the Queue (mean the oldest one).
-    _queues.removeFirst();
+    queues.removeFirst();
     // It means the current computation should be added to the Queue.
     return true;
   }
