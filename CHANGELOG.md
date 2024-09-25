@@ -1,3 +1,7 @@
+## 5.4.0-rc.2
+
+* Improve README.
+
 ## 5.4.0-rc.1
 
 * Public the `queues` variable in the `QueueStrategy` class.
