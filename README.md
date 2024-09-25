@@ -60,7 +60,14 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 ## **Setup**
 
-A function used for the Isolate **MUST BE** a `static` or `top-level` function.
+A function used for the Isolate **MUST BE** a `static` or `top-level` function. The `@pragma('vm:entry-point')` annotation also should be added to this function to ensure that tree-shaking doesn't remove the code since it would be invoked on the native side.
+
+```dart
+@pragma('vm:entry-point')
+Future<int> add(List<int> params) {
+  return params[0] + params[1];
+}
+```
 
 ### Mobile and Desktop
 
