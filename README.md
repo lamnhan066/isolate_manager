@@ -30,6 +30,7 @@
   - [Compute a priority computation](#compute-a-priority-computation)
   - [Max number of Queues](#max-number-of-queues)
   - [How a new computation is added if the max queues is exceeded](#how-a-new-computation-is-added-if-the-max-queues-is-exceeded)
+  - [Create a custom strategy](#create-a-custom-strategy)
 - [Try Catch Block](#try-catch-block)
 - [The Generator Options And Flags](#the-generator-options-and-flags)
 - [Addtional Information](#additional-information)
