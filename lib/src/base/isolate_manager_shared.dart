@@ -1,3 +1,3 @@
-library isolate_manager_shared;
+library;
 
 export 'shared/isolate_manager_shared.dart';

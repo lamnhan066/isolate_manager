@@ -1,4 +1,4 @@
-library isolate_contactor;
+library;
 
 export 'contactor/isolate_contactor.dart';
 export 'contactor/isolate_contactor_controller.dart';

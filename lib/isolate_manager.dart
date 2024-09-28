@@ -1,6 +1,6 @@
 /// Create multiple long-lived isolates for a function (keep it active to send and receive data),
 /// supports Worker and WASM on the Web.
-library isolate_manager;
+library;
 
 export 'src/base/isolate_contactor.dart'
     show IsolateException, IsolateConverter, IsolateFunction, IsolateState;
