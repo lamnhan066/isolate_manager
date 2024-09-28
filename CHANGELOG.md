@@ -1,16 +1,8 @@
-## 5.4.0-rc.4
-
-* Improve README.
-
-## 5.4.0-rc.1
-
-* Public the `queues` variable in the `QueueStrategy` class.
-
-## 5.4.0-rc
+## 5.4.0
 
 * Set the max number of the queued computations.
-* Control how a new computation is added to the Queue.
-* Compute a priority computation (promote a computation to the top of the Queue).
+* Control how a new computation is added and retrieved from the Queue.
+* Compute a priority computation (promote a computation to the top of the Queue so it will be compute as soon as possible).
 
 ## 5.3.0
 
