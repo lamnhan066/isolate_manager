@@ -269,11 +269,13 @@ When you have a computation that you want to compute as soon as possible, you ca
 
 ### Max number of Queues
 
-You can set the `maxCount` (the max number of the queued computations) of an `IsolateManager` or `IsolateManagerShared`, if this value is <= 0, the number of queues is unlimited.
+You can set the maximum number of the queued computations for an `IsolateManager` or `IsolateManagerShared` by changing the `maxCount` value.
+
+If the `maxCount` is <= 0, the max number of the queued computations is unlimited.
 
 ### How a new computation is added if the max queues is exceeded
 
-When creating a new `IsolateManager` or `IsolateManagerShared`, you can specify the `queueStrategy` to control the way that a new computation is added or a computation is got from the Queue. There are 3 base strategies:
+When creating a new `IsolateManager` or `IsolateManagerShared`, you can define the `queueStrategy` to control how new computations are added to or retrieved from the queue. There are four fundamental strategies:
 
 ```dart
 /// Unlimited queued computations (default).
