@@ -30,6 +30,7 @@
   - [Compute a priority computation](#compute-a-priority-computation)
   - [Max number of Queues](#max-number-of-queues)
   - [How a new computation is added if the max queues is exceeded](#how-a-new-computation-is-added-if-the-max-queues-is-exceeded)
+  - [Create a custom strategy](#create-a-custom-strategy)
 - [Try Catch Block](#try-catch-block)
 - [The Generator Options And Flags](#the-generator-options-and-flags)
 - [Addtional Information](#additional-information)
@@ -59,7 +60,14 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 ## **Setup**
 
-A function used for the Isolate **MUST BE** a `static` or `top-level` function.
+A function used for the Isolate **MUST BE** a `static` or `top-level` function. The `@pragma('vm:entry-point')` annotation also should be added to this function to ensure that tree-shaking doesn't remove the code since it would be invoked on the native side.
+
+```dart
+@pragma('vm:entry-point')
+int add(List<int> values) {
+  return values[0] + values[1];
+}
+```
 
 ### Mobile and Desktop
 
@@ -283,7 +291,7 @@ QueueStrategyDiscardIncoming()
 
 ### Create a custom strategy
 
-You can extend the `QueueStrategy` to create your own strategy. For instances:
+You can extend the `QueueStrategy` and use the `queues`, `maxCount` and `queuesCount` to create your own strategy. These are how the basic strategies are created:
 
 ```dart
 class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
@@ -291,7 +299,11 @@ class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
   QueueStrategyUnlimited();
 
   @override
-  bool continueIfMaxCountExceeded() => true;
+  bool continueIfMaxCountExceeded() {
+    // It means the current computation should be added to the Queue
+    // without doing anything with the `queues`.
+    return true; 
+  }
 }
 
 class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
@@ -301,7 +313,7 @@ class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   @override
   bool continueIfMaxCountExceeded() {
     // Remove the last computation if the Queue (mean the newest one).
-    _queues.removeLast();
+    queues.removeLast();
     // It means the current computation should be added to the Queue.
     return true; 
   }
@@ -314,7 +326,7 @@ class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   @override
   bool continueIfMaxCountExceeded() {
     // Remove the first computation if the Queue (mean the oldest one).
-    _queues.removeFirst();
+    queues.removeFirst();
     // It means the current computation should be added to the Queue.
     return true;
   }
@@ -322,7 +334,7 @@ class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
 
 class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
   /// Discard the new incoming computation if the [maxCount] is exceeded.
-  QueueStrategyDiscardIncoming({super.maxCount = 0,});
+  QueueStrategyDiscardIncoming({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {

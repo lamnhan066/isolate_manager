@@ -1,4 +1,12 @@
-## 5.4.0
+## 5.4.0-rc.4
+
+* Improve README.
+
+## 5.4.0-rc.1
+
+* Public the `queues` variable in the `QueueStrategy` class.
+
+## 5.4.0-rc
 
 * Set the max number of the queued computations.
 * Control how a new computation is added to the Queue.
