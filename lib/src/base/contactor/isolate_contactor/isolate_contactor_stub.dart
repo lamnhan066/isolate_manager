@@ -60,8 +60,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     required IsolateConverter<R> workerConverter,
     bool debugMode = false,
   }) async {
-    IsolateContactorInternal<R, P> isolateContactor =
-        IsolateContactorInternal._(
+    final isolateContactor = IsolateContactorInternal<R, P>._(
       isolateFunction: isolateFunction,
       workerName: workerName,
       isolateParam: initialParams,

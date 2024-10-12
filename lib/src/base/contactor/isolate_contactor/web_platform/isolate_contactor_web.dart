@@ -50,8 +50,7 @@ class IsolateContactorInternalFuture<R, P>
     required IsolateConverter<R> workerConverter,
     bool debugMode = false,
   }) async {
-    IsolateContactorInternalFuture<R, P> isolateContactor =
-        IsolateContactorInternalFuture._(
+    final isolateContactor = IsolateContactorInternalFuture<R, P>._(
       isolateFunction: isolateFunction,
       workerName: isolateFunctionName,
       isolateParam: initialParams ?? [],
