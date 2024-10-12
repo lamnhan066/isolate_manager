@@ -37,13 +37,13 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
     return;
   }
 
-  final List<FileSystemEntity> allFiles = _listAllFiles(Directory(input), []);
+  final allFiles = _listAllFiles(Directory(input), []);
   final isolateManager = IsolateManager.create(
     _getAndGenerateFromAnotatedFunctions,
     concurrent: 3,
   )..start();
 
-  List<List<dynamic>> params = [];
+  final params = <List<dynamic>>[];
   for (final file in allFiles) {
     if (file is File && file.path.endsWith('.dart')) {
       final filePath = file.absolute.path;
@@ -73,12 +73,12 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
 }
 
 Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
-  String filePath = params[0];
-  String obfuscate = params[1];
-  bool isDebug = params[2];
-  bool isWasm = params[3];
-  String output = params[4];
-  List<String> dartArgs = params[5];
+  final String filePath = params[0];
+  final String obfuscate = params[1];
+  final bool isDebug = params[2];
+  final bool isWasm = params[3];
+  final String output = params[4];
+  final List<String> dartArgs = params[5];
 
   final anotatedFunctions = await _getAnotatedFunctions(filePath);
 
