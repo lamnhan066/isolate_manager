@@ -441,7 +441,7 @@ void main() {
       }
       expect(queueStrategies.queuesCount, equals(10));
       expect(queueStrategies.continueIfMaxCountExceeded(), true);
-      List<int> result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      final result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -467,7 +467,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List<int> result = [0, 1, 9];
+      final result = [0, 1, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -480,7 +480,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List<int> result = [9, 8, 7];
+      final result = [9, 8, 7];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -493,7 +493,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List<int> result = [7, 8, 9];
+      final result = [7, 8, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -506,7 +506,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List<int> result = [9, 1, 0];
+      final result = [9, 1, 0];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -520,7 +520,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List<int> result = [0, 1, 2];
+      final result = [0, 1, 2];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -534,7 +534,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List<int> result = [2, 1, 0];
+      final result = <int>[2, 1, 0];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
