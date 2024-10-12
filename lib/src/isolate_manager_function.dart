@@ -90,11 +90,11 @@ class IsolateManagerFunction {
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
     controller.onIsolateMessage.listen((message) {
-      final completer = Completer();
+      final completer = Completer<R>();
       completer.future.then(
         (value) => autoHandleResult ? controller.sendResult(value) : null,
         onError: autoHandleException
-            ? (err, stack) =>
+            ? (Object err, StackTrace stack) =>
                 controller.sendResultError(IsolateException(err, stack))
             : null,
       );

@@ -22,10 +22,10 @@ Future<void> isolateWorkerImpl<R, P>(
     await completer.future;
   }
   controller.onIsolateMessage.listen((message) {
-    final completer = Completer();
+    final completer = Completer<R>();
     completer.future.then(
       (value) => controller.sendResult(value),
-      onError: (err, stack) =>
+      onError: (Object err, StackTrace stack) =>
           controller.sendResultError(IsolateException(err, stack)),
     );
     try {

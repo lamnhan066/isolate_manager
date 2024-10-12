@@ -34,7 +34,7 @@ class IsolateContactorInternalFuture<R, P>
         _workerName = workerName,
         _isolateParam = isolateParam,
         _isolateContactorController = IsolateContactorControllerImpl(
-          StreamController.broadcast(),
+          StreamController<R>.broadcast(),
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,
@@ -72,7 +72,7 @@ class IsolateContactorInternalFuture<R, P>
         () => '[Main Stream] Message received from Future: $message',
       );
       _mainStreamController.sink.add(message);
-    }).onError((err, stack) {
+    }).onError((Object err, StackTrace stack) {
       printDebug(
         () => '[Main Stream] Error message received from Future: $err',
       );
@@ -115,16 +115,16 @@ class IsolateContactorInternalFuture<R, P>
     }
 
     final Completer<R> completer = Completer();
-    StreamSubscription? sub;
+    late final StreamSubscription<R> sub;
     sub = _isolateContactorController.onMessage.listen((result) async {
       if (!completer.isCompleted) {
         completer.complete(result);
-        await sub?.cancel();
+        await sub.cancel();
       }
     })
-      ..onError((err, stack) async {
+      ..onError((Object err, StackTrace stack) async {
         completer.completeError(err, stack);
-        await sub?.cancel();
+        await sub.cancel();
       });
 
     printDebug(() => 'Message send to isolate: $message');

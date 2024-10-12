@@ -162,6 +162,7 @@ class IsolateManager<R, P> {
   /// Controller for stream.
   final StreamController<R> _streamController = StreamController.broadcast();
   StreamSubscription<R>? _streamSubscription;
+
   // final List<StreamSubscription<R>> _streamSubscriptions = [];
 
   /// Is the `start` method is starting.
@@ -243,8 +244,9 @@ class IsolateManager<R, P> {
     _isStarting = false;
     _startedCompleter = Completer();
     queueStrategy.clear();
-    await Future.wait(
-        [for (IsolateContactor isolate in _isolates.keys) isolate.dispose()]);
+    await Future.wait([
+      for (final isolate in _isolates.keys) isolate.dispose(),
+    ]);
     _isolates.clear();
     _streamSubscription?.cancel();
   }
@@ -371,26 +373,26 @@ class IsolateManager<R, P> {
     // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
-    StreamSubscription? sub;
+    late final StreamSubscription<R> sub;
     sub = isolate.onMessage.listen((event) async {
       // Callbacks on every event.
       final completer = Completer<bool>();
       completer.complete(queue.callback!(event));
       if (await completer.future) {
-        sub?.cancel();
+        sub.cancel();
         // Mark the current isolate as free.
         _isolates[isolate] = false;
         // Send the result back to the main app.
         _streamController.sink.add(event);
         queue.completer.complete(event);
       }
-    }, onError: (error, stackTrace) {
-      sub?.cancel();
+    }, onError: (Object error, StackTrace stackTrace) {
+      sub.cancel();
       // Mark the current isolate as free.
       _isolates[isolate] = false;
 
       // Send the exception back to the main app.
-      _streamController.sink.addError(error!, stackTrace);
+      _streamController.sink.addError(error, stackTrace);
       queue.completer.completeError(error, stackTrace);
     });
 

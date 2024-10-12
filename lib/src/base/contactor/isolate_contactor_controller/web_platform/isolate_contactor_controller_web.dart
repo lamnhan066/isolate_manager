@@ -9,7 +9,7 @@ import '../isolate_contactor_controller_web.dart';
 
 class IsolateContactorControllerImplFuture<R, P>
     implements IsolateContactorControllerImpl<R, P> {
-  final StreamController _delegate;
+  final StreamController<Map<IsolatePort, dynamic>> _delegate;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
@@ -33,7 +33,7 @@ class IsolateContactorControllerImplFuture<R, P>
             : params,
         _initialParams = params is List ? params.first : null {
     _delegate.stream.listen((event) {
-      (event as Map<IsolatePort, dynamic>).forEach((key, value) {
+      event.forEach((key, value) {
         switch (key) {
           case IsolatePort.main:
             if (value is IsolateException) {
@@ -65,7 +65,7 @@ class IsolateContactorControllerImplFuture<R, P>
 
   /// Get this StreamController
   @override
-  StreamController get controller => _delegate;
+  StreamController<Map<IsolatePort, dynamic>> get controller => _delegate;
 
   /// Get initial params for `createCustom`
   @override

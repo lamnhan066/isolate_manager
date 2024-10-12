@@ -16,7 +16,7 @@ abstract class IsolateContactorController<R, P> {
     /// `params` is the default parameters of the isolate function.
     dynamic params, {
     /// `onDispose` is called when the controller is disposed.
-    Function()? onDispose,
+    void Function()? onDispose,
   }) {
     // This method is not used in this controller
     R converter(dynamic value) => value; // coverage:ignore-line
