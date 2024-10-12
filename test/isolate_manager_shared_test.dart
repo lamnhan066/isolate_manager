@@ -105,7 +105,7 @@ void main() async {
     // Catch the error from the stream
     isolates.stream.listen((result) {
       // print('Stream get add: $result');
-    }).onError((e) {
+    }).onError((Object e) {
       // print('Error from stream: $e');
       expect(e.toString(), equals(ArgumentError().toString()));
     });
