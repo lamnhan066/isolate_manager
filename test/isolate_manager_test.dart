@@ -672,7 +672,7 @@ int errorFunction(List<int> value) {
 
 @pragma('vm:entry-point')
 Future<int> errorFunctionFuture(List<int> value) async {
-  await Future<void>.delayed(Duration(seconds: 1));
+  await Future<void>.delayed(const Duration(seconds: 1));
 
   if (value[0] == 50) {
     return throw StateError('The exception is threw at value[0] = ${value[0]}');

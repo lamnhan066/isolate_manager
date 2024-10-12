@@ -21,7 +21,7 @@ void main() {
 
     // Fibonacci 36
     await execute(36);
-  }, timeout: Timeout(Duration(seconds: 120)));
+  }, timeout: const Timeout(Duration(seconds: 120)));
 }
 
 Future<void> execute(int fibonacciNumber) async {

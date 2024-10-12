@@ -49,7 +49,7 @@ void main() async {
     }
 
     // Stop the usolate after 5 seconds
-    Timer(Duration(seconds: 5), isolates.stop);
+    Timer(const Duration(seconds: 5), isolates.stop);
   });
 
   test('Test with worker mappings', () {
@@ -94,7 +94,7 @@ void main() async {
     }
 
     // Stop the usolate after 5 seconds
-    Timer(Duration(seconds: 5), isolates.stop);
+    Timer(const Duration(seconds: 5), isolates.stop);
   });
 
   test('test try-catch', () async {
@@ -123,7 +123,7 @@ void main() async {
     }
 
     // Stop the usolate after 5 seconds
-    Timer(Duration(seconds: 5), isolates.stop);
+    Timer(const Duration(seconds: 5), isolates.stop);
   });
 
   // This test will work better if the `autoInitialized` is set to `false`.
