@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:isolate_manager/src/base/contactor/utils/utils.dart';
 import 'package:web/web.dart';
 
 import '../../isolate_contactor.dart';
@@ -32,28 +33,30 @@ class IsolateContactorControllerImplWorker<R, P>
             : params as Worker,
         _initialParams = params is List ? params.first : null {
     _delegate.onmessage = (MessageEvent event) {
-      if (IsolateState.dispose.isValidJson(event.data)) {
+      final data = dartify(event.data);
+
+      if (IsolateState.dispose.isValidJson(data)) {
         onDispose!();
         close();
         return;
       }
 
-      if (IsolateState.initialized.isValidJson(event.data)) {
+      if (IsolateState.initialized.isValidJson(data)) {
         if (!ensureInitialized.isCompleted) {
           ensureInitialized.complete();
         }
         return;
       }
 
-      if (IsolateException.isValidObject(event.data)) {
-        final exception = IsolateException.fromJson(event.data);
+      if (IsolateException.isValidObject(data)) {
+        final exception = IsolateException.fromJson(data);
         _mainStreamController.addError(
             exception.error.toString(), StackTrace.empty);
         return;
       }
 
       // Decode json from string which sent from isolate
-      _mainStreamController.add(workerConverter(event.data));
+      _mainStreamController.add(workerConverter(data));
     }.toJS;
   }
 
@@ -76,7 +79,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolate(P message) {
-    _delegate.postMessage(message as dynamic);
+    _delegate.postMessage(jsify(message));
   }
 
   @override

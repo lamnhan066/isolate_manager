@@ -1,3 +1,7 @@
+## 5.5.0
+
+* Able to create a `Map` function and use it as a `Worker` instead of using JSON.
+
 ## 5.4.0
 
 * Set the max number of the queued computations.
