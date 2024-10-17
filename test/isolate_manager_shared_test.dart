@@ -54,7 +54,7 @@ void main() async {
     });
   });
 
-  test('Test with worker mappings', () {
+  test('Test with worker mappings', () async {
     // Create 3 isolates to solve the problems
     final isolates = IsolateManager.createShared(
       concurrent: 3,
@@ -64,6 +64,7 @@ void main() async {
         addFuture: 'addFuture',
         add: 'add',
         concat: 'concat',
+        aDynamicMap: 'aDynamicMap',
       },
     );
 
@@ -95,10 +96,13 @@ void main() async {
       });
     }
 
-    // Stop the usolate after 5 seconds
-    Timer(Duration(seconds: 5), () {
-      isolates.stop();
+    isolates.compute(aDynamicMap, {'k': 1, 't': '2'}).then((value) {
+      expect(value, equals({'k': 1, 't': '2'}));
     });
+
+    // Stop the usolate after 5 seconds
+    await Future.delayed(Duration(seconds: 3));
+    await isolates.stop();
   });
 
   test('test try-catch', () async {
@@ -127,9 +131,8 @@ void main() async {
     }
 
     // Stop the usolate after 5 seconds
-    Timer(Duration(seconds: 5), () {
-      isolates.stop();
-    });
+    await Future.delayed(Duration(seconds: 3));
+    await isolates.stop();
   });
 
   // This test will work better if the `autoInitialized` is set to `false`.
@@ -224,5 +227,10 @@ String concat(List<String> params) {
 
 @isolateManagerSharedWorker
 List<List<String>> complexReturn(List<List<String>> params) {
+  return params;
+}
+
+@isolateManagerSharedWorker
+Map aDynamicMap(Map params) {
   return params;
 }

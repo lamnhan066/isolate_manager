@@ -409,28 +409,26 @@ void main() {
     final isolate = IsolateManager.create(
       aStringList,
       workerName: 'workers/aStringList',
-      // Cast to List<String>
-      workerConverter: (value) => value.cast<String>() as List<String>,
     );
     await isolate.start();
 
     final listString = ['a', 'b', 'c'];
     final result = await isolate.compute(listString);
 
-    expect(result, listString);
+    expect(result, equals(listString));
   });
 
-  test('Test with returning a Map<String, int>', () async {
+  test('Test with returning a real Map', () async {
     final isolate = IsolateManager.create(
-      aStringIntMap,
-      workerName: 'aStringIntMap',
+      aDynamicMap,
+      workerName: 'aDynamicMap',
     );
     await isolate.start();
 
-    final map = {'a': 1, 'b': 2, 'c': 3};
-    final result = await isolate.compute(jsonEncode(map));
+    final map = {'a': '1', 'b': 2, 'c': 3};
+    final result = await isolate.compute(map);
 
-    expect(jsonDecode(result), map);
+    expect(result, equals(map));
   });
 
   group('Isolate Queue Strategy -', () {
@@ -569,12 +567,12 @@ int fibonacciRecursive(int n) {
 }
 
 @isolateManagerWorker
-List<String> aStringList(List<String> params) {
+List aStringList(List params) {
   return params;
 }
 
 @isolateManagerWorker
-String aStringIntMap(String params) {
+Map aDynamicMap(Map params) {
   return params;
 }
 
