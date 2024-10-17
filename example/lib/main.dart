@@ -69,6 +69,12 @@ class _MyAppState extends State<MyApp> {
     isDebug: true,
   );
 
+  final isolateTestMap = IsolateManager.create(
+    testMap,
+    workerName: 'testMap',
+    isDebug: true,
+  );
+
   int fibonacciFutureParam = 2;
   int fibonacciFutureResult = 0;
 
@@ -217,6 +223,10 @@ class _MyAppState extends State<MyApp> {
   void callFetchAndDecode() async {
     const url = 'https://pub.lamnhan.dev/isolate-manager/example-json.json';
     isolateFetchAndDecode.sendMessage(url);
+  }
+
+  void callTestMap() async {
+    isolateTestMap({'k1': 'v1', 'k2': 'v2'});
   }
 
   @override
@@ -390,6 +400,21 @@ class _MyAppState extends State<MyApp> {
                                   snapshot.data as String);
 
                               return Text(result.messages.join('\n'));
+                            },
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        title: ElevatedButton(
+                          onPressed: callTestMap,
+                          child: StreamBuilder(
+                            stream: isolateTestMap.stream,
+                            builder: (_, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Text('Dynamic Map');
+                              }
+
+                              return Text(snapshot.data!.toString());
                             },
                           ),
                         ),
