@@ -13,16 +13,16 @@ void main() {
   group('Models', () {
     test('IsolateState', () {
       for (final state in IsolateState.values) {
-        expect(state.isValidJson(state.toJson()), equals(true));
+        expect(state.isValidMap(state.toMap()), equals(true));
       }
     });
 
     test('IsolateException', () {
       final exception =
           IsolateException('Object', StackTrace.fromString('stackTrace'));
-      final json = exception.toJson();
-      expect(IsolateException.isValidObject(json), equals(true));
-      expect(IsolateException.fromJson(json), isA<IsolateException>());
+      final json = exception.toMap();
+      expect(IsolateException.isValidMap(json), equals(true));
+      expect(IsolateException.fromMap(json), isA<IsolateException>());
     });
   });
 
