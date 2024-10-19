@@ -4,6 +4,7 @@ import 'dart:js_interop';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:web/web.dart';
 
+import '../base/contactor/utils/utils.dart';
 import '../base/isolate_contactor.dart';
 
 /// This method only use to create a custom isolate.
@@ -62,7 +63,7 @@ class _IsolateManagerWorkerController<R, P>
 
   _IsolateManagerWorkerController(this.self) {
     self.onmessage = (MessageEvent event) {
-      _streamController.sink.add(event.data as dynamic);
+      _streamController.sink.add(dartify(event.data));
     }.toJS;
   }
 
@@ -75,7 +76,7 @@ class _IsolateManagerWorkerController<R, P>
   /// Send result to the main app
   @override
   void sendResult(dynamic m) {
-    self.postMessage(m);
+    self.postMessage(jsify(m));
   }
 
   /// Send error to the main app
