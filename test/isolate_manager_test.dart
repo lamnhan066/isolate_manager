@@ -431,6 +431,35 @@ void main() {
     expect(result, equals(map));
   });
 
+  test('Test a 2D List to 1D List', () async {
+    final isolate = IsolateManager.create(
+      a2DTo1DList,
+      workerName: 'a2DTo1DList',
+    );
+    await isolate.start();
+
+    final list = [
+      ['a', 'b', 'v'],
+      ['d', 'e', 'f']
+    ];
+    final result = await isolate.compute(list);
+
+    expect(result, equals(a2DTo1DList(list)));
+  });
+
+  test('Test a 1D List to 2D List', () async {
+    final isolate = IsolateManager.create(
+      a1DTo2DList,
+      workerName: 'a1DTo2DList',
+    );
+    await isolate.start();
+
+    final list = ['a', 'b', 'v', 'd', 'e', 'f'];
+    final result = await isolate.compute(list);
+
+    expect(result, equals(a1DTo2DList(list)));
+  });
+
   group('Isolate Queue Strategy -', () {
     test('QueueStrategyRemoveNewest with unlimited queue count', () {
       final queueStrategies = QueueStrategyUnlimited<int, int>();
@@ -574,6 +603,24 @@ List aStringList(List params) {
 @isolateManagerWorker
 Map aDynamicMap(Map params) {
   return params;
+}
+
+@isolateManagerWorker
+List a2DTo1DList(List params) {
+  return params.map((e) => (e as List).join()).toList();
+}
+
+@isolateManagerWorker
+List a1DTo2DList(List params) {
+  final result = [[], []];
+  for (int i = 0; i < params.length; i++) {
+    if (i % 2 == 0) {
+      result[0].add(params[i]);
+    } else {
+      result[1].add(params[i]);
+    }
+  }
+  return result;
 }
 
 void isolateFunction(dynamic params) {
