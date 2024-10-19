@@ -1,3 +1,7 @@
+## 5.5.2
+
+* Improve Type cast in the `_IsolateManagerWorkerController`.
+
 ## 5.5.1
 
 * Change the type of the `Map` from `String` to `dynamic` when converting by `dartify`.
