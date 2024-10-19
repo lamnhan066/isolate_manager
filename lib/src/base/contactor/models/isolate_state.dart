@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 /// Isolate state
 enum IsolateState {
   /// A dispose state
@@ -12,14 +10,12 @@ enum IsolateState {
   ///   type: '$IsolateState',
   ///   value: '<name>',
   /// }
-  String toJson() => jsonEncode({'type': r'$IsolateState', 'value': name});
+  Map<String, String> toMap() => {'type': r'$IsolateState', 'value': name};
 
-  /// Check if the [object] is a valid enum.
-  bool isValidJson(Object? object) {
-    try {
-      final decoded = jsonDecode(object.toString()) as Map;
-      return decoded['type'] == r'$IsolateState' && decoded['value'] == name;
-    } catch (_) {}
-    return false;
+  /// Check if the [map] is a valid enum.
+  bool isValidMap(Map map) {
+    return map.containsKey('type') &&
+        map['type'] == r'$IsolateState' &&
+        map['value'] == name;
   }
 }

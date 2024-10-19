@@ -35,28 +35,35 @@ class IsolateContactorControllerImplWorker<R, P>
     _delegate.onmessage = (MessageEvent event) {
       final data = dartify(event.data);
 
-      if (IsolateState.dispose.isValidJson(data)) {
-        onDispose!();
-        close();
+      if (data['type'] == 'data') {
+        _mainStreamController.add(workerConverter(data['value']));
         return;
       }
 
-      if (IsolateState.initialized.isValidJson(data)) {
+      if (IsolateState.initialized.isValidMap(data)) {
         if (!ensureInitialized.isCompleted) {
           ensureInitialized.complete();
         }
         return;
       }
 
-      if (IsolateException.isValidObject(data)) {
-        final exception = IsolateException.fromJson(data);
+      if (IsolateState.dispose.isValidMap(data)) {
+        onDispose!();
+        close();
+        return;
+      }
+
+      if (IsolateException.isValidMap(data)) {
+        final exception = IsolateException.fromMap(data);
         _mainStreamController.addError(
             exception.error.toString(), StackTrace.empty);
         return;
       }
 
-      // Decode json from string which sent from isolate
-      _mainStreamController.add(workerConverter(data));
+      // There is an unhandled `type` of the `data`.
+      _mainStreamController.addError(
+        IsolateException('Unhandled $data from the Isolate').toString(),
+      );
     }.toJS;
   }
 
@@ -84,7 +91,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolateState(IsolateState state) {
-    _delegate.postMessage(state.toJson().toJS);
+    _delegate.postMessage(jsify(state.toMap()));
   }
 
   @override

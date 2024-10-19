@@ -1,3 +1,8 @@
+## 6.0.0-rc.1
+
+* **BREAKING CHANGE** All the JS files MUST BE recompiled.
+* Improve the data transfer performances between the Worker and the main App by replacing the `json` with the `Map` when sending and receiving data.
+
 ## 5.5.1
 
 * Change the type of the `Map` from `String` to `dynamic` when converting by `dartify`.

@@ -50,12 +50,11 @@ class IsolateContactorControllerImpl<R, P>
               break;
             }
 
-            _mainStreamController
-                .add(converter == null ? value : converter!(value));
+            _mainStreamController.add(converter?.call(value) ?? value);
             break;
           case IsolatePort.isolate:
             if (value == IsolateState.dispose) {
-              if (onDispose != null) onDispose!();
+              onDispose?.call();
               close();
             } else {
               _isolateStreamController.add(value);
