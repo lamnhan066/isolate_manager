@@ -20,7 +20,7 @@ dynamic convertNested(dynamic object) {
   if (object is List) {
     return object.map(convertNested).toList();
   } else if (object is Map) {
-    var map = <String, dynamic>{};
+    var map = <dynamic, dynamic>{};
     object.forEach((key, value) {
       map[key] = convertNested(value);
     });
