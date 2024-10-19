@@ -24,7 +24,8 @@ class IsolateManagerControllerImpl<R, P>
     dynamic params, {
     void Function()? onDispose,
   }) : _delegate = params.runtimeType == DedicatedWorkerGlobalScope
-            ? _IsolateManagerWorkerController<R, P>(params)
+            ? _IsolateManagerWorkerController<R, P>(params,
+                onDispose: onDispose)
             : IsolateContactorController<R, P>(params, onDispose: onDispose);
 
   /// Mark the isolate as initialized.
@@ -59,10 +60,19 @@ class IsolateManagerControllerImpl<R, P>
 class _IsolateManagerWorkerController<R, P>
     implements IsolateContactorController<R, P> {
   final DedicatedWorkerGlobalScope self;
+  final void Function()? onDispose;
   final _streamController = StreamController<P>.broadcast();
 
-  _IsolateManagerWorkerController(this.self) {
+  _IsolateManagerWorkerController(this.self, {this.onDispose}) {
     self.onmessage = (MessageEvent event) {
+      final data = dartify(event.data);
+      if (data is Map) {
+        if (IsolateState.dispose.isValidMap(data)) {
+          onDispose?.call();
+          close();
+          return;
+        }
+      }
       _streamController.sink.add(dartify(event.data));
     }.toJS;
   }
@@ -76,19 +86,19 @@ class _IsolateManagerWorkerController<R, P>
   /// Send result to the main app
   @override
   void sendResult(dynamic m) {
-    self.postMessage(jsify(m));
+    self.postMessage(jsify({'type': 'data', 'value': jsify(m)}));
   }
 
   /// Send error to the main app
   @override
   void sendResultError(IsolateException exception) {
-    sendResult(exception.toJson());
+    self.postMessage(jsify(exception.toMap()));
   }
 
   /// Mark the Worker as initialized
   @override
   void initialized() {
-    sendResult(IsolateState.initialized.toJson());
+    self.postMessage(jsify(IsolateState.initialized.toMap()));
   }
 
   /// Close this `IsolateManagerWorkerController`.
