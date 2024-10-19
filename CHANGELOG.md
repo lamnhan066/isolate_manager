@@ -1,3 +1,8 @@
+## 5.5.1
+
+* Change the type of the `Map` from `String` to `dynamic` when converting by `dartify`.
+* Add more tests for the Map.
+
 ## 5.5.0
 
 * Able to create a `Map` function and use it as a `Worker` instead of using JSON.
