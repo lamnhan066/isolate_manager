@@ -46,17 +46,17 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 |Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|
 |:-:|-:|-:|-:|-:|
-|30|751,364|771,142|274,854|769,588|
-|33|3,189,873|3,185,798|1,152,083|3,214,685|
-|36|13,510,136|13,540,763|4,873,100|13,766,930|
+|30|755,313|771,500|275,800|772,843|
+|33|3,173,846|3,186,777|1,148,128|3,216,177|
+|36|13,475,199|13,506,222|4,853,034|13,576,593|
 
 - Chrome (With `Worker` supported)
 
 |Fibonacci|Main App|One Worker|Three Workers|Isolate.run (Unsupported)|
 |:-:|-:|-:|-:|-:|
-|30|2,125,101|547,800|195,101|0|
-|33|9,083,800|2,286,899|803,599|0|
-|36|38,083,500|9,575,899|3,383,299|0|
+|30|2,132,800|544,900|191,100|0|
+|33|9,046,800|2,277,800|803,300|0|
+|36|38,313,000|9,544,300|3,383,500|0|
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for the test details.
 
