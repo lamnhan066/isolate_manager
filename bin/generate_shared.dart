@@ -214,10 +214,8 @@ bool checkAnnotation(Element element) {
   for (final metadata in element.metadata) {
     final annotationElement = metadata.element;
     if (annotationElement is PropertyAccessorElement) {
-      // TODO: Change to `variable2` when bumping the `analyzer` to `^6.0.0`
-      // ignore: deprecated_member_use
-      final variable = annotationElement.variable;
-      if (variable.name == constAnnotation) {
+      final variable = annotationElement.variable2?.name;
+      if (variable == constAnnotation) {
         return true;
       }
     }
