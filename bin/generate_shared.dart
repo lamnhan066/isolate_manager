@@ -40,7 +40,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
     concurrent: 3,
   )..start();
 
-  List<List<dynamic>> params = [];
+  final params = <List<dynamic>>[];
   for (final file in allFiles) {
     if (file is File && file.path.endsWith('.dart')) {
       final filePath = file.absolute.path;
@@ -54,7 +54,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
 
   print('Total files to generate: ${params.length}');
 
-  Map<String, String> anotatedFunctions = {};
+  final anotatedFunctions = <String, String>{};
   int counter = 0;
   await Future.wait(
     [
@@ -86,7 +86,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
 
 Future<Map<String, String>> _getAndGenerateFromAnotatedFunctions(
     List<dynamic> params) async {
-  String filePath = params[0];
+  final String filePath = params[0];
 
   return _getAnotatedFunctions(filePath);
 }

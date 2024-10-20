@@ -40,7 +40,7 @@ class IsolateManagerControllerImpl<R, P>
 
   /// Get initial parameters when you create the IsolateManager.
   @override
-  get initialParams => _delegate.initialParams;
+  dynamic get initialParams => _delegate.initialParams;
 
   /// This parameter is only used for Isolate. Use to listen for values from the main application.
   @override

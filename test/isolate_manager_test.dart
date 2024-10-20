@@ -217,14 +217,14 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20]));
     }
 
     await expectLater(
-      () async => await Future.wait(futures, eagerError: true),
+      () async => Future.wait(futures, eagerError: true),
       throwsStateError,
     );
     await isolateManager.stop();
@@ -238,7 +238,7 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20], callback: (value) => true));
@@ -257,7 +257,7 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20]));
@@ -278,7 +278,7 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20], callback: (value) => true));
@@ -468,7 +468,7 @@ void main() {
       }
       expect(queueStrategies.queuesCount, equals(10));
       expect(queueStrategies.continueIfMaxCountExceeded(), true);
-      List result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      final result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -494,7 +494,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [0, 1, 9];
+      final result = [0, 1, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -507,7 +507,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [9, 8, 7];
+      final result = [9, 8, 7];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -520,7 +520,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [7, 8, 9];
+      final result = [7, 8, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -533,7 +533,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [9, 1, 0];
+      final result = [9, 1, 0];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -547,7 +547,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [0, 1, 2];
+      final result = [0, 1, 2];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -561,7 +561,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [2, 1, 0];
+      final result = <int>[2, 1, 0];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -717,7 +717,7 @@ int errorFunction(List<int> value) {
 
 @pragma('vm:entry-point')
 Future<int> errorFunctionFuture(List<int> value) async {
-  await Future.delayed(Duration(seconds: 1));
+  await Future<void>.delayed(const Duration(seconds: 1));
 
   if (value[0] == 50) {
     return throw StateError('The exception is threw at value[0] = ${value[0]}');

@@ -49,9 +49,7 @@ void main() async {
     }
 
     // Stop the usolate after 5 seconds
-    Timer(Duration(seconds: 5), () {
-      isolates.stop();
-    });
+    Timer(const Duration(seconds: 5), isolates.stop);
   });
 
   test('Test with worker mappings', () async {
@@ -100,8 +98,8 @@ void main() async {
       expect(value, equals({'k': 1, 't': '2'}));
     });
 
-    // Stop the usolate after 5 seconds
-    await Future.delayed(Duration(seconds: 3));
+    // Stop the isolate after 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
     await isolates.stop();
   });
 
@@ -113,7 +111,7 @@ void main() async {
     // Catch the error from the stream
     isolates.stream.listen((result) {
       // print('Stream get add: $result');
-    }).onError((e) {
+    }).onError((Object e) {
       // print('Error from stream: $e');
       expect(e.toString(), equals(ArgumentError().toString()));
     });
@@ -130,8 +128,8 @@ void main() async {
       expect(e.toString(), equals(ArgumentError().toString()));
     }
 
-    // Stop the usolate after 5 seconds
-    await Future.delayed(Duration(seconds: 3));
+    // Stop the isolate after 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
     await isolates.stop();
   });
 
