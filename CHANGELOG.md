@@ -1,9 +1,17 @@
+## 6.0.0-rc.2
+
+* Bump the `web` package to `^1.0.0`.
+* Bump the `analyzer` package to `^6.0.0`.
+* Update the benchmark result.
+
+*Although all tests are passed, many things will be refactored before version 6.0.0 is fully released.*
+
 ## 6.0.0-rc.1
 
-* **BREAKING CHANGE** All the JS files MUST BE recompiled.
+* **BREAKING CHANGE** All the JS files MUST BE recompiled by running `dart run isolate_manager:generate`.
 * Improve the data transfer performances between the Worker and the main App by replacing the `json` with the `Map` when sending and receiving data.
 
-* *Although all tests are passed, many things will be refactored before version 6.0.0 is fully released.*
+*Although all tests are passed, many things will be refactored before version 6.0.0 is fully released.*
 
 ## 5.5.1
 
