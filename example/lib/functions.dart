@@ -127,3 +127,8 @@ Future<Map<String, dynamic>> fetchAndDecode(String url) async {
   final response = await http.Client().get(Uri.parse(url));
   return jsonDecode(response.body);
 }
+
+@isolateManagerWorker
+Map testMap(Map map) {
+  return map;
+}

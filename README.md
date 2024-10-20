@@ -32,6 +32,8 @@
   - [How a new computation is added if the max queues is exceeded](#how-a-new-computation-is-added-if-the-max-queues-is-exceeded)
   - [Create a custom strategy](#create-a-custom-strategy)
 - [Try Catch Block](#try-catch-block)
+- [Progress Values](#progress-values)
+- [Complicated List, Map Functions](#complicated-list-map-functions)
 - [The Generator Options And Flags](#the-generator-options-and-flags)
 - [Addtional Information](#additional-information)
 - [Contributions](#contributions)
@@ -409,6 +411,57 @@ void progressFunction(dynamic params) {
 }
 ```
 
+## Complicated List, Map Functions
+
+- The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
+
+  1. `List`
+
+      ```dart
+      main() async {
+        final isolate = IsolateManager.create(
+          aList,
+          workerName: 'aList',
+          isDebug: true,
+        );
+
+        final list = ['a', 'b', 'c'];
+        final result = await isolate.compute(list);
+        expect(result, equals(list));
+      }
+
+      @isolateManagerSharedWorker
+      @isolateManagerWorker
+      List aList(List params) {
+        return params;
+      }
+      ```
+
+  2. `Map`
+
+      ``` dart
+      main() async {
+        final isolate = IsolateManager.create(
+          aMap,
+          workerName: 'aMap',
+          isDebug: true,
+        );
+        await isolate.start();
+
+        final map = {'a': '1', 'b': 2, 'c': 3};
+        final result = await isolate.compute(map);
+        expect(result, equals(map));
+      }
+
+      @isolateManagerSharedWorker
+      @isolateManagerWorker
+      Map aMap(Map params) {
+        return params;
+      }
+      ```
+
+  **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
+
 ## The Generator Options And Flags
 
 - `--single`: Generates single Functions only.
@@ -428,55 +481,6 @@ void progressFunction(dynamic params) {
 - Use `queuesLength` to get the current number of queued computation.
 - Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
 - Use `isStarted` to check if the `start` method is completed or not.
-- The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
-
-  1. `List<String>`
-
-      ```dart
-      main() async {
-        final isolate = IsolateManager.create(
-          aStringList,
-          workerName: 'aStringList',
-          // Cast to List<String>
-          workerConverter: (value) => value.cast<String>() as List<String>,
-          isDebug: true,
-        );
-
-        final listString = ['a', 'b', 'c'];
-        final result = await isolate.compute(listString);
-        expect(result, listString);
-      }
-
-      @isolateManagerWorker
-      List<String> aStringList(List<String> params) {
-        return params;
-      }
-      ```
-
-  2. `Map<String, int>`: Use `json` for the complicated cases
-
-      ``` dart
-      main() async {
-        final isolate = IsolateManager.create(
-          aStringIntMap,
-          workerName: 'aStringIntMap',
-          isDebug: true,
-        );
-        await isolate.start();
-
-        final map = {'a': 1, 'b': 2, 'c': 3};
-        final result = await isolate.compute(jsonEncode(map));
-        expect(jsonDecode(result), map);
-      }
-
-      @isolateManagerWorker
-      String aStringIntMap(String params) {
-        return params;
-      }
-      ```
-
-  **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
-
 - All above examples use `top-level` functions so the `workerName` will be the same as the function name. If you use `static` functions, you have to add the class name like `ClassName.functionName` to the `workerName` parameter. For instance:
 
   ```dart
