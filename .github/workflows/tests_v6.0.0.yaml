@@ -1,0 +1,48 @@
+name: Flutter_Tests
+
+on:
+  push:
+    branches: [v6.0.0]
+  pull_request:
+    branches: [v6.0.0]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "v6.0.0"
+
+      - name: Restore packages
+        run: dart pub get
+
+      - name: Analyze
+        run: dart analyze
+
+      - name: Compile Workers
+        run: |
+          dart run isolate_manager:generate -i test -o test
+          dart run isolate_manager:generate -i test -o test/workers
+
+      - name: Run tests on VM
+        run: dart test --platform=vm --coverage=coverage
+
+      - name: Run tests on Chrome
+        run: dart test --platform=chrome --coverage=coverage
+
+      - name: Format coverage
+        run: dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib
+
+      - name: Covert to relative paths
+        run: sed -i 's|SF:.*/lib|SF:lib|' coverage/lcov.info
+
+      - name: Show code coverage reports
+        uses: romeovs/lcov-reporter-action@v0.4.0
+        with:
+          lcov-file: ./coverage/lcov.info

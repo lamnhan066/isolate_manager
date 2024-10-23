@@ -3,6 +3,8 @@
 * Use `very_good_analysis`.
 * Improve tests.
 
+*Although all tests are passed, many things will be refactored before version 6.0.0 is fully released.*
+
 ## 6.0.0-rc.2
 
 * Bump the `web` package to `^1.0.0`.
