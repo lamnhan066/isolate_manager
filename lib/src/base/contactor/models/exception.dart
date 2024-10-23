@@ -35,10 +35,12 @@ class IsolateException implements Exception {
     );
   }
 
-  /// Check if the [json] is a valid [IsolateException].
-  static bool isValidObject(dynamic json) {
+  /// Check if the [input] is a valid [IsolateException].
+  static bool isValidObject(dynamic input) {
+    if (input is! String) return false;
+
     try {
-      final decoded = jsonDecode(json.toString()) as Map;
+      final decoded = jsonDecode(input) as Map;
       return decoded.containsKey(r'$IsolateException');
     } catch (_) {}
     return false;
