@@ -12,12 +12,12 @@ environment:
   sdk: ^3.4.0
 
 dependencies:
+  analyzer: ^6.0.0
+  args: ^2.5.0
+  path: ^1.9.0
   stream_channel: ^2.1.2
   web: ^1.0.0
-  analyzer: ^6.0.0
-  path: ^1.9.0
-  args: ^2.5.0
 
 dev_dependencies:
   test: ^1.25.8
-  lints: ^5.0.0
+  very_good_analysis: ^6.0.0
