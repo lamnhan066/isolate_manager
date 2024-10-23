@@ -1,6 +1,7 @@
 import 'dart:isolate';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/utils/print.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
@@ -9,30 +10,36 @@ import '../test/isolate_manager_test.dart';
 //  dart test --platform=chrome "benchmark/benchmark.dart"
 
 void main() {
-  test('benchmark', () async {
-    print('|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|');
-    print('|:-:|-:|-:|-:|-:|');
+  test(
+    'benchmark',
+    () async {
+      printDebug(
+        () => '|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|',
+      );
+      printDebug(() => '|:-:|-:|-:|-:|-:|');
 
-    // Fibonacci 30
-    await execute(30);
+      // Fibonacci 30
+      await execute(30);
 
-    // Fibonacci 33
-    await execute(33);
+      // Fibonacci 33
+      await execute(33);
 
-    // Fibonacci 36
-    await execute(36);
-  }, timeout: Timeout(Duration(seconds: 120)));
+      // Fibonacci 36
+      await execute(36);
+    },
+    timeout: const Timeout(Duration(seconds: 120)),
+  );
 }
 
 Future<void> execute(int fibonacciNumber) async {
-  Duration singleInMain = Duration.zero;
-  Duration singleInIsolate = Duration.zero;
-  Duration threeIsolatesInIsolate = Duration.zero;
-  Duration runMethodInIsolate = Duration.zero;
+  var singleInMain = Duration.zero;
+  var singleInIsolate = Duration.zero;
+  var threeIsolatesInIsolate = Duration.zero;
+  var runMethodInIsolate = Duration.zero;
 
   // Main App
   final stopWatch = Stopwatch()..start();
-  for (int i = 0; i < 70; i++) {
+  for (var i = 0; i < 70; i++) {
     fibonacciRecursive(fibonacciNumber);
   }
   singleInMain = stopWatch.elapsed;
@@ -41,13 +48,13 @@ Future<void> execute(int fibonacciNumber) async {
     ..reset();
 
   // One Isolate (Worker)
-  final singleIsolate = IsolateManager.create(
+  final singleIsolate = IsolateManager<int, int>.create(
     fibonacciRecursive,
     workerName: 'fibonacciRecursive',
   );
   await singleIsolate.start();
   stopWatch.start();
-  for (int i = 0; i < 70; i++) {
+  for (var i = 0; i < 70; i++) {
     await singleIsolate.compute(fibonacciNumber);
   }
   singleInIsolate = stopWatch.elapsed;
@@ -56,7 +63,7 @@ Future<void> execute(int fibonacciNumber) async {
     ..reset();
 
   // Three Isolates (Workers)
-  final threeIsolates = IsolateManager.create(
+  final threeIsolates = IsolateManager<int, int>.create(
     fibonacciRecursive,
     concurrent: 3,
     workerName: 'fibonacciRecursive',
@@ -65,7 +72,8 @@ Future<void> execute(int fibonacciNumber) async {
 
   stopWatch.start();
   await Future.wait(
-      [for (int i = 0; i < 70; i++) threeIsolates.compute(fibonacciNumber)]);
+    [for (int i = 0; i < 70; i++) threeIsolates.compute(fibonacciNumber)],
+  );
   threeIsolatesInIsolate = stopWatch.elapsed;
   stopWatch
     ..stop()
@@ -74,17 +82,24 @@ Future<void> execute(int fibonacciNumber) async {
   // Isolate.run
   try {
     stopWatch.start();
-    for (int i = 0; i < 70; i++) {
+    for (var i = 0; i < 70; i++) {
       await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
     }
     runMethodInIsolate = stopWatch.elapsed;
     stopWatch
       ..stop()
       ..reset();
-  } on UnsupportedError catch (_) {
+  } on Exception catch (_) {
     /* Unsupported on the Web platform */
   }
 
-  print(
-      '|$fibonacciNumber|${singleInMain.inMicroseconds}|${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}|${runMethodInIsolate.inMicroseconds}|');
+  printDebug(
+    () => '|$fibonacciNumber|${singleInMain.inMicroseconds}|'
+        '${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}'
+        '|${runMethodInIsolate.inMicroseconds}|',
+  );
+}
+
+void printDebug(Object? Function() log) {
+  debugPrinter(log, debug: true);
 }
