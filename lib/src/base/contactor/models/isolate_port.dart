@@ -1,2 +1,8 @@
 /// Port for sending message
-enum IsolatePort { main, isolate }
+enum IsolatePort {
+  /// The main app's port.
+  main,
+
+  /// The isolate's port.
+  isolate;
+}

@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_web.dart'
+    if (dart.library.io) 'isolate_contactor_controller/isolate_contactor_controller_stub.dart';
+import 'package:isolate_manager/src/base/contactor/models/exception.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
 
-import 'isolate_contactor_controller/isolate_contactor_controller_web.dart'
-    if (dart.library.io) 'isolate_contactor_controller/isolate_contactor_controller_stub.dart';
-import 'models/exception.dart';
-
+/// Create controller for current `IsolateContactor`
 abstract class IsolateContactorController<R, P> {
   /// Create controller for current `IsolateContactor`
   ///
@@ -16,10 +16,10 @@ abstract class IsolateContactorController<R, P> {
     /// `params` is the default parameters of the isolate function.
     dynamic params, {
     /// `onDispose` is called when the controller is disposed.
-    Function()? onDispose,
+    FutureOr<void> Function()? onDispose,
   }) {
     // This method is not used in this controller
-    R converter(dynamic value) => value; // coverage:ignore-line
+    R converter(dynamic value) => value as R; // coverage:ignore-line
     return IsolateContactorControllerImpl<R, P>(
       params,
       onDispose: onDispose,

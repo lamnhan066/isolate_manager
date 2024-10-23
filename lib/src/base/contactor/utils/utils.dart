@@ -1,12 +1,12 @@
 import 'dart:js_interop';
 
 /// Returns Dart representation from JS Object.
-dynamic dartify(dynamic object) {
+Object? dartify(dynamic object) {
   // Convert JSObject to Dart equivalents directly
   // Cannot be done with Dart 3.2 constraints
   // ignore: invalid_runtime_check_with_js_interop_types
   if (object is! JSObject) {
-    return object;
+    return object as Object?;
   }
 
   final jsObject = object;
@@ -16,11 +16,12 @@ dynamic dartify(dynamic object) {
   return convertNested(dartObject);
 }
 
-dynamic convertNested(dynamic object) {
+/// Convert nested Map or List.
+Object? convertNested(Object? object) {
   if (object is List) {
     return object.map(convertNested).toList();
   } else if (object is Map) {
-    var map = <dynamic, dynamic>{};
+    final map = <dynamic, dynamic>{};
     object.forEach((key, value) {
       map[key] = convertNested(value);
     });
@@ -34,7 +35,7 @@ dynamic convertNested(dynamic object) {
 /// Returns the JS implementation from Dart Object.
 JSAny? jsify(Object? dartObject) {
   if (dartObject == null) {
-    return dartObject?.jsify();
+    return dartObject.jsify();
   }
 
   if (dartObject is List) {

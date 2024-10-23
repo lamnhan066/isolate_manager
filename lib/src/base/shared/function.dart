@@ -1,24 +1,22 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
-
-import 'platforms/web.dart' if (dart.library.io) 'platforms/stub.dart';
+import 'package:isolate_manager/src/base/shared/platforms/web.dart'
+    if (dart.library.io) 'package:isolate_manager/src/base/shared/platforms/stub.dart';
 
 /// Internal function
-Future<Object> internalFunction(List<Object> params) async {
-  // assert(params is List, 'params is not a list');
+Future<dynamic> internalFunction(List<dynamic> params) async {
   assert(params.length == 2, 'params must have only 2 elements');
-  assert(params[0] is Function, 'params[0] is not a Function');
 
-  Completer<Object> completer = Completer();
-  completer.complete((params[0] as Function)(params[1]));
+  final completer = Completer<dynamic>()
+    ..complete((params[0] as Function)(params[1]));
   return completer.future;
 }
 
 /// Internal platform execute
 Future<R> platformExecute<R extends Object, P extends Object>({
-  required IsolateManager<Object, Object> manager,
-  required FutureOr<R> Function(P) function,
+  required IsolateManager<Object, dynamic> manager,
+  required IsolateFunction<R, P> function,
   required P params,
   required String? workerFunction,
   required Object? workerParams,

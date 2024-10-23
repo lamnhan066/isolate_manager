@@ -11,6 +11,16 @@ import 'package:isolate_manager/src/models/isolate_queue.dart';
 ///   - [QueueStrategyRemoveOldest]
 ///   - [QueueStrategyDiscardIncoming]
 abstract class QueueStrategy<R, P> {
+  /// Strategy to control a new (incoming) computation if the maximum number of Queues
+  /// is reached. The maximum number is unlimited if [maxCount] <= 0 (by default).
+  ///
+  /// Some of strategies:
+  ///   - [QueueStrategyUnlimited] is default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  QueueStrategy({this.maxCount = 0});
+
   /// Queue of isolates.
   final Queue<IsolateQueue<R, P>> queues = Queue();
 
@@ -21,16 +31,6 @@ abstract class QueueStrategy<R, P> {
 
   /// Number of the current queues.
   int get queuesCount => queues.length;
-
-  /// Strategy to control a new (incoming) computation if the maximum number of Queues
-  /// is reached. The maximum number is unlimited if [maxCount] <= 0 (by default).
-  ///
-  /// Some of strategies:
-  ///   - [QueueStrategyUnlimited] is default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
-  QueueStrategy({this.maxCount = 0});
 
   /// Run this method before adding a new computation to the Queue if the max
   /// queue count is exceeded. If this method returns `false`, the new computation
@@ -59,7 +59,7 @@ abstract class QueueStrategy<R, P> {
 
   /// Get the next computation.
   IsolateQueue<R, P> getNext() {
-    assert(hasNext());
+    assert(hasNext(), 'Can only `getNext` when there is a next element');
     return queues.removeFirst();
   }
 
@@ -67,6 +67,7 @@ abstract class QueueStrategy<R, P> {
   void clear() => queues.clear();
 }
 
+/// Unlimited queued computations.
 class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
   /// Unlimited queued computations.
   QueueStrategyUnlimited();
@@ -75,6 +76,7 @@ class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
   bool continueIfMaxCountExceeded() => true;
 }
 
+/// Remove the newest computation if the [maxCount] is exceeded.
 class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   /// Remove the newest computation if the [maxCount] is exceeded.
   QueueStrategyRemoveNewest({super.maxCount = 0});
@@ -88,6 +90,7 @@ class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   }
 }
 
+/// Remove the oldest computation if the [maxCount] is exceeded.
 class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   /// Remove the oldest computation if the [maxCount] is exceeded.
   QueueStrategyRemoveOldest({super.maxCount = 0});
@@ -101,6 +104,7 @@ class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   }
 }
 
+/// Discard the new incoming computation if the [maxCount] is exceeded.
 class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
   /// Discard the new incoming computation if the [maxCount] is exceeded.
   QueueStrategyDiscardIncoming({

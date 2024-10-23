@@ -1,12 +1,34 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:isolate_manager/src/base/contactor/isolate_contactor.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_stub.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
 
-import '../isolate_contactor.dart';
-import '../isolate_contactor_controller/isolate_contactor_controller_stub.dart';
-
+/// Internal instance
 class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
+  /// Internal instance
+  IsolateContactorInternal._({
+    required CustomIsolateFunction isolateFunction,
+    required dynamic isolateParam,
+    required String workerName,
+    required IsolateConverter<R> converter,
+    // This parameter is needed on the web platform.
+    // ignore: avoid_unused_constructor_parameters
+    required IsolateConverter<R> workerConverter,
+    required ReceivePort receivePort,
+    super.debugMode,
+  })  : _isolateFunction = isolateFunction,
+        _workerName = workerName,
+        _isolateParam = isolateParam,
+        _receivePort = receivePort,
+        _isolateContactorController = IsolateContactorControllerImpl(
+          receivePort,
+          converter: converter,
+          workerConverter: workerConverter,
+          onDispose: null,
+        );
+
   /// Create receive port
   final ReceivePort _receivePort;
 
@@ -30,27 +52,6 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   // ignore: unused_field
   final String _workerName;
 
-  /// Internal instance
-  IsolateContactorInternal._({
-    required CustomIsolateFunction isolateFunction,
-    required dynamic isolateParam,
-    required String workerName,
-    required IsolateConverter<R> converter,
-    required IsolateConverter<R> workerConverter,
-    required ReceivePort receivePort,
-    bool debugMode = false,
-  })  : _isolateFunction = isolateFunction,
-        _workerName = workerName,
-        _isolateParam = isolateParam,
-        _receivePort = receivePort,
-        _isolateContactorController = IsolateContactorControllerImpl(
-          receivePort,
-          converter: converter,
-          workerConverter: workerConverter,
-          onDispose: null,
-        ),
-        super(debugMode);
-
   /// Create an instance with your own function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
     required CustomIsolateFunction isolateFunction,
@@ -60,8 +61,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     required IsolateConverter<R> workerConverter,
     bool debugMode = false,
   }) async {
-    IsolateContactorInternal<R, P> isolateContactor =
-        IsolateContactorInternal._(
+    final isolateContactor = IsolateContactorInternal<R, P>._(
       isolateFunction: isolateFunction,
       workerName: workerName,
       isolateParam: initialParams,
@@ -81,13 +81,15 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     _isolateContactorController.onMessage.listen((message) {
       printDebug(() => 'Message received from Isolate: $message');
       _mainStreamController.sink.add(message);
-    }).onError((err, stack) {
+    }).onError((Object err, StackTrace stack) {
       printDebug(() => 'Error message received from Isolate: $err');
       _mainStreamController.sink.addError(err, stack);
     });
 
     _isolate = await Isolate.spawn(
-        _isolateFunction, [_isolateParam, _receivePort.sendPort]);
+      _isolateFunction,
+      <Object?>[_isolateParam, _receivePort.sendPort],
+    );
 
     await _isolateContactorController.ensureInitialized.future;
     printDebug(() => 'Initialized');
@@ -97,15 +99,13 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     _isolateContactorController.sendIsolateState(IsolateState.dispose);
     await _isolateContactorController.close();
     _receivePort.close();
-    _isolate!.kill(priority: Isolate.beforeNextEvent);
+    _isolate!.kill();
     _isolate = null;
   }
 
-  /// Get current message as stream
   @override
   Stream<R> get onMessage => _mainStreamController.stream;
 
-  /// Dispose current [Isolate]
   @override
   Future<void> dispose() async {
     await _dispose();
@@ -113,20 +113,17 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     printDebug(() => 'Disposed');
   }
 
-  /// Send message to child isolate [function]
-  ///
-  /// Throw IsolateContactorException if error occurs.
   @override
   Future<R> sendMessage(P message) async {
-    final Completer<R> completer = Completer();
-    StreamSubscription? sub;
+    final completer = Completer<R>();
+    StreamSubscription<R>? sub;
     sub = _isolateContactorController.onMessage.listen((result) async {
       if (!completer.isCompleted) {
         completer.complete(result);
         await sub?.cancel();
       }
     })
-      ..onError((err, stack) async {
+      ..onError((Object err, StackTrace stack) async {
         completer.completeError(err, stack);
         await sub?.cancel();
       });

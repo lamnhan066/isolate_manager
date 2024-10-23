@@ -1,17 +1,11 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
-
-import 'isolate_manager_controller/web.dart'
+import 'package:isolate_manager/src/isolate_manager_controller/web.dart'
     if (dart.library.io) 'isolate_manager_controller/stub.dart';
 
 /// This method only use to create a custom isolate.
-///
-/// The [params] is a default parameter of a custom isolate function.
-/// `onDispose` will be called when the controller is disposed.
 class IsolateManagerController<R, P> {
-  final IsolateManagerControllerImpl<R, P> _delegate;
-
   /// This method only use to create a custom isolate.
   ///
   /// The [params] is a default parameter of a custom isolate function.
@@ -23,6 +17,7 @@ class IsolateManagerController<R, P> {
           params,
           onDispose: onDispose,
         );
+  final IsolateManagerControllerImpl<R, P> _delegate;
 
   /// Mark the isolate as initialized.
   ///
@@ -34,7 +29,7 @@ class IsolateManagerController<R, P> {
   Future<void> close() => _delegate.close();
 
   /// Get initial parameters when you create the IsolateManager.
-  get initialParams => _delegate.initialParams;
+  dynamic get initialParams => _delegate.initialParams;
 
   /// This parameter is only used for Isolate. Use to listen for values from the main application.
   Stream<P> get onIsolateMessage => _delegate.onIsolateMessage;

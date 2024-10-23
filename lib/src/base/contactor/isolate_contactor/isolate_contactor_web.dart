@@ -1,12 +1,14 @@
 import 'dart:async';
 
-import '../isolate_contactor.dart';
-import 'web_platform/isolate_contactor_web.dart';
-import 'web_platform/isolate_contactor_web_worker.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor/web_platform/isolate_contactor_web.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor/web_platform/isolate_contactor_web_worker.dart';
+import 'package:isolate_manager/src/utils/print.dart';
 
+/// Internal instance
 abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   /// Constructer.
-  const IsolateContactorInternal(super.debugMode);
+  const IsolateContactorInternal({super.debugMode});
 
   /// Create modified isolate function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
@@ -29,10 +31,11 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
           debugMode: debugMode,
         );
       } catch (_) {
-        if (debugMode) {
-          print(
-              '[${IsolateContactor.debugLogPrefix}]: This browser doesn\'t support Worker, Future will be applied!');
-        }
+        debugPrinter(
+          () => "This browser doesn't support"
+              ' Worker, Future will be applied!',
+          debug: debugMode,
+        );
       }
     }
     return IsolateContactorInternalFuture.createCustom<R, P>(

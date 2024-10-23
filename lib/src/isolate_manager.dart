@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:isolate_manager/src/base/isolate_contactor.dart';
+import 'package:isolate_manager/src/base/isolate_manager_shared.dart';
+import 'package:isolate_manager/src/isolate_manager_function.dart';
+import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:isolate_manager/src/models/queue_strategy.dart';
-
-import 'base/isolate_contactor.dart';
-import 'base/isolate_manager_shared.dart';
-import 'isolate_manager_function.dart';
-import 'models/isolate_queue.dart';
+import 'package:isolate_manager/src/utils/print.dart';
 
 /// Type for the callback of the isolate.
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
@@ -16,64 +16,6 @@ typedef IsolateCustomFunction = IsolateFunction<void, dynamic>;
 /// Create a new [IsolateManager] instance by using [IsolateManager.create] or
 /// [IsolateManager.createCustom].
 class IsolateManager<R, P> {
-  /// Debug logs prefix.
-  static String debugLogPrefix = 'Isolate Manager';
-
-  /// Number of concurrent isolates.
-  final int concurrent;
-
-  /// Isolate function.
-  final Object isolateFunction;
-
-  /// Name of the `Worker` without the extension.
-  ///
-  /// Ex: Worker: `worker.js` => workerName: 'worker;
-  ///     Worker: `workers/worker.js` => workerName: 'workers/worker'
-  final String workerName;
-
-  /// Initial parameters.
-  final Object? initialParams;
-
-  /// Is using your own isolate function.
-  final bool isCustomIsolate;
-
-  /// Allow print debug log.
-  final bool isDebug;
-
-  /// Get value as stream.
-  Stream<R> get stream => _streamController.stream;
-
-  /// Convert the result received from the isolate before getting real result.
-  /// This function useful when the result received from the isolate is different
-  /// from the return type.
-  final IsolateConverter<R>? converter;
-
-  /// Convert the result received from the isolate before getting real result.
-  /// This function useful when the result received from the isolate is different
-  /// from the return type.
-  ///
-  /// This function only available in `Worker` mode on Web platform.
-  final IsolateConverter<R>? workerConverter;
-
-  /// Get current number of queues.
-  int get queuesLength => queueStrategy.queuesCount;
-
-  /// Strategy to control a new (incoming) computation.
-  ///
-  /// Basic strategies:
-  ///   - [QueueStrategyUnlimited] - default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
-  final QueueStrategy<R, P> queueStrategy;
-
-  /// If you want to call the [start] method manually without `await`, you can `await`
-  /// later by using [ensureStarted] to ensure that all the isolates are started.
-  Future<void> get ensureStarted => _startedCompleter.future;
-
-  /// To check if the [start] method is completed or not.
-  bool get isStarted => _startedCompleter.isCompleted;
-
   /// An easy way to create a new isolate.
   IsolateManager.create(
     IsolateFunction<R, P> this.isolateFunction, {
@@ -138,7 +80,7 @@ class IsolateManager<R, P> {
     int concurrent = 1,
     bool useWorker = false,
     Object Function(dynamic)? workerConverter,
-    Map<Function, String> workerMappings = const {},
+    Map<Function, String> workerMappings = const <Function, String>{},
     bool autoStart = true,
     String subPath = '',
     int maxQueueCount = 0,
@@ -156,12 +98,71 @@ class IsolateManager<R, P> {
         isDebug: isDebug,
       );
 
+  /// Debug logs prefix.
+  static String debugLogPrefix = 'Isolate Manager';
+
+  /// Number of concurrent isolates.
+  final int concurrent;
+
+  /// Isolate function.
+  final Object isolateFunction;
+
+  /// Name of the `Worker` without the extension.
+  ///
+  /// Ex: Worker: `worker.js` => workerName: 'worker;
+  ///     Worker: `workers/worker.js` => workerName: 'workers/worker'
+  final String workerName;
+
+  /// Initial parameters.
+  final Object? initialParams;
+
+  /// Is using your own isolate function.
+  final bool isCustomIsolate;
+
+  /// Allow print debug log.
+  final bool isDebug;
+
+  /// Get value as stream.
+  Stream<R> get stream => _streamController.stream;
+
+  /// Convert the result received from the isolate before getting real result.
+  /// This function useful when the result received from the isolate is different
+  /// from the return type.
+  final IsolateConverter<R>? converter;
+
+  /// Convert the result received from the isolate before getting real result.
+  /// This function useful when the result received from the isolate is different
+  /// from the return type.
+  ///
+  /// This function only available in `Worker` mode on Web platform.
+  final IsolateConverter<R>? workerConverter;
+
+  /// Get current number of queues.
+  int get queuesLength => queueStrategy.queuesCount;
+
+  /// Strategy to control a new (incoming) computation.
+  ///
+  /// Basic strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  final QueueStrategy<R, P> queueStrategy;
+
+  /// If you want to call the [start] method manually without `await`, you can `await`
+  /// later by using [ensureStarted] to ensure that all the isolates are started.
+  Future<void> get ensureStarted => _startedCompleter.future;
+
+  /// To check if the [start] method is completed or not.
+  bool get isStarted => _startedCompleter.isCompleted;
+
   /// Map<IsolateContactor instance, isBusy>.
-  final Map<IsolateContactor<R, P>, bool> _isolates = {};
+  final Map<IsolateContactor<R, P>, bool> _isolates =
+      <IsolateContactor<R, P>, bool>{};
 
   /// Controller for stream.
   final StreamController<R> _streamController = StreamController.broadcast();
-  StreamSubscription<R>? _streamSubscription;
+  StreamSubscription<dynamic>? _streamSubscription;
   // final List<StreamSubscription<R>> _streamSubscriptions = [];
 
   /// Is the `start` method is starting.
@@ -172,11 +173,13 @@ class IsolateManager<R, P> {
 
   /// A default function for using the [IsolateManager.create] method.
   static void _defaultIsolateFunction<R, P>(dynamic params) {
-    IsolateManagerFunction.customFunction<R, P>(params,
-        onEvent: (controller, message) {
-      final function = controller.initialParams;
-      return function(message);
-    });
+    IsolateManagerFunction.customFunction<R, P>(
+      params,
+      onEvent: (controller, message) {
+        final function = controller.initialParams;
+        return (function as Function)(message) as FutureOr<R>;
+      },
+    );
   }
 
   /// Initialize the instance. This method can be called manually or will be
@@ -197,7 +200,7 @@ class IsolateManager<R, P> {
     if (isCustomIsolate) {
       // Create the custom isolates.
       await Future.wait(
-        [
+        <Future<void>>[
           for (int i = 0; i < concurrent; i++)
             IsolateContactor.createCustom<R, P>(
               isolateFunction as IsolateCustomFunction,
@@ -206,13 +209,16 @@ class IsolateManager<R, P> {
               converter: converter,
               workerConverter: workerConverter,
               debugMode: isDebug,
-            ).then((value) => _isolates.addAll({value: false}))
+            ).then(
+              (IsolateContactor<R, P> value) => _isolates
+                  .addAll(<IsolateContactor<R, P>, bool>{value: false}),
+            ),
         ],
       );
     } else {
       // Create isolates with the internal method.
       await Future.wait(
-        [
+        <Future<void>>[
           for (int i = 0; i < concurrent; i++)
             IsolateContactor.createCustom<R, P>(
               _defaultIsolateFunction<R, P>,
@@ -221,7 +227,10 @@ class IsolateManager<R, P> {
               converter: converter,
               workerConverter: workerConverter,
               debugMode: isDebug,
-            ).then((value) => _isolates.addAll({value: false}))
+            ).then(
+              (IsolateContactor<R, P> value) => _isolates
+                  .addAll(<IsolateContactor<R, P>, bool>{value: false}),
+            ),
         ],
       );
     }
@@ -244,9 +253,12 @@ class IsolateManager<R, P> {
     _startedCompleter = Completer();
     queueStrategy.clear();
     await Future.wait(
-        [for (IsolateContactor isolate in _isolates.keys) isolate.dispose()]);
+      <Future<void>>[
+        for (final isolate in _isolates.keys) isolate.dispose(),
+      ],
+    );
     _isolates.clear();
-    _streamSubscription?.cancel();
+    await _streamSubscription?.cancel();
   }
 
   /// Stop the isolate.
@@ -293,13 +305,19 @@ class IsolateManager<R, P> {
   ///       return true;
   ///  });
   /// ```
-  Future<R> call(P params,
-          {IsolateCallback<R>? callback, bool priority = false}) =>
+  Future<R> call(
+    P params, {
+    IsolateCallback<R>? callback,
+    bool priority = false,
+  }) =>
       compute(params, callback: callback, priority: priority);
 
   ///  Similar to the [compute], for who's using IsolateContactor.
-  Future<R> sendMessage(P params,
-          {IsolateCallback<R>? callback, bool priority = false}) =>
+  Future<R> sendMessage(
+    P params, {
+    IsolateCallback<R>? callback,
+    bool priority = false,
+  }) =>
       compute(params, callback: callback, priority: priority);
 
   /// Compute isolate manager with [R] is return type.
@@ -334,8 +352,11 @@ class IsolateManager<R, P> {
   ///       return true;
   ///  });
   /// ```
-  Future<R> compute(P params,
-      {IsolateCallback<R>? callback, bool priority = false}) async {
+  Future<R> compute(
+    P params, {
+    IsolateCallback<R>? callback,
+    bool priority = false,
+  }) async {
     await start();
 
     final queue = IsolateQueue<R, P>(params, callback);
@@ -367,32 +388,39 @@ class IsolateManager<R, P> {
   }
 
   Future<R> _excuteWithCallback(
-      IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
+    IsolateContactor<R, P> isolate,
+    IsolateQueue<R, P> queue,
+  ) async {
     // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
-    StreamSubscription? sub;
-    sub = isolate.onMessage.listen((event) async {
-      // Callbacks on every event.
-      final completer = Completer<bool>();
-      completer.complete(queue.callback!(event));
-      if (await completer.future) {
-        sub?.cancel();
+    StreamSubscription<dynamic>? sub;
+    sub = isolate.onMessage.listen(
+      (event) async {
+        // Callbacks on every event.
+        final completer = Completer<bool>()..complete(queue.callback!(event));
+        if (await completer.future) {
+          await sub?.cancel();
+
+          // Send the result back to the main app.
+          _streamController.sink.add(event);
+          queue.completer.complete(event);
+
+          // Mark the current isolate as free.
+          _isolates[isolate] = false;
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) async {
+        await sub?.cancel();
+
+        // Send the exception back to the main app.
+        _streamController.sink.addError(error, stackTrace);
+        queue.completer.completeError(error, stackTrace);
+
         // Mark the current isolate as free.
         _isolates[isolate] = false;
-        // Send the result back to the main app.
-        _streamController.sink.add(event);
-        queue.completer.complete(event);
-      }
-    }, onError: (error, stackTrace) {
-      sub?.cancel();
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
-
-      // Send the exception back to the main app.
-      _streamController.sink.addError(error!, stackTrace);
-      queue.completer.completeError(error, stackTrace);
-    });
+      },
+    );
 
     try {
       await isolate.sendMessage(queue.params);
@@ -404,25 +432,27 @@ class IsolateManager<R, P> {
   }
 
   Future<R> _excuteWithoutCallback(
-      IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
+    IsolateContactor<R, P> isolate,
+    IsolateQueue<R, P> queue,
+  ) async {
     // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
     // Send the `param` to the isolate and wait for the result.
-    isolate.sendMessage(queue.params).then((value) {
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
-
+    await isolate.sendMessage(queue.params).then((value) {
       // Send the result back to the main app.
       _streamController.sink.add(value);
       queue.completer.complete(value);
-    }).onError((error, stackTrace) {
+
       // Mark the current isolate as free.
       _isolates[isolate] = false;
-
+    }).onError((Object? error, StackTrace stackTrace) {
       // Send the exception back to the main app.
       _streamController.sink.addError(error!, stackTrace);
       queue.completer.completeError(error, stackTrace);
+
+      // Mark the current isolate as free.
+      _isolates[isolate] = false;
     });
 
     return queue.completer.future;
@@ -430,8 +460,6 @@ class IsolateManager<R, P> {
 
   /// Print logs if [isDebug] is true
   void printDebug(Object? Function() object) {
-    if (isDebug) {
-      print('[$debugLogPrefix]: ${object()}');
-    }
+    debugPrinter(object, debug: isDebug);
   }
 }

@@ -2,20 +2,13 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/base/contactor/utils/utils.dart';
+import 'package:isolate_manager/src/base/isolate_contactor.dart';
 import 'package:web/web.dart';
 
-import '../base/contactor/utils/utils.dart';
-import '../base/isolate_contactor.dart';
-
 /// This method only use to create a custom isolate.
-///
-/// The [params] is a default parameter of a custom isolate function.
-/// `onDispose` will be called when the controller is disposed.
 class IsolateManagerControllerImpl<R, P>
     implements IsolateManagerController<R, P> {
-  /// Delegation of IsolateContactor.
-  final IsolateContactorController<R, P> _delegate;
-
   /// This method only use to create a custom isolate.
   ///
   /// The [params] is a default parameter of a custom isolate function.
@@ -24,9 +17,14 @@ class IsolateManagerControllerImpl<R, P>
     dynamic params, {
     void Function()? onDispose,
   }) : _delegate = params.runtimeType == DedicatedWorkerGlobalScope
-            ? _IsolateManagerWorkerController<R, P>(params,
-                onDispose: onDispose)
+            ? _IsolateManagerWorkerController<R, P>(
+                params as DedicatedWorkerGlobalScope,
+                onDispose: onDispose,
+              )
             : IsolateContactorController<R, P>(params, onDispose: onDispose);
+
+  /// Delegation of IsolateContactor.
+  final IsolateContactorController<R, P> _delegate;
 
   /// Mark the isolate as initialized.
   ///
@@ -41,7 +39,7 @@ class IsolateManagerControllerImpl<R, P>
 
   /// Get initial parameters when you create the IsolateManager.
   @override
-  get initialParams => _delegate.initialParams;
+  dynamic get initialParams => _delegate.initialParams;
 
   /// This parameter is only used for Isolate. Use to listen for values from the main application.
   @override
@@ -59,26 +57,17 @@ class IsolateManagerControllerImpl<R, P>
 
 class _IsolateManagerWorkerController<R, P>
     implements IsolateContactorController<R, P> {
+  _IsolateManagerWorkerController(this.self, {this.onDispose}) {
+    self.onmessage = (MessageEvent event) {
+      _streamController.sink.add(dartify(event.data) as P);
+    }.toJS;
+  }
   final DedicatedWorkerGlobalScope self;
   final void Function()? onDispose;
   final _streamController = StreamController<P>.broadcast();
 
-  _IsolateManagerWorkerController(this.self, {this.onDispose}) {
-    self.onmessage = (MessageEvent event) {
-      final data = dartify(event.data);
-      if (data is Map) {
-        if (IsolateState.dispose.isValidMap(data)) {
-          onDispose?.call();
-          close();
-          return;
-        }
-      }
-      _streamController.sink.add(dartify(event.data));
-    }.toJS;
-  }
-
   @override
-  Stream<P> get onIsolateMessage => _streamController.stream;
+  Stream<P> get onIsolateMessage => _streamController.stream.cast();
 
   @override
   Object? get initialParams => null;
@@ -86,7 +75,9 @@ class _IsolateManagerWorkerController<R, P>
   /// Send result to the main app
   @override
   void sendResult(dynamic m) {
-    self.postMessage(jsify({'type': 'data', 'value': jsify(m)}));
+    self.postMessage(
+      jsify(<String, Object?>{'type': 'data', 'value': m}),
+    );
   }
 
   /// Send error to the main app
@@ -114,7 +105,7 @@ class _IsolateManagerWorkerController<R, P>
   Stream<R> get onMessage => throw UnimplementedError();
 
   @override
-  void sendIsolate(P message) => throw UnimplementedError();
+  void sendIsolate(dynamic message) => throw UnimplementedError();
 
   @override
   void sendIsolateState(IsolateState state) => throw UnimplementedError();

@@ -4,14 +4,18 @@ import 'package:isolate_manager/isolate_manager.dart';
 
 /// Execute
 Future<R> platformExecuteImpl<R extends Object, P extends Object>({
-  required IsolateManager<Object, Object> manager,
+  required IsolateManager<Object, dynamic> manager,
   required IsolateFunction<R, P> function,
   required P params,
   required String? workerFunction,
   required Object? workerParams,
   required bool priority,
 }) async {
-  return (await manager.compute([function, params], priority: priority)) as R;
+  final result = await manager.compute(
+    <Object>[function, params],
+    priority: priority,
+  );
+  return result as R;
 }
 
 /// Create a Worker on Web.

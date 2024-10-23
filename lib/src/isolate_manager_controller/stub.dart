@@ -1,18 +1,11 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
-
-import '../base/isolate_contactor.dart';
+import 'package:isolate_manager/src/base/isolate_contactor.dart';
 
 /// This method only use to create a custom isolate.
-///
-/// The [params] is a default parameter of a custom isolate function.
-/// `onDispose` will be called when the controller is disposed.
 class IsolateManagerControllerImpl<R, P>
     implements IsolateManagerController<R, P> {
-  /// Delegation of IsolateContactor.
-  final IsolateContactorController<R, P> _delegate;
-
   /// This method only use to create a custom isolate.
   ///
   /// The [params] is a default parameter of a custom isolate function.
@@ -24,6 +17,9 @@ class IsolateManagerControllerImpl<R, P>
           params,
           onDispose: onDispose,
         );
+
+  /// Delegation of IsolateContactor.
+  final IsolateContactorController<R, P> _delegate;
 
   /// Get initial parameters when you create the IsolateManager.
   @override
@@ -46,7 +42,7 @@ class IsolateManagerControllerImpl<R, P>
 
   /// Send values from Isolate to the main application (to `onMessage`).
   @override
-  void sendResult(dynamic result) => _delegate.sendResult(result);
+  void sendResult(dynamic result) => _delegate.sendResult(result as R);
 
   /// Send the `Exception` to the main app.
   @override

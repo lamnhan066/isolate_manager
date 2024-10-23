@@ -1,42 +1,32 @@
 import 'dart:async';
 import 'dart:js_interop';
 
-import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_web.dart';
 import 'package:isolate_manager/src/base/contactor/utils/utils.dart';
+import 'package:isolate_manager/src/base/isolate_contactor.dart';
 import 'package:web/web.dart';
 
-import '../../isolate_contactor.dart';
-import '../../models/exception.dart';
-import '../isolate_contactor_controller_web.dart';
-
+/// Implementation of the [IsolateContactorController] in `web` with `Worker`.
 class IsolateContactorControllerImplWorker<R, P>
     implements IsolateContactorControllerImpl<R, P> {
-  final Worker _delegate;
-
-  final StreamController<R> _mainStreamController =
-      StreamController.broadcast();
-
-  final void Function()? onDispose;
-  final IsolateConverter<R> workerConverter;
-  final dynamic _initialParams;
-
-  @override
-  Completer<void> ensureInitialized = Completer();
-
+  /// Implementation of the [IsolateContactorController] in `web` with `Worker`.
   IsolateContactorControllerImplWorker(
     dynamic params, {
-    required this.onDispose,
-    required IsolateConverter<R> converter, // Converter for native
-    required this.workerConverter, // Converter for Worker (Web Only)
-  })  : _delegate = params is List
-            ? params.last.controller as Worker
+    required void Function()? onDispose, // Converter for native
+    required R Function(dynamic)
+        workerConverter, // Converter for Worker (Web Only)
+  })  : _workerConverter = workerConverter,
+        _onDispose = onDispose,
+        _delegate = params is List
+            ? (params.last as IsolateContactorControllerImpl).controller
+                as Worker
             : params as Worker,
         _initialParams = params is List ? params.first : null {
     _delegate.onmessage = (MessageEvent event) {
-      final data = dartify(event.data);
+      final data = dartify(event.data) as Map;
 
       if (data['type'] == 'data') {
-        _mainStreamController.add(workerConverter(data['value']));
+        _mainStreamController.add(_workerConverter(data['value']));
         return;
       }
 
@@ -48,15 +38,17 @@ class IsolateContactorControllerImplWorker<R, P>
       }
 
       if (IsolateState.dispose.isValidMap(data)) {
-        onDispose!();
-        close();
+        _onDispose!();
+        unawaited(close());
         return;
       }
 
       if (IsolateException.isValidMap(data)) {
         final exception = IsolateException.fromMap(data);
         _mainStreamController.addError(
-            exception.error.toString(), StackTrace.empty);
+          exception.error.toString(),
+          StackTrace.empty,
+        );
         return;
       }
 
@@ -66,12 +58,21 @@ class IsolateContactorControllerImplWorker<R, P>
       );
     }.toJS;
   }
+  final Worker _delegate;
 
-  /// Get this Worker
+  final StreamController<R> _mainStreamController =
+      StreamController.broadcast();
+
+  final void Function()? _onDispose;
+  final IsolateConverter<R> _workerConverter;
+  final dynamic _initialParams;
+
+  @override
+  Completer<void> ensureInitialized = Completer();
+
   @override
   Worker get controller => _delegate;
 
-  /// Get initial params for `createCustom`
   @override
   dynamic get initialParams => _initialParams;
 

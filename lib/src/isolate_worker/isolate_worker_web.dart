@@ -8,28 +8,28 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:web/web.dart';
 
 @JS('self')
-external DedicatedWorkerGlobalScope get self;
+external DedicatedWorkerGlobalScope get _self;
 
 /// Create a worker in your `main`.
 Future<void> isolateWorkerImpl<R, P>(
   IsolateWorkerFunction<R, P> function,
   FutureOr<void> Function()? onInitial,
 ) async {
-  final controller = IsolateManagerController<R, P>(self);
+  final controller = IsolateManagerController<R, P>(_self);
   if (onInitial != null) {
-    final completer = Completer<void>();
-    completer.complete(onInitial());
+    final completer = Completer<void>()..complete(onInitial());
     await completer.future;
   }
   controller.onIsolateMessage.listen((message) {
-    final completer = Completer();
+    final completer = Completer<R>();
     completer.future.then(
-      (value) => controller.sendResult(value),
-      onError: (err, stack) =>
-          controller.sendResultError(IsolateException(err, stack)),
+      controller.sendResult,
+      onError: (Object err, StackTrace stack) => controller.sendResultError(
+        IsolateException(err, stack),
+      ),
     );
     try {
-      completer.complete(function(message) as dynamic);
+      completer.complete(function(message));
     } catch (err, stack) {
       completer.completeError(err, stack);
     }
@@ -39,5 +39,5 @@ Future<void> isolateWorkerImpl<R, P>(
 
 /// Create a custom worker in your `main`.
 void customWorkerFunctionImpl(IsolateWorkerFunction<void, dynamic> function) {
-  function(self);
+  function(_self);
 }

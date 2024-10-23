@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:isolate_manager/src/base/contactor/isolate_contactor.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/web_platform/isolate_contactor_controller_web.dart';
+import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/web_platform/isolate_contactor_controller_web_worker.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_contactor_controller_web_controller_mixin.dart';
 
-import '../isolate_contactor.dart';
-import '../isolate_contactor_controller.dart';
-import 'web_platform/isolate_contactor_controller_web.dart';
-import 'web_platform/isolate_contactor_controller_web_worker.dart';
-
+/// Implementation of the [IsolateContactorController] in `web`.
 abstract class IsolateContactorControllerImpl<R, P>
     with IsolateContactorControllerWebControllerMixin
     implements IsolateContactorController<R, P> {
+  /// Implementation of the [IsolateContactorController] in `web`.
   factory IsolateContactorControllerImpl(
     dynamic params, {
     required void Function()? onDispose,
@@ -18,19 +19,19 @@ abstract class IsolateContactorControllerImpl<R, P>
         workerConverter, // Converter for Worker (Web Only)
   }) {
     if (params is StreamController ||
-        params is List && params.last.controller is StreamController) {
+        params is List &&
+            (params.last as IsolateContactorControllerImpl).controller
+                is StreamController) {
       return IsolateContactorControllerImplFuture<R, P>(
         params,
         onDispose: onDispose,
         converter: converter,
-        workerConverter: workerConverter,
       );
     }
 
     return IsolateContactorControllerImplWorker<R, P>(
       params,
       onDispose: onDispose,
-      converter: converter,
       workerConverter: workerConverter,
     );
   }
