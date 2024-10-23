@@ -1,12 +1,14 @@
 import 'package:args/args.dart';
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/utils/print.dart';
 
 import 'generate_shared.dart' as shared;
 import 'generate_single.dart' as single;
 
-void main(List<String> args) async {
+void main(List<String> paramArgs) async {
+  var args = paramArgs;
   final separator = args.indexOf('--');
-  List<String> dartArgs = [];
+  var dartArgs = <String>[];
   if (separator != -1) {
     dartArgs = args.sublist(separator + 1);
     args = args.sublist(0, separator);
@@ -15,27 +17,25 @@ void main(List<String> args) async {
   final parser = ArgParser()
     ..addFlag(
       'single',
-      defaultsTo: false,
       help: 'Generate the single Workers',
     )
     ..addFlag(
       'shared',
-      defaultsTo: false,
       help: 'Generate the shared Workers',
     )
     ..addOption(
       'input',
       abbr: 'i',
-      help:
-          'Path of the folder to generate the Workers. Default is set to `lib`.',
+      help: 'Path of the folder to generate the Workers. '
+          'Default is set to `lib`.',
       valueHelp: 'lib',
       defaultsTo: 'lib',
     )
     ..addOption(
       'output',
       abbr: 'o',
-      help:
-          'Path of the folder to save the generated files. Default is set to `web`.',
+      help: 'Path of the folder to save the generated files. '
+          'Default is set to `web`.',
       valueHelp: 'web',
       defaultsTo: 'web',
     )
@@ -54,19 +54,17 @@ void main(List<String> args) async {
     )
     ..addFlag(
       'debug',
-      defaultsTo: false,
       help: 'Export the debug files like *.js.deps, *.js.map and *.unopt.wasm',
     )
     ..addFlag(
       'wasm',
-      defaultsTo: false,
       help: 'Compile to wasm',
     );
 
   final argResults = parser.parse(args);
 
-  bool isSingle = argResults['single'] as bool;
-  bool isShared = argResults['shared'] as bool;
+  var isSingle = argResults['single'] as bool;
+  var isShared = argResults['shared'] as bool;
 
   if (!isSingle && !isShared) {
     isSingle = true;
@@ -74,14 +72,18 @@ void main(List<String> args) async {
   }
 
   if (isSingle) {
-    print('>> Generating the single Workers...');
+    printDebug(() => '>> Generating the single Workers...');
     await single.generate(argResults, dartArgs);
-    print('>> Generated.');
+    printDebug(() => '>> Generated.');
   }
 
   if (isShared) {
-    print('>> Generating the shared Worker...');
+    printDebug(() => '>> Generating the shared Worker...');
     await shared.generate(argResults, dartArgs);
-    print('>> Generated.');
+    printDebug(() => '>> Generated.');
   }
+}
+
+void printDebug(Object? Function() log) {
+  debugPrinter(log, debug: true);
 }

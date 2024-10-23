@@ -1,11 +1,11 @@
 class AnnotationResult {
-  final String workerName;
-  final bool isCustomWorker;
 
   AnnotationResult({
     required this.workerName,
     required this.isCustomWorker,
   });
+  final String workerName;
+  final bool isCustomWorker;
 
   AnnotationResult copyWith({
     String? workerName,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:analyzer/dart/analysis/results.dart';
@@ -8,7 +9,9 @@ import 'package:args/args.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:path/path.dart' as p;
 
-const constAnnotation = 'isolateManagerSharedWorker';
+import 'generate.dart';
+
+const String constAnnotation = 'isolateManagerSharedWorker';
 
 /// --path "path/to/generate" --obfuscate 0->4 --debug
 Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
@@ -26,43 +29,47 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   final isWasm = argResults['wasm'] as bool? ?? false;
   final name = argResults['name'] as String;
 
-  print('Parsing the `IsolateManagerWorker` inside directory: $input...');
+  printDebug(
+    () => 'Parsing the `IsolateManagerWorker` inside directory: $input...',
+  );
 
   final dir = Directory(input);
   if (!dir.existsSync()) {
-    print('The command run in the wrong directory.');
+    printDebug(() => 'The command run in the wrong directory.');
     return;
   }
 
-  final List<FileSystemEntity> allFiles = _listAllFiles(Directory(input), []);
-  final isolateManager = IsolateManager.create(
+  final allFiles = _listAllFiles(Directory(input), <FileSystemEntity>[]);
+  final isolateManager =
+      IsolateManager<Map<String, String>, List<dynamic>>.create(
     _getAndGenerateFromAnotatedFunctions,
     concurrent: 3,
-  )..start();
+  );
+  unawaited(isolateManager.start());
 
-  List<List<dynamic>> params = [];
+  final params = <List<dynamic>>[];
   for (final file in allFiles) {
     if (file is File && file.path.endsWith('.dart')) {
       final filePath = file.absolute.path;
       final content = await file.readAsString();
       final pattern = RegExp('@$constAnnotation');
       if (content.contains(pattern)) {
-        params.add([filePath]);
+        params.add(<String>[filePath]);
       }
     }
   }
 
-  print('Total files to generate: ${params.length}');
+  printDebug(() => 'Total files to generate: ${params.length}');
 
-  Map<String, String> anotatedFunctions = {};
-  int counter = 0;
+  final anotatedFunctions = <String, String>{};
+  var counter = 0;
   await Future.wait(
-    [
-      for (final param in params)
-        isolateManager.compute(param).then((value) {
+    <Future<void>>[
+      for (final List<dynamic> param in params)
+        isolateManager.compute(param).then((Map<String, String> value) {
           counter += value.length;
           anotatedFunctions.addAll(value);
-        })
+        }),
     ],
   );
 
@@ -78,15 +85,16 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
     );
   }
 
-  print('Total generated functions: $counter');
+  printDebug(() => 'Total generated functions: $counter');
 
   await isolateManager.stop();
-  print('Done');
+  printDebug(() => 'Done');
 }
 
 Future<Map<String, String>> _getAndGenerateFromAnotatedFunctions(
-    List<dynamic> params) async {
-  String filePath = params[0];
+  List<dynamic> params,
+) async {
+  final filePath = params[0] as String;
 
   return _getAnotatedFunctions(filePath);
 }
@@ -96,8 +104,8 @@ Future<Map<String, String>> _getAnotatedFunctions(String path) async {
   final result = await resolveFile2(path: sourceFilePath);
 
   if (result is! ResolvedUnitResult) {
-    print('Error resolving file.');
-    return {};
+    printDebug(() => 'Error resolving file.');
+    return <String, String>{};
   }
 
   final unit = result.unit;
@@ -141,8 +149,8 @@ Future<void> _generateFromAnotatedFunctions(
   List<String> dartArgs,
 ) async {
   final file = File('.IsolateManagerShared.${anotatedFunctions.hashCode}.dart');
-  final sink = file.openWrite();
-  sink.writeln("import 'package:isolate_manager/isolate_manager.dart';");
+  final sink = file.openWrite()
+    ..writeln("import 'package:isolate_manager/isolate_manager.dart';");
   for (final function in anotatedFunctions.entries) {
     sink.writeln("import '${p.relative(function.value)}';");
   }
@@ -150,10 +158,11 @@ Future<void> _generateFromAnotatedFunctions(
   for (final function in anotatedFunctions.entries) {
     sink.writeln("'${function.key}' : ${function.key},");
   }
-  sink.writeln('};');
-  sink.writeln('main() {');
-  sink.writeln('  IsolateManagerFunction.sharedWorkerFunction(map);');
-  sink.writeln('}');
+  sink
+    ..writeln('};')
+    ..writeln('main() {')
+    ..writeln('  IsolateManagerFunction.sharedWorkerFunction(map);')
+    ..writeln('}');
   await sink.close();
 
   final extension = isWasm ? 'wasm' : 'js';
@@ -161,13 +170,13 @@ Future<void> _generateFromAnotatedFunctions(
   final outputPath = p.join(output, '$name.$extension');
   final outputFile = File(outputPath);
 
-  if (await outputFile.exists()) {
+  if (outputFile.existsSync()) {
     await outputFile.delete();
   }
 
   final process = Process.run(
     'dart',
-    [
+    <String>[
       'compile',
       extension,
       file.path,
@@ -181,15 +190,15 @@ Future<void> _generateFromAnotatedFunctions(
   );
 
   if (isDebug) {
-    process.asStream().listen((data) {
-      print(data.stdout);
+    process.asStream().listen((ProcessResult data) {
+      printDebug(() => data.stdout);
     });
   }
 
   final result = await process;
 
-  if (await outputFile.exists()) {
-    print('Compiled: ${p.relative(outputPath)}');
+  if (outputFile.existsSync()) {
+    printDebug(() => 'Compiled: ${p.relative(outputPath)}');
     if (!isDebug) {
       if (isWasm) {
         await File('$output/$name.unopt.wasm').delete();
@@ -198,10 +207,10 @@ Future<void> _generateFromAnotatedFunctions(
       }
     }
   } else {
-    print('Compile ERROR: ${p.relative(outputPath)}');
+    printDebug(() => 'Compile ERROR: ${p.relative(outputPath)}');
     final r = result.stdout.toString().split('\n');
-    for (var element in r) {
-      print('   > $element');
+    for (final element in r) {
+      printDebug(() => '   > $element');
     }
   }
 
@@ -227,15 +236,15 @@ List<FileSystemEntity> _listAllFiles(
   Directory dir,
   List<FileSystemEntity> fileList,
 ) {
-  final files = dir.listSync(recursive: false);
-
-  for (FileSystemEntity file in files) {
+  final files = dir.listSync();
+  var list = fileList;
+  for (final file in files) {
     if (file is File) {
-      fileList.add(file);
+      list.add(file);
     } else if (file is Directory) {
-      fileList = _listAllFiles(file, fileList);
+      list = _listAllFiles(file, list);
     }
   }
 
-  return fileList;
+  return list;
 }
