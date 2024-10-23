@@ -1,3 +1,8 @@
+## 6.0.0-rc.3
+
+* Use `very_good_analysis`.
+* Improve tests.
+
 ## 6.0.0-rc.2
 
 * Bump the `web` package to `^1.0.0`.
