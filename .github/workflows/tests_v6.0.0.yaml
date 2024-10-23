@@ -46,3 +46,4 @@ jobs:
         uses: romeovs/lcov-reporter-action@v0.4.0
         with:
           lcov-file: ./coverage/lcov.info
+          filter-changed-files: true
