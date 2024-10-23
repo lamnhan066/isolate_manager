@@ -8,12 +8,13 @@ import 'package:test/test.dart';
 //  dart test --platform=chrome,vm
 
 void main() async {
-  test('test', () {
+  test('test', () async {
     // Create 3 isolates to solve the problems
     final isolates = IsolateManager.createShared(
       concurrent: 3,
       useWorker: true,
-      subPath: 'workers',
+      // subPath: 'workers',
+      isDebug: true,
     );
 
     isolates.stream.listen((result) {
@@ -26,32 +27,40 @@ void main() async {
       }
     });
 
-    for (double i = 0; i < 10; i++) {
-      isolates
-          .compute(addFuture, [i, i], workerFunction: 'addFuture')
-          .then((value) async {
-        expect(value, equals(await addFuture([i, i])));
-      });
-    }
-
-    for (int i = 0; i < 10; i++) {
-      isolates(add, [i, i], workerFunction: 'add').then((value) {
-        expect(value, equals(add([i, i])));
-      });
-    }
-
-    for (int i = 0; i < 10; i++) {
-      isolates
-          .compute(concat, ['$i', '$i'], workerFunction: 'concat')
-          .then((value) {
-        expect(value, equals(concat(['$i', '$i'])));
-      });
-    }
+    await Future.wait([
+      for (var i = 0; i < 10; i++)
+        isolates
+            .compute(
+          addFuture,
+          <double>[i.toDouble(), i.toDouble()],
+          workerFunction: 'addFuture',
+        )
+            .then(
+          (double value) async {
+            expect(
+              value,
+              equals(await addFuture(<double>[i.toDouble(), i.toDouble()])),
+            );
+          },
+        ),
+      for (var i = 0; i < 10; i++)
+        isolates(add, <int>[i, i], workerFunction: 'add').then(
+          (int value) {
+            expect(value, equals(add(<int>[i, i])));
+          },
+        ),
+      for (var i = 0; i < 10; i++)
+        isolates
+            .compute(concat, <String>['$i', '$i'], workerFunction: 'concat')
+            .then(
+          (String value) {
+            expect(value, equals(concat(<String>['$i', '$i'])));
+          },
+        ),
+    ]);
 
     // Stop the usolate after 5 seconds
-    Timer(Duration(seconds: 5), () {
-      isolates.stop();
-    });
+    await isolates.stop();
   });
 
   test('Test with worker mappings', () async {
@@ -60,7 +69,7 @@ void main() async {
       concurrent: 3,
       useWorker: true,
       subPath: 'workers',
-      workerMappings: {
+      workerMappings: <Function, String>{
         addFuture: 'addFuture',
         add: 'add',
         concat: 'concat',
@@ -78,60 +87,46 @@ void main() async {
       }
     });
 
-    for (double i = 0; i < 10; i++) {
-      isolates.compute(addFuture, [i, i]).then((value) async {
-        expect(value, equals(await addFuture([i, i])));
-      });
-    }
-
-    for (int i = 0; i < 10; i++) {
-      isolates(add, [i, i]).then((value) {
-        expect(value, equals(add([i, i])));
-      });
-    }
-
-    for (int i = 0; i < 10; i++) {
-      isolates.compute(concat, ['$i', '$i']).then((value) {
-        expect(value, equals(concat(['$i', '$i'])));
-      });
-    }
-
-    isolates.compute(aDynamicMap, {'k': 1, 't': '2'}).then((value) {
-      expect(value, equals({'k': 1, 't': '2'}));
-    });
+    await Future.wait([
+      for (var i = 0; i < 10; i++)
+        isolates.compute(addFuture, <double>[i.toDouble(), i.toDouble()]).then(
+          (double value) async {
+            expect(
+              value,
+              equals(await addFuture(<double>[i.toDouble(), i.toDouble()])),
+            );
+          },
+        ),
+      for (var i = 0; i < 10; i++)
+        isolates(add, <int>[i, i]).then(
+          (int value) {
+            expect(value, equals(add(<int>[i, i])));
+          },
+        ),
+      for (var i = 0; i < 10; i++)
+        isolates.compute(concat, <String>['$i', '$i']).then((String value) {
+          expect(value, equals(concat(<String>['$i', '$i'])));
+        }),
+      isolates.compute(aDynamicMap, <String, Object>{'k': 1, 't': '2'}).then(
+          (Map<dynamic, dynamic> value) {
+        expect(value, equals(<String, Object>{'k': 1, 't': '2'}));
+      }),
+    ]);
 
     // Stop the usolate after 5 seconds
-    await Future.delayed(Duration(seconds: 3));
     await isolates.stop();
   });
 
   test('test try-catch', () async {
     // Create 3 isolates to solve the problems
-    final isolates =
-        IsolateManager.createShared(concurrent: 3, useWorker: true);
+    final isolates = IsolateManager.createShared();
 
-    // Catch the error from the stream
-    isolates.stream.listen((result) {
-      // print('Stream get add: $result');
-    }).onError((e) {
-      // print('Error from stream: $e');
-      expect(e.toString(), equals(ArgumentError().toString()));
-    });
-
-    // Catch the error from the try-catch block
-    try {
-      await isolates.compute(
-        addException,
-        [1, 1],
-        workerFunction: 'addException',
-      );
-    } catch (e) {
-      // print('Error from try-catch: $e');
-      expect(e.toString(), equals(ArgumentError().toString()));
-    }
+    await expectLater(
+      () async => isolates.compute(addException, <int>[1, 1]),
+      throwsException,
+    );
 
     // Stop the usolate after 5 seconds
-    await Future.delayed(Duration(seconds: 3));
     await isolates.stop();
   });
 
@@ -139,14 +134,18 @@ void main() async {
   test('Ensure started', () async {
     // The first `compute` will ensure started automatically
     final isolates1 = IsolateManager.createShared(
-      concurrent: 1,
       useWorker: true,
       subPath: 'workers',
+      isDebug: true,
     );
 
     final stopWatch = Stopwatch()..start();
     expect(isolates1.isStarted, equals(false));
-    await isolates1.compute(addFuture, [2.0, 3.0], workerFunction: 'addFuture');
+    await isolates1.compute(
+      addFuture,
+      <double>[2, 3],
+      workerFunction: 'addFuture',
+    );
     final stopWithoutEnsured = stopWatch.elapsedMicroseconds;
 
     // reset stopwatch
@@ -155,13 +154,16 @@ void main() async {
       ..reset();
 
     // Calling the `compute` method after waiting for `ensureStarted`.
-    final isolates2 =
-        IsolateManager.createShared(concurrent: 1, useWorker: true);
+    final isolates2 = IsolateManager.createShared(useWorker: true);
     await isolates2.ensureStarted;
     expect(isolates1.isStarted, equals(true));
 
     stopWatch.start();
-    await isolates2.compute(addFuture, [2.0, 3.0], workerFunction: 'addFuture');
+    await isolates2.compute(
+      addFuture,
+      <double>[2, 3],
+      workerFunction: 'addFuture',
+    );
     final stopWithEnsured = stopWatch.elapsedMicroseconds;
     stopWatch.stop();
 
@@ -179,7 +181,7 @@ void main() async {
     final result = await isolates.compute(
       complexReturn,
       <List<String>>[
-        <String>['abc']
+        <String>['abc'],
       ],
       workerFunction: 'complexReturn',
     );
@@ -188,17 +190,18 @@ void main() async {
 
     expect(result, isA<List<List<String>>>());
     expect(
-        result,
-        equals(<List<String>>[
-          <String>['abc']
-        ]));
+      result,
+      equals(<List<String>>[
+        <String>['abc'],
+      ]),
+    );
 
-    isolates.stop();
+    await isolates.stop();
   });
 
   test('Test `workerFunction`', () {
     try {
-      IsolateManagerFunction.sharedWorkerFunction({});
+      IsolateManagerFunction.sharedWorkerFunction(<String, Function>{});
     } catch (e) {
       expect(e, isA<UnimplementedError>());
     }
@@ -217,7 +220,7 @@ int add(List<int> values) {
 
 @isolateManagerSharedWorker
 int addException(dynamic values) {
-  return throw ArgumentError();
+  return throw Exception('Has Exception');
 }
 
 @isolateManagerSharedWorker
@@ -231,6 +234,6 @@ List<List<String>> complexReturn(List<List<String>> params) {
 }
 
 @isolateManagerSharedWorker
-Map aDynamicMap(Map params) {
+Map<dynamic, dynamic> aDynamicMap(Map<dynamic, dynamic> params) {
   return params;
 }
