@@ -23,7 +23,7 @@ class IsolateContactorControllerImplWorker<R, P>
             : params as Worker,
         _initialParams = params is List ? params.first : null {
     _delegate.onmessage = (MessageEvent event) {
-      final data = dartify(event.data) as Map;
+      final data = dartify(event.data)! as Map;
 
       if (data['type'] == 'data') {
         _mainStreamController.add(_workerConverter(data['value']));
