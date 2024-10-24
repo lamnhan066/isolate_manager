@@ -45,7 +45,7 @@ void main() async {
         })
     ]);
 
-    // Stop the usolate after 5 seconds
+    // Stop the isolates
     await isolates.stop();
   });
 
@@ -91,7 +91,7 @@ void main() async {
       }),
     ]);
 
-    // Stop the usolate after 5 seconds
+    // Stop the isolates
     await isolates.stop();
   });
 
@@ -103,7 +103,7 @@ void main() async {
     // Catch the error from the stream
     isolates.stream.listen((result) {
       // print('Stream get add: $result');
-    }).onError((e) {
+    }).onError((Object e) {
       // print('Error from stream: $e');
       expect(e.toString(), equals(ArgumentError().toString()));
     });
@@ -120,8 +120,8 @@ void main() async {
       expect(e.toString(), equals(ArgumentError().toString()));
     }
 
-    // Stop the usolate after 5 seconds
-    await Future.delayed(Duration(seconds: 3));
+    // Stop the isolate after 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
     await isolates.stop();
   });
 
