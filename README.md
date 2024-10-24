@@ -81,7 +81,7 @@ int add(List<int> values) {
 - In this instruction, the built-in generator will be used to compile the annotated function into Javascript Worker automatically.
 - **Required Note:** If you want to build functions into Javascript Worker:
   - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
-  - The input parameters and the return type of these functions should be a `JSON` (or Dart primitive types) to make the `Worker` work properly.
+  - The Worker's input parameters and the return type can be a Dart primitive types (like `int`, `double`, `String` and `bool`), a `Map<dynamic, dynamic>` or a `List<dynamic>`.
 
 ## **IsolateManagerShared Method**
 
@@ -304,6 +304,7 @@ class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
 
   @override
   bool continueIfMaxCountExceeded() {
+
     // It means the current computation should be added to the Queue
     // without doing anything with the `queues`.
     return true; 
@@ -318,6 +319,7 @@ class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   bool continueIfMaxCountExceeded() {
     // Remove the last computation if the Queue (mean the newest one).
     queues.removeLast();
+
     // It means the current computation should be added to the Queue.
     return true; 
   }
@@ -331,6 +333,7 @@ class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   bool continueIfMaxCountExceeded() {
     // Remove the first computation if the Queue (mean the oldest one).
     queues.removeFirst();
+
     // It means the current computation should be added to the Queue.
     return true;
   }
@@ -342,6 +345,7 @@ class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
 
   @override
   bool continueIfMaxCountExceeded() {
+
     // It means the current computation should NOT be added to the Queue.
     return false;
   }
@@ -413,54 +417,50 @@ void progressFunction(dynamic params) {
 
 ## Complicated List, Map Functions
 
-- The result that you get from the isolate (or Worker) is sometimes different from the result that you want to get from the return type in the main app, you can use `converter` and `workerConverter` parameters to convert the result received from the `Isolate` (converter) and `Worker` (workerConverter). Example:
+1. `List<dynamic>`
 
-  1. `List`
+    ```dart
+    main() async {
+      final isolate = IsolateManager.create(
+        aList,
+        workerName: 'aList',
+        isDebug: true,
+      );
 
-      ```dart
-      main() async {
-        final isolate = IsolateManager.create(
-          aList,
-          workerName: 'aList',
-          isDebug: true,
-        );
+      final list = ['a', 'b', 'c'];
+      final result = await isolate.compute(list);
+      expect(result, equals(list));
+    }
 
-        final list = ['a', 'b', 'c'];
-        final result = await isolate.compute(list);
-        expect(result, equals(list));
-      }
+    @isolateManagerSharedWorker
+    @isolateManagerWorker
+    List aList(List params) {
+      return params;
+    }
+    ```
 
-      @isolateManagerSharedWorker
-      @isolateManagerWorker
-      List aList(List params) {
-        return params;
-      }
-      ```
+2. `Map<dynamic, dynamic>`
 
-  2. `Map`
+    ``` dart
+    main() async {
+      final isolate = IsolateManager.create(
+        aMap,
+        workerName: 'aMap',
+        isDebug: true,
+      );
+      await isolate.start();
 
-      ``` dart
-      main() async {
-        final isolate = IsolateManager.create(
-          aMap,
-          workerName: 'aMap',
-          isDebug: true,
-        );
-        await isolate.start();
+      final map = {'a': '1', 'b': 2, 'c': 3};
+      final result = await isolate.compute(map);
+      expect(result, equals(map));
+    }
 
-        final map = {'a': '1', 'b': 2, 'c': 3};
-        final result = await isolate.compute(map);
-        expect(result, equals(map));
-      }
-
-      @isolateManagerSharedWorker
-      @isolateManagerWorker
-      Map aMap(Map params) {
-        return params;
-      }
-      ```
-
-  **Data flow:** Main -> Isolate or Worker -> **Converter** -> Result
+    @isolateManagerSharedWorker
+    @isolateManagerWorker
+    Map aMap(Map params) {
+      return params;
+    }
+    ```
 
 ## The Generator Options And Flags
 
@@ -473,7 +473,7 @@ void progressFunction(dynamic params) {
 - If you want to add options or flags to the Dart to Js Compiler, you can add a `--` flag before adding those options and flags. Please note that all the arguments after the `--` flag will be passed directly into the Dart to Js Compiler. For instance:
 
   ```shell
-  dart run isolate_manager:generate --single -i test -out test -- -Dkey1=value1 -Dkey2=value2
+  dart run isolate_manager:generate -i test -out test -- -Dkey1=value1 -Dkey2=value2
   ```
 
 ## Additional Information
@@ -481,6 +481,7 @@ void progressFunction(dynamic params) {
 - Use `queuesLength` to get the current number of queued computation.
 - Use `ensureStarted` to able to wait for the `start` method to finish when you want to call the `start` method manually without `await` and wait for it later.
 - Use `isStarted` to check if the `start` method is completed or not.
+- The flow of data when using `converter` or `workerConverter`: Main -> Isolate or Worker -> Main -> **Converter** -> Final Result.
 - All above examples use `top-level` functions so the `workerName` will be the same as the function name. If you use `static` functions, you have to add the class name like `ClassName.functionName` to the `workerName` parameter. For instance:
 
   ```dart
