@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 //  dart test --platform=chrome,vm
 
 void main() async {
-  test('test', () {
+  test('test', () async {
     // Create 3 isolates to solve the problems
     final isolates = IsolateManager.createShared(
       concurrent: 3,
@@ -26,30 +26,27 @@ void main() async {
       }
     });
 
-    for (double i = 0; i < 10; i++) {
-      isolates
-          .compute(addFuture, [i, i], workerFunction: 'addFuture')
-          .then((value) async {
-        expect(value, equals(await addFuture([i, i])));
-      });
-    }
+    await Future.wait([
+      for (double i = 0; i < 10; i++)
+        isolates
+            .compute(addFuture, [i, i], workerFunction: 'addFuture')
+            .then((value) async {
+          expect(value, equals(await addFuture([i, i])));
+        }),
+      for (int i = 0; i < 10; i++)
+        isolates(add, [i, i], workerFunction: 'add').then((value) {
+          expect(value, equals(add([i, i])));
+        }),
+      for (int i = 0; i < 10; i++)
+        isolates
+            .compute(concat, ['$i', '$i'], workerFunction: 'concat')
+            .then((value) {
+          expect(value, equals(concat(['$i', '$i'])));
+        })
+    ]);
 
-    for (int i = 0; i < 10; i++) {
-      isolates(add, [i, i], workerFunction: 'add').then((value) {
-        expect(value, equals(add([i, i])));
-      });
-    }
-
-    for (int i = 0; i < 10; i++) {
-      isolates
-          .compute(concat, ['$i', '$i'], workerFunction: 'concat')
-          .then((value) {
-        expect(value, equals(concat(['$i', '$i'])));
-      });
-    }
-
-    // Stop the usolate after 5 seconds
-    Timer(const Duration(seconds: 5), isolates.stop);
+    // Stop the isolates
+    await isolates.stop();
   });
 
   test('Test with worker mappings', () async {
@@ -76,30 +73,25 @@ void main() async {
       }
     });
 
-    for (double i = 0; i < 10; i++) {
-      isolates.compute(addFuture, [i, i]).then((value) async {
-        expect(value, equals(await addFuture([i, i])));
-      });
-    }
+    await Future.wait([
+      for (double i = 0; i < 10; i++)
+        isolates.compute(addFuture, [i, i]).then((value) async {
+          expect(value, equals(await addFuture([i, i])));
+        }),
+      for (int i = 0; i < 10; i++)
+        isolates(add, [i, i]).then((value) {
+          expect(value, equals(add([i, i])));
+        }),
+      for (int i = 0; i < 10; i++)
+        isolates.compute(concat, ['$i', '$i']).then((value) {
+          expect(value, equals(concat(['$i', '$i'])));
+        }),
+      isolates.compute(aDynamicMap, {'k': 1, 't': '2'}).then((value) {
+        expect(value, equals({'k': 1, 't': '2'}));
+      }),
+    ]);
 
-    for (int i = 0; i < 10; i++) {
-      isolates(add, [i, i]).then((value) {
-        expect(value, equals(add([i, i])));
-      });
-    }
-
-    for (int i = 0; i < 10; i++) {
-      isolates.compute(concat, ['$i', '$i']).then((value) {
-        expect(value, equals(concat(['$i', '$i'])));
-      });
-    }
-
-    isolates.compute(aDynamicMap, {'k': 1, 't': '2'}).then((value) {
-      expect(value, equals({'k': 1, 't': '2'}));
-    });
-
-    // Stop the isolate after 3 seconds
-    await Future.delayed(const Duration(seconds: 3));
+    // Stop the isolates
     await isolates.stop();
   });
 

@@ -16,8 +16,10 @@ enum IsolateState {
 
   /// Check if the [object] is a valid enum.
   bool isValidJson(Object? object) {
+    if (object is! String) return false;
+
     try {
-      final decoded = jsonDecode(object.toString()) as Map;
+      final decoded = jsonDecode(object) as Map;
       return decoded['type'] == r'$IsolateState' && decoded['value'] == name;
     } catch (_) {}
     return false;

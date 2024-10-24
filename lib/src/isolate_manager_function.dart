@@ -27,7 +27,7 @@ typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 /// The helper functions for the [IsolateManager].
 class IsolateManagerFunction {
   /// No-op
-  IsolateManagerFunction._(); // coverage:ignore-line
+  IsolateManagerFunction._();
 
   /// Create a custom isolate function.
   ///
@@ -115,7 +115,6 @@ class IsolateManagerFunction {
     controller.initialized();
   }
 
-  // coverage:ignore-start
   // Tested by compiling to `js` for the Web Worker.
   //
   /// Create a worker in your `main`.
@@ -213,5 +212,4 @@ class IsolateManagerFunction {
   static void sharedWorkerFunction(Map<String, Function> map) {
     return sharedWorkerFunctionImpl(map);
   }
-  // coverage:ignore-end
 }
