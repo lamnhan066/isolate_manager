@@ -37,7 +37,7 @@ jobs:
         run: dart test --platform=chrome --coverage=coverage
 
       - name: Format coverage
-        run: dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib
+        run: dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
 
       - name: Covert to relative paths
         run: sed -i 's|SF:.*/lib|SF:lib|' coverage/lcov.info
