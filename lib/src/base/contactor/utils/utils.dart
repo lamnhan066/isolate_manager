@@ -43,7 +43,9 @@ JSAny? jsify(Object? dartObject) {
   }
 
   if (dartObject is Map) {
-    return dartObject.map((key, value) => MapEntry(key, jsify(value))).jsify();
+    return dartObject
+        .map((key, value) => MapEntry(jsify(key), jsify(value)))
+        .jsify();
   }
 
   if (dartObject is JSAny Function()) {
