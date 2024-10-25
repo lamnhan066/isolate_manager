@@ -109,7 +109,10 @@ class IsolateManager<R, P> {
   /// Add the mapping between a function and a Worker to the [_workerMappings].
   ///
   /// This method is used by the generator.
-  static void addWorkerMapping(Function function, String name) {
+  static void addWorkerMapping<R, P>(
+    IsolateFunction<R, P> function,
+    String name,
+  ) {
     _workerMappings.addAll({function: name});
   }
 
