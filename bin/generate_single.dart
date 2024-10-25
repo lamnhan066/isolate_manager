@@ -29,6 +29,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   };
   final isDebug = argResults['debug'] as bool? ?? false;
   final isWasm = argResults['wasm'] as bool? ?? false;
+  final isWorkerMappings = argResults['worker-mappings-experiment'] as String;
 
   printDebug(
     () => 'Parsing the `IsolateManagerWorker` inside directory: $input...',
@@ -56,7 +57,15 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
       );
       if (content.contains(pattern)) {
         params.add(
-          <dynamic>[filePath, obfuscate, isDebug, isWasm, output, dartArgs],
+          <dynamic>[
+            filePath,
+            obfuscate,
+            isDebug,
+            isWasm,
+            output,
+            dartArgs,
+            isWorkerMappings,
+          ],
         );
       }
     }
@@ -85,6 +94,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
   final isWasm = params[3] as bool;
   final output = params[4] as String;
   final dartArgs = params[5] as List<String>;
+  final isWorkerMappings = params[6] as String;
 
   final anotatedFunctions = await _getAnotatedFunctions(filePath);
 
@@ -97,6 +107,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
       isWasm,
       output,
       dartArgs,
+      isWorkerMappings,
     );
   }
 
@@ -153,6 +164,7 @@ Future<void> _generateFromAnotatedFunctions(
   bool isWasm,
   String output,
   List<String> dartArgs,
+  String isWorkerMappings,
 ) async {
   await Future.wait(
     <Future<void>>[
@@ -166,6 +178,7 @@ Future<void> _generateFromAnotatedFunctions(
           isWasm,
           output,
           dartArgs,
+          isWorkerMappings,
         ),
     ],
   );
@@ -179,6 +192,7 @@ Future<void> _generateFromAnotatedFunction(
   bool isWasm,
   String output,
   List<String> dartArgs,
+  String workerMappingsPath,
 ) async {
   var inputPath = p.join(
     p.dirname(sourceFilePath),
@@ -259,6 +273,17 @@ Future<void> _generateFromAnotatedFunction(
     for (final element in r) {
       printDebug(() => '   > $element');
     }
+  }
+
+  if (workerMappingsPath.isNotEmpty) {
+    printDebug(() => 'Generate the `workerMappings`...');
+    await addWorkerMappingToSourceFile(
+      workerMappingsPath,
+      sourceFilePath,
+      function.key,
+    );
+
+    printDebug(() => 'Done.');
   }
 
   if (!isDebug) {

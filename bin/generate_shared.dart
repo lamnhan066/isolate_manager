@@ -28,6 +28,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   final isDebug = argResults['debug'] as bool? ?? false;
   final isWasm = argResults['wasm'] as bool? ?? false;
   final name = argResults['name'] as String;
+  final isWorkerMappings = argResults['worker-mappings-experiment'] as String;
 
   printDebug(
     () => 'Parsing the `IsolateManagerWorker` inside directory: $input...',
@@ -82,6 +83,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
       output,
       name,
       dartArgs,
+      isWorkerMappings,
     );
   }
 
@@ -147,6 +149,7 @@ Future<void> _generateFromAnotatedFunctions(
   String output,
   String name,
   List<String> dartArgs,
+  String workerMappingsPath,
 ) async {
   final file = File('.IsolateManagerShared.${anotatedFunctions.hashCode}.dart');
   final sink = file.openWrite()
@@ -212,6 +215,18 @@ Future<void> _generateFromAnotatedFunctions(
     for (final element in r) {
       printDebug(() => '   > $element');
     }
+  }
+
+  if (workerMappingsPath.isNotEmpty) {
+    printDebug(() => 'Generate the `workerMappings`...');
+    for (final function in anotatedFunctions.entries) {
+      await addWorkerMappingToSourceFile(
+        workerMappingsPath,
+        p.absolute(function.value),
+        function.key,
+      );
+    }
+    printDebug(() => 'Done.');
   }
 
   if (!isDebug) {

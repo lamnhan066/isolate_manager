@@ -19,7 +19,7 @@ class IsolateManager<R, P> {
   /// An easy way to create a new isolate.
   IsolateManager.create(
     IsolateFunction<R, P> this.isolateFunction, {
-    this.workerName = '',
+    String? workerName,
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
@@ -27,7 +27,8 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   })  : isCustomIsolate = false,
         initialParams = '',
-        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
+        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -35,7 +36,7 @@ class IsolateManager<R, P> {
   /// Create a new isolate with your own isolate function.
   IsolateManager.createCustom(
     IsolateCustomFunction this.isolateFunction, {
-    this.workerName = '',
+    String? workerName,
     this.initialParams,
     this.concurrent = 1,
     this.converter,
@@ -43,7 +44,8 @@ class IsolateManager<R, P> {
     QueueStrategy<R, P>? queueStrategy,
     this.isDebug = false,
   })  : isCustomIsolate = true,
-        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
+        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -80,7 +82,7 @@ class IsolateManager<R, P> {
     int concurrent = 1,
     bool useWorker = false,
     Object Function(dynamic)? workerConverter,
-    Map<Function, String> workerMappings = const <Function, String>{},
+    Map<Function, String>? workerMappings,
     bool autoStart = true,
     String subPath = '',
     int maxQueueCount = 0,
@@ -91,7 +93,7 @@ class IsolateManager<R, P> {
         concurrent: concurrent,
         useWorker: useWorker,
         workerConverter: workerConverter,
-        workerMappings: workerMappings,
+        workerMappings: workerMappings ?? _workerMappings,
         autoStart: autoStart,
         subPath: subPath,
         queueStrategy: queueStrategy,
@@ -100,6 +102,16 @@ class IsolateManager<R, P> {
 
   /// Debug logs prefix.
   static String debugLogPrefix = 'Isolate Manager';
+
+  /// Store the global mappings between functions and Workers.
+  static final _workerMappings = <Function, String>{};
+
+  /// Add the mapping between a function and a Worker to the [_workerMappings].
+  ///
+  /// This method is used by the generator.
+  static void addWorkerMapping(Function function, String name) {
+    _workerMappings.addAll({function: name});
+  }
 
   /// Number of concurrent isolates.
   final int concurrent;
