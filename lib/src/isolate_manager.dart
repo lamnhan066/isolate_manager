@@ -16,8 +16,102 @@ typedef IsolateCustomFunction = IsolateFunction<void, dynamic>;
 /// Create a new [IsolateManager] instance by using [IsolateManager.create] or
 /// [IsolateManager.createCustom].
 class IsolateManager<R, P> {
+  /// An easy way to create a new isolate.
+  IsolateManager.create(
+    IsolateFunction<R, P> this.isolateFunction, {
+    String? workerName,
+    this.concurrent = 1,
+    this.converter,
+    this.workerConverter,
+    QueueStrategy<R, P>? queueStrategy,
+    this.isDebug = false,
+  })  : isCustomIsolate = false,
+        initialParams = '',
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
+        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
+    // Set the debug log prefix.
+    IsolateContactor.debugLogPrefix = debugLogPrefix;
+  }
+
+  /// Create a new isolate with your own isolate function.
+  IsolateManager.createCustom(
+    IsolateCustomFunction this.isolateFunction, {
+    String? workerName,
+    this.initialParams,
+    this.concurrent = 1,
+    this.converter,
+    this.workerConverter,
+    QueueStrategy<R, P>? queueStrategy,
+    this.isDebug = false,
+  })  : isCustomIsolate = true,
+        queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
+        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
+    // Set the debug log prefix.
+    IsolateContactor.debugLogPrefix = debugLogPrefix;
+  }
+
+  /// Create multiple long live isolates for computation. This method can be used
+  /// to compute multiple functions.
+  ///
+  /// [concurrent] is a number of isolates that you want to create.
+  ///
+  /// Set [useWorker] to `true` if you want to use the Worker on the Web.
+  ///
+  /// [workerConverter] is a converter for the worker, the data from the worker
+  /// will be directly sent to this method to convert to the result format that
+  /// you want to.
+  ///
+  /// Predefine the mapping between a function and a name of worker function
+  /// using the [workerMappings], so we can ignore the `workerName` parameter
+  /// when we compute a function multiple times.
+  ///
+  /// Set [autoStart] to `false` if you want to call the `start()` method manually.
+  ///
+  /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
+  /// needs to be set to `workers`.
+  ///
+  /// Control the Queue strategy via [queueStrategy] with the following basic
+  /// strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  ///
+  /// Set [isDebug] to `true` if you want to print the debug log.
+  static IsolateManagerShared createShared({
+    int concurrent = 1,
+    bool useWorker = false,
+    Object Function(dynamic)? workerConverter,
+    Map<Function, String>? workerMappings,
+    bool autoStart = true,
+    String subPath = '',
+    int maxQueueCount = 0,
+    QueueStrategy<Object, List<Object>>? queueStrategy,
+    bool isDebug = false,
+  }) =>
+      IsolateManagerShared(
+        concurrent: concurrent,
+        useWorker: useWorker,
+        workerConverter: workerConverter,
+        workerMappings: workerMappings ?? _workerMappings,
+        autoStart: autoStart,
+        subPath: subPath,
+        queueStrategy: queueStrategy,
+        isDebug: isDebug,
+      );
+
   /// Debug logs prefix.
   static String debugLogPrefix = 'Isolate Manager';
+
+  /// Store the global mappings between functions and Workers.
+  static final _workerMappings = <Function, String>{};
+
+  /// Add the mapping between a function and a Worker to the [_workerMappings].
+  ///
+  /// This method is used by the generator.
+  static void addWorkerMapping(Function function, String name) {
+    _workerMappings.addAll({function: name});
+  }
 
   /// Number of concurrent isolates.
   final int concurrent;
@@ -73,88 +167,6 @@ class IsolateManager<R, P> {
 
   /// To check if the [start] method is completed or not.
   bool get isStarted => _startedCompleter.isCompleted;
-
-  /// An easy way to create a new isolate.
-  IsolateManager.create(
-    IsolateFunction<R, P> this.isolateFunction, {
-    this.workerName = '',
-    this.concurrent = 1,
-    this.converter,
-    this.workerConverter,
-    QueueStrategy<R, P>? queueStrategy,
-    this.isDebug = false,
-  })  : isCustomIsolate = false,
-        initialParams = '',
-        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
-    // Set the debug log prefix.
-    IsolateContactor.debugLogPrefix = debugLogPrefix;
-  }
-
-  /// Create a new isolate with your own isolate function.
-  IsolateManager.createCustom(
-    IsolateCustomFunction this.isolateFunction, {
-    this.workerName = '',
-    this.initialParams,
-    this.concurrent = 1,
-    this.converter,
-    this.workerConverter,
-    QueueStrategy<R, P>? queueStrategy,
-    this.isDebug = false,
-  })  : isCustomIsolate = true,
-        queueStrategy = queueStrategy ?? QueueStrategyUnlimited() {
-    // Set the debug log prefix.
-    IsolateContactor.debugLogPrefix = debugLogPrefix;
-  }
-
-  /// Create multiple long live isolates for computation. This method can be used
-  /// to compute multiple functions.
-  ///
-  /// [concurrent] is a number of isolates that you want to create.
-  ///
-  /// Set [useWorker] to `true` if you want to use the Worker on the Web.
-  ///
-  /// [workerConverter] is a converter for the worker, the data from the worker
-  /// will be directly sent to this method to convert to the result format that
-  /// you want to.
-  ///
-  /// Predefine the mapping between a function and a name of worker function
-  /// using the [workerMappings], so we can ignore the `workerName` parameter
-  /// when we compute a function multiple times.
-  ///
-  /// Set [autoStart] to `false` if you want to call the `start()` method manually.
-  ///
-  /// If the generated Worker is put inside a folder (such as `workers`), the [subPath]
-  /// needs to be set to `workers`.
-  ///
-  /// Control the Queue strategy via [queueStrategy] with the following basic
-  /// strategies:
-  ///   - [QueueStrategyUnlimited] - default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
-  ///
-  /// Set [isDebug] to `true` if you want to print the debug log.
-  static IsolateManagerShared createShared({
-    int concurrent = 1,
-    bool useWorker = false,
-    Object Function(dynamic)? workerConverter,
-    Map<Function, String> workerMappings = const {},
-    bool autoStart = true,
-    String subPath = '',
-    int maxQueueCount = 0,
-    QueueStrategy<Object, List<Object>>? queueStrategy,
-    bool isDebug = false,
-  }) =>
-      IsolateManagerShared(
-        concurrent: concurrent,
-        useWorker: useWorker,
-        workerConverter: workerConverter,
-        workerMappings: workerMappings,
-        autoStart: autoStart,
-        subPath: subPath,
-        queueStrategy: queueStrategy,
-        isDebug: isDebug,
-      );
 
   /// Map<IsolateContactor instance, isBusy>.
   final Map<IsolateContactor<R, P>, bool> _isolates = {};
