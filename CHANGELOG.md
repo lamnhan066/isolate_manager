@@ -1,4 +1,4 @@
-## 5.5.3
+## 5.6.0
 
 * Correctly parse the dart native arguments (Fixes #36).
 * [Experiment] Automatically generate the `workerMappings` by adding the `--worker-mappings-experiment=lib/main.dart` flag to the generator.
