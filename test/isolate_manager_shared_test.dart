@@ -3,11 +3,15 @@ import 'dart:async';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
-//  dart run isolate_manager:generate -i test -o test
-//  dart test
-//  dart test --platform=chrome,vm
+/*
+  dart run isolate_manager:generate -i test -o test --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
+  dart run isolate_manager:generate -i test -o test/workers --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
+  dart test --platform=vm
+  dart test --platform=chrome
+*/
 
 void main() async {
+  _addWorkerMappings();
   test('test', () async {
     // Create 3 isolates to solve the problems
     final isolates = IsolateManager.createShared(
@@ -28,19 +32,15 @@ void main() async {
 
     await Future.wait([
       for (double i = 0; i < 10; i++)
-        isolates
-            .compute(addFuture, [i, i], workerFunction: 'addFuture')
-            .then((value) async {
+        isolates.compute(addFuture, [i, i]).then((value) async {
           expect(value, equals(await addFuture([i, i])));
         }),
       for (int i = 0; i < 10; i++)
-        isolates(add, [i, i], workerFunction: 'add').then((value) {
+        isolates(add, [i, i]).then((value) {
           expect(value, equals(add([i, i])));
         }),
       for (int i = 0; i < 10; i++)
-        isolates
-            .compute(concat, ['$i', '$i'], workerFunction: 'concat')
-            .then((value) {
+        isolates.compute(concat, ['$i', '$i']).then((value) {
           expect(value, equals(concat(['$i', '$i'])));
         })
     ]);
@@ -55,12 +55,6 @@ void main() async {
       concurrent: 3,
       useWorker: true,
       subPath: 'workers',
-      workerMappings: {
-        addFuture: 'addFuture',
-        add: 'add',
-        concat: 'concat',
-        aDynamicMap: 'aDynamicMap',
-      },
     );
 
     isolates.stream.listen((result) {
@@ -113,7 +107,6 @@ void main() async {
       await isolates.compute(
         addException,
         [1, 1],
-        workerFunction: 'addException',
       );
     } catch (e) {
       // print('Error from try-catch: $e');
@@ -136,7 +129,7 @@ void main() async {
 
     final stopWatch = Stopwatch()..start();
     expect(isolates1.isStarted, equals(false));
-    await isolates1.compute(addFuture, [2.0, 3.0], workerFunction: 'addFuture');
+    await isolates1.compute(addFuture, [2.0, 3.0]);
     final stopWithoutEnsured = stopWatch.elapsedMicroseconds;
 
     // reset stopwatch
@@ -151,7 +144,7 @@ void main() async {
     expect(isolates1.isStarted, equals(true));
 
     stopWatch.start();
-    await isolates2.compute(addFuture, [2.0, 3.0], workerFunction: 'addFuture');
+    await isolates2.compute(addFuture, [2.0, 3.0]);
     final stopWithEnsured = stopWatch.elapsedMicroseconds;
     stopWatch.stop();
 
@@ -171,7 +164,6 @@ void main() async {
       <List<String>>[
         <String>['abc']
       ],
-      workerFunction: 'complexReturn',
     );
 
     await isolates.restart();
@@ -223,4 +215,13 @@ List<List<String>> complexReturn(List<List<String>> params) {
 @isolateManagerSharedWorker
 Map aDynamicMap(Map params) {
   return params;
+}
+
+void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
+  IsolateManager.addWorkerMapping(add, 'add');
+  IsolateManager.addWorkerMapping(addException, 'addException');
+  IsolateManager.addWorkerMapping(concat, 'concat');
+  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
+  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
 }

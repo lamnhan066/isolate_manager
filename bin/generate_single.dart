@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:isolate_manager/src/isolate_manager.dart';
 import 'package:path/path.dart' as p;
 
+import 'generate.dart';
 import 'model/annotation_result.dart';
 
 const classAnnotation = 'IsolateManagerWorker';
@@ -28,6 +29,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   };
   final isDebug = argResults['debug'] as bool? ?? false;
   final isWasm = argResults['wasm'] as bool? ?? false;
+  final isWorkerMappings = argResults['worker-mappings-experiment'] as String;
 
   print('Parsing the `IsolateManagerWorker` inside directory: $input...');
 
@@ -51,7 +53,17 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
       final pattern = RegExp(
           '(@$classAnnotation|@$constAnnotation|@$constCustomWorkerAnnotation)');
       if (content.contains(pattern)) {
-        params.add([filePath, obfuscate, isDebug, isWasm, output, dartArgs]);
+        params.add(
+          <dynamic>[
+            filePath,
+            obfuscate,
+            isDebug,
+            isWasm,
+            output,
+            dartArgs,
+            isWorkerMappings,
+          ],
+        );
       }
     }
   }
@@ -73,12 +85,13 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
 }
 
 Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
-  String filePath = params[0];
-  String obfuscate = params[1];
-  bool isDebug = params[2];
-  bool isWasm = params[3];
-  String output = params[4];
-  List<String> dartArgs = params[5];
+  final filePath = params[0] as String;
+  final obfuscate = params[1] as String;
+  final isDebug = params[2] as bool;
+  final isWasm = params[3] as bool;
+  final output = params[4] as String;
+  final dartArgs = params[5] as List<String>;
+  final isWorkerMappings = params[6] as String;
 
   final anotatedFunctions = await _getAnotatedFunctions(filePath);
 
@@ -91,6 +104,7 @@ Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
       isWasm,
       output,
       dartArgs,
+      isWorkerMappings,
     );
   }
 
@@ -147,6 +161,7 @@ Future<void> _generateFromAnotatedFunctions(
   bool isWasm,
   String output,
   List<String> dartArgs,
+  String isWorkerMappings,
 ) async {
   await Future.wait(
     [
@@ -159,7 +174,8 @@ Future<void> _generateFromAnotatedFunctions(
           isWasm,
           output,
           dartArgs,
-        )
+          isWorkerMappings,
+        ),
     ],
   );
 }
@@ -172,6 +188,7 @@ Future<void> _generateFromAnotatedFunction(
   bool isWasm,
   String output,
   List<String> dartArgs,
+  String workerMappingsPath,
 ) async {
   String inputPath = p.join(
     p.dirname(sourceFilePath),
@@ -245,6 +262,17 @@ Future<void> _generateFromAnotatedFunction(
     for (var element in r) {
       print('   > $element');
     }
+  }
+
+  if (workerMappingsPath.isNotEmpty) {
+    printDebug(() => 'Generate the `workerMappings`...');
+    await addWorkerMappingToSourceFile(
+      workerMappingsPath,
+      sourceFilePath,
+      function.key,
+    );
+
+    printDebug(() => 'Done.');
   }
 
   if (!isDebug) {
