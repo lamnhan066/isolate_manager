@@ -5,9 +5,12 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:test/test.dart';
 
-//  dart run isolate_manager:generate -i test -o test
-//  dart test
-//  dart test --platform=chrome,vm
+/*
+  dart run isolate_manager:generate -i test -o test --single --worker-mappings-experiment=test/isolate_manager_test.dart
+  dart run isolate_manager:generate -i test -o test/workers --single --worker-mappings-experiment=test/isolate_manager_test.dart
+  dart test --platform=vm
+  dart test --platform=chrome
+*/
 
 void main() {
   _addWorkerMappings();
@@ -780,12 +783,17 @@ void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
   IsolateManager.addWorkerMapping(aStringList, 'aStringList');
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunctionWithSpecifiedType,
-      'isolateCallbackSimpleFunctionWithSpecifiedType');
+    isolateCallbackSimpleFunctionWithSpecifiedType,
+    'isolateCallbackSimpleFunctionWithSpecifiedType',
+  );
   IsolateManager.addWorkerMapping(
-      isolateCallbackFunction, 'isolateCallbackFunction');
+    isolateCallbackFunction,
+    'isolateCallbackFunction',
+  );
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+    isolateCallbackSimpleFunction,
+    'isolateCallbackSimpleFunction',
+  );
   IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
   IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
   IsolateManager.addWorkerMapping(fibonacciFuture, 'fibonacciFuture');
