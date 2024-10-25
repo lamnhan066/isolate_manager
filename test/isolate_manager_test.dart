@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 //  dart test --platform=chrome,vm
 
 void main() {
+  _addWorkerMappings();
   group('Models', () {
     test('IsolateState', () {
       for (final state in IsolateState.values) {
@@ -30,7 +31,6 @@ void main() {
     // Create IsolateContactor
     final isolateManager = IsolateManager<int, int>.create(
       fibonacci,
-      workerName: 'fibonacci',
       concurrent: 4,
       isDebug: true,
     );
@@ -46,7 +46,6 @@ void main() {
     // Create IsolateContactor
     final isolateManager = IsolateManager<int, int>.create(
       fibonacciFuture,
-      workerName: 'fibonacciFuture',
       concurrent: 4,
       isDebug: true,
     );
@@ -62,7 +61,6 @@ void main() {
     // Create IsolateContactor
     final isolateManager = IsolateManager<int, int>.create(
       fibonacci,
-      workerName: 'fibonacci',
       concurrent: 4,
     );
 
@@ -89,7 +87,6 @@ void main() {
     // Create IsolateContactor
     final isolateManager = IsolateManager<int, int>.create(
       fibonacciFuture,
-      workerName: 'fibonacciFuture',
       concurrent: 4,
     );
 
@@ -381,7 +378,6 @@ void main() {
       () async {
     final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackSimpleFunctionWithSpecifiedType,
-      workerName: 'isolateCallbackSimpleFunctionWithSpecifiedType',
     );
     await isolateManager.start();
 
@@ -440,10 +436,7 @@ void main() {
   });
 
   test('Test with returning a List<String>', () async {
-    final isolate = IsolateManager.create(
-      aStringList,
-      workerName: 'workers/aStringList',
-    );
+    final isolate = IsolateManager.create(aStringList);
     await isolate.start();
 
     final listString = <String>['a', 'b', 'c'];
@@ -453,10 +446,7 @@ void main() {
   });
 
   test('Test with returning a real Map', () async {
-    final isolate = IsolateManager.create(
-      aDynamicMap,
-      workerName: 'aDynamicMap',
-    );
+    final isolate = IsolateManager.create(aDynamicMap);
     await isolate.start();
 
     final map = <String, Object>{'a': '1', 'b': 2, 'c': 3};
@@ -466,10 +456,7 @@ void main() {
   });
 
   test('Test a 2D List to 1D List', () async {
-    final isolate = IsolateManager.create(
-      a2DTo1DList,
-      workerName: 'a2DTo1DList',
-    );
+    final isolate = IsolateManager.create(a2DTo1DList);
     await isolate.start();
 
     final list = <List<String>>[
@@ -482,10 +469,7 @@ void main() {
   });
 
   test('Test a 1D List to 2D List', () async {
-    final isolate = IsolateManager.create(
-      a1DTo2DList,
-      workerName: 'a1DTo2DList',
-    );
+    final isolate = IsolateManager.create(a1DTo2DList);
     await isolate.start();
 
     final list = <String>['a', 'b', 'v', 'd', 'e', 'f'];
@@ -788,4 +772,21 @@ Future<int> errorFunctionFuture(List<int> value) async {
     return throw StateError('The exception is threw at value[0] = ${value[0]}');
   }
   return value[0] + value[1];
+}
+
+void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
+  IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
+  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
+  IsolateManager.addWorkerMapping(aStringList, 'aStringList');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackSimpleFunctionWithSpecifiedType,
+      'isolateCallbackSimpleFunctionWithSpecifiedType');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackFunction, 'isolateCallbackFunction');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
+  IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
+  IsolateManager.addWorkerMapping(fibonacciFuture, 'fibonacciFuture');
 }
