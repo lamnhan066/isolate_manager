@@ -11,6 +11,7 @@ import 'package:isolate_manager_example/functions.dart';
 import 'package:isolate_manager_example/models/complex_model.dart';
 
 void main() {
+  _addWorkerMappings();
   runApp(const MyApp());
 }
 
@@ -25,12 +26,6 @@ class _MyAppState extends State<MyApp> {
   final isolates = IsolateManager.createShared(
     concurrent: 3,
     useWorker: true,
-    workerMappings: {
-      countEven: 'countEven',
-      fibonacciRecursiveFuture: 'fibonacciRecursiveFuture',
-      fibonacciFuture: 'fibonacciFuture',
-      fibonacci: 'fibonacci',
-    },
     isDebug: true,
   )..start();
 
@@ -42,7 +37,6 @@ class _MyAppState extends State<MyApp> {
 
   final isolateFunctionName = IsolateManager.create(
     functionName,
-    workerName: 'functionName',
     isDebug: true,
   );
 
@@ -54,13 +48,11 @@ class _MyAppState extends State<MyApp> {
 
   final isolateProgress = IsolateManager<String?, String?>.createCustom(
     isolateProgressFunction,
-    workerName: 'isolateProgressFunction',
     isDebug: true,
   );
 
   final isolateComplexFunction = IsolateManager.create(
     complexFunction,
-    workerName: 'complexFunction',
     isDebug: true,
   );
 
@@ -71,7 +63,6 @@ class _MyAppState extends State<MyApp> {
 
   final isolateTestMap = IsolateManager.create(
     testMap,
-    workerName: 'testMap',
     isDebug: true,
   );
 
@@ -143,6 +134,7 @@ class _MyAppState extends State<MyApp> {
       fibonacciRecursiveParam,
     );
     setState(() {
+      fibonacciRecursiveResult = result;
       fibonacciRecursiveResult = result;
     });
   }
@@ -445,4 +437,17 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+}
+
+void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(functionName, 'functionName');
+  IsolateManager.addWorkerMapping(
+      isolateProgressFunction, 'isolateProgressFunction');
+  IsolateManager.addWorkerMapping(complexFunction, 'complexFunction');
+  IsolateManager.addWorkerMapping(fetchAndDecode, 'fetchAndDecode');
+  IsolateManager.addWorkerMapping(countEven, 'countEven');
+  IsolateManager.addWorkerMapping(
+      fibonacciRecursiveFuture, 'fibonacciRecursiveFuture');
+  IsolateManager.addWorkerMapping(fibonacciFuture, 'fibonacciFuture');
+  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
 }
