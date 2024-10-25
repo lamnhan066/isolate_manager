@@ -27,7 +27,8 @@ jobs:
 
       - name: Compile Workers
         run: |
-          dart run isolate_manager:generate -i test -o test
+          dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_test.dart
+          dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_shared_test.dart
           dart run isolate_manager:generate -i test -o test/workers
 
       - name: Run tests on VM
