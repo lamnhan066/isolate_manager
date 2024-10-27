@@ -113,7 +113,9 @@ class IsolateManager<R, P> {
     IsolateFunction<R, P> function,
     String name,
   ) {
-    _workerMappings.addAll({function: name});
+    if (!_workerMappings.containsKey(function)) {
+      _workerMappings.addAll({function: name});
+    }
   }
 
   /// Number of concurrent isolates.
