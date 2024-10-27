@@ -199,7 +199,7 @@ Future<void> addWorkerMappingToSourceFile(
     // If `addWorkerMappings` already exists, add the new worker mapping if not already present.
     var hasThisMapping = false;
     for (var i = addWorkerMappingsIndex; i < content.length; i++) {
-      if (content[i].contains('$functionName,')) {
+      if (content[i].contains(RegExp('(\'$functionName\'|"$functionName")'))) {
         hasThisMapping = true;
         break;
       }
