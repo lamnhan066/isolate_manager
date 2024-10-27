@@ -1,3 +1,9 @@
+## 5.6.1
+
+* Improve the generator to generate the worker mappings better.
+* Improve the `jsify` to convert the `Map` better.
+* Improve the github workflows to ensure backward compatibility with the compiled Workers.
+
 ## 5.6.0
 
 * Correctly parse the dart native arguments (Fixes #36).
