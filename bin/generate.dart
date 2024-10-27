@@ -127,15 +127,15 @@ Future<void> addWorkerMappingToSourceFile(
 
   const newImportLine =
       "import 'package:isolate_manager/isolate_manager.dart';";
-  final newFunctionSourceImport =
-      "import '${relative(sourceFilePath, from: 'lib')}';";
-
   // Insert the new import line after all existing import statements, if it doesn't exist already.
   if (!content.contains(newImportLine)) {
     content.insert(++lastImportIndex, newImportLine);
   }
 
-  if (!content.contains(newFunctionSourceImport)) {
+  final newFunctionSourceImport =
+      "import '${relative(sourceFilePath, from: 'lib')}';";
+  if (absolute(sourceFilePath) != mainPath &&
+      !content.contains(newFunctionSourceImport)) {
     content.insert(++lastImportIndex, newFunctionSourceImport);
   }
 
@@ -184,28 +184,31 @@ Future<void> addWorkerMappingToSourceFile(
       "  IsolateManager.addWorkerMapping($functionName, '$functionName');";
 
   // Step 4: Add or update the `addWorkerMappings` function at the end of the file.
-  final addWorkerMappingsIndex = content
-      .indexWhere((line) => line.contains('void _addWorkerMappings() {'));
+  final addWorkerMappingsIndex =
+      content.indexWhere((line) => line.contains('void _addWorkerMappings()'));
 
   if (addWorkerMappingsIndex == -1) {
     // If `addWorkerMappings` function does not exist, add it at the end.
     content
       ..add('')
+      ..add('/// This method MUST be stored at the end of the file to avoid')
+      ..add('/// issues when generating.')
       ..add('void _addWorkerMappings() {')
       ..add(newWorkerMappingLine)
-      ..add('}');
+      ..add('}')
+      ..add('');
   } else {
     // If `addWorkerMappings` already exists, add the new worker mapping if not already present.
-    var closingBraceIndex = addWorkerMappingsIndex;
-    while (closingBraceIndex < content.length &&
-        !content[closingBraceIndex].contains('}')) {
-      closingBraceIndex++;
+    bool hasThisMapping = false;
+    for (int i = addWorkerMappingsIndex; i < content.length; i++) {
+      if (content[i].contains('$functionName,')) {
+        hasThisMapping = true;
+        break;
+      }
     }
 
-    if (!content
-        .sublist(addWorkerMappingsIndex, closingBraceIndex)
-        .contains(newWorkerMappingLine)) {
-      content.insert(closingBraceIndex, newWorkerMappingLine);
+    if (!hasThisMapping) {
+      content.insert(addWorkerMappingsIndex + 1, newWorkerMappingLine);
     }
   }
 
