@@ -63,7 +63,7 @@ class _IsolateManagerWorkerController<R, P>
 
   _IsolateManagerWorkerController(this.self) {
     self.onmessage = (MessageEvent event) {
-      _streamController.sink.add(dartify(event.data) as P);
+      _streamController.sink.add(dartify(event.data));
     }.toJS;
   }
 
