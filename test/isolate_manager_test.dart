@@ -5,6 +5,8 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:test/test.dart';
 
+import '../test/isolate_manager_shared_test.dart';
+
 /*
   dart run isolate_manager:generate -i test -o test --single --worker-mappings-experiment=test/isolate_manager_test.dart
   dart run isolate_manager:generate -i test -o test/workers --single --worker-mappings-experiment=test/isolate_manager_test.dart
@@ -726,17 +728,22 @@ Future<int> errorFunctionFuture(List<int> value) async {
 }
 
 void _addWorkerMappings() {
-  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
-  IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
-  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
-  IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
   IsolateManager.addWorkerMapping(
       isolateCallbackSimpleFunctionWithSpecifiedType,
       'isolateCallbackSimpleFunctionWithSpecifiedType');
-  IsolateManager.addWorkerMapping(aStringList, 'aStringList');
-  IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
-  IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
+  IsolateManager.addWorkerMapping(addException, 'addException');
+  IsolateManager.addWorkerMapping(add, 'add');
+  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
+  IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
   IsolateManager.addWorkerMapping(
       isolateCallbackFunction, 'isolateCallbackFunction');
+  IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+  IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
+  IsolateManager.addWorkerMapping(aStringList, 'aStringList');
+  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
+  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
+  IsolateManager.addWorkerMapping(concat, 'concat');
 }

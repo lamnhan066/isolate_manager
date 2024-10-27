@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
+import '../test/isolate_manager_test.dart';
+
 /*
   dart run isolate_manager:generate -i test -o test --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
   dart run isolate_manager:generate -i test -o test/workers --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
@@ -218,10 +220,23 @@ Map aDynamicMap(Map params) {
 }
 
 void _addWorkerMappings() {
-  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
-  IsolateManager.addWorkerMapping(add, 'add');
-  IsolateManager.addWorkerMapping(addException, 'addException');
-  IsolateManager.addWorkerMapping(concat, 'concat');
-  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
+  IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
+  IsolateManager.addWorkerMapping(aStringList, 'aStringList');
+  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
   IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
+  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
+  IsolateManager.addWorkerMapping(concat, 'concat');
+  IsolateManager.addWorkerMapping(addException, 'addException');
+  IsolateManager.addWorkerMapping(add, 'add');
+  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackSimpleFunctionWithSpecifiedType,
+      'isolateCallbackSimpleFunctionWithSpecifiedType');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+  IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackFunction, 'isolateCallbackFunction');
+  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
+  IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
 }
