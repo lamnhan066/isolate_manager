@@ -1,3 +1,8 @@
+## 6.0.0-rc.5
+
+* Improve the generator to generate the worker mappings better.
+* Update workflows to ensure backward compatibility.
+
 ## 6.0.0-rc.4
 
 * Correctly parse the dart native arguments (Fixes #36).
