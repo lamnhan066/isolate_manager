@@ -5,6 +5,8 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:test/test.dart';
 
+import '../test/isolate_manager_shared_test.dart';
+
 /*
   dart run isolate_manager:generate -i test -o test --single --worker-mappings-experiment=test/isolate_manager_test.dart
   dart run isolate_manager:generate -i test -o test/workers --single --worker-mappings-experiment=test/isolate_manager_test.dart
@@ -778,6 +780,11 @@ Future<int> errorFunctionFuture(List<int> value) async {
 }
 
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
+  IsolateManager.addWorkerMapping(concat, 'concat');
+  IsolateManager.addWorkerMapping(addException, 'addException');
+  IsolateManager.addWorkerMapping(add, 'add');
+  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
   IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
   IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
   IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
