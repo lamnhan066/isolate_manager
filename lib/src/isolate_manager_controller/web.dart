@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/base/contactor/utils/utils.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
 import 'package:web/web.dart';
 
@@ -59,7 +58,7 @@ class _IsolateManagerWorkerController<R, P>
     implements IsolateContactorController<R, P> {
   _IsolateManagerWorkerController(this.self, {this.onDispose}) {
     self.onmessage = (MessageEvent event) {
-      _streamController.sink.add(dartify(event.data) as P);
+      _streamController.sink.add(event.data.dartify() as P);
     }.toJS;
   }
   final DedicatedWorkerGlobalScope self;
@@ -74,22 +73,20 @@ class _IsolateManagerWorkerController<R, P>
 
   /// Send result to the main app
   @override
-  void sendResult(dynamic m) {
-    self.postMessage(
-      jsify(<String, Object?>{'type': 'data', 'value': m}),
-    );
+  void sendResult(R m) {
+    self.postMessage(<String, Object?>{'type': 'data', 'value': m}.jsify());
   }
 
   /// Send error to the main app
   @override
   void sendResultError(IsolateException exception) {
-    self.postMessage(jsify(exception.toMap()));
+    self.postMessage(exception.toMap().jsify());
   }
 
   /// Mark the Worker as initialized
   @override
   void initialized() {
-    self.postMessage(jsify(IsolateState.initialized.toMap()));
+    self.postMessage(IsolateState.initialized.toMap().jsify());
   }
 
   /// Close this `IsolateManagerWorkerController`.

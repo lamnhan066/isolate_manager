@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_web.dart';
-import 'package:isolate_manager/src/base/contactor/utils/utils.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
 import 'package:web/web.dart';
 
@@ -23,7 +22,7 @@ class IsolateContactorControllerImplWorker<R, P>
             : params as Worker,
         _initialParams = params is List ? params.first : null {
     _delegate.onmessage = (MessageEvent event) {
-      final data = dartify(event.data)! as Map;
+      final data = event.data.dartify()! as Map;
 
       if (data['type'] == 'data') {
         _mainStreamController.add(_workerConverter(data['value']));
@@ -87,12 +86,12 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolate(P message) {
-    _delegate.postMessage(jsify(message));
+    _delegate.postMessage(message.jsify());
   }
 
   @override
   void sendIsolateState(IsolateState state) {
-    _delegate.postMessage(jsify(state.toMap()));
+    _delegate.postMessage(state.toMap().jsify());
   }
 
   @override
