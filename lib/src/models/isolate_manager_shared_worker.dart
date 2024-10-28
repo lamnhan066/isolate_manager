@@ -8,6 +8,7 @@ const isolateManagerSharedWorker =
 /// Shared Worker annotation
 class _IsolateManagerWorkerShared {
   const _IsolateManagerWorkerShared(this.name);
+
   /// Name of the Worker JS. Default is `worker.js`.
   final String name;
 }

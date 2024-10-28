@@ -1,5 +1,4 @@
 class AnnotationResult {
-
   AnnotationResult({
     required this.workerName,
     required this.isCustomWorker,

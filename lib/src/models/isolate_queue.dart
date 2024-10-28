@@ -4,9 +4,9 @@ import 'package:isolate_manager/src/isolate_manager.dart';
 
 /// Use for queuing your `compute`.
 class IsolateQueue<R, P> {
-
   /// Use for queuing your `compute`.
   IsolateQueue(this.params, this.callback);
+
   /// Control the state and result of this `IsolateQueue`.
   final Completer<R> completer = Completer<R>();
 
