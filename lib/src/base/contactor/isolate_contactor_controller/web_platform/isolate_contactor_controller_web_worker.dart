@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:isolate_manager/src/base/contactor/utils/utils.dart';
 import 'package:web/web.dart';
 
 import '../../isolate_contactor.dart';
@@ -32,7 +33,7 @@ class IsolateContactorControllerImplWorker<R, P>
             : params as Worker,
         _initialParams = params is List ? params.first : null {
     _delegate.onmessage = (MessageEvent event) {
-      final data = event.data.dartify();
+      final data = dartify(event.data);
 
       if (IsolateState.dispose.isValidJson(data)) {
         onDispose!();
@@ -78,7 +79,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolate(P message) {
-    _delegate.postMessage(message.jsify());
+    _delegate.postMessage(jsify(message));
   }
 
   @override
