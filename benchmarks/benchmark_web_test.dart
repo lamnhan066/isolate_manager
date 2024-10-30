@@ -1,4 +1,5 @@
-import 'dart:isolate';
+@TestOn('chrome')
+library;
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/utils/print.dart';
@@ -6,15 +7,13 @@ import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
 
-//  dart test --platform=vm "benchmark/benchmark.dart"
-//  dart test --platform=chrome "benchmark/benchmark.dart"
-
 void main() {
   test(
     'benchmark',
     () async {
       printDebug(
-        () => '|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|',
+        () =>
+            '|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run (Unsupported)|',
       );
       printDebug(() => '|:-:|-:|-:|-:|-:|');
 
@@ -35,7 +34,7 @@ Future<void> execute(int fibonacciNumber) async {
   var singleInMain = Duration.zero;
   var singleInIsolate = Duration.zero;
   var threeIsolatesInIsolate = Duration.zero;
-  var runMethodInIsolate = Duration.zero;
+  const runMethodInIsolate = Duration.zero;
 
   // Main App
   final stopWatch = Stopwatch()..start();
@@ -78,20 +77,6 @@ Future<void> execute(int fibonacciNumber) async {
   stopWatch
     ..stop()
     ..reset();
-
-  // Isolate.run
-  try {
-    stopWatch.start();
-    for (var i = 0; i < 70; i++) {
-      await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
-    }
-    runMethodInIsolate = stopWatch.elapsed;
-    stopWatch
-      ..stop()
-      ..reset();
-  } on Exception catch (_) {
-    /* Unsupported on the Web platform */
-  }
 
   printDebug(
     () => '|$fibonacciNumber|${singleInMain.inMicroseconds}|'

@@ -58,7 +58,7 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 |33|9,046,800|2,277,800|803,300|0|
 |36|38,313,000|9,544,300|3,383,500|0|
 
-[See here](https://github.com/lamnhan066/isolate_manager/blob/main/test/benchmark_test.dart) for the test details.
+[See here](https://github.com/lamnhan066/isolate_manager/blob/main/benchmarks/README.md) for the test details.
 
 ## **Setup**
 
