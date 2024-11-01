@@ -11,7 +11,7 @@ import '../models/exception.dart';
 class IsolateContactorControllerImpl<R, P>
     implements IsolateContactorController<R, P> {
   final IsolateChannel<Map<IsolatePort, dynamic>> _delegate;
-  StreamSubscription<Map<IsolatePort, dynamic>>? _delegateSubscription;
+  late final StreamSubscription<Map<IsolatePort, dynamic>> _delegateSubscription;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
@@ -103,7 +103,7 @@ class IsolateContactorControllerImpl<R, P>
   @override
   Future<void> close() async {
     await Future.wait([
-      _delegateSubscription!.cancel(),
+      _delegateSubscription.cancel(),
       _mainStreamController.close(),
       _isolateStreamController.close(),
     ]);
