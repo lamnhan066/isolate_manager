@@ -86,7 +86,9 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     });
 
     _isolate = await Isolate.spawn(
-        _isolateFunction, [_isolateParam, _receivePort.sendPort]);
+      _isolateFunction,
+      [_isolateParam, _receivePort.sendPort],
+    );
 
     await _isolateContactorController.ensureInitialized.future;
     printDebug(() => 'Initialized');

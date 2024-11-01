@@ -190,11 +190,13 @@ class IsolateManager<R, P> {
 
   /// A default function for using the [IsolateManager.create] method.
   static void _defaultIsolateFunction<R, P>(dynamic params) {
-    IsolateManagerFunction.customFunction<R, P>(params,
-        onEvent: (controller, message) {
-      final function = controller.initialParams;
-      return function(message);
-    });
+    IsolateManagerFunction.customFunction<R, P>(
+      params,
+      onEvent: (controller, message) {
+        final function = controller.initialParams;
+        return function(message);
+      },
+    );
   }
 
   /// Initialize the instance. This method can be called manually or will be
@@ -214,34 +216,30 @@ class IsolateManager<R, P> {
 
     if (isCustomIsolate) {
       // Create the custom isolates.
-      await Future.wait(
-        [
-          for (int i = 0; i < concurrent; i++)
-            IsolateContactor.createCustom<R, P>(
-              isolateFunction as IsolateCustomFunction,
-              workerName: workerName,
-              initialParams: initialParams,
-              converter: converter,
-              workerConverter: workerConverter,
-              debugMode: isDebug,
-            ).then((value) => _isolates.addAll({value: false}))
-        ],
-      );
+      await Future.wait([
+        for (int i = 0; i < concurrent; i++)
+          IsolateContactor.createCustom<R, P>(
+            isolateFunction as IsolateCustomFunction,
+            workerName: workerName,
+            initialParams: initialParams,
+            converter: converter,
+            workerConverter: workerConverter,
+            debugMode: isDebug,
+          ).then((value) => _isolates.addAll({value: false})),
+      ]);
     } else {
       // Create isolates with the internal method.
-      await Future.wait(
-        [
-          for (int i = 0; i < concurrent; i++)
-            IsolateContactor.createCustom<R, P>(
-              _defaultIsolateFunction<R, P>,
-              initialParams: isolateFunction as IsolateFunction<R, P>,
-              workerName: workerName,
-              converter: converter,
-              workerConverter: workerConverter,
-              debugMode: isDebug,
-            ).then((value) => _isolates.addAll({value: false}))
-        ],
-      );
+      await Future.wait([
+        for (int i = 0; i < concurrent; i++)
+          IsolateContactor.createCustom<R, P>(
+            _defaultIsolateFunction<R, P>,
+            initialParams: isolateFunction as IsolateFunction<R, P>,
+            workerName: workerName,
+            converter: converter,
+            workerConverter: workerConverter,
+            debugMode: isDebug,
+          ).then((value) => _isolates.addAll({value: false})),
+      ]);
     }
 
     _streamSubscription = _streamController.stream.listen((result) {
@@ -312,13 +310,19 @@ class IsolateManager<R, P> {
   ///       return true;
   ///  });
   /// ```
-  Future<R> call(P params,
-          {IsolateCallback<R>? callback, bool priority = false}) =>
+  Future<R> call(
+    P params, {
+    IsolateCallback<R>? callback,
+    bool priority = false,
+  }) =>
       compute(params, callback: callback, priority: priority);
 
   ///  Similar to the [compute], for who's using IsolateContactor.
-  Future<R> sendMessage(P params,
-          {IsolateCallback<R>? callback, bool priority = false}) =>
+  Future<R> sendMessage(
+    P params, {
+    IsolateCallback<R>? callback,
+    bool priority = false,
+  }) =>
       compute(params, callback: callback, priority: priority);
 
   /// Compute isolate manager with [R] is return type.
@@ -353,8 +357,11 @@ class IsolateManager<R, P> {
   ///       return true;
   ///  });
   /// ```
-  Future<R> compute(P params,
-      {IsolateCallback<R>? callback, bool priority = false}) async {
+  Future<R> compute(
+    P params, {
+    IsolateCallback<R>? callback,
+    bool priority = false,
+  }) async {
     await start();
 
     final queue = IsolateQueue<R, P>(params, callback);
@@ -386,32 +393,37 @@ class IsolateManager<R, P> {
   }
 
   Future<R> _excuteWithCallback(
-      IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
+    IsolateContactor<R, P> isolate,
+    IsolateQueue<R, P> queue,
+  ) async {
     // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
     late final StreamSubscription<R> sub;
-    sub = isolate.onMessage.listen((event) async {
-      // Callbacks on every event.
-      final completer = Completer<bool>();
-      completer.complete(queue.callback!(event));
-      if (await completer.future) {
-        await sub.cancel();
+    sub = isolate.onMessage.listen(
+      (event) async {
+        // Callbacks on every event.
+        final completer = Completer<bool>();
+        completer.complete(queue.callback!(event));
+        if (await completer.future) {
+          await sub.cancel();
+          // Mark the current isolate as free.
+          _isolates[isolate] = false;
+          // Send the result back to the main app.
+          _streamController.sink.add(event);
+          queue.completer.complete(event);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        sub.cancel();
         // Mark the current isolate as free.
         _isolates[isolate] = false;
-        // Send the result back to the main app.
-        _streamController.sink.add(event);
-        queue.completer.complete(event);
-      }
-    }, onError: (Object error, StackTrace stackTrace) {
-      sub.cancel();
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
 
-      // Send the exception back to the main app.
-      _streamController.sink.addError(error, stackTrace);
-      queue.completer.completeError(error, stackTrace);
-    });
+        // Send the exception back to the main app.
+        _streamController.sink.addError(error, stackTrace);
+        queue.completer.completeError(error, stackTrace);
+      },
+    );
 
     try {
       await isolate.sendMessage(queue.params);
@@ -423,7 +435,9 @@ class IsolateManager<R, P> {
   }
 
   Future<R> _excuteWithoutCallback(
-      IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) async {
+    IsolateContactor<R, P> isolate,
+    IsolateQueue<R, P> queue,
+  ) async {
     // Mark the current isolate as busy.
     _isolates[isolate] = true;
 

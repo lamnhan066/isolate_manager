@@ -44,7 +44,7 @@ void main() async {
       for (int i = 0; i < 10; i++)
         isolates.compute(concat, ['$i', '$i']).then((value) {
           expect(value, equals(concat(['$i', '$i'])));
-        })
+        }),
     ]);
 
     // Stop the isolates
@@ -164,7 +164,7 @@ void main() async {
     final result = await isolates.compute(
       complexReturn,
       <List<String>>[
-        <String>['abc']
+        <String>['abc'],
       ],
     );
 
@@ -172,10 +172,11 @@ void main() async {
 
     expect(result, isA<List<List<String>>>());
     expect(
-        result,
-        equals(<List<String>>[
-          <String>['abc']
-        ]));
+      result,
+      equals(<List<String>>[
+        <String>['abc'],
+      ]),
+    );
 
     await isolates.stop();
   });
@@ -230,13 +231,18 @@ void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(add, 'add');
   IsolateManager.addWorkerMapping(addFuture, 'addFuture');
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunctionWithSpecifiedType,
-      'isolateCallbackSimpleFunctionWithSpecifiedType');
+    isolateCallbackSimpleFunctionWithSpecifiedType,
+    'isolateCallbackSimpleFunctionWithSpecifiedType',
+  );
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+    isolateCallbackSimpleFunction,
+    'isolateCallbackSimpleFunction',
+  );
   IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
   IsolateManager.addWorkerMapping(
-      isolateCallbackFunction, 'isolateCallbackFunction');
+    isolateCallbackFunction,
+    'isolateCallbackFunction',
+  );
   IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
   IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
 }

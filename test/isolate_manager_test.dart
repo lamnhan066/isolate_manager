@@ -67,7 +67,7 @@ void main() {
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await isolateManager.stop();
@@ -91,7 +91,7 @@ void main() {
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await isolateManager.restart();
@@ -100,7 +100,7 @@ void main() {
       for (int i = 5; i < 13; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await expectLater(() => isolateManager.sendMessage(-1), throwsStateError);
@@ -138,7 +138,7 @@ void main() {
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await isolateManager.restart();
@@ -147,7 +147,7 @@ void main() {
       for (int i = 5; i < 13; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await expectLater(() => isolateManager.sendMessage(-1), throwsStateError);
@@ -169,7 +169,7 @@ void main() {
           final realFib = fibonacci(i);
 
           expect(value, realFib);
-        })
+        }),
     ]);
 
     await isolateManager.stop();
@@ -211,9 +211,7 @@ void main() {
     await isolateManager.start();
 
     await expectLater(
-      () => isolateManager.compute([50, 50], callback: (value) {
-        return true;
-      }),
+      () => isolateManager.compute([50, 50], callback: (value) => true),
       throwsStateError,
     );
     await isolateManager.stop();
@@ -307,16 +305,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -335,16 +336,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -363,16 +367,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -392,16 +399,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -446,7 +456,7 @@ void main() {
 
     final list = [
       ['a', 'b', 'v'],
-      ['d', 'e', 'f']
+      ['d', 'e', 'f'],
     ];
     final result = await isolate.compute(list);
 
@@ -732,18 +742,23 @@ Future<int> errorFunctionFuture(List<int> value) async {
 
 void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunctionWithSpecifiedType,
-      'isolateCallbackSimpleFunctionWithSpecifiedType');
+    isolateCallbackSimpleFunctionWithSpecifiedType,
+    'isolateCallbackSimpleFunctionWithSpecifiedType',
+  );
   IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
   IsolateManager.addWorkerMapping(addException, 'addException');
   IsolateManager.addWorkerMapping(add, 'add');
   IsolateManager.addWorkerMapping(addFuture, 'addFuture');
   IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
   IsolateManager.addWorkerMapping(
-      isolateCallbackFunction, 'isolateCallbackFunction');
+    isolateCallbackFunction,
+    'isolateCallbackFunction',
+  );
   IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+    isolateCallbackSimpleFunction,
+    'isolateCallbackSimpleFunction',
+  );
   IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
   IsolateManager.addWorkerMapping(aStringList, 'aStringList');
   IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');

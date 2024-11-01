@@ -66,7 +66,7 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
         isolateManager.compute(param).then((value) {
           counter += value.length;
           anotatedFunctions.addAll(value);
-        })
+        }),
     ],
   );
 
@@ -90,7 +90,8 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
 }
 
 Future<Map<String, String>> _getAndGenerateFromAnotatedFunctions(
-    List<dynamic> params) async {
+  List<dynamic> params,
+) async {
   final String filePath = params[0];
 
   return _getAnotatedFunctions(filePath);
