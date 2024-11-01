@@ -34,7 +34,7 @@ class IsolateContactorInternalFuture<R, P>
         _workerName = workerName,
         _isolateParam = isolateParam,
         _isolateContactorController = IsolateContactorControllerImpl(
-          StreamController<R>.broadcast(),
+          StreamController<dynamic>.broadcast(),
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,
