@@ -44,7 +44,7 @@ void main() {
 
     expect(result, fibonacci(3));
 
-    isolateManager.stop();
+    await isolateManager.stop();
   });
 
   test('Test IsolateManager.create', () async {
@@ -70,7 +70,7 @@ void main() {
         })
     ]);
 
-    isolateManager.stop();
+    await isolateManager.stop();
   });
 
   test('Test IsolateManager.createCustom', () async {
@@ -79,7 +79,8 @@ void main() {
       isolateFunction,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
-    )..start();
+    );
+    await isolateManager.start();
 
     isolateManager.stream
         .listen((value) {})
@@ -111,7 +112,8 @@ void main() {
     final isolateManager = IsolateManager<int, int>.createCustom(
       isolateFunction,
       concurrent: 1,
-    )..start();
+    );
+    await isolateManager.start();
 
     await expectLater(() => isolateManager(-1), throwsStateError);
     await isolateManager.stop();
@@ -124,7 +126,8 @@ void main() {
       isolateFunctionWithAutomaticallyHandlers,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
-    )..start();
+    );
+    await isolateManager.start();
 
     isolateManager.stream
         .listen((value) {})

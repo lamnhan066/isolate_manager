@@ -265,7 +265,7 @@ class IsolateManager<R, P> {
       for (final isolate in _isolates.keys) isolate.dispose(),
     ]);
     _isolates.clear();
-    _streamSubscription?.cancel();
+    await _streamSubscription?.cancel();
   }
 
   /// Stop the isolate.
@@ -396,7 +396,7 @@ class IsolateManager<R, P> {
       final completer = Completer<bool>();
       completer.complete(queue.callback!(event));
       if (await completer.future) {
-        sub.cancel();
+        await sub.cancel();
         // Mark the current isolate as free.
         _isolates[isolate] = false;
         // Send the result back to the main app.
@@ -428,7 +428,7 @@ class IsolateManager<R, P> {
     _isolates[isolate] = true;
 
     // Send the `param` to the isolate and wait for the result.
-    isolate.sendMessage(queue.params).then((value) {
+    await isolate.sendMessage(queue.params).then((value) {
       // Mark the current isolate as free.
       _isolates[isolate] = false;
 

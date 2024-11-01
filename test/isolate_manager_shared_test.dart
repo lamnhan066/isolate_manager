@@ -177,7 +177,7 @@ void main() async {
           <String>['abc']
         ]));
 
-    isolates.stop();
+    await isolates.stop();
   });
 
   test('Test `workerFunction`', () {
