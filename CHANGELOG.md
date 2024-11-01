@@ -1,3 +1,17 @@
+## 5.6.1
+
+* Improve the generator to generate the worker mappings better.
+* Improve the `jsify` to convert the `Map` better.
+* Improve the github workflows to ensure backward compatibility with the compiled Workers.
+
+## 5.6.0
+
+* Correctly parse the dart native arguments (Fixes #36).
+* [Experiment] Automatically generate the `workerMappings` by adding the `--worker-mappings-experiment=lib/main.dart` flag to the generator.
+* The code coverage is now using `dart test` instead of `flutter test` so we can correctly test the code on both `vm` and `chrome`.
+* Improve the performaces by improving the way to detect the `IsolateState`.
+* Improve tests.
+
 ## 5.5.2
 
 * Improve Type cast in the `_IsolateManagerWorkerController`.

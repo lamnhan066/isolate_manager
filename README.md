@@ -476,6 +476,12 @@ void progressFunction(dynamic params) {
   dart run isolate_manager:generate --single -i test -out test -- -Dkey1=value1 -Dkey2=value2
   ```
 
+- **[Experiment]**: Automatically generate the `workerMappings` for both `IsolateManager` and `IsolateManagerShared` by adding a `--worker-mappings-experiment=lib/main.dart` flag to the generator. Here are the steps of the generator:
+
+  1. Generate a `_addWorkerMappings` method at the end of the `lib/main.dart`.
+  2. Add all worker mappings by using `IsolateManager.addWorkerMapping` method.
+  3. Add the `_addWorkerMappings` method to the beginning of the `main` method.
+
 ## Additional Information
 
 - Use `queuesLength` to get the current number of queued computation.

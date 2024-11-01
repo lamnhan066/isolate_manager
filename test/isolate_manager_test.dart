@@ -5,11 +5,17 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:test/test.dart';
 
-//  dart run isolate_manager:generate -i test -o test
-//  dart test
-//  dart test --platform=chrome,vm
+import '../test/isolate_manager_shared_test.dart';
+
+/*
+  dart run isolate_manager:generate -i test -o test --single --worker-mappings-experiment=test/isolate_manager_test.dart
+  dart run isolate_manager:generate -i test -o test/workers --single --worker-mappings-experiment=test/isolate_manager_test.dart
+  dart test --platform=vm
+  dart test --platform=chrome
+*/
 
 void main() {
+  _addWorkerMappings();
   group('Models', () {
     test('IsolateState', () {
       for (final state in IsolateState.values) {
@@ -149,7 +155,6 @@ void main() {
     // Create IsolateContactor
     final isolateManager = IsolateManager.create(
       fibonacci,
-      workerName: 'fibonacci',
       concurrent: 4,
     );
 
@@ -352,7 +357,6 @@ void main() {
     final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackSimpleFunctionWithSpecifiedType,
       concurrent: 1,
-      workerName: 'isolateCallbackSimpleFunctionWithSpecifiedType',
     );
     await isolateManager.start();
 
@@ -434,7 +438,6 @@ void main() {
   test('Test a 2D List to 1D List', () async {
     final isolate = IsolateManager.create(
       a2DTo1DList,
-      workerName: 'a2DTo1DList',
     );
     await isolate.start();
 
@@ -450,7 +453,6 @@ void main() {
   test('Test a 1D List to 2D List', () async {
     final isolate = IsolateManager.create(
       a1DTo2DList,
-      workerName: 'a1DTo2DList',
     );
     await isolate.start();
 
@@ -723,4 +725,25 @@ Future<int> errorFunctionFuture(List<int> value) async {
     return throw StateError('The exception is threw at value[0] = ${value[0]}');
   }
   return value[0] + value[1];
+}
+
+void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(
+      isolateCallbackSimpleFunctionWithSpecifiedType,
+      'isolateCallbackSimpleFunctionWithSpecifiedType');
+  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
+  IsolateManager.addWorkerMapping(addException, 'addException');
+  IsolateManager.addWorkerMapping(add, 'add');
+  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
+  IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackFunction, 'isolateCallbackFunction');
+  IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
+  IsolateManager.addWorkerMapping(
+      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+  IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
+  IsolateManager.addWorkerMapping(aStringList, 'aStringList');
+  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
+  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
+  IsolateManager.addWorkerMapping(concat, 'concat');
 }

@@ -25,21 +25,26 @@ jobs:
       - name: Analyze
         run: dart analyze
 
-      - name: Compile Workers
+      - name: Run tests on Chrome for the old Workers
+        run: dart test --platform=chrome
+
+      - name: Recompile Workers
         run: |
-          dart run isolate_manager:generate -i test -o test
+          dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_test.dart
+          dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_shared_test.dart
           dart run isolate_manager:generate -i test -o test/workers
+
+      # Should run on Chrome before the VM because it almost fails here when an issue occurs
+      - name: Run tests on Chrome
+        run: dart test --platform=chrome --coverage=coverage
 
       - name: Run tests on VM
         run: dart test --platform=vm --coverage=coverage
 
-      - name: Run tests on Chrome
-        run: dart test --platform=chrome --coverage=coverage
-
       - name: Format coverage
-        run: dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib
+        run: dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
 
-      - name: Covert to relative paths
+      - name: Convert to relative paths
         run: sed -i 's|SF:.*/lib|SF:lib|' coverage/lcov.info
 
       - name: Upload coverage reports to Codecov
