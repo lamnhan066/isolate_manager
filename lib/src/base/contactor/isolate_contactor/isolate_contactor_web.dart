@@ -31,7 +31,8 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
       } catch (_) {
         if (debugMode) {
           print(
-              '[${IsolateContactor.debugLogPrefix}]: This browser doesn\'t support Worker, Future will be applied!');
+            '[${IsolateContactor.debugLogPrefix}]: This browser doesn\'t support Worker, Future will be applied!',
+          );
         }
       }
     }

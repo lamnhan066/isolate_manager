@@ -39,19 +39,21 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
     return;
   }
 
-  final List<FileSystemEntity> allFiles = _listAllFiles(Directory(input), []);
+  final allFiles = _listAllFiles(Directory(input), []);
   final isolateManager = IsolateManager.create(
     _getAndGenerateFromAnotatedFunctions,
     concurrent: 3,
-  )..start();
+  );
+  await isolateManager.start();
 
-  List<List<dynamic>> params = [];
+  final params = <List<dynamic>>[];
   for (final file in allFiles) {
     if (file is File && file.path.endsWith('.dart')) {
       final filePath = file.absolute.path;
       final content = await file.readAsString();
       final pattern = RegExp(
-          '(@$classAnnotation|@$constAnnotation|@$constCustomWorkerAnnotation)');
+        '(@$classAnnotation|@$constAnnotation|@$constCustomWorkerAnnotation)',
+      );
       if (content.contains(pattern)) {
         params.add(
           <dynamic>[
@@ -71,12 +73,10 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   print('Total files to generate: ${params.length}');
 
   int counter = 0;
-  await Future.wait(
-    [
-      for (final param in params)
-        isolateManager.compute(param).then((value) => counter += value)
-    ],
-  );
+  await Future.wait([
+    for (final param in params)
+      isolateManager.compute(param).then((value) => counter += value),
+  ]);
 
   print('Total generated functions: $counter');
 
@@ -203,7 +203,8 @@ Future<void> _generateFromAnotatedFunction(
   sink.writeln('main() {');
   if (function.value.isCustomWorker) {
     sink.writeln(
-        '  IsolateManagerFunction.customWorkerFunction(${function.key});');
+      '  IsolateManagerFunction.customWorkerFunction(${function.key});',
+    );
   } else {
     sink.writeln('  IsolateManagerFunction.workerFunction(${function.key});');
   }
@@ -247,7 +248,9 @@ Future<void> _generateFromAnotatedFunction(
 
   if (await outputFile.exists()) {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compiled: ${p.relative(outputPath)}');
+      'Path: ${p.relative(sourceFilePath)} => '
+      'Function: ${function.key} => Compiled: ${p.relative(outputPath)}',
+    );
     if (!isDebug) {
       if (isWasm) {
         await File('$output/$name.unopt.wasm').delete();
@@ -257,7 +260,9 @@ Future<void> _generateFromAnotatedFunction(
     }
   } else {
     print(
-        'Path: ${p.relative(sourceFilePath)} => Function: ${function.key} => Compile ERROR: ${p.relative(outputPath)}');
+      'Path: ${p.relative(sourceFilePath)} => Function: '
+      '${function.key} => Compile ERROR: ${p.relative(outputPath)}',
+    );
     final r = result.stdout.toString().split('\n');
     for (var element in r) {
       print('   > $element');

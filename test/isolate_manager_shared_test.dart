@@ -44,10 +44,10 @@ void main() async {
       for (int i = 0; i < 10; i++)
         isolates.compute(concat, ['$i', '$i']).then((value) {
           expect(value, equals(concat(['$i', '$i'])));
-        })
+        }),
     ]);
 
-    // Stop the usolate after 5 seconds
+    // Stop the isolates
     await isolates.stop();
   });
 
@@ -87,7 +87,7 @@ void main() async {
       }),
     ]);
 
-    // Stop the usolate after 5 seconds
+    // Stop the isolates
     await isolates.stop();
   });
 
@@ -99,7 +99,7 @@ void main() async {
     // Catch the error from the stream
     isolates.stream.listen((result) {
       // print('Stream get add: $result');
-    }).onError((e) {
+    }).onError((Object e) {
       // print('Error from stream: $e');
       expect(e.toString(), equals(ArgumentError().toString()));
     });
@@ -115,8 +115,8 @@ void main() async {
       expect(e.toString(), equals(ArgumentError().toString()));
     }
 
-    // Stop the usolate after 5 seconds
-    await Future.delayed(Duration(seconds: 3));
+    // Stop the isolate after 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
     await isolates.stop();
   });
 
@@ -164,7 +164,7 @@ void main() async {
     final result = await isolates.compute(
       complexReturn,
       <List<String>>[
-        <String>['abc']
+        <String>['abc'],
       ],
     );
 
@@ -172,12 +172,13 @@ void main() async {
 
     expect(result, isA<List<List<String>>>());
     expect(
-        result,
-        equals(<List<String>>[
-          <String>['abc']
-        ]));
+      result,
+      equals(<List<String>>[
+        <String>['abc'],
+      ]),
+    );
 
-    isolates.stop();
+    await isolates.stop();
   });
 
   test('Test `workerFunction`', () {
@@ -230,13 +231,18 @@ void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(add, 'add');
   IsolateManager.addWorkerMapping(addFuture, 'addFuture');
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunctionWithSpecifiedType,
-      'isolateCallbackSimpleFunctionWithSpecifiedType');
+    isolateCallbackSimpleFunctionWithSpecifiedType,
+    'isolateCallbackSimpleFunctionWithSpecifiedType',
+  );
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+    isolateCallbackSimpleFunction,
+    'isolateCallbackSimpleFunction',
+  );
   IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
   IsolateManager.addWorkerMapping(
-      isolateCallbackFunction, 'isolateCallbackFunction');
+    isolateCallbackFunction,
+    'isolateCallbackFunction',
+  );
   IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
   IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
 }

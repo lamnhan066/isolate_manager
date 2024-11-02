@@ -9,17 +9,22 @@ import 'isolate_worker/isolate_worker_web.dart'
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
 typedef IsolateOnInitialCallback<R, P, T> = FutureOr<void> Function(
-    IsolateManagerController<R, P> controller, T initialParams);
+  IsolateManagerController<R, P> controller,
+  T initialParams,
+);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
 typedef IsolateOnDisposeCallback<R, P> = void Function(
-    IsolateManagerController<R, P> controller);
+  IsolateManagerController<R, P> controller,
+);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed every time
 /// the [message] is received from the `sendMessage` or `execute` method.
 typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
-    IsolateManagerController<R, P> controller, P message);
+  IsolateManagerController<R, P> controller,
+  P message,
+);
 
 /// A function for the `IsolateManagerFunction.workerFunction`.
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
@@ -90,11 +95,11 @@ class IsolateManagerFunction {
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
     controller.onIsolateMessage.listen((message) {
-      final completer = Completer();
+      final completer = Completer<R>();
       completer.future.then(
         (value) => autoHandleResult ? controller.sendResult(value) : null,
         onError: autoHandleException
-            ? (err, stack) =>
+            ? (Object err, StackTrace stack) =>
                 controller.sendResultError(IsolateException(err, stack))
             : null,
       );

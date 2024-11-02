@@ -9,19 +9,23 @@ import '../test/isolate_manager_test.dart';
 //  dart test --platform=chrome "benchmark/benchmark.dart"
 
 void main() {
-  test('benchmark', () async {
-    print('|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|');
-    print('|:-:|-:|-:|-:|-:|');
+  test(
+    'benchmark',
+    () async {
+      print('|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|');
+      print('|:-:|-:|-:|-:|-:|');
 
-    // Fibonacci 30
-    await execute(30);
+      // Fibonacci 30
+      await execute(30);
 
-    // Fibonacci 33
-    await execute(33);
+      // Fibonacci 33
+      await execute(33);
 
-    // Fibonacci 36
-    await execute(36);
-  }, timeout: Timeout(Duration(seconds: 120)));
+      // Fibonacci 36
+      await execute(36);
+    },
+    timeout: const Timeout(Duration(seconds: 120)),
+  );
 }
 
 Future<void> execute(int fibonacciNumber) async {
@@ -65,7 +69,8 @@ Future<void> execute(int fibonacciNumber) async {
 
   stopWatch.start();
   await Future.wait(
-      [for (int i = 0; i < 70; i++) threeIsolates.compute(fibonacciNumber)]);
+    [for (int i = 0; i < 70; i++) threeIsolates.compute(fibonacciNumber)],
+  );
   threeIsolatesInIsolate = stopWatch.elapsed;
   stopWatch
     ..stop()
@@ -86,5 +91,6 @@ Future<void> execute(int fibonacciNumber) async {
   }
 
   print(
-      '|$fibonacciNumber|${singleInMain.inMicroseconds}|${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}|${runMethodInIsolate.inMicroseconds}|');
+    '|$fibonacciNumber|${singleInMain.inMicroseconds}|${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}|${runMethodInIsolate.inMicroseconds}|',
+  );
 }

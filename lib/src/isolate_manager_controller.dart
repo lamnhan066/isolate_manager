@@ -34,7 +34,7 @@ class IsolateManagerController<R, P> {
   Future<void> close() => _delegate.close();
 
   /// Get initial parameters when you create the IsolateManager.
-  get initialParams => _delegate.initialParams;
+  dynamic get initialParams => _delegate.initialParams;
 
   /// This parameter is only used for Isolate. Use to listen for values from the main application.
   Stream<P> get onIsolateMessage => _delegate.onIsolateMessage;

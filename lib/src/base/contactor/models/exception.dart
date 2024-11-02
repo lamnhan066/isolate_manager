@@ -18,13 +18,15 @@ class IsolateException implements Exception {
         r'$IsolateException': {
           'error': error.toString(),
           'stack': stack.toString(),
-        }
+        },
       });
 
   /// Convert from JSON.
   factory IsolateException.fromJson(dynamic json) {
-    assert(isValidObject(json),
-        'json should be checked by `isValidObject` before using');
+    assert(
+      isValidObject(json),
+      'json should be checked by `isValidObject` before using',
+    );
 
     final decoded = jsonDecode(json.toString());
     final values = decoded[r'$IsolateException'];

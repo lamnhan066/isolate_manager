@@ -10,7 +10,7 @@ Future<Object> internalFunction(List<Object> params) async {
   assert(params.length == 2, 'params must have only 2 elements');
   assert(params[0] is Function, 'params[0] is not a Function');
 
-  Completer<Object> completer = Completer();
+  final completer = Completer<Object>();
   completer.complete((params[0] as Function)(params[1]));
   return completer.future;
 }

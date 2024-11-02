@@ -9,7 +9,7 @@ import '../isolate_contactor_controller_web.dart';
 
 class IsolateContactorControllerImplFuture<R, P>
     implements IsolateContactorControllerImpl<R, P> {
-  final StreamController _delegate;
+  final StreamController<dynamic> _delegate;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
@@ -65,7 +65,7 @@ class IsolateContactorControllerImplFuture<R, P>
 
   /// Get this StreamController
   @override
-  StreamController get controller => _delegate;
+  StreamController<dynamic> get controller => _delegate;
 
   /// Get initial params for `createCustom`
   @override

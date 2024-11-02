@@ -51,7 +51,9 @@ class IsolateContactorControllerImplWorker<R, P>
       if (IsolateException.isValidObject(data)) {
         final exception = IsolateException.fromJson(data);
         _mainStreamController.addError(
-            exception.error.toString(), StackTrace.empty);
+          exception.error.toString(),
+          StackTrace.empty,
+        );
         return;
       }
 

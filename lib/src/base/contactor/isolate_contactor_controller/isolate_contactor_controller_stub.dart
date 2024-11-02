@@ -10,8 +10,8 @@ import '../models/exception.dart';
 
 class IsolateContactorControllerImpl<R, P>
     implements IsolateContactorController<R, P> {
-  final IsolateChannel _delegate;
-  StreamSubscription? _delegateSubscription;
+  final IsolateChannel<Map<IsolatePort, dynamic>> _delegate;
+  late final StreamSubscription<Map<IsolatePort, dynamic>> _delegateSubscription;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
@@ -35,7 +35,7 @@ class IsolateContactorControllerImpl<R, P>
             : IsolateChannel.connectReceive(params),
         _initialParams = params is List ? params.first : null {
     _delegateSubscription = _delegate.stream.listen((event) {
-      (event as Map<IsolatePort, dynamic>).forEach((key, value) {
+      event.forEach((key, value) {
         switch (key) {
           case IsolatePort.main:
             if (value is IsolateException) {
@@ -103,7 +103,7 @@ class IsolateContactorControllerImpl<R, P>
   @override
   Future<void> close() async {
     await Future.wait([
-      _delegateSubscription!.cancel(),
+      _delegateSubscription.cancel(),
       _mainStreamController.close(),
       _isolateStreamController.close(),
     ]);

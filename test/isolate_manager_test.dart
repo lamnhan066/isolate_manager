@@ -44,7 +44,7 @@ void main() {
 
     expect(result, fibonacci(3));
 
-    isolateManager.stop();
+    await isolateManager.stop();
   });
 
   test('Test IsolateManager.create', () async {
@@ -67,10 +67,10 @@ void main() {
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
-    isolateManager.stop();
+    await isolateManager.stop();
   });
 
   test('Test IsolateManager.createCustom', () async {
@@ -79,7 +79,8 @@ void main() {
       isolateFunction,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
-    )..start();
+    );
+    await isolateManager.start();
 
     isolateManager.stream
         .listen((value) {})
@@ -90,7 +91,7 @@ void main() {
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await isolateManager.restart();
@@ -99,7 +100,7 @@ void main() {
       for (int i = 5; i < 13; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await expectLater(() => isolateManager.sendMessage(-1), throwsStateError);
@@ -111,7 +112,8 @@ void main() {
     final isolateManager = IsolateManager<int, int>.createCustom(
       isolateFunction,
       concurrent: 1,
-    )..start();
+    );
+    await isolateManager.start();
 
     await expectLater(() => isolateManager(-1), throwsStateError);
     await isolateManager.stop();
@@ -124,7 +126,8 @@ void main() {
       isolateFunctionWithAutomaticallyHandlers,
       concurrent: 4,
       initialParams: ['Test initialParams 0', 'Test initialParams 1'],
-    )..start();
+    );
+    await isolateManager.start();
 
     isolateManager.stream
         .listen((value) {})
@@ -135,7 +138,7 @@ void main() {
       for (int i = 0; i < 10; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await isolateManager.restart();
@@ -144,7 +147,7 @@ void main() {
       for (int i = 5; i < 13; i++)
         isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
-        })
+        }),
     ]);
 
     await expectLater(() => isolateManager.sendMessage(-1), throwsStateError);
@@ -166,7 +169,7 @@ void main() {
           final realFib = fibonacci(i);
 
           expect(value, realFib);
-        })
+        }),
     ]);
 
     await isolateManager.stop();
@@ -208,9 +211,7 @@ void main() {
     await isolateManager.start();
 
     await expectLater(
-      () => isolateManager.compute([50, 50], callback: (value) {
-        return true;
-      }),
+      () => isolateManager.compute([50, 50], callback: (value) => true),
       throwsStateError,
     );
     await isolateManager.stop();
@@ -222,14 +223,14 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20]));
     }
 
     await expectLater(
-      () async => await Future.wait(futures, eagerError: true),
+      () async => Future.wait(futures, eagerError: true),
       throwsStateError,
     );
     await isolateManager.stop();
@@ -243,7 +244,7 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20], callback: (value) => true));
@@ -262,7 +263,7 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20]));
@@ -283,7 +284,7 @@ void main() {
       concurrent: 2,
     );
     await isolateManager.start();
-    final List<Future> futures = [];
+    final List<Future<int>> futures = [];
 
     for (var i = 0; i < 100; i++) {
       futures.add(isolateManager.compute([i, 20], callback: (value) => true));
@@ -304,16 +305,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -332,16 +336,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -360,16 +367,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -389,16 +399,19 @@ void main() {
     );
     await isolateManager.start();
 
-    final result = await isolateManager.compute(1, callback: (value) {
-      final decoded = jsonDecode(value) as Map;
-      // Do not return this [value] as the final result
-      if (decoded.containsKey('source')) {
-        return false;
-      }
+    final result = await isolateManager.compute(
+      1,
+      callback: (value) {
+        final decoded = jsonDecode(value) as Map;
+        // Do not return this [value] as the final result
+        if (decoded.containsKey('source')) {
+          return false;
+        }
 
-      // Return this [value] as the final result
-      return true;
-    });
+        // Return this [value] as the final result
+        return true;
+      },
+    );
 
     final decoded = jsonDecode(result) as Map;
     expect(
@@ -443,7 +456,7 @@ void main() {
 
     final list = [
       ['a', 'b', 'v'],
-      ['d', 'e', 'f']
+      ['d', 'e', 'f'],
     ];
     final result = await isolate.compute(list);
 
@@ -470,7 +483,7 @@ void main() {
       }
       expect(queueStrategies.queuesCount, equals(10));
       expect(queueStrategies.continueIfMaxCountExceeded(), true);
-      List result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      final result = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -496,7 +509,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [0, 1, 9];
+      final result = [0, 1, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -509,7 +522,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [9, 8, 7];
+      final result = [9, 8, 7];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -522,7 +535,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [7, 8, 9];
+      final result = [7, 8, 9];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -535,7 +548,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [9, 1, 0];
+      final result = [9, 1, 0];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -549,7 +562,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [0, 1, 2];
+      final result = [0, 1, 2];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -563,7 +576,7 @@ void main() {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
-      List result = [2, 1, 0];
+      final result = <int>[2, 1, 0];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
@@ -719,7 +732,7 @@ int errorFunction(List<int> value) {
 
 @pragma('vm:entry-point')
 Future<int> errorFunctionFuture(List<int> value) async {
-  await Future.delayed(Duration(seconds: 1));
+  await Future<void>.delayed(const Duration(seconds: 1));
 
   if (value[0] == 50) {
     return throw StateError('The exception is threw at value[0] = ${value[0]}');
@@ -729,18 +742,23 @@ Future<int> errorFunctionFuture(List<int> value) async {
 
 void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunctionWithSpecifiedType,
-      'isolateCallbackSimpleFunctionWithSpecifiedType');
+    isolateCallbackSimpleFunctionWithSpecifiedType,
+    'isolateCallbackSimpleFunctionWithSpecifiedType',
+  );
   IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
   IsolateManager.addWorkerMapping(addException, 'addException');
   IsolateManager.addWorkerMapping(add, 'add');
   IsolateManager.addWorkerMapping(addFuture, 'addFuture');
   IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
   IsolateManager.addWorkerMapping(
-      isolateCallbackFunction, 'isolateCallbackFunction');
+    isolateCallbackFunction,
+    'isolateCallbackFunction',
+  );
   IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
   IsolateManager.addWorkerMapping(
-      isolateCallbackSimpleFunction, 'isolateCallbackSimpleFunction');
+    isolateCallbackSimpleFunction,
+    'isolateCallbackSimpleFunction',
+  );
   IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
   IsolateManager.addWorkerMapping(aStringList, 'aStringList');
   IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
