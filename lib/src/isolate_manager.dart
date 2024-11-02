@@ -442,21 +442,23 @@ class IsolateManager<R, P> {
     _isolates[isolate] = true;
 
     // Send the `param` to the isolate and wait for the result.
-    await isolate.sendMessage(queue.params).then((value) {
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
+    unawaited(
+      isolate.sendMessage(queue.params).then((value) {
+        // Mark the current isolate as free.
+        _isolates[isolate] = false;
 
-      // Send the result back to the main app.
-      _streamController.sink.add(value);
-      queue.completer.complete(value);
-    }).onError((error, stackTrace) {
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
+        // Send the result back to the main app.
+        _streamController.sink.add(value);
+        queue.completer.complete(value);
+      }).onError((error, stackTrace) {
+        // Mark the current isolate as free.
+        _isolates[isolate] = false;
 
-      // Send the exception back to the main app.
-      _streamController.sink.addError(error!, stackTrace);
-      queue.completer.completeError(error, stackTrace);
-    });
+        // Send the exception back to the main app.
+        _streamController.sink.addError(error!, stackTrace);
+        queue.completer.completeError(error, stackTrace);
+      }),
+    );
 
     return queue.completer.future;
   }
