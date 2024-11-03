@@ -82,15 +82,24 @@ void main(List<String> args) async {
     isShared = true;
   }
 
+  final input = argResults['input'] as String;
+  final dir = Directory(input);
+  if (!dir.existsSync()) {
+    print('The command run in the wrong directory.');
+    return;
+  }
+
+  final List<File> dartFiles = _listDartFiles(Directory(input), []);
+
   if (isSingle) {
     print('>> Generating the single Workers...');
-    await single.generate(argResults, dartArgs);
+    await single.generate(argResults, dartArgs, dartFiles);
     print('>> Generated.');
   }
 
   if (isShared) {
     print('>> Generating the shared Worker...');
-    await shared.generate(argResults, dartArgs);
+    await shared.generate(argResults, dartArgs, dartFiles);
     print('>> Generated.');
   }
 }
@@ -219,4 +228,21 @@ Future<void> addWorkerMappingToSourceFile(
     () =>
         'Updated source file: $sourceFilePath with new import, worker mapping call, and addWorkerMappings function.',
   );
+}
+
+List<File> _listDartFiles(
+  Directory dir,
+  List<File> fileList,
+) {
+  final files = dir.listSync(recursive: false);
+
+  for (FileSystemEntity file in files) {
+    if (file is File && file.path.endsWith('.dart')) {
+      fileList.add(file);
+    } else if (file is Directory) {
+      fileList = _listDartFiles(file, fileList);
+    }
+  }
+
+  return fileList;
 }

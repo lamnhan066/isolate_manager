@@ -14,9 +14,16 @@ import 'model/annotation_result.dart';
 const classAnnotation = 'IsolateManagerWorker';
 const constAnnotation = 'isolateManagerWorker';
 const constCustomWorkerAnnotation = 'isolateManagerCustomWorker';
+final _singlePattern = RegExp(
+  '(@$classAnnotation|@$constAnnotation|@$constCustomWorkerAnnotation)',
+);
 
 /// --path "path/to/generate" --obfuscate 0->4 --debug
-Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
+Future<void> generate(
+  ArgResults argResults,
+  List<String> dartArgs,
+  List<File> dartFiles,
+) async {
   final input = argResults['input'] as String;
   final output = argResults['output'] as String;
   final obfuscate = switch (argResults['obfuscate']) {
@@ -33,13 +40,6 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
 
   print('Parsing the `IsolateManagerWorker` inside directory: $input...');
 
-  final dir = Directory(input);
-  if (!dir.existsSync()) {
-    print('The command run in the wrong directory.');
-    return;
-  }
-
-  final allFiles = _listAllFiles(Directory(input), []);
   final isolateManager = IsolateManager.create(
     _getAndGenerateFromAnotatedFunctions,
     concurrent: 3,
@@ -47,26 +47,21 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   await isolateManager.start();
 
   final params = <List<dynamic>>[];
-  for (final file in allFiles) {
-    if (file is File && file.path.endsWith('.dart')) {
-      final filePath = file.absolute.path;
-      final content = await file.readAsString();
-      final pattern = RegExp(
-        '(@$classAnnotation|@$constAnnotation|@$constCustomWorkerAnnotation)',
+  for (final file in dartFiles) {
+    final filePath = file.absolute.path;
+    final content = await file.readAsString();
+    if (containsAnnotations(content)) {
+      params.add(
+        <dynamic>[
+          filePath,
+          obfuscate,
+          isDebug,
+          isWasm,
+          output,
+          dartArgs,
+          isWorkerMappings,
+        ],
       );
-      if (content.contains(pattern)) {
-        params.add(
-          <dynamic>[
-            filePath,
-            obfuscate,
-            isDebug,
-            isWasm,
-            output,
-            dartArgs,
-            isWorkerMappings,
-          ],
-        );
-      }
     }
   }
 
@@ -82,6 +77,10 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
 
   await isolateManager.stop();
   print('Done');
+}
+
+bool containsAnnotations(String content) {
+  return content.contains(_singlePattern);
 }
 
 Future<int> _getAndGenerateFromAnotatedFunctions(List<dynamic> params) async {
@@ -128,7 +127,7 @@ Future<Map<String, AnnotationResult>> _getAnotatedFunctions(String path) async {
       final element = declaration.declaredElement;
       if (element != null) {
         final annotationNameValue =
-            getIsolateManagerWorkerAnnotationValue(element);
+            _getIsolateManagerWorkerAnnotationValue(element);
         if (annotationNameValue != null) {
           annotatedFunctions[element.name] = annotationNameValue;
         }
@@ -139,7 +138,7 @@ Future<Map<String, AnnotationResult>> _getAnotatedFunctions(String path) async {
           final element = member.declaredElement;
           if (element != null) {
             final annotationNameValue =
-                getIsolateManagerWorkerAnnotationValue(element);
+                _getIsolateManagerWorkerAnnotationValue(element);
             if (annotationNameValue != null) {
               annotatedFunctions['${declaration.name}.${element.name}'] =
                   annotationNameValue;
@@ -285,7 +284,7 @@ Future<void> _generateFromAnotatedFunction(
   }
 }
 
-AnnotationResult? getIsolateManagerWorkerAnnotationValue(Element element) {
+AnnotationResult? _getIsolateManagerWorkerAnnotationValue(Element element) {
   for (final metadata in element.metadata) {
     final annotationElement = metadata.element;
     if (annotationElement is ConstructorElement) {
@@ -317,21 +316,4 @@ AnnotationResult? getIsolateManagerWorkerAnnotationValue(Element element) {
     }
   }
   return null;
-}
-
-List<FileSystemEntity> _listAllFiles(
-  Directory dir,
-  List<FileSystemEntity> fileList,
-) {
-  final files = dir.listSync(recursive: false);
-
-  for (FileSystemEntity file in files) {
-    if (file is File) {
-      fileList.add(file);
-    } else if (file is Directory) {
-      fileList = _listAllFiles(file, fileList);
-    }
-  }
-
-  return fileList;
 }
