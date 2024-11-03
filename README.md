@@ -510,7 +510,9 @@ void progressFunction(dynamic params) {
 ## Contributions
 
 - If you encounter any problems or feel the library is missing a feature, feel free to open an issue. Pull requests are also welcome.
-
 - If you like my work or the free stuff on this channel and want to say thanks, or encourage me to do more, you can buy me a coffee. Thank you so much!
+- PR Notes:
+  - After you make something changes, you can run `test/bin/run.sh` to run all needed tests (the generator included).
+  - When you want to make a PR, you must discard changes in all generated files (`.js` files inside the test) to keep to the original files for backward compatibility testing.
 
   [![BMC QR](https://raw.githubusercontent.com/lamnhan066/isolate_manager/main/assets/images/bmc_qr.png)](https://www.buymeacoffee.com/lamnhan066)
