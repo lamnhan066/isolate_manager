@@ -11,5 +11,4 @@ dart test --platform=vm --coverage=coverage
 
 dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
 
-# sed -i 's|SF:.*/lib|SF:lib|' coverage/lcov.info
-sed -i '' 's|SF:.*/lib|SF:lib|' coverage/lcov.info 
+sed -i 's|SF:.*/lib|SF:lib|' coverage/lcov.info
