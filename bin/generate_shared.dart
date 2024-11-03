@@ -11,10 +11,15 @@ import 'package:path/path.dart' as p;
 
 import 'generate.dart';
 
-const String constAnnotation = 'isolateManagerSharedWorker';
+const _constAnnotation = 'isolateManagerSharedWorker';
+final _sharedAnnotations = RegExp('@$_constAnnotation');
 
 /// --path "path/to/generate" --obfuscate 0->4 --debug
-Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
+Future<void> generate(
+  ArgResults argResults,
+  List<String> dartArgs,
+  List<File> dartFiles,
+) async {
   final input = argResults['input'] as String;
   final output = argResults['output'] as String;
   final obfuscate = switch (argResults['obfuscate']) {
@@ -34,29 +39,18 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
     () => 'Parsing the `IsolateManagerWorker` inside directory: $input...',
   );
 
-  final dir = Directory(input);
-  if (!dir.existsSync()) {
-    printDebug(() => 'The command run in the wrong directory.');
-    return;
-  }
-
-  final allFiles = _listAllFiles(Directory(input), <FileSystemEntity>[]);
-  final isolateManager =
-      IsolateManager<Map<String, String>, List<dynamic>>.create(
+  final isolateManager = IsolateManager.create(
     _getAndGenerateFromAnotatedFunctions,
     concurrent: 3,
   );
   unawaited(isolateManager.start());
 
   final params = <List<dynamic>>[];
-  for (final file in allFiles) {
-    if (file is File && file.path.endsWith('.dart')) {
-      final filePath = file.absolute.path;
-      final content = await file.readAsString();
-      final pattern = RegExp('@$constAnnotation');
-      if (content.contains(pattern)) {
-        params.add(<String>[filePath]);
-      }
+  for (final file in dartFiles) {
+    final filePath = file.absolute.path;
+    final content = file.readAsStringSync();
+    if (containsAnnotations(content)) {
+      params.add([filePath]);
     }
   }
 
@@ -93,6 +87,10 @@ Future<void> generate(ArgResults argResults, List<String> dartArgs) async {
   printDebug(() => 'Done');
 }
 
+bool containsAnnotations(String content) {
+  return content.contains(_sharedAnnotations);
+}
+
 Future<Map<String, String>> _getAndGenerateFromAnotatedFunctions(
   List<dynamic> params,
 ) async {
@@ -117,7 +115,7 @@ Future<Map<String, String>> _getAnotatedFunctions(String path) async {
     if (declaration is FunctionDeclaration) {
       final element = declaration.declaredElement;
       if (element != null) {
-        final isValidAnnotation = checkAnnotation(element);
+        final isValidAnnotation = _checkAnnotation(element);
         if (isValidAnnotation) {
           annotatedFunctions[element.name] = p.relative(sourceFilePath);
         }
@@ -127,7 +125,7 @@ Future<Map<String, String>> _getAnotatedFunctions(String path) async {
         if (member is MethodDeclaration && member.isStatic) {
           final element = member.declaredElement;
           if (element != null) {
-            final isValidAnnotation = checkAnnotation(element);
+            final isValidAnnotation = _checkAnnotation(element);
             if (isValidAnnotation) {
               annotatedFunctions['${declaration.name}.${element.name}'] =
                   p.relative(sourceFilePath);
@@ -234,32 +232,17 @@ Future<void> _generateFromAnotatedFunctions(
   }
 }
 
-bool checkAnnotation(Element element) {
+bool _checkAnnotation(Element element) {
   for (final metadata in element.metadata) {
     final annotationElement = metadata.element;
     if (annotationElement is PropertyAccessorElement) {
-      final variable = annotationElement.variable2?.name;
-      if (variable == constAnnotation) {
+      // TODO: Change to `variable2` when bumping the `analyzer` to `^6.0.0`
+      // ignore: deprecated_member_use
+      final variable = annotationElement.variable;
+      if (variable.name == _constAnnotation) {
         return true;
       }
     }
   }
   return false;
-}
-
-List<FileSystemEntity> _listAllFiles(
-  Directory dir,
-  List<FileSystemEntity> fileList,
-) {
-  final files = dir.listSync();
-  var list = fileList;
-  for (final file in files) {
-    if (file is File) {
-      list.add(file);
-    } else if (file is Directory) {
-      list = _listAllFiles(file, list);
-    }
-  }
-
-  return list;
 }
