@@ -15,8 +15,6 @@ enum IsolateState {
 
   /// Check if the [map] is a valid enum.
   bool isValidMap(Map<dynamic, dynamic> map) {
-    return map.containsKey('type') &&
-        map['type'] == r'$IsolateState' &&
-        map['value'] == name;
+    return map['type'] == r'$IsolateState' && map['value'] == name;
   }
 }

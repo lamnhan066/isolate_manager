@@ -37,6 +37,6 @@ class IsolateException implements Exception {
 
   /// Check if the [map] is a valid [IsolateException].
   static bool isValidMap(Map<dynamic, dynamic> map) {
-    return map.containsKey('type') && map['type'] == r'$IsolateException';
+    return map['type'] == r'$IsolateException';
   }
 }
