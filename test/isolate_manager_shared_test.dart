@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/models/isolate_types.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
@@ -192,6 +193,75 @@ void main() async {
       expect(e, isA<UnimplementedError>());
     }
   });
+
+  group('Isolate Types -', () {
+    final isolates = IsolateManager.createShared();
+
+    setUpAll(() async {
+      await isolates.start();
+    });
+
+    tearDownAll(() async {
+      await isolates.stop();
+    });
+
+    test('num', () async {
+      final value = IsolateNum(15);
+
+      final result = await isolates.compute(isolateTypeNum, value);
+
+      expect(result, isA<IsolateNum>());
+      expect(result, equals(value));
+    });
+
+    test('String', () async {
+      final value = IsolateString('abc');
+
+      final result = await isolates.compute(isolateTypeString, value);
+
+      expect(result, isA<IsolateString>());
+      expect(result, equals(value));
+    });
+
+    test('bool', () async {
+      final value = IsolateBool(false);
+
+      final result = await isolates.compute(isolateTypeBool, value);
+
+      expect(result, isA<IsolateBool>());
+      expect(result, equals(value));
+    });
+
+    test('List', () async {
+      final value = IsolateList(<IsolateNum>[IsolateNum(100)]);
+
+      final result = await isolates.compute(isolateTypeList, value);
+
+      expect(result, isA<IsolateList<IsolateString>>());
+      expect(
+        result,
+        equals(IsolateList(<IsolateString>[IsolateString('100')])),
+      );
+    });
+
+    test('Map', () async {
+      final result = await isolates.compute(
+        isolateTypeMap,
+        IsolateList<IsolateNum>([IsolateNum(5), IsolateNum(7)]),
+      );
+
+      expect(result, isA<IsolateMap<IsolateString, IsolateNum>>());
+      expect(
+        result,
+        equals(
+          IsolateMap(<IsolateString, IsolateNum>{
+            IsolateString('5'): IsolateNum(5),
+            IsolateString('7'): IsolateNum(7),
+          }),
+        ),
+      );
+    });
+  });
 }
 
 @isolateManagerSharedWorker
@@ -224,7 +294,44 @@ Map<dynamic, dynamic> aDynamicMap(Map<dynamic, dynamic> params) {
   return params;
 }
 
+@isolateManagerSharedWorker
+IsolateNum isolateTypeNum(IsolateNum number) {
+  return IsolateNum(number.decode);
+}
+
+@isolateManagerSharedWorker
+IsolateString isolateTypeString(IsolateString string) {
+  return IsolateString(string.decode);
+}
+
+@isolateManagerSharedWorker
+IsolateBool isolateTypeBool(IsolateBool boolean) {
+  return IsolateBool(boolean.decode);
+}
+
+@isolateManagerSharedWorker
+IsolateList<IsolateString> isolateTypeList(IsolateList<IsolateNum> numbers) {
+  return IsolateList(numbers.decode.map((e) => IsolateString('$e')).toList());
+}
+
+@isolateManagerSharedWorker
+IsolateMap<IsolateString, IsolateNum> isolateTypeMap(
+  IsolateList<IsolateNum> numbers,
+) {
+  return IsolateMap(
+    Map.fromEntries(
+      numbers.decode
+          .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e as num))),
+    ),
+  );
+}
+
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(isolateTypeMap, 'isolateTypeMap');
+  IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
+  IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');
+  IsolateManager.addWorkerMapping(isolateTypeString, 'isolateTypeString');
+  IsolateManager.addWorkerMapping(isolateTypeNum, 'isolateTypeNum');
   IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
   IsolateManager.addWorkerMapping(aStringList, 'aStringList');
   IsolateManager.addWorkerMapping(
