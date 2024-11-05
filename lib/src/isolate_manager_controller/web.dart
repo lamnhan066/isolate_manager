@@ -3,6 +3,7 @@ import 'dart:js_interop';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
+import 'package:isolate_manager/src/models/isolate_types.dart';
 import 'package:web/web.dart';
 
 /// This method only use to create a custom isolate.
@@ -58,7 +59,11 @@ class _IsolateManagerWorkerController<R, P>
     implements IsolateContactorController<R, P> {
   _IsolateManagerWorkerController(this.self, {this.onDispose}) {
     self.onmessage = (MessageEvent event) {
-      _streamController.sink.add(event.data.dartify() as P);
+      dynamic result = event.data.dartify();
+      if (P is IsolateType) {
+        result = IsolateType.encode(result);
+      }
+      _streamController.sink.add(result as P);
     }.toJS;
   }
   final DedicatedWorkerGlobalScope self;

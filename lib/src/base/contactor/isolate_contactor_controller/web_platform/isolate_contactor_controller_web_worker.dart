@@ -3,7 +3,11 @@ import 'dart:js_interop';
 
 import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_web.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
+import 'package:isolate_manager/src/models/isolate_types.dart';
+import 'package:isolate_manager/src/utils/check_subtype.dart';
 import 'package:web/web.dart';
+
+bool _isSubtype<S, T>() => <S>[] is List<T>;
 
 /// Implementation of the [IsolateContactorController] in `web` with `Worker`.
 class IsolateContactorControllerImplWorker<R, P>
@@ -25,7 +29,11 @@ class IsolateContactorControllerImplWorker<R, P>
       final data = event.data.dartify()! as Map;
 
       if (data['type'] == 'data') {
-        _mainStreamController.add(_workerConverter(data['value']));
+        dynamic result = data['value'];
+        if (isSubtype<R, IsolateType>()) {
+          result = IsolateType.encode(result);
+        }
+        _mainStreamController.add(_workerConverter(result));
         return;
       }
 
@@ -86,7 +94,11 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolate(P message) {
-    _delegate.postMessage(message.jsify());
+    if (message is IsolateType) {
+      _delegate.postMessage(message.decode.jsify());
+    } else {
+      _delegate.postMessage(message.jsify());
+    }
   }
 
   @override
