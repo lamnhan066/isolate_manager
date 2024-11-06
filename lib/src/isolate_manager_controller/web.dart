@@ -3,7 +3,7 @@ import 'dart:js_interop';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
-import 'package:isolate_manager/src/models/isolate_types.dart';
+import 'package:isolate_manager/src/utils/check_subtype.dart';
 import 'package:web/web.dart';
 
 /// This method only use to create a custom isolate.
@@ -60,7 +60,7 @@ class _IsolateManagerWorkerController<R, P>
   _IsolateManagerWorkerController(this.self, {this.onDispose}) {
     self.onmessage = (MessageEvent event) {
       dynamic result = event.data.dartify();
-      if (P is IsolateType) {
+      if (isSubtype<P, IsolateType>()) {
         result = IsolateType.encode(result);
       }
       _streamController.sink.add(result as P);
@@ -79,7 +79,13 @@ class _IsolateManagerWorkerController<R, P>
   /// Send result to the main app
   @override
   void sendResult(R m) {
-    self.postMessage(<String, Object?>{'type': 'data', 'value': m}.jsify());
+    if (m is IsolateType) {
+      self.postMessage(
+        <String, Object?>{'type': 'data', 'value': m.decode}.jsify(),
+      );
+    } else {
+      self.postMessage(<String, Object?>{'type': 'data', 'value': m}.jsify());
+    }
   }
 
   /// Send error to the main app

@@ -7,8 +7,6 @@ import 'package:isolate_manager/src/models/isolate_types.dart';
 import 'package:isolate_manager/src/utils/check_subtype.dart';
 import 'package:web/web.dart';
 
-bool _isSubtype<S, T>() => <S>[] is List<T>;
-
 /// Implementation of the [IsolateContactorController] in `web` with `Worker`.
 class IsolateContactorControllerImplWorker<R, P>
     implements IsolateContactorControllerImpl<R, P> {
