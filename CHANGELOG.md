@@ -1,3 +1,9 @@
+## 6.0.0-rc.6
+
+* Add `IsolateType` to use for function parameters and return types to ensure that type is supported when generating a Worker.
+* Add `test/bin/run.sh` to generate and run all tests locally.
+* Use native `dartify` and `jstify` to improve perfomances.
+
 ## 6.0.0-rc.5
 
 * Improve the generator to generate the worker mappings better.
@@ -16,15 +22,11 @@
 * Use `very_good_analysis`.
 * Improve tests.
 
-*Although all tests are passed, many things will be refactored before version 6.0.0 is fully released.*
-
 ## 6.0.0-rc.2
 
 * Bump the `web` package to `^1.0.0`.
 * Bump the `analyzer` package to `^6.0.0`.
 * Update the benchmark result.
-
-*Although all tests are passed, many things will be refactored before version 6.0.0 is fully released.*
 
 ## 6.0.0-rc.1
 
