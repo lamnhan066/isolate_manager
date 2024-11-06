@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/shared/function.dart';
+import 'package:isolate_manager/src/utils/check_subtype.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 
 /// Web platform does not need to use the `function`
@@ -24,14 +25,29 @@ Future<R> platformExecuteImpl<R extends Object, P extends Object>({
   }
 
   final func = (isWorker && workerFunction != null) ? workerFunction : function;
-  final finalParams = workerParams ?? params;
-  final result = await manager.compute([func, finalParams], priority: priority);
+  var finalParams = workerParams ?? params;
+  final isParameterIsolateType = finalParams is IsolateType;
+
+  // Decode to a sendable object.
+  if (isParameterIsolateType) {
+    finalParams = finalParams.decode!;
+  }
+  var result = await manager.compute(
+    [func, finalParams, isParameterIsolateType],
+    priority: priority,
+  );
+
+  // Encode to IsolateType.
+  if (isSubtype<R, IsolateType>()) {
+    result = IsolateType.encode(result);
+  }
+
   return result as R;
 }
 
 /// Create a Worker on Web.
 void workerFunctionImpl(Map<String, Function> map) {
   IsolateManagerFunction.workerFunction((List<dynamic> message) {
-    return internalFunction([map[message[0]], message[1]]);
+    return internalFunction([map[message[0]], message[1], message[2]]);
   });
 }
