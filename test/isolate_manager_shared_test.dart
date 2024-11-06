@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/models/isolate_types.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
@@ -195,7 +194,7 @@ void main() async {
   });
 
   group('Isolate Types -', () {
-    final isolates = IsolateManager.createShared();
+    final isolates = IsolateManager.createShared(useWorker: true);
 
     setUpAll(() async {
       await isolates.start();
@@ -237,7 +236,7 @@ void main() async {
 
       final result = await isolates.compute(isolateTypeList, value);
 
-      expect(result, isA<IsolateList<IsolateString>>());
+      expect(result, isA<IsolateList>());
       expect(
         result,
         equals(IsolateList(<IsolateString>[IsolateString('100')])),
@@ -247,14 +246,14 @@ void main() async {
     test('Map', () async {
       final result = await isolates.compute(
         isolateTypeMap,
-        IsolateList<IsolateNum>([IsolateNum(5), IsolateNum(7)]),
+        IsolateList([IsolateNum(5), IsolateNum(7)]),
       );
 
-      expect(result, isA<IsolateMap<IsolateString, IsolateNum>>());
+      expect(result, isA<IsolateMap>());
       expect(
         result,
         equals(
-          IsolateMap(<IsolateString, IsolateNum>{
+          IsolateMap({
             IsolateString('5'): IsolateNum(5),
             IsolateString('7'): IsolateNum(7),
           }),
@@ -310,18 +309,16 @@ IsolateBool isolateTypeBool(IsolateBool boolean) {
 }
 
 @isolateManagerSharedWorker
-IsolateList<IsolateString> isolateTypeList(IsolateList<IsolateNum> numbers) {
-  return IsolateList(numbers.decode.map((e) => IsolateString('$e')).toList());
+IsolateList isolateTypeList(IsolateList numbers) {
+  return IsolateList(numbers.decode?.map((e) => IsolateString('$e')).toList());
 }
 
 @isolateManagerSharedWorker
-IsolateMap<IsolateString, IsolateNum> isolateTypeMap(
-  IsolateList<IsolateNum> numbers,
-) {
+IsolateMap isolateTypeMap(IsolateList numbers) {
   return IsolateMap(
     Map.fromEntries(
-      numbers.decode
-          .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e as num))),
+      numbers.decode!
+          .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num))),
     ),
   );
 }
