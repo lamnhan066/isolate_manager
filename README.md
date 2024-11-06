@@ -32,6 +32,7 @@
   - [How a new computation is added if the max queues is exceeded](#how-a-new-computation-is-added-if-the-max-queues-is-exceeded)
   - [Create a custom strategy](#create-a-custom-strategy)
 - [Try Catch Block](#try-catch-block)
+- [IsolateType for the IsolateManager](#isolatetype-for-the-isolatemanager)
 - [Progress Values](#progress-values)
 - [Complicated List, Map Functions](#complicated-list-map-functions)
 - [The Generator Options And Flags](#the-generator-options-and-flags)
@@ -365,6 +366,48 @@ try {
   print(e2);
 }
 ```
+
+## **IsolateType for the IsolateManager**
+
+- You can use the `IsolateType`s when you want to write a function to ensure that it'll be generated to the Worker without unsupported type issue:
+  - `IsolateNum`: Use for `num` type.
+  - `IsolateString`: Use for `String` type.
+  - `IsolateBool`: Use for `bool` type.
+  - `IsolateList`: Use for `List` of `IsolateType` type.
+  - `IsolateMap`: Use for `Map` of `IsolateType` type.
+- The issue behind this new `IsolateType` is that only those types can be transferred between the main app and the Worker. This issue will be easily resolved if `Dart` supports union type like: `typedef IsolateType = num | String | bool | List<IsolateType> | Map<IsolateType, IsolateType>`. Before it happens, I created these `IsolateType`s by using the `sealed` class as a workaround for this issue.
+- Here is how to use it:
+
+```dart
+@isolateManagerWorker
+IsolateMap isolateFunction(IsolateList numbers) {
+  // Convert from `IsolateList` to `Object`.
+  final data = numbers.decode!;
+
+  // Create a Map from `numbers`
+  final map = Map.fromEntries(
+      data.map(
+        (e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num)),
+      ),
+    );
+
+  // Convert to `IsolateMap`
+  final isolateMap = IsolateMap(map);
+
+  // Return as a `IsolateMap`.
+  return isolateMap;
+}
+```
+
+- There is also a helper to convert from supported `Object`s to `IsolateType`s:
+
+```dart
+final map = {'k1': 'v1', 'k2': 'v2'};
+final isolateType = IsolateType.encode(map);
+```
+
+- These are only helper types to make it easier to write a function for the Worker and are optional.
+- This method requires additional computation so if you don't want to use Web Workers then you shouldn't use it.
 
 ## Progress Values
 
