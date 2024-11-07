@@ -59,6 +59,9 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     required String workerName,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    // This parameter is needed on the web platform.
+    // ignore: avoid_unused_constructor_parameters
+    required bool isWasmWorker,
     bool debugMode = false,
   }) async {
     final isolateContactor = IsolateContactorInternal<R, P>._(

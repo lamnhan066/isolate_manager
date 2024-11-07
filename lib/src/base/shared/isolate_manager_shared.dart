@@ -46,6 +46,7 @@ class IsolateManagerShared {
     bool autoStart = true,
     String subPath = '',
     QueueStrategy<Object, List<Object>>? queueStrategy,
+    bool isWasmWorker = false,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
           internalFunction,
@@ -53,6 +54,7 @@ class IsolateManagerShared {
           workerConverter: workerConverter,
           concurrent: concurrent,
           queueStrategy: queueStrategy,
+          isWasmWorker: isWasmWorker,
           isDebug: isDebug,
         ) {
     if (autoStart) start();

@@ -47,6 +47,7 @@ abstract class IsolateContactor<R, P> {
   /// `debugMode` allow printing debug data in console. Default is set to false.
   static Future<IsolateContactor<R, P>> createCustom<R, P>(
     CustomIsolateFunction function, {
+    required bool isWasmWorker,
     String workerName = '',
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
@@ -64,6 +65,7 @@ abstract class IsolateContactor<R, P> {
       converter: converter,
       workerConverter: workerConverter,
       initialParams: initialParams,
+      isWasmWorker: isWasmWorker,
       debugMode: debugMode,
     );
   }

@@ -17,6 +17,7 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     required Object? initialParams,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    required bool isWasmWorker,
     bool debugMode = false,
   }) async {
     /// If browser is not supported Worker then use Future
@@ -28,6 +29,7 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
           initialParams: initialParams,
           converter: converter,
           workerConverter: workerConverter,
+          isWasmWorker: isWasmWorker,
           debugMode: debugMode,
         );
       } catch (_) {

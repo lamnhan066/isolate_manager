@@ -8,8 +8,8 @@ import '../test/isolate_manager_test.dart';
 /*
   dart run isolate_manager:generate -i test -o test --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
   dart run isolate_manager:generate -i test -o test/workers --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
-  dart test --platform=vm
-  dart test --platform=chrome
+  dart test --platform=vm test/isolate_manager_shared_test.dart
+  dart test --platform=chrome test/isolate_manager_shared_test.dart
 */
 
 void main() async {
@@ -19,7 +19,8 @@ void main() async {
     final isolates = IsolateManager.createShared(
       concurrent: 3,
       useWorker: true,
-      // subPath: 'workers',
+      subPath: 'wasms',
+      isWasmWorker: true,
       isDebug: true,
     );
 

@@ -19,11 +19,12 @@ class IsolateContactorInternalWorker<R, P>
     required String workerName,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    required bool isWasmWorker,
     super.debugMode,
   })  : _isolateFunction = isolateFunction,
         _isolateParam = isolateParam,
         _isolateContactorController = IsolateContactorControllerImpl(
-          Worker('$workerName.js'.toJS),
+          Worker('$workerName.${isWasmWorker ? '.wasm' : '.js'}'.toJS),
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,
@@ -53,6 +54,7 @@ class IsolateContactorInternalWorker<R, P>
     required Object? initialParams,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    required bool isWasmWorker,
     bool debugMode = false,
   }) async {
     final isolateContactor = IsolateContactorInternalWorker<R, P>._(
@@ -61,6 +63,7 @@ class IsolateContactorInternalWorker<R, P>
       isolateParam: initialParams,
       converter: converter,
       workerConverter: workerConverter,
+      isWasmWorker: isWasmWorker,
       debugMode: debugMode,
     );
 

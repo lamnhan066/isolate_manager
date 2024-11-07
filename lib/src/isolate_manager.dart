@@ -24,6 +24,7 @@ class IsolateManager<R, P> {
     this.converter,
     this.workerConverter,
     QueueStrategy<R, P>? queueStrategy,
+    this.isWasmWorker = false,
     this.isDebug = false,
   })  : isCustomIsolate = false,
         initialParams = '',
@@ -42,6 +43,7 @@ class IsolateManager<R, P> {
     this.converter,
     this.workerConverter,
     QueueStrategy<R, P>? queueStrategy,
+    this.isWasmWorker = false,
     this.isDebug = false,
   })  : isCustomIsolate = true,
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
@@ -87,6 +89,7 @@ class IsolateManager<R, P> {
     String subPath = '',
     int maxQueueCount = 0,
     QueueStrategy<Object, List<Object>>? queueStrategy,
+    bool isWasmWorker = false,
     bool isDebug = false,
   }) =>
       IsolateManagerShared(
@@ -97,6 +100,7 @@ class IsolateManager<R, P> {
         autoStart: autoStart,
         subPath: subPath,
         queueStrategy: queueStrategy,
+        isWasmWorker: isWasmWorker,
         isDebug: isDebug,
       );
 
@@ -153,6 +157,10 @@ class IsolateManager<R, P> {
   ///
   /// This function only available in `Worker` mode on Web platform.
   final IsolateConverter<R>? workerConverter;
+
+  /// If this value is set to `true`, the [IsolateManager] will load a `.wasm`
+  /// instead of a `.js` when using the Worker.
+  final bool isWasmWorker;
 
   /// Get current number of queues.
   int get queuesLength => queueStrategy.queuesCount;
@@ -225,6 +233,7 @@ class IsolateManager<R, P> {
               initialParams: initialParams,
               converter: converter,
               workerConverter: workerConverter,
+              isWasmWorker: isWasmWorker,
               debugMode: isDebug,
             ).then(
               (IsolateContactor<R, P> value) => _isolates
@@ -243,6 +252,7 @@ class IsolateManager<R, P> {
               workerName: workerName,
               converter: converter,
               workerConverter: workerConverter,
+              isWasmWorker: isWasmWorker,
               debugMode: isDebug,
             ).then(
               (IsolateContactor<R, P> value) => _isolates
