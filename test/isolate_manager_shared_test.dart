@@ -4,6 +4,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
+import 'models/user.dart';
 
 /*
   dart run isolate_manager:generate -i test -o test --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
@@ -202,6 +203,11 @@ void main() async {
 
     tearDownAll(() async {
       await isolates.stop();
+    });
+
+    test('Unimplemented Type', () {
+      final user = User(name: 'user', email: 'user@user.com');
+      expect(() => IsolateType.encode(user), throwsUnimplementedError);
     });
 
     test('num', () async {
