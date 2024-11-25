@@ -219,6 +219,22 @@ void main() async {
       expect(result, equals(value));
     });
 
+    test('num toDouble', () async {
+      const doubleValue = 15.0;
+      final value = IsolateNum(doubleValue).toDouble();
+
+      expect(value, isA<double>());
+      expect(value, equals(doubleValue));
+    });
+
+    test('num toInt', () async {
+      const doubleValue = 15;
+      final value = IsolateNum(doubleValue).toInt();
+
+      expect(value, isA<int>());
+      expect(value, equals(doubleValue));
+    });
+
     test('String', () async {
       final value = IsolateString('abc');
 
