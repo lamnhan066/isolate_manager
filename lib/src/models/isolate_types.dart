@@ -50,6 +50,12 @@ class IsolateNum extends IsolateType {
 
   final num? _value;
 
+  /// Convert this num to double.
+  double? toDouble() => _value?.toDouble();
+
+  /// Convert this num to integer.
+  int? toInt() => _value?.toInt();
+
   @override
   num? get decode => _value;
 }
