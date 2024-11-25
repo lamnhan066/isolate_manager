@@ -1,3 +1,7 @@
+## 6.0.0-rc.7
+
+* The `IsolateType.encode` is now accept the nullable values.
+
 ## 6.0.0-rc.6
 
 * Add `IsolateType` to use for function parameters and return types to ensure that type is supported when generating a Worker.
