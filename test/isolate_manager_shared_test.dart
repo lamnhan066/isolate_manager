@@ -219,7 +219,7 @@ void main() async {
       expect(result, equals(value));
     });
 
-    test('num toDouble', () async {
+    test('num toDouble', () {
       const doubleValue = 15.0;
       final value = IsolateNum(doubleValue).toDouble();
 
@@ -227,12 +227,28 @@ void main() async {
       expect(value, equals(doubleValue));
     });
 
-    test('num toInt', () async {
+    test('num toInt', () {
       const doubleValue = 15;
       final value = IsolateNum(doubleValue).toInt();
 
       expect(value, isA<int>());
       expect(value, equals(doubleValue));
+    });
+
+    test('encode, decode IsolateList', () {
+      final list = <Object>['1', 1, 1.0, false];
+      final value = IsolateType.encode(list);
+
+      expect(value, isA<IsolateList>());
+      expect(value.decode, equals(list));
+    });
+
+    test('encode, decode IsolateMap', () {
+      final map = <String, Object>{'k1': '1', 'k2': 1, 'k3': 1.0, 'k4': false};
+      final value = IsolateType.encode(map);
+
+      expect(value, isA<IsolateMap>());
+      expect(value.decode, equals(map));
     });
 
     test('String', () async {
