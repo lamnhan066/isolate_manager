@@ -19,21 +19,26 @@ sealed class IsolateType extends Object with EquatableMixin {
       return object as R;
     }
 
-    return switch (object) {
-      num() => IsolateNum(object) as R,
-      String() => IsolateString(object) as R,
-      bool() => IsolateBool(object) as R,
-      List<Object?>() =>
-        IsolateList(object.map(IsolateType.encode).toList()) as R,
-      Map<Object?, Object?>() => IsolateMap(
-          object.map(
-            (k, v) => MapEntry(IsolateType.encode(k), IsolateType.encode(v)),
-          ),
-        ) as R,
-      _ => throw UnimplementedError(
-          'Contains unsupported type ${object.runtimeType} when encoding an IsolateType',
+    if (object is num?) {
+      return IsolateNum(object) as R;
+    } else if (object is String?) {
+      return IsolateString(object as String?) as R;
+    } else if (object is bool?) {
+      return IsolateBool(object as bool?) as R;
+    } else if (object is List<Object?>?) {
+      return IsolateList((object as List?)?.map(IsolateType.encode).toList())
+          as R;
+    } else if (object is Map<Object?, Object?>?) {
+      return IsolateMap(
+        (object as Map<Object?, Object?>?)?.map(
+          (k, v) => MapEntry(IsolateType.encode(k), IsolateType.encode(v)),
         ),
-    };
+      ) as R;
+    }
+
+    return throw UnimplementedError(
+      'Contains unsupported type ${object.runtimeType} when encoding an IsolateType',
+    );
   }
 
   /// Convert to normal types.
