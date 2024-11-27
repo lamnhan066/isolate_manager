@@ -5,8 +5,8 @@ import 'package:isolate_manager/isolate_manager.dart';
 import '../function.dart';
 
 /// Web platform does not need to use the `function`
-Future<R> platformExecuteImpl<R extends Object, P extends Object>({
-  required IsolateManager<Object, Object> manager,
+Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
+  required IsolateManager<Object?, dynamic> manager,
   required IsolateFunction<R, P> function,
   required P params,
   required String? workerFunction,
