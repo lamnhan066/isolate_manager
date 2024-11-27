@@ -188,6 +188,13 @@ void main() async {
       expect(e, isA<UnimplementedError>());
     }
   });
+
+  test('Test a nullable function', () async {
+    final isolates = IsolateManager.createShared(useWorker: true);
+
+    final result = await isolates.compute(aNullableInt, null);
+    expect(result, equals(null));
+  });
 }
 
 @isolateManagerSharedWorker
@@ -220,7 +227,13 @@ Map aDynamicMap(Map params) {
   return params;
 }
 
+@isolateManagerSharedWorker
+int? aNullableInt(int? number) {
+  return number;
+}
+
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(aNullableInt, 'aNullableInt');
   IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
   IsolateManager.addWorkerMapping(aStringList, 'aStringList');
   IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');

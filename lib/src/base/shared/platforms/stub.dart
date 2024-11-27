@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:isolate_manager/isolate_manager.dart';
 
 /// Execute
-Future<R> platformExecuteImpl<R extends Object, P extends Object>({
-  required IsolateManager<Object, Object> manager,
+Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
+  required IsolateManager<Object?, dynamic> manager,
   required IsolateFunction<R, P> function,
   required P params,
   required String? workerFunction,
