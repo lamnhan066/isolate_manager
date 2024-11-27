@@ -583,6 +583,13 @@ void main() {
       expect(result.length, equals(0));
     });
   });
+
+  test('Test a nullable function', () async {
+    final isolates = IsolateManager.create(aNullableInt);
+
+    final result = await isolates(null);
+    expect(result, equals(null));
+  });
 }
 
 @isolateManagerWorker
@@ -636,6 +643,11 @@ List a1DTo2DList(List params) {
     }
   }
   return result;
+}
+
+@isolateManagerWorker
+int? aNullableInt(int? number) {
+  return number;
 }
 
 void isolateFunction(dynamic params) {
@@ -741,6 +753,7 @@ Future<int> errorFunctionFuture(List<int> value) async {
 }
 
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(aNullableInt, 'aNullableInt');
   IsolateManager.addWorkerMapping(
     isolateCallbackSimpleFunctionWithSpecifiedType,
     'isolateCallbackSimpleFunctionWithSpecifiedType',
