@@ -1,3 +1,10 @@
+## 5.7.0
+
+* Able to compute a nullable function with a nullable parameter when using the `IsolateManagerShared`.
+* Improve the worker mappings generator.
+* Basic Refactoring: Type Annotations, Final & Const Usage (thanks @Marc-R2).
+* Add some PR notes.
+
 ## 5.6.1
 
 * Improve the generator to generate the worker mappings better.
