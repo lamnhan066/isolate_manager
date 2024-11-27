@@ -299,6 +299,13 @@ void main() async {
       );
     });
   });
+
+  test('Nullable type', () async {
+    final isolates = IsolateManager.createShared(useWorker: true);
+    final result = await isolates.compute(isolateNullableInt, null);
+
+    expect(result, equals(null));
+  });
 }
 
 @isolateManagerSharedWorker
@@ -361,7 +368,13 @@ IsolateMap isolateTypeMap(IsolateList numbers) {
   );
 }
 
+@isolateManagerSharedWorker
+int? isolateNullableInt(int? number) {
+  return number;
+}
+
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
   IsolateManager.addWorkerMapping(isolateTypeMap, 'isolateTypeMap');
   IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
   IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');

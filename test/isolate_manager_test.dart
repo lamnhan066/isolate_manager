@@ -654,6 +654,13 @@ void main() {
         ),
       );
     });
+
+    test('Nullable type', () async {
+      final isolates = IsolateManager.create(isolateNullableInt);
+      final result = await isolates(null);
+
+      expect(result, equals(null));
+    });
   });
 }
 
@@ -856,6 +863,11 @@ IsolateMap isolateTypeMap(IsolateList numbers) {
   );
 }
 
+@isolateManagerWorker
+int? isolateNullableInt(int? number) {
+  return number;
+}
+
 @pragma('vm:entry-point')
 int errorFunction(List<int> value) {
   if (value[0] == 50) {
@@ -875,6 +887,7 @@ Future<int> errorFunctionFuture(List<int> value) async {
 }
 
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
   IsolateManager.addWorkerMapping(isolateTypeString, 'isolateTypeString');
   IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');
   IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
