@@ -22,8 +22,8 @@ Future<dynamic> internalFunction(List<dynamic> params) async {
 }
 
 /// Internal platform execute
-Future<R> platformExecute<R extends Object, P extends Object>({
-  required IsolateManager<Object, dynamic> manager,
+Future<R> platformExecute<R extends Object?, P extends Object?>({
+  required IsolateManager<Object?, dynamic> manager,
   required IsolateFunction<R, P> function,
   required P params,
   required String? workerFunction,

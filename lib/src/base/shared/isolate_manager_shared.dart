@@ -41,7 +41,7 @@ class IsolateManagerShared {
   IsolateManagerShared({
     int concurrent = 1,
     bool useWorker = false,
-    Object Function(dynamic)? workerConverter,
+    Object? Function(dynamic)? workerConverter,
     this.workerMappings = const <Function, String>{},
     bool autoStart = true,
     String subPath = '',
@@ -59,7 +59,7 @@ class IsolateManagerShared {
   }
 
   /// The instance of the [IsolateManager].
-  final IsolateManager<Object, List<dynamic>> _manager;
+  final IsolateManager<Object?, List<dynamic>> _manager;
 
   /// Predefine the mapping between a function and a name of worker function,
   /// so we can ignore the `workerName` parameter when we compute a function
@@ -80,7 +80,7 @@ class IsolateManagerShared {
   /// [workerParams] is specific params for `Worker`, [params] will be use if this value is null.
   ///
   /// Equavient of [compute].
-  Future<R> call<R extends Object, P extends Object>(
+  Future<R> call<R extends Object?, P extends Object?>(
     IsolateFunction<R, P> function,
     P params, {
     String? workerFunction,
@@ -102,7 +102,7 @@ class IsolateManagerShared {
   /// You can ignore this parameter when the [workerMappings] is specified.
   ///
   /// [workerParams] is specific params for `Worker`, [params] will be use if this value is null.
-  Future<R> compute<R extends Object, P extends Object>(
+  Future<R> compute<R extends Object?, P extends Object?>(
     IsolateFunction<R, P> function,
     P params, {
     String? workerFunction,
@@ -119,7 +119,7 @@ class IsolateManagerShared {
   }
 
   /// Execute the given [function] with its' [params].
-  Future<R> _excute<R extends Object, P extends Object>(
+  Future<R> _excute<R extends Object?, P extends Object?>(
     IsolateFunction<R, P> function,
     P params, {
     String? workerFunction,
@@ -137,7 +137,7 @@ class IsolateManagerShared {
   }
 
   /// Get the result as stream.
-  Stream<Object> get stream => _manager.stream;
+  Stream<Object?> get stream => _manager.stream;
 
   /// Start all the isolates. This method is optional because it will be started
   /// automatically when it needs to calculate.

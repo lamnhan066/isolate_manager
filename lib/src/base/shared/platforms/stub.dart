@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:isolate_manager/isolate_manager.dart';
 
 /// Execute
-Future<R> platformExecuteImpl<R extends Object, P extends Object>({
-  required IsolateManager<Object, dynamic> manager,
+Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
+  required IsolateManager<Object?, dynamic> manager,
   required IsolateFunction<R, P> function,
   required P params,
   required String? workerFunction,
@@ -12,7 +12,7 @@ Future<R> platformExecuteImpl<R extends Object, P extends Object>({
   required bool priority,
 }) async {
   final result = await manager.compute(
-    <Object>[function, params],
+    [function, params],
     priority: priority,
   );
   return result as R;

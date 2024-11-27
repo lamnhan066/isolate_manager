@@ -6,8 +6,8 @@ import 'package:isolate_manager/src/utils/check_subtype.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 
 /// Web platform does not need to use the `function`
-Future<R> platformExecuteImpl<R extends Object, P extends Object>({
-  required IsolateManager<Object, dynamic> manager,
+Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
+  required IsolateManager<Object?, dynamic> manager,
   required IsolateFunction<R, P> function,
   required P params,
   required String? workerFunction,
@@ -30,7 +30,7 @@ Future<R> platformExecuteImpl<R extends Object, P extends Object>({
 
   // Decode to a sendable object.
   if (isParameterIsolateType) {
-    finalParams = finalParams.decode!;
+    finalParams = finalParams.decode;
   }
   var result = await manager.compute(
     [func, finalParams, isParameterIsolateType],
