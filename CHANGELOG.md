@@ -1,3 +1,7 @@
+## 6.0.0-rc.8
+
+* Able to compute a nullable function with a nullable parameter use IsolateManagerShared.
+
 ## 6.0.0-rc.7
 
 * The `IsolateType.encode` is now accept the nullable values.
