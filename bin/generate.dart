@@ -100,6 +100,8 @@ void main(List<String> paramArgs) async {
     await shared.generate(argResults, dartArgs, dartFiles);
     printDebug(() => '>> Generated.');
   }
+
+  exit(0);
 }
 
 void printDebug(Object? Function() log) {
