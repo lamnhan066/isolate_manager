@@ -1,3 +1,7 @@
+## 5.7.0+1
+
+* Run `dart format .` to improve the pub.dev score.
+
 ## 5.7.0
 
 * Able to compute a nullable function with a nullable parameter when using the `IsolateManagerShared`.
