@@ -11,7 +11,8 @@ import '../models/exception.dart';
 class IsolateContactorControllerImpl<R, P>
     implements IsolateContactorController<R, P> {
   final IsolateChannel<Map<IsolatePort, dynamic>> _delegate;
-  late final StreamSubscription<Map<IsolatePort, dynamic>> _delegateSubscription;
+  late final StreamSubscription<Map<IsolatePort, dynamic>>
+      _delegateSubscription;
 
   final StreamController<R> _mainStreamController =
       StreamController.broadcast();
