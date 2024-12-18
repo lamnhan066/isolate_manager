@@ -277,6 +277,48 @@ void main() {
     await isolateManager.stop();
   });
 
+  test('Test with all Exception functions with eagerError is true', () async {
+    final isolateManager = IsolateManager<int, List<int>>.create(
+      errorFunction,
+      concurrent: 2,
+    );
+    await isolateManager.start();
+    final futures = <Future<dynamic>>[];
+
+    for (var i = 0; i < 100; i++) {
+      futures.add(isolateManager.compute(<int>[50, 20]));
+    }
+
+    await expectLater(
+      () async => Future.wait(futures, eagerError: true),
+      throwsStateError,
+    );
+    await isolateManager.stop();
+  });
+
+  test(
+      'Test with all Exception functions with eagerError is true with available callback',
+      () async {
+    final isolateManager = IsolateManager<int, List<int>>.create(
+      errorFunction,
+      concurrent: 2,
+    );
+    await isolateManager.start();
+    final futures = <Future<dynamic>>[];
+
+    for (var i = 0; i < 100; i++) {
+      futures.add(
+        isolateManager.compute(<int>[50, 20], callback: (int value) => true),
+      );
+    }
+
+    await expectLater(
+      () async => Future.wait(futures, eagerError: true),
+      throwsStateError,
+    );
+    await isolateManager.stop();
+  });
+
   test('Test with Exception function with eagerError is false', () async {
     final isolateManager = IsolateManager<int, List<int>>.create(
       errorFunction,
@@ -309,6 +351,48 @@ void main() {
     for (var i = 0; i < 100; i++) {
       futures.add(
         isolateManager.compute(<int>[i, 20], callback: (int value) => true),
+      );
+    }
+
+    await expectLater(
+      () async => Future.wait(futures),
+      throwsStateError,
+    );
+    await isolateManager.stop();
+  });
+
+  test('Test with all Exception functions with eagerError is false', () async {
+    final isolateManager = IsolateManager<int, List<int>>.create(
+      errorFunction,
+      concurrent: 2,
+    );
+    await isolateManager.start();
+    final futures = <Future<dynamic>>[];
+
+    for (var i = 0; i < 100; i++) {
+      futures.add(isolateManager.compute(<int>[50, 20]));
+    }
+
+    await expectLater(
+      () async => Future.wait(futures),
+      throwsStateError,
+    );
+    await isolateManager.stop();
+  });
+
+  test(
+      'Test with all Exception functions with eagerError is false with available callback',
+      () async {
+    final isolateManager = IsolateManager<int, List<int>>.create(
+      errorFunction,
+      concurrent: 2,
+    );
+    await isolateManager.start();
+    final futures = <Future<dynamic>>[];
+
+    for (var i = 0; i < 100; i++) {
+      futures.add(
+        isolateManager.compute(<int>[50, 20], callback: (int value) => true),
       );
     }
 
