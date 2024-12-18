@@ -11,7 +11,7 @@ class IsolateContactorInternalFuture<R, P>
       StreamController.broadcast();
 
   /// Listener for result
-  final IsolateContactorController<R, P>? _isolateContactorController;
+  IsolateContactorController<R, P>? _isolateContactorController;
 
   /// Control the function of isolate
   final void Function(dynamic) _isolateFunction;
@@ -80,7 +80,7 @@ class IsolateContactorInternalFuture<R, P>
 
     _isolateFunction([_isolateParam, _isolateContactorController]);
 
-    await _isolateContactorController.ensureInitialized.future;
+    await _isolateContactorController!.ensureInitialized.future;
 
     printDebug(() => 'Initialized');
   }
@@ -96,6 +96,8 @@ class IsolateContactorInternalFuture<R, P>
 
     await _isolateContactorController?.close();
     await _mainStreamController.close();
+
+    _isolateContactorController = null;
 
     printDebug(() => 'Disposed');
   }
@@ -115,7 +117,7 @@ class IsolateContactorInternalFuture<R, P>
 
     final Completer<R> completer = Completer();
     late final StreamSubscription<R> sub;
-    sub = _isolateContactorController.onMessage.listen((result) async {
+    sub = _isolateContactorController!.onMessage.listen((result) async {
       if (!completer.isCompleted) {
         completer.complete(result);
         await sub.cancel();
@@ -128,7 +130,7 @@ class IsolateContactorInternalFuture<R, P>
 
     printDebug(() => 'Message send to isolate: $message');
 
-    _isolateContactorController.sendIsolate(message);
+    _isolateContactorController!.sendIsolate(message);
 
     return completer.future;
   }

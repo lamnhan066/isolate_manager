@@ -55,7 +55,9 @@ class IsolateContactorControllerImplFuture<R, P>
               if (onDispose != null) onDispose!();
               close();
             } else {
-              _isolateStreamController.add(value);
+              if (!_isolateStreamController.isClosed) {
+                _isolateStreamController.add(value);
+              }
             }
             break;
         }
@@ -78,26 +80,37 @@ class IsolateContactorControllerImplFuture<R, P>
   Stream<P> get onIsolateMessage => _isolateStreamController.stream;
 
   @override
-  void initialized() =>
-      _delegate.sink.add({IsolatePort.main: IsolateState.initialized});
+  void initialized() {
+    if (_delegate.isClosed) return;
+
+    _delegate.sink.add({IsolatePort.main: IsolateState.initialized});
+  }
 
   @override
   void sendIsolate(P message) {
+    if (_delegate.isClosed) return;
+
     _delegate.sink.add({IsolatePort.isolate: message});
   }
 
   @override
   void sendIsolateState(IsolateState state) {
+    if (_delegate.isClosed) return;
+
     _delegate.sink.add({IsolatePort.isolate: state});
   }
 
   @override
   void sendResult(R message) {
+    if (_delegate.isClosed) return;
+
     _delegate.sink.add({IsolatePort.main: message});
   }
 
   @override
   void sendResultError(IsolateException exception) {
+    if (_delegate.isClosed) return;
+
     _delegate.sink.add({IsolatePort.main: exception});
   }
 
