@@ -252,11 +252,10 @@ class IsolateManager<R, P> {
       );
     }
 
-    _streamSubscription = _streamController.stream.listen((result) {
-      _excuteQueue();
-    })
-      // Needs to put onError here to make the try-catch work properly.
-      ..onError((error, stack) {});
+    _streamSubscription = _streamController.stream.listen(
+      (_) => _excuteQueue(),
+      onError: (_, __) => _excuteQueue(),
+    );
 
     _excuteQueue();
 
