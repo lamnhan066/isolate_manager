@@ -1,3 +1,7 @@
+## 6.0.0-rc.9
+
+* Fixed issue that causes subsequent tasks not to be processed after receiving an exception.
+
 ## 6.0.0-rc.8
 
 * Able to compute a nullable function with a nullable parameter use IsolateManagerShared.
