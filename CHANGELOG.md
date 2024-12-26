@@ -1,3 +1,7 @@
+## 5.7.1
+
+* Fixed issue that the IsolateManager does not properly handle exceptions causes subsequent tasks are not processed.
+
 ## 5.7.0+1
 
 * Run `dart format .` to improve the pub.dev score.
