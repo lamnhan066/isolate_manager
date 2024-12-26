@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:test/test.dart';
 
@@ -20,6 +21,12 @@ void main() {
     test('IsolateState', () {
       for (final state in IsolateState.values) {
         expect(state.isValidMap(state.toMap()), equals(true));
+      }
+    });
+
+    test('IsolatePort', () {
+      for (final port in IsolatePort.values) {
+        expect(port, isA<IsolatePort>());
       }
     });
 
