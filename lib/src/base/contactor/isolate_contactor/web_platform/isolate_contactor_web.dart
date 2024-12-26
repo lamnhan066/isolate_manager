@@ -107,14 +107,6 @@ class IsolateContactorInternalFuture<R, P>
   /// Throw IsolateContactorException if error occurs.
   @override
   Future<R> sendMessage(P message) {
-    if (_isolateContactorController == null) {
-      printDebug(() => '! This isolate has been terminated');
-      return throw IsolateException(
-        'This isolate was terminated',
-        StackTrace.empty,
-      );
-    }
-
     final Completer<R> completer = Completer();
     late final StreamSubscription<R> sub;
     sub = _isolateContactorController!.onMessage.listen((result) async {

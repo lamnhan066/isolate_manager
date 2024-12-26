@@ -45,17 +45,4 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
       debugMode: debugMode,
     );
   }
-
-  @override
-  Future<void> dispose() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Stream<R> get onMessage => throw UnimplementedError();
-
-  @override
-  Future<R> sendMessage(P message) {
-    throw UnimplementedError();
-  }
 }

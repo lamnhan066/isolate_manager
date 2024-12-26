@@ -1,12 +1,11 @@
 import 'dart:async';
 
-import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:isolate_manager/isolate_manager.dart';
 import 'package:web/web.dart';
 
 import '../../isolate_contactor.dart';
 import '../../isolate_contactor_controller.dart';
 import '../../isolate_contactor_controller/isolate_contactor_controller_web.dart';
-import '../../models/exception.dart';
 import '../isolate_contactor_web.dart';
 
 class IsolateContactorInternalWorker<R, P>
@@ -112,14 +111,6 @@ class IsolateContactorInternalWorker<R, P>
   /// Throw IsolateContactorException if error occurs.
   @override
   Future<R> sendMessage(P message) {
-    if (_isolateContactorController == null) {
-      printDebug(() => '! This isolate has been terminated');
-      return throw IsolateException(
-        'This isolate was terminated',
-        StackTrace.empty,
-      );
-    }
-
     final Completer<R> completer = Completer();
     late final StreamSubscription<R> sub;
     sub = _isolateContactorController!.onMessage.listen((result) async {
