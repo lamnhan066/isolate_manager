@@ -201,6 +201,13 @@ class IsolateManager<R, P> {
 
   /// Initialize the instance. This method can be called manually or will be
   /// called when the first `compute()` has been made.
+  ///
+  /// **Notice:** Avoid using this method when creating a new instance like this
+  /// to avoid unexpected behavior:
+  ///
+  /// ```dart
+  /// final isolate = IsolateManager.create(function)..start();
+  /// ```
   Future<void> start() async {
     // This instance is stoped.
     if (_streamController.isClosed) return;
