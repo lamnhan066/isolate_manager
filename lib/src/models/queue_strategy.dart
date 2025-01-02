@@ -103,9 +103,7 @@ class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
 
 class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
   /// Discard the new incoming computation if the [maxCount] is exceeded.
-  QueueStrategyDiscardIncoming({
-    super.maxCount = 0,
-  });
+  QueueStrategyDiscardIncoming({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
