@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/shared/function.dart';
+import 'package:path/path.dart';
 
 /// Default shared worker name.
 const String kSharedWorkerName = r'$shared_worker';
@@ -48,7 +49,7 @@ class IsolateManagerShared {
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
           internalFunction,
-          workerName: useWorker ? '$subPath/$kSharedWorkerName' : '',
+          workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
           workerConverter: workerConverter,
           concurrent: concurrent,
           queueStrategy: queueStrategy,
