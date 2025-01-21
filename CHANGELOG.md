@@ -1,3 +1,7 @@
+## 6.0.0-rc.10
+
+* Separate the generator into the `isolate_manager_generator` package.
+
 ## 6.0.0-rc.9
 
 * Fixed issue that causes subsequent tasks not to be processed after receiving an exception.
