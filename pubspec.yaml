@@ -13,10 +13,10 @@ environment:
   sdk: ^3.4.0
 
 dependencies:
-  equatable: ^2.0.5
+  equatable: ^2.0.0
   isolate_manager_generator: ^0.0.1
-  path: ^1.9.1
-  stream_channel: ^2.1.0
+  path: ^1.0.0
+  stream_channel: ^2.0.0
   web: ^1.0.0
 
 dev_dependencies:
