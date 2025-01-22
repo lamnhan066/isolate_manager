@@ -173,14 +173,13 @@ class IsolateManager<R, P> {
   /// To check if the [start] method is completed or not.
   bool get isStarted => _startedCompleter.isCompleted;
 
-  /// Map<IsolateContactor instance, isBusy>.
+  /// `Map<IsolateContactor instance, isBusy>`.
   final Map<IsolateContactor<R, P>, bool> _isolates =
       <IsolateContactor<R, P>, bool>{};
 
   /// Controller for stream.
   final StreamController<R> _streamController = StreamController.broadcast();
   StreamSubscription<dynamic>? _streamSubscription;
-  // final List<StreamSubscription<R>> _streamSubscriptions = [];
 
   /// Is the `start` method is starting.
   bool _isStarting = false;
