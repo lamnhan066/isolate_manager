@@ -1,3 +1,7 @@
+## 6.0.0-rc.11
+
+* Adjust the dependencies.
+
 ## 6.0.0-rc.10
 
 * Separate the generator into the `isolate_manager_generator` package.
