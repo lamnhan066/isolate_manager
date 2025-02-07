@@ -10,7 +10,7 @@ enum IsolateState {
 
   /// {
   ///   type: '$IsolateState',
-  ///   value: '<name>',
+  ///   value: `<name>`,
   /// }
   String toJson() => jsonEncode({'type': r'$IsolateState', 'value': name});
 

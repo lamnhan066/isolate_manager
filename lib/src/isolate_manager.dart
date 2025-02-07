@@ -173,7 +173,7 @@ class IsolateManager<R, P> {
   /// To check if the [start] method is completed or not.
   bool get isStarted => _startedCompleter.isCompleted;
 
-  /// Map<IsolateContactor instance, isBusy>.
+  /// `Map<IsolateContactor instance, isBusy>`.
   final Map<IsolateContactor<R, P>, bool> _isolates = {};
 
   /// Controller for stream.
