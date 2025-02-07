@@ -19,22 +19,14 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   }) async {
     /// If browser is not supported Worker then use Future
     if (workerName != '') {
-      try {
-        return IsolateContactorInternalWorker.createCustom<R, P>(
-          isolateFunction: isolateFunction,
-          workerName: workerName,
-          initialParams: initialParams,
-          converter: converter,
-          workerConverter: workerConverter,
-          debugMode: debugMode,
-        );
-      } catch (_) {
-        if (debugMode) {
-          print(
-            '[${IsolateContactor.debugLogPrefix}]: This browser doesn\'t support Worker, Future will be applied!',
-          );
-        }
-      }
+      return IsolateContactorInternalWorker.createCustom<R, P>(
+        isolateFunction: isolateFunction,
+        workerName: workerName,
+        initialParams: initialParams,
+        converter: converter,
+        workerConverter: workerConverter,
+        debugMode: debugMode,
+      );
     }
     return IsolateContactorInternalFuture.createCustom<R, P>(
       isolateFunction: isolateFunction,
