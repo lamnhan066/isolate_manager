@@ -1,3 +1,10 @@
+## 5.7.2
+
+* Separate the generator into `isolate_manager_generator` (still included in this package).
+* Update tests.
+* Update some comments.
+* Remove unnecessary code.
+
 ## 5.7.1
 
 * Fixed issue that the IsolateManager does not properly handle exceptions causes subsequent tasks are not processed.
