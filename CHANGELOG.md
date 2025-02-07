@@ -1,4 +1,4 @@
-## 5.7.2
+## 5.7.2+1
 
 * Separate the generator into `isolate_manager_generator` (still included in this package).
 * Update tests.
