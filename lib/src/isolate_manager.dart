@@ -395,89 +395,45 @@ class IsolateManager<R, P> {
       /// Allow calling `compute` before `start`.
       if (queueStrategy.hasNext() && _isolates[isolate] == false) {
         final queue = queueStrategy.getNext();
-        _excute(isolate, queue);
+        _execute(isolate, queue);
       }
     }
   }
 
   /// Send and recieve value.
-  Future<R> _excute(IsolateContactor<R, P> isolate, IsolateQueue<R, P> queue) {
-    if (queue.callback != null) {
-      return _excuteWithCallback(isolate, queue);
-    } else {
-      return _excuteWithoutCallback(isolate, queue);
-    }
-  }
-
-  Future<R> _excuteWithCallback(
+  Future<R> _execute(
     IsolateContactor<R, P> isolate,
     IsolateQueue<R, P> queue,
   ) async {
     // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
-    StreamSubscription<dynamic>? sub;
-    sub = isolate.onMessage.listen(
-      (event) async {
-        // Callbacks on every event.
-        final completer = Completer<bool>()..complete(queue.callback!(event));
-        if (await completer.future) {
-          await sub?.cancel();
+    // Receive the data and check if it's the right result
+    Future<void> onData(R event) async {
+      if (await queue.callback(event)) {
+        // Send the result back to the main app.
+        _streamController.sink.add(event);
+        queue.completer.complete(event);
+      }
+    }
 
-          // Send the result back to the main app.
-          _streamController.sink.add(event);
-          queue.completer.complete(event);
+    // Send the exception back to the main app.
+    void onError(Object error, StackTrace stackTrace) {
+      _streamController.sink.addError(error, stackTrace);
+      queue.completer.completeError(error, stackTrace);
+    }
 
-          // Mark the current isolate as free.
-          _isolates[isolate] = false;
-        }
-      },
-      onError: (Object error, StackTrace stackTrace) async {
-        await sub?.cancel();
-
-        // Send the exception back to the main app.
-        _streamController.sink.addError(error, stackTrace);
-        queue.completer.completeError(error, stackTrace);
-
-        // Mark the current isolate as free.
-        _isolates[isolate] = false;
-      },
-    );
+    final sub = isolate.onMessage.listen(onData, onError: onError);
 
     try {
-      await isolate.sendMessage(queue.params);
-    } catch (_, __) {
-      /* Do not need to catch the Exception here because it's catched in the above Stream */
+      unawaited(isolate.sendMessage(queue.params));
+      return await queue.completer.future;
+    } finally {
+      await sub.cancel();
+
+      // Mark the current isolate as free.
+      _isolates[isolate] = false;
     }
-
-    return queue.completer.future;
-  }
-
-  Future<R> _excuteWithoutCallback(
-    IsolateContactor<R, P> isolate,
-    IsolateQueue<R, P> queue,
-  ) async {
-    // Mark the current isolate as busy.
-    _isolates[isolate] = true;
-
-    // Send the `param` to the isolate and wait for the result.
-    await isolate.sendMessage(queue.params).then((value) {
-      // Send the result back to the main app.
-      _streamController.sink.add(value);
-      queue.completer.complete(value);
-
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
-    }).onError((Object? error, StackTrace stackTrace) {
-      // Send the exception back to the main app.
-      _streamController.sink.addError(error!, stackTrace);
-      queue.completer.completeError(error, stackTrace);
-
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
-    });
-
-    return queue.completer.future;
   }
 
   /// Print logs if [isDebug] is true
