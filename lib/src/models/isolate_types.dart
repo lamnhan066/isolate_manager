@@ -15,30 +15,23 @@ sealed class IsolateType extends Object with EquatableMixin {
   ///
   /// Throw [UnimplementedError] if containing any un supported types.
   static R encode<R extends IsolateType>(Object? object) {
-    if (object is IsolateType) {
-      return object as R;
-    }
+    if (object is IsolateType) return object as R;
 
-    if (object is num?) {
-      return IsolateNum(object) as R;
-    } else if (object is String?) {
-      return IsolateString(object as String?) as R;
-    } else if (object is bool?) {
-      return IsolateBool(object as bool?) as R;
-    } else if (object is List<Object?>?) {
-      return IsolateList((object as List?)?.map(IsolateType.encode).toList())
-          as R;
-    } else if (object is Map<Object?, Object?>?) {
-      return IsolateMap(
-        (object as Map<Object?, Object?>?)?.map(
-          (k, v) => MapEntry(IsolateType.encode(k), IsolateType.encode(v)),
+    return switch (object) {
+      final num? n => IsolateNum(n),
+      final String? s => IsolateString(s),
+      final bool? b => IsolateBool(b),
+      final List<Object?>? list =>
+        IsolateList(list?.map(IsolateType.encode).toList()),
+      final Map<Object?, Object?>? map => IsolateMap(
+          map?.map(
+            (k, v) => MapEntry(IsolateType.encode(k), IsolateType.encode(v)),
+          ),
         ),
-      ) as R;
-    }
-
-    return throw UnimplementedError(
-      'Contains unsupported type ${object.runtimeType} when encoding an IsolateType',
-    );
+      _ => throw UnimplementedError(
+          'Contains unsupported type ${object.runtimeType} when encoding an IsolateType',
+        ),
+    } as R;
   }
 
   /// Convert to normal types.
