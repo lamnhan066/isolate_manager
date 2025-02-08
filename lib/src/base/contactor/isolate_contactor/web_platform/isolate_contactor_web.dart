@@ -28,7 +28,7 @@ class IsolateContactorInternalFuture<R, P>
       StreamController.broadcast();
 
   /// Listener for result
-  final IsolateContactorController<R, P>? _isolateContactorController;
+  final IsolateContactorController<R, P> _isolateContactorController;
 
   /// Control the function of isolate
   final void Function(dynamic) _isolateFunction;
@@ -60,7 +60,7 @@ class IsolateContactorInternalFuture<R, P>
 
   /// Initialize
   Future<void> _initial() async {
-    _isolateContactorController!.onMessage.listen((message) {
+    _isolateContactorController.onMessage.listen((message) {
       printDebug(
         () => '[Main Stream] Message received from Future: $message',
       );
@@ -84,40 +84,30 @@ class IsolateContactorInternalFuture<R, P>
 
   @override
   Future<void> dispose() async {
-    _isolateContactorController?.sendIsolateState(IsolateState.dispose);
+    _isolateContactorController.sendIsolateState(IsolateState.dispose);
 
-    await _isolateContactorController?.close();
+    await _isolateContactorController.close();
     await _mainStreamController.close();
 
     printDebug(() => 'Disposed');
   }
 
   @override
-  Future<R> sendMessage(P message) {
-    if (_isolateContactorController == null) {
-      printDebug(() => '! This isolate has been terminated');
-      return throw IsolateException(
-        'This isolate was terminated',
-      );
-    }
-
+  Future<R> sendMessage(P message) async {
     final completer = Completer<R>();
-    StreamSubscription<dynamic>? sub;
-    sub = _isolateContactorController.onMessage.listen((result) async {
-      if (!completer.isCompleted) {
-        completer.complete(result);
-        await sub?.cancel();
-      }
+    final sub = _isolateContactorController.onMessage.listen((result) async {
+      if (!completer.isCompleted) completer.complete(result);
     })
       ..onError((Object err, StackTrace stack) async {
-        completer.completeError(err, stack);
-        await sub?.cancel();
+        if (!completer.isCompleted) completer.completeError(err, stack);
       });
 
-    printDebug(() => 'Message send to isolate: $message');
-
-    _isolateContactorController.sendIsolate(message);
-
-    return completer.future;
+    try {
+      printDebug(() => 'Message sent to isolate: $message');
+      _isolateContactorController.sendIsolate(message);
+      return await completer.future;
+    } finally {
+      await sub.cancel();
+    }
   }
 }

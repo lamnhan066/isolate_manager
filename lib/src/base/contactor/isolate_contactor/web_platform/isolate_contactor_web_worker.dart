@@ -5,7 +5,6 @@ import 'package:isolate_manager/src/base/contactor/isolate_contactor.dart';
 import 'package:isolate_manager/src/base/contactor/isolate_contactor/isolate_contactor_web.dart';
 import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller.dart';
 import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_web.dart';
-import 'package:isolate_manager/src/base/contactor/models/exception.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
 import 'package:web/web.dart';
 
@@ -34,7 +33,7 @@ class IsolateContactorInternalWorker<R, P>
       StreamController.broadcast();
 
   /// Listener for result
-  IsolateContactorController<R, P>? _isolateContactorController;
+  final IsolateContactorController<R, P> _isolateContactorController;
 
   // final _isolateWorker = Worker("isolate.dart.js");
 
@@ -71,7 +70,7 @@ class IsolateContactorInternalWorker<R, P>
 
   /// Initialize
   Future<void> _initial() async {
-    _isolateContactorController!.onMessage.listen((message) {
+    _isolateContactorController.onMessage.listen((message) {
       printDebug(
         () => '[Main Stream] Message received from Worker: $message',
       );
@@ -83,7 +82,7 @@ class IsolateContactorInternalWorker<R, P>
       _mainStreamController.sink.addError(err, stack);
     });
 
-    await _isolateContactorController!.ensureInitialized.future;
+    await _isolateContactorController.ensureInitialized.future;
 
     printDebug(() => 'Initialized');
   }
@@ -93,42 +92,30 @@ class IsolateContactorInternalWorker<R, P>
 
   @override
   Future<void> dispose() async {
-    _isolateContactorController?.sendIsolateState(IsolateState.dispose);
+    _isolateContactorController.sendIsolateState(IsolateState.dispose);
 
-    await _isolateContactorController?.close();
+    await _isolateContactorController.close();
     await _mainStreamController.close();
-
-    _isolateContactorController = null;
 
     printDebug(() => 'Disposed');
   }
 
   @override
-  Future<R> sendMessage(P message) {
-    if (_isolateContactorController == null) {
-      printDebug(() => '! This isolate has been terminated');
-      return throw IsolateException(
-        'This isolate was terminated',
-      );
-    }
-
+  Future<R> sendMessage(P message) async {
     final completer = Completer<R>();
-    StreamSubscription<R>? sub;
-    sub = _isolateContactorController!.onMessage.listen((result) async {
-      if (!completer.isCompleted) {
-        completer.complete(result);
-        await sub?.cancel();
-      }
+    final sub = _isolateContactorController.onMessage.listen((result) async {
+      if (!completer.isCompleted) completer.complete(result);
     })
       ..onError((Object err, StackTrace stack) async {
-        completer.completeError(err, stack);
-        await sub?.cancel();
+        if (!completer.isCompleted) completer.completeError(err, stack);
       });
 
-    printDebug(() => 'Message send to isolate: $message');
-
-    _isolateContactorController!.sendIsolate(message);
-
-    return completer.future;
+    try {
+      printDebug(() => 'Message sent to isolate: $message');
+      _isolateContactorController.sendIsolate(message);
+      return await completer.future;
+    } finally {
+      await sub.cancel();
+    }
   }
 }

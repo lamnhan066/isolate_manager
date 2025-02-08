@@ -116,22 +116,19 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   @override
   Future<R> sendMessage(P message) async {
     final completer = Completer<R>();
-    StreamSubscription<R>? sub;
-    sub = _isolateContactorController.onMessage.listen((result) async {
-      if (!completer.isCompleted) {
-        completer.complete(result);
-        await sub?.cancel();
-      }
+    final sub = _isolateContactorController.onMessage.listen((result) async {
+      if (!completer.isCompleted) completer.complete(result);
     })
       ..onError((Object err, StackTrace stack) async {
-        completer.completeError(err, stack);
-        await sub?.cancel();
+        if (!completer.isCompleted) completer.completeError(err, stack);
       });
 
-    printDebug(() => 'Message send to isolate: $message');
-
-    _isolateContactorController.sendIsolate(message);
-
-    return completer.future;
+    try {
+      printDebug(() => 'Message sent to isolate: $message');
+      _isolateContactorController.sendIsolate(message);
+      return await completer.future;
+    } finally {
+      await sub.cancel();
+    }
   }
 }
