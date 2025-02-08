@@ -52,8 +52,9 @@ Future<void> execute(int fibonacciNumber) async {
     fibonacciRecursive,
     workerName: 'fibonacciRecursive',
   );
-  await singleIsolate.start();
+
   stopWatch.start();
+  await singleIsolate.start();
   for (var i = 0; i < 70; i++) {
     await singleIsolate.compute(fibonacciNumber);
   }
@@ -68,9 +69,9 @@ Future<void> execute(int fibonacciNumber) async {
     concurrent: 3,
     workerName: 'fibonacciRecursive',
   );
-  await threeIsolates.start();
 
   stopWatch.start();
+  await threeIsolates.start();
   await Future.wait(
     [for (int i = 0; i < 70; i++) threeIsolates.compute(fibonacciNumber)],
   );
