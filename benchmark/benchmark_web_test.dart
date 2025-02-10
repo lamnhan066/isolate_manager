@@ -5,8 +5,6 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 import 'package:test/test.dart';
 
-import '../test/isolate_manager_test.dart';
-
 void main() {
   test(
     'benchmark',
@@ -28,6 +26,13 @@ void main() {
     },
     timeout: const Timeout(Duration(seconds: 120)),
   );
+}
+
+int fibonacciRecursive(int n) {
+  if (n == 0) return 0;
+  if (n == 1) return 1;
+
+  return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
 }
 
 Future<void> execute(int fibonacciNumber) async {
