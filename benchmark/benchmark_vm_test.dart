@@ -45,23 +45,25 @@ Future<void> execute(int fibonacciNumber) async {
   singleInMain = stopWatch.elapsed;
   stopWatch
     ..stop()
-    ..reset();
+    ..reset()
+    ..start();
 
   // One Isolate (Worker)
   final singleIsolate = IsolateManager<int, int>.create(
     fibonacciRecursive,
     workerName: 'fibonacciRecursive',
   );
-
-  stopWatch.start();
   await singleIsolate.start();
   for (var i = 0; i < 70; i++) {
     await singleIsolate.compute(fibonacciNumber);
   }
+  await singleIsolate.stop();
   singleInIsolate = stopWatch.elapsed;
+
   stopWatch
     ..stop()
-    ..reset();
+    ..reset()
+    ..start();
 
   // Three Isolates (Workers)
   final threeIsolates = IsolateManager<int, int>.create(
@@ -69,13 +71,13 @@ Future<void> execute(int fibonacciNumber) async {
     concurrent: 3,
     workerName: 'fibonacciRecursive',
   );
-
-  stopWatch.start();
   await threeIsolates.start();
   await Future.wait(
     [for (int i = 0; i < 70; i++) threeIsolates.compute(fibonacciNumber)],
   );
+  await threeIsolates.stop();
   threeIsolatesInIsolate = stopWatch.elapsed;
+
   stopWatch
     ..stop()
     ..reset()
@@ -86,9 +88,8 @@ Future<void> execute(int fibonacciNumber) async {
     await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
   }
   runMethodInIsolate = stopWatch.elapsed;
-  stopWatch
-    ..stop()
-    ..reset();
+
+  stopWatch.stop();
 
   printDebug(
     () => '|$fibonacciNumber|${singleInMain.inMicroseconds}|'
