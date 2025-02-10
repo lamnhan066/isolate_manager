@@ -408,32 +408,41 @@ class IsolateManager<R, P> {
     // Mark the current isolate as busy.
     _isolates[isolate] = true;
 
-    // Receive the data and check if it's the right result
-    Future<void> onData(R event) async {
-      if (await queue.callback(event)) {
-        // Send the result back to the main app.
-        _streamController.sink.add(event);
-        queue.completer.complete(event);
-      }
-    }
+    StreamSubscription<dynamic>? sub;
+    sub = isolate.onMessage.listen(
+      (event) async {
+        // Callbacks on every event.
+        final completer = Completer<bool>()..complete(queue.callback(event));
+        if (await completer.future) {
+          await sub?.cancel();
 
-    // Send the exception back to the main app.
-    void onError(Object error, StackTrace stackTrace) {
-      _streamController.sink.addError(error, stackTrace);
-      queue.completer.completeError(error, stackTrace);
-    }
+          // Send the result back to the main app.
+          _streamController.sink.add(event);
+          queue.completer.complete(event);
 
-    final sub = isolate.onMessage.listen(onData, onError: onError);
+          // Mark the current isolate as free.
+          _isolates[isolate] = false;
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) async {
+        await sub?.cancel();
+
+        // Send the exception back to the main app.
+        _streamController.sink.addError(error, stackTrace);
+        queue.completer.completeError(error, stackTrace);
+
+        // Mark the current isolate as free.
+        _isolates[isolate] = false;
+      },
+    );
 
     try {
-      unawaited(isolate.sendMessage(queue.params));
-      return await queue.completer.future;
-    } finally {
-      await sub.cancel();
-
-      // Mark the current isolate as free.
-      _isolates[isolate] = false;
+      await isolate.sendMessage(queue.params);
+    } catch (_, __) {
+      /* Do not need to catch the Exception here because it's catched in the above Stream */
     }
+
+    return queue.completer.future;
   }
 
   /// Print logs if [isDebug] is true
