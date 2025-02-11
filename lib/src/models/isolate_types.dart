@@ -29,6 +29,7 @@ sealed class IsolateType<T extends Object?> extends Object with EquatableMixin {
       final String? s => IsolateString(s),
       final bool? b => IsolateBool(b),
       final List<Object?>? list => IsolateList(list?.map(encode<R>).toList()),
+      final Iterable<Object?>? list => IsolateIterable(list?.map(encode<R>)),
       final Map<Object?, Object?>? map => IsolateMap(
           map?.map(
             (k, v) => MapEntry(encode<R>(k), encode<R>(v)),
@@ -82,11 +83,19 @@ class IsolateBool extends IsolateType<bool?> {
   const IsolateBool(super.value);
 }
 
+/// A wrapper for iterables of [IsolateType] objects specific to [Object?] types.
+///
+/// Use [IsolateIterable] when transferring iterables between isolates.
+class IsolateIterable extends _IsolateTypedIterable<Object?> {
+  /// Creates an [IsolateIterable] with the provided [list] of wrapped objects.
+  const IsolateIterable(super.list);
+}
+
 /// A wrapper for lists of [IsolateType] objects specific to [Object?] types.
 ///
 /// This class safely transfers lists between isolates and decodes to a list
 /// of original Dart values.
-class IsolateList extends _IsolateTypedIterable<Object?> {
+class IsolateList extends IsolateIterable {
   /// Creates an [IsolateList] with the provided list of wrapped objects.
   const IsolateList(super.list);
 
