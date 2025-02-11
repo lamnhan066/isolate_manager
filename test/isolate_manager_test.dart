@@ -687,7 +687,7 @@ void main() {
     test('num', () async {
       final isolates = IsolateManager.create(isolateTypeNum, isDebug: true);
 
-      final value = IsolateNum(15);
+      const value = IsolateNum(15);
 
       final result = await isolates.compute(value);
 
@@ -696,7 +696,7 @@ void main() {
     });
 
     test('String', () async {
-      final value = IsolateString('abc');
+      const value = IsolateString('abc');
       final isolates = IsolateManager.create(isolateTypeString);
 
       final result = await isolates.compute(value);
@@ -706,7 +706,7 @@ void main() {
     });
 
     test('bool', () async {
-      final value = IsolateBool(false);
+      const value = IsolateBool(false);
       final isolates = IsolateManager.create(isolateTypeBool);
 
       final result = await isolates.compute(value);
@@ -716,7 +716,7 @@ void main() {
     });
 
     test('List', () async {
-      final value = IsolateList(<IsolateNum>[IsolateNum(100)]);
+      const value = IsolateList(<IsolateNum>[IsolateNum(100)]);
       final isolates = IsolateManager.create(isolateTypeList);
 
       final result = await isolates.compute(value);
@@ -724,14 +724,14 @@ void main() {
       expect(result, isA<IsolateList>());
       expect(
         result,
-        equals(IsolateList(<IsolateString>[IsolateString('100')])),
+        equals(const IsolateList(<IsolateString>[IsolateString('100')])),
       );
     });
 
     test('Map', () async {
       final isolates = IsolateManager.create(isolateTypeMap);
       final result = await isolates.compute(
-        IsolateList([IsolateNum(5), IsolateNum(7)]),
+        const IsolateList([IsolateNum(5), IsolateNum(7)]),
       );
 
       expect(result, isA<IsolateMap>());
@@ -739,8 +739,8 @@ void main() {
         result,
         equals(
           IsolateMap(<IsolateString, IsolateNum>{
-            IsolateString('5'): IsolateNum(5),
-            IsolateString('7'): IsolateNum(7),
+            const IsolateString('5'): const IsolateNum(5),
+            const IsolateString('7'): const IsolateNum(7),
           }),
         ),
       );

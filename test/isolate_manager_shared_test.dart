@@ -207,11 +207,14 @@ void main() async {
 
     test('Unimplemented Type', () {
       final user = User(name: 'user', email: 'user@user.com');
-      expect(() => IsolateType.encode(user), throwsUnimplementedError);
+      expect(
+        () => IsolateType.encode<IsolateType<Object?>>(user),
+        throwsUnimplementedError,
+      );
     });
 
     test('num', () async {
-      final value = IsolateNum(15);
+      const value = IsolateNum(15);
 
       final result = await isolates.compute(isolateTypeNum, value);
 
@@ -221,7 +224,7 @@ void main() async {
 
     test('num toDouble', () {
       const doubleValue = 15.0;
-      final value = IsolateNum(doubleValue).toDouble();
+      final value = const IsolateNum(doubleValue).toDouble();
 
       expect(value, isA<double>());
       expect(value, equals(doubleValue));
@@ -229,7 +232,7 @@ void main() async {
 
     test('num toInt', () {
       const doubleValue = 15;
-      final value = IsolateNum(doubleValue).toInt();
+      final value = const IsolateNum(doubleValue).toInt();
 
       expect(value, isA<int>());
       expect(value, equals(doubleValue));
@@ -237,7 +240,7 @@ void main() async {
 
     test('encode, decode IsolateList', () {
       final list = <Object>['1', 1, 1.0, false];
-      final value = IsolateType.encode(list);
+      final value = IsolateType.encode<IsolateType<Object?>>(list);
 
       expect(value, isA<IsolateList>());
       expect(value.decode, equals(list));
@@ -245,14 +248,14 @@ void main() async {
 
     test('encode, decode IsolateMap', () {
       final map = <String, Object>{'k1': '1', 'k2': 1, 'k3': 1.0, 'k4': false};
-      final value = IsolateType.encode(map);
+      final value = IsolateType.encode<IsolateType<Object?>>(map);
 
       expect(value, isA<IsolateMap>());
       expect(value.decode, equals(map));
     });
 
     test('String', () async {
-      final value = IsolateString('abc');
+      const value = IsolateString('abc');
 
       final result = await isolates.compute(isolateTypeString, value);
 
@@ -261,7 +264,7 @@ void main() async {
     });
 
     test('bool', () async {
-      final value = IsolateBool(false);
+      const value = IsolateBool(false);
 
       final result = await isolates.compute(isolateTypeBool, value);
 
@@ -270,21 +273,21 @@ void main() async {
     });
 
     test('List', () async {
-      final value = IsolateList(<IsolateNum>[IsolateNum(100)]);
+      const value = IsolateList(<IsolateNum>[IsolateNum(100)]);
 
       final result = await isolates.compute(isolateTypeList, value);
 
       expect(result, isA<IsolateList>());
       expect(
         result,
-        equals(IsolateList(<IsolateString>[IsolateString('100')])),
+        equals(const IsolateList(<IsolateString>[IsolateString('100')])),
       );
     });
 
     test('Map', () async {
       final result = await isolates.compute(
         isolateTypeMap,
-        IsolateList([IsolateNum(5), IsolateNum(7)]),
+        const IsolateList([IsolateNum(5), IsolateNum(7)]),
       );
 
       expect(result, isA<IsolateMap>());
@@ -292,8 +295,8 @@ void main() async {
         result,
         equals(
           IsolateMap({
-            IsolateString('5'): IsolateNum(5),
-            IsolateString('7'): IsolateNum(7),
+            const IsolateString('5'): const IsolateNum(5),
+            const IsolateString('7'): const IsolateNum(7),
           }),
         ),
       );
