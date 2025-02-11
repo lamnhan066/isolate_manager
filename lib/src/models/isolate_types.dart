@@ -91,7 +91,7 @@ class IsolateList extends _IsolateTypedIterable<Object?> {
   const IsolateList(super.list);
 
   @override
-  List<Object?>? get decode => _list?.map((e) => e.decode).toList();
+  List<Object?>? get decode => super.decode?.toList();
 }
 
 /// A wrapper for maps with both keys and values of [Object?] types.
