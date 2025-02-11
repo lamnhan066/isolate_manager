@@ -60,8 +60,8 @@ class _IsolateManagerWorkerController<R, P>
   _IsolateManagerWorkerController(this.self, {this.onDispose}) {
     self.onmessage = (MessageEvent event) {
       dynamic result = event.data.dartify();
-      if (isSubtype<P, IsolateType>()) {
-        result = IsolateType.encode(result);
+      if (isSubtype<P, IsolateType<Object?>>()) {
+        result = IsolateType.encode<IsolateType<Object?>>(result);
       }
       _streamController.sink.add(result as P);
     }.toJS;

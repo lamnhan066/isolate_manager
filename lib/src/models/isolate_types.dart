@@ -1,105 +1,132 @@
 import 'package:equatable/equatable.dart';
 
-/// Use [IsolateType] in your parameter and return types to ensure that the value
-/// is transferable between the main app and the Workers. So the `IsolateManager`
-/// will work correctly on both VM and Web.
+/// An abstract wrapper for simple transferable types between the main thread
+/// and worker isolates.
 ///
-/// Includes:
-///   [IsolateNum] for [num]
-///   [IsolateString] for [String]
-///   [IsolateBool] for [bool]
-///   [IsolateMap] for [Map]
-///   [IsolateList] for [List]
-sealed class IsolateType extends Object with EquatableMixin {
-  /// This `object` only accept `num`, `String`, `bool`, and List, Map of those types.
-  ///
-  /// Throw [UnimplementedError] if containing any un supported types.
-  static R encode<R extends IsolateType>(Object? object) {
-    if (object is IsolateType) return object as R;
+/// Use this class as the parameter or return type in your isolate communication
+/// methods. It provides safe wrapping for these Dart types:
+///   - num (wrapped in [IsolateNum])
+///   - String (wrapped in [IsolateString])
+///   - bool (wrapped in [IsolateBool])
+///   - List (wrapped in [IsolateList])
+///   - Map (wrapped in [IsolateMap])
+///
+/// The static [encode] method wraps a Dart object in the appropriate [IsolateType].
+sealed class IsolateType<T extends Object?> extends Object with EquatableMixin {
+  /// Creates an instance of [IsolateType] holding the provided [_value].
+  const IsolateType(this._value);
 
+  /// Converts a plain Dart object into its corresponding [IsolateType] instance.
+  ///
+  /// Supported types include:
+  ///   num, String, bool, List, and Map that contain these types.
+  ///
+  /// Throws an [UnimplementedError] if the object's type is not supported.
+  static R encode<R extends IsolateType<Object?>>(Object? object) {
     return switch (object) {
+      final R r => r,
       final num? n => IsolateNum(n),
       final String? s => IsolateString(s),
       final bool? b => IsolateBool(b),
-      final List<Object?>? list =>
-        IsolateList(list?.map(IsolateType.encode).toList()),
+      final List<Object?>? list => IsolateList(list?.map(encode<R>).toList()),
       final Map<Object?, Object?>? map => IsolateMap(
           map?.map(
-            (k, v) => MapEntry(IsolateType.encode(k), IsolateType.encode(v)),
+            (k, v) => MapEntry(encode<R>(k), encode<R>(v)),
           ),
         ),
       _ => throw UnimplementedError(
-          'Contains unsupported type ${object.runtimeType} when encoding an IsolateType',
+          'Unsupported type ${object.runtimeType} when encoding an IsolateType',
         ),
     } as R;
   }
 
-  /// Convert to normal types.
-  Object? get decode;
+  /// The internal wrapped value.
+  final T _value;
+
+  /// Returns the original Dart value by unwrapping this instance.
+  T get decode => _value;
 
   @override
   List<Object?> get props => [decode];
 }
 
-/// The [IsolateType] for [num].
-class IsolateNum extends IsolateType {
-  /// The [IsolateType] for [num].
-  IsolateNum(this._value);
+/// A wrapper for numeric values.
+///
+/// Use [IsolateNum] to safely transfer a numeric value between isolates.
+/// It also provides helper methods for converting the value.
+class IsolateNum extends IsolateType<num?> {
+  /// Creates an [IsolateNum] with the given numeric [value].
+  const IsolateNum(super.value);
 
-  final num? _value;
-
-  /// Convert this num to double.
+  /// Returns the numeric value as a [double], or null if the value is null.
   double? toDouble() => _value?.toDouble();
 
-  /// Convert this num to integer.
+  /// Returns the numeric value as an [int], or null if the value is null.
   int? toInt() => _value?.toInt();
-
-  @override
-  num? get decode => _value;
 }
 
-/// The [IsolateType] for [String].
-class IsolateString extends IsolateType {
-  /// The [IsolateType] for [String].
-  IsolateString(this._value);
-
-  final String? _value;
-
-  @override
-  String? get decode => _value;
+/// A wrapper for [String] values.
+///
+/// Use [IsolateString] to safely transfer strings between isolates.
+class IsolateString extends IsolateType<String?> {
+  /// Creates an [IsolateString] with the given string [value].
+  const IsolateString(super.value);
 }
 
-/// The [IsolateType] for [bool].
-class IsolateBool extends IsolateType {
-  /// The [IsolateType] for [bool].
+/// A wrapper for boolean values.
+///
+/// Use [IsolateBool] when transferring boolean values between isolates.
+class IsolateBool extends IsolateType<bool?> {
+  /// Creates an [IsolateBool] with the given boolean [value].
   // ignore: avoid_positional_boolean_parameters
-  IsolateBool(this._value);
-
-  final bool? _value;
-
-  @override
-  bool? get decode => _value;
+  const IsolateBool(super.value);
 }
 
-/// The [IsolateType] for [List] of [IsolateType].
-class IsolateList extends IsolateType {
-  /// The [IsolateType] for [List] of [IsolateType].
-  IsolateList(this._value);
-
-  final List<IsolateType>? _value;
+/// A wrapper for lists of [IsolateType] objects specific to [Object?] types.
+///
+/// This class safely transfers lists between isolates and decodes to a list
+/// of original Dart values.
+class IsolateList extends _IsolateTypedIterable<Object?> {
+  /// Creates an [IsolateList] with the provided list of wrapped objects.
+  const IsolateList(super.list);
 
   @override
-  List<Object?>? get decode => _value?.map((e) => e.decode).toList();
+  List<Object?>? get decode => _list?.map((e) => e.decode).toList();
 }
 
-/// The [IsolateType] for [Map] of [IsolateType] as key and value.
-class IsolateMap extends IsolateType {
-  /// The [IsolateType] for [Map] of [IsolateType] as key and value.
-  IsolateMap(this._value);
+/// A wrapper for maps with both keys and values of [Object?] types.
+///
+/// Use [IsolateMap] to safely transfer maps between isolates.
+class IsolateMap extends _IsolateTypedMap<Object?, Object?> {
+  /// Creates an [IsolateMap] with the provided map of wrapped objects.
+  const IsolateMap(super.map);
+}
 
-  final Map<IsolateType, IsolateType>? _value;
+/// A generic wrapper for iterables containing [IsolateType] elements.
+///
+/// This class wraps each element in an [IsolateType] and decodes the iterable
+/// back to its original unwrapped values.
+class _IsolateTypedIterable<T> extends IsolateType<Iterable<T>?> {
+  /// Creates an instance that wraps the provided iterable of [IsolateType] elements.
+  const _IsolateTypedIterable(this._list) : super(null);
+
+  final Iterable<IsolateType<T>>? _list;
 
   @override
-  Map<Object?, Object?>? get decode =>
-      _value?.map((k, v) => MapEntry(k.decode, v.decode));
+  Iterable<T>? get decode => _list?.map((e) => e.decode);
+}
+
+/// A generic wrapper for maps that have keys and values wrapped in [IsolateType].
+///
+/// This class enables safe transfer of maps between isolates. The [decode]
+/// getter reconstructs the original map by unwrapping the keys and values.
+class _IsolateTypedMap<K, V> extends IsolateType<Map<K, V>?> {
+  /// Creates an instance that wraps a map with both keys and values as [IsolateType] objects.
+  const _IsolateTypedMap(this._map) : super(null);
+
+  /// The internal map with wrapped keys and values.
+  final Map<IsolateType<K>, IsolateType<V>>? _map;
+
+  @override
+  Map<K, V>? get decode => _map?.map((k, v) => MapEntry(k.decode, v.decode));
 }

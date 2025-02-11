@@ -28,8 +28,8 @@ class IsolateContactorControllerImplWorker<R, P>
 
       if (data['type'] == 'data') {
         dynamic result = data['value'];
-        if (isSubtype<R, IsolateType>()) {
-          result = IsolateType.encode(result);
+        if (isSubtype<R, IsolateType<Object?>>()) {
+          result = IsolateType.encode<IsolateType<Object?>>(result);
         }
         _mainStreamController.add(_workerConverter(result));
         return;
@@ -92,7 +92,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolate(P message) {
-    if (message is IsolateType) {
+    if (message is IsolateType<Object?>) {
       _delegate.postMessage(message.decode.jsify());
     } else {
       _delegate.postMessage(message.jsify());
