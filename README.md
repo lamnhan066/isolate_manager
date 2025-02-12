@@ -4,7 +4,7 @@
 
 [![Pub Version](https://img.shields.io/pub/v/isolate_manager)](https://pub.dev/packages/isolate_manager)
 [![Pub Points](https://img.shields.io/pub/points/isolate_manager)](https://pub.dev/packages/isolate_manager)
-[![Pub Popularity](https://img.shields.io/pub/popularity/isolate_manager)](https://pub.dev/packages/isolate_manager)
+[![Pub Downloads](https://img.shields.io/pub/dm/isolate_manager)](https://pub.dev/packages/isolate_manager)
 [![Pub Likes](https://img.shields.io/pub/likes/isolate_manager)](https://pub.dev/packages/isolate_manager)
 
 ## **Features**
