@@ -1,3 +1,7 @@
+## 5.7.3
+
+* Update the `web` package version to re-support a wider range (">=0.5.1 <2.0.0").
+
 ## 5.7.2+1
 
 * Separate the generator into `isolate_manager_generator` (still included in this package).
