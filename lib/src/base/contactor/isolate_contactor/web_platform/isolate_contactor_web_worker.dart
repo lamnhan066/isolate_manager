@@ -39,8 +39,9 @@ class IsolateContactorInternalWorker<R, P>
   })  : _isolateFunction = isolateFunction,
         _isolateParam = isolateParam,
         super(debugMode) {
-    // This is a workaround to use a wider range of the package `web` version (>=0.5.1 <2.0.0)
-    // and will use only `$workerName.js'.toJS` in the next major release (v6.0.0).
+    // This is a workaround to support a wider range of `web` package versions (>=0.5.1 <2.0.0).
+    // In the next major release (v6.0.0), only `$workerName.js'.toJS` will be used,
+    // which requires `web` package version 1.0.0 or higher.
     try {
       _isolateContactorController = IsolateContactorControllerImpl(
         Worker('$workerName.js' as dynamic),
