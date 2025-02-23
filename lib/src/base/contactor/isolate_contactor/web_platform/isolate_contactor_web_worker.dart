@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:web/web.dart';
@@ -37,15 +38,25 @@ class IsolateContactorInternalWorker<R, P>
     bool debugMode = false,
   })  : _isolateFunction = isolateFunction,
         _isolateParam = isolateParam,
-        _isolateContactorController = IsolateContactorControllerImpl(
-          // TODO: Change to `'$workerName.js'.toJS` when releasing version `6.0.0` (a new major version).
-          // this is a workaround to use a wider range of the package `web` version (>=0.5.1 <2.0.0).
-          Worker('$workerName.js' as dynamic),
-          converter: converter,
-          workerConverter: workerConverter,
-          onDispose: null,
-        ),
-        super(debugMode);
+        super(debugMode) {
+    // This is a workaround to use a wider range of the package `web` version (>=0.5.1 <2.0.0)
+    // and will use only `$workerName.js'.toJS` in the next major release (v6.0.0).
+    try {
+      _isolateContactorController = IsolateContactorControllerImpl(
+        Worker('$workerName.js' as dynamic),
+        converter: converter,
+        workerConverter: workerConverter,
+        onDispose: null,
+      );
+    } catch (_) {
+      _isolateContactorController = IsolateContactorControllerImpl(
+        Worker('$workerName.js'.toJS as dynamic),
+        converter: converter,
+        workerConverter: workerConverter,
+        onDispose: null,
+      );
+    }
+  }
 
   /// Create modified isolate function
   static Future<IsolateContactorInternalWorker<R, P>> createCustom<R, P>({

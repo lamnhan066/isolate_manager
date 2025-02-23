@@ -17,7 +17,7 @@ dependencies:
   isolate_manager_generator: ^0.0.1
   path: ^1.0.0
   stream_channel: ^2.1.0
-  web: ^1.0.0
+  web: ">=0.5.1 <2.0.0"
 
 dev_dependencies:
   test: ^1.25.8
