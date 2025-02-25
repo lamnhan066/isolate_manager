@@ -1,3 +1,7 @@
+## 6.0.0-rc.13
+
+* Improve README.
+
 ## 6.0.0-rc.12
 
 * Add an `IsolateManager.run` method that follows `Isolate.run` but also supports Web Workers.
