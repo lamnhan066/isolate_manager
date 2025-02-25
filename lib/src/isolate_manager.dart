@@ -85,6 +85,46 @@ class IsolateManager<R, P> {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
+  /// Runs [computation] in a new isolate and returns the result. Similar to `Isolate.run`,
+  /// but supports Web Worker for the web.
+  ///
+  /// If [workerName] is provided, it will run the named worker using [workerParameter].
+  ///
+  /// Example:
+  /// ```dart
+  /// @isolateManagerWorker
+  /// int fibonacciRecursive(int n) {
+  ///   if (n == 0) return 0;
+  ///   if (n == 1) return 1;
+  ///   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+  /// }
+  ///
+  /// final fibo40 = await IsolateManager.run(
+  ///   () => fibonacciRecursive(40),
+  ///   workerName: 'fibonacciRecursive',
+  ///   workerParameter: 40,
+  /// );
+  /// ```
+  /// Set [isDebug] to `true` if you want to print the debug log.
+  static Future<R> run<R>(
+    FutureOr<R> Function() computation, {
+    String? workerName,
+    Object? workerParameter,
+    bool isDebug = false,
+  }) async {
+    final im = IsolateManager<R, Object?>.create(
+      (_) => computation(),
+      workerName: workerName,
+      isDebug: isDebug,
+    );
+
+    await im.start();
+    final result = await im.compute(workerParameter);
+    await im.stop();
+
+    return result;
+  }
+
   /// Create multiple long live isolates for computation. This method can be used
   /// to compute multiple functions.
   ///

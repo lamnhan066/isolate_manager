@@ -11,7 +11,7 @@ void main() {
     () async {
       printDebug(
         () =>
-            '|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run (Unsupported)|',
+            '|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run (Unsupported)|',
       );
       printDebug(() => '|:-:|-:|-:|-:|-:|');
 
@@ -39,7 +39,7 @@ Future<void> execute(int fibonacciNumber) async {
   var singleInMain = Duration.zero;
   var singleInIsolate = Duration.zero;
   var threeIsolatesInIsolate = Duration.zero;
-  const runMethodInIsolate = Duration.zero;
+  var runMethodInIsolateManager = Duration.zero;
 
   // Main App
   final stopWatch = Stopwatch()..start();
@@ -82,12 +82,27 @@ Future<void> execute(int fibonacciNumber) async {
   await threeIsolates.stop();
   threeIsolatesInIsolate = stopWatch.elapsed;
 
-  stopWatch.stop();
+  stopWatch
+    ..stop()
+    ..reset()
+    ..start();
+
+  for (var i = 0; i < 70; i++) {
+    await IsolateManager.run(
+      () => fibonacciRecursive(fibonacciNumber),
+      workerName: 'fibonacciRecursive',
+      workerParameter: fibonacciNumber,
+    );
+  }
+  runMethodInIsolateManager = stopWatch.elapsed;
+  stopWatch
+    ..stop()
+    ..reset();
 
   printDebug(
     () => '|$fibonacciNumber|${singleInMain.inMicroseconds}|'
         '${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}'
-        '|${runMethodInIsolate.inMicroseconds}|',
+        '|${runMethodInIsolateManager.inMicroseconds}|-|',
   );
 }
 

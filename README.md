@@ -21,6 +21,7 @@
 
 - [Benchmark](#benchmark)
 - [Setup](#setup)
+- [Isolate Manager Run](#isolatemanager-run)
 - [Isolate Manager Shared (For Multiple Functions)](#isolatemanagershared-method)
 - [Isolate Manager (For A Single Function)](#isolatemanager-method)
   - [Basic Usage](#basic-usage)
@@ -45,19 +46,19 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 - VM
 
-|Fibonacci|Main App|One Isolate|Three Isolates|Isolate.run|
-|:-:|-:|-:|-:|-:|
-|30|755,313|771,500|275,800|772,843|
-|33|3,173,846|3,186,777|1,148,128|3,216,177|
-|36|13,475,199|13,506,222|4,853,034|13,576,593|
+|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run|
+|:-:|-:|-:|-:|-:|-:|
+|30|761,423|780,398|279,172|784,649|761,381|
+|33|3,205,501|3,249,139|1,171,256|3,236,956|3,180,707|
+|36|13,605,980|13,633,074|4,944,189|13,671,389|13,424,013|
 
 - Chrome (With `Worker` supported)
 
-|Fibonacci|Main App|One Worker|Three Workers|Isolate.run (Unsupported)|
-|:-:|-:|-:|-:|-:|
-|30|2,132,800|544,900|191,100|0|
-|33|9,046,800|2,277,800|803,300|0|
-|36|38,313,000|9,544,300|3,383,500|0|
+[Isolate Manager]: |Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run (Unsupported)|
+[Isolate Manager]: |:-:|-:|-:|-:|-:|
+[Isolate Manager]: |30|2,139,400|572,100|201,100|1,078,500|-|
+[Isolate Manager]: |33|9,040,700|2,301,700|816,800|2,850,000|-|
+[Isolate Manager]: |36|38,641,400|9,739,000|3,438,800|10,243,600|-|
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/benchmarks/README.md) for the test details.
 
@@ -83,6 +84,27 @@ int add(List<int> values) {
 - **Required Note:** If you want to build functions into Javascript Worker:
   - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
   - The Worker's input parameters and the return type can be a Dart primitive types (like `int`, `double`, `String` and `bool`), a `Map<dynamic, dynamic>` or a `List<dynamic>`.
+
+## **IsolateManager Run**
+
+Since version `6.0.0`, the `IsolateManager.run` method matches the behavior of `Isolate.run` but also supports Web Workers on the web.
+
+For instance:
+
+```dart
+@isolateManagerWorker
+int fibonacciRecursive(int n) {
+  if (n == 0) return 0;
+  if (n == 1) return 1;
+  return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+}
+
+final fibo40 = await IsolateManager.run(
+  () => fibonacciRecursive(40),
+  workerName: 'fibonacciRecursive',
+  workerParameter: 40,
+);
+```
 
 ## **IsolateManagerShared Method**
 

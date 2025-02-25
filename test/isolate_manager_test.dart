@@ -753,6 +753,16 @@ void main() {
       expect(result, equals(null));
     });
   });
+
+  test('IsolateManager.run method', () async {
+    final result = await IsolateManager.run(
+      () => fibonacciRecursive(20),
+      workerName: 'fibonacciRecursive',
+      workerParameter: 20,
+    );
+
+    expect(result, equals(6765));
+  });
 }
 
 @isolateManagerWorker
