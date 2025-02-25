@@ -1,3 +1,12 @@
+## 6.0.0-rc.12
+
+* Add an `IsolateManager.run` method that follows `Isolate.run` but also supports Web Workers.
+* Allow `IsolateType` to be declared as const.
+* Refactor to simplify internal code.
+* Strengthen tests.
+* Improve the README.
+* Improve the Benchmarks.
+
 ## 6.0.0-rc.11
 
 * Adjust the dependencies.
