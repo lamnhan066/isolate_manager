@@ -13,8 +13,8 @@ typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
 /// Callback for the `createCustom`'s `function`.
 typedef IsolateCustomFunction = IsolateFunction<void, dynamic>;
 
-/// Create a new [IsolateManager] instance by using [IsolateManager.create] or
-/// [IsolateManager.createCustom].
+/// Create a new [IsolateManager] instance by using [IsolateManager.create],
+/// [IsolateManager.createCustom] or [IsolateManager.createShared].
 class IsolateManager<R, P> {
   /// Creates a new IsolateManager for isolate-based computations.
   ///
