@@ -16,7 +16,25 @@ typedef IsolateCustomFunction = IsolateFunction<void, dynamic>;
 /// Create a new [IsolateManager] instance by using [IsolateManager.create] or
 /// [IsolateManager.createCustom].
 class IsolateManager<R, P> {
-  /// An easy way to create a new isolate.
+  /// Creates a new IsolateManager for isolate-based computations.
+  ///
+  /// [isolateFunction] is the function to be run in each isolate.
+  ///
+  /// Use [workerName] (or a pre-defined mapping in [_workerMappings]) to utilize
+  /// a named worker JS file on the Web.
+  ///
+  /// [concurrent] decides how many isolates to spawn.
+  ///
+  /// [converter] and [workerConverter] optionally transform the results before returning.
+  ///
+  /// Control the Queue strategy via [queueStrategy] with the following basic
+  /// strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  ///
+  /// [isDebug] enables debug logs when set to true.
   IsolateManager.create(
     IsolateFunction<R, P> this.isolateFunction, {
     String? workerName,
@@ -29,11 +47,28 @@ class IsolateManager<R, P> {
         initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
         workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
-    // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
-  /// Create a new isolate with your own isolate function.
+  /// Creates a new [IsolateManager] instance with a custom isolate function.
+  ///
+  /// [isolateFunction] is the user-defined function to be run in each isolate.
+  ///
+  /// Use [workerName] (or a pre-defined mapping in [_workerMappings]) to utilize
+  /// a named worker JS file on the Web.
+  ///
+  /// [concurrent] decides how many isolates to spawn.
+  ///
+  /// [converter] and [workerConverter] optionally transform results before returning.
+  ///
+  /// Control the Queue strategy via [queueStrategy] with the following basic
+  /// strategies:
+  ///   - [QueueStrategyUnlimited] - default.
+  ///   - [QueueStrategyRemoveNewest]
+  ///   - [QueueStrategyRemoveOldest]
+  ///   - [QueueStrategyDiscardIncoming]
+  ///
+  /// Set [isDebug] to `true` to enable debug logs.
   IsolateManager.createCustom(
     IsolateCustomFunction this.isolateFunction, {
     String? workerName,
