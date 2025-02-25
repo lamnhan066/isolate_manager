@@ -106,6 +106,12 @@ final fibo40 = await IsolateManager.run(
 );
 ```
 
+Run this command to generate the Javascript Workers:
+
+```console
+dart run isolate_manager:generate
+```
+
 ## **IsolateManagerShared Method**
 
 ```dart
@@ -197,7 +203,7 @@ int fibonacci(int n) {
 }
 ```
 
-Run this command to generate a Javascript Worker:
+Run this command to generate the Javascript Workers:
 
 ```console
 dart run isolate_manager:generate
