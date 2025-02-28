@@ -85,17 +85,17 @@ class IsolateContactorControllerImpl<R, P>
     ]);
   }
 
-  void _handleEvent(dynamic event) {
+  Future<void> _handleEvent(dynamic event) async {
     if (event is! Map<IsolatePort, dynamic>) return;
 
-    event.forEach((port, value) {
-      switch (port) {
+    for (final entry in event.entries) {
+      switch (entry.key) {
         case IsolatePort.main:
-          _handleMainPort(value);
+          _handleMainPort(entry.value);
         case IsolatePort.isolate:
-          _handleIsolatePort(value);
+          await _handleIsolatePort(entry.value);
       }
-    });
+    }
   }
 
   void _handleMainPort(dynamic value) {

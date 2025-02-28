@@ -81,7 +81,9 @@ class IsolateContactorControllerImplWorker<R, P>
   }
 
   /// Centralizes the event processing for the incoming worker messages.
-  Future<void> _handleMessage(MessageEvent event) async {
+  // Can't return `Future<void>` because of the `onmessage` signature.
+  // ignore: avoid_void_async
+  void _handleMessage(MessageEvent event) async {
     try {
       final data = event.data.dartify() as Map?;
       if (data == null) return;
@@ -115,7 +117,7 @@ class IsolateContactorControllerImplWorker<R, P>
       }
 
       _mainStreamController.addError(
-        IsolateException('Unhandled $data from the Isolate').error.toString(),
+        IsolateException('Unhandled $data from the Isolate').toMap(),
       );
     } catch (e, stack) {
       _mainStreamController.addError(e, stack);
