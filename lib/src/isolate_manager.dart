@@ -113,18 +113,13 @@ class IsolateManager<R, P> {
     String? workerName,
     Object? workerParameter,
     bool isDebug = false,
-  }) async {
-    final im = IsolateManager<R, Object?>.create(
+  }) {
+    return runFunction<R, Object?>(
       (_) => computation(),
+      workerParameter,
       workerName: workerName,
       isDebug: isDebug,
     );
-
-    await im.start();
-    final result = await im.compute(workerParameter);
-    await im.stop();
-
-    return result;
   }
 
   /// Executes [function] in a dedicated, one-off isolate and returns its result.
@@ -159,10 +154,11 @@ class IsolateManager<R, P> {
     );
 
     await im.start();
-    final result = await im.compute(parameter);
-    await im.stop();
-
-    return result;
+    try {
+      return await im.compute(parameter);
+    } finally {
+      await im.stop();
+    }
   }
 
   /// Create multiple long live isolates for computation. This method can be used
