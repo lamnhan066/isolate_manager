@@ -363,10 +363,7 @@ class IsolateManager<R, P> {
               converter: converter,
               workerConverter: workerConverter,
               debugMode: isDebug,
-            ).then(
-              (IsolateContactor<R, P> value) => _isolates
-                  .addAll(<IsolateContactor<R, P>, bool>{value: false}),
-            ),
+            ).then((value) => _isolates[value] = false),
         ],
       );
     }
