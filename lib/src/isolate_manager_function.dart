@@ -29,10 +29,7 @@ typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 
 /// The helper functions for the [IsolateManager].
-class IsolateManagerFunction {
-  /// No-op
-  IsolateManagerFunction._(); // coverage:ignore-line
-
+abstract class IsolateManagerFunction {
   /// Create a custom isolate function.
   ///
   /// The [onInitial] and [onDispose] will be executed only one time in the beginning
@@ -75,41 +72,34 @@ class IsolateManagerFunction {
     // Initialize the controller for the child isolate. This function will be declared
     // with `Map<String, dynamic>` as the return type (.sendResult) and `String` as the parameter type (.sendMessage).
     late IsolateManagerController<R, P> controller;
+    StreamSubscription<P>? subscription;
+
     controller = IsolateManagerController(
       params,
       onDispose: onDispose == null
           ? null
-          : () {
+          : () async {
               onDispose(controller);
-              controller.close();
+              await subscription?.cancel();
+              await controller.close();
             },
     );
 
-    if (onInitial != null) {
-      final completer = Completer<void>()
-        ..complete(onInitial(controller, controller.initialParams));
-      await completer.future;
-    }
+    await onInitial?.call(controller, controller.initialParams);
 
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
-    controller.onIsolateMessage.listen((message) {
-      final completer = Completer<dynamic>();
-      completer.future.then(
-        (value) => autoHandleResult ? controller.sendResult(value as R) : null,
-        onError: autoHandleException
-            ? (Object err, StackTrace stack) =>
-                controller.sendResultError(IsolateException(err, stack))
-            : null,
-      );
-
+    subscription = controller.onIsolateMessage.listen((message) async {
       // Use try-catch to send the exception to the main app
       try {
-        completer.complete(onEvent(controller, message));
+        final value = await onEvent(controller, message);
+        if (autoHandleResult) {
+          controller.sendResult(value);
+        }
       } catch (err, stack) {
         // Send the exception to your main app
         if (autoHandleException) {
-          completer.completeError(err, stack);
+          controller.sendResultError(IsolateException(err, stack));
         } else {
           rethrow;
         }
