@@ -9,21 +9,22 @@
 
 ## **Features**
 
-- Supports to create multiple Isolates for:
-  - **A single Function:** One `IsolateManager` instance can be used for only one Function, so that the `stream` can be used easily when using something like a `StreamBuilder` (Use the`@isolateManagerWorker` and `@isolateManagerCustomWorker` annotations).
-  - **Multiple Functions:** One `IsolateManagerShared` instance can be used for multiple Functions, it's good for computing multiple Functions and doesn't care much about the `stream` (Use the `@isolateManagerSharedWorker` annotation).
-- Supports `Worker` on the Web. If the `Worker` is unavailable in the working browser or is not configured, the `Future` (and `Stream`) will be used.
+- Supports creating multiple Isolates for:
+  - **One-off Isolate:** Utilize `IsolateManager.run` for single-use computations, which functions similarly to `Isolate.run` but includes support for web Workers. Additionally, use `IsolateManager.runFunction` to automatically set the `workerName` via `IsolateManager.addWorkerMapping`.
+  - **Long-lived Isolates For A Single Function:** Use one `IsolateManager` instance per function, allowing easy use of streams with `StreamBuilder`. Annotate with `@isolateManagerWorker` and `@isolateManagerCustomWorker`.
+  - **Long-lived Isolates For Multiple Functions:** Use one `IsolateManagerShared` instance for multiple functions, ideal for computing multiple functions without focusing on streams. Annotate with `@isolateManagerSharedWorker`.
+- Supports `Worker` on the Web. If `Worker` is unavailable or not configured, `Future` (and `Stream`) will be used.
 - Supports `WASM` compilation on the Web.
 - Supports `try-catch` blocks.
-- Multiple `compute` operations are allowed because the plugin will queue the input data and send it to a free isolate later.
+- Allows multiple `compute` operations by queuing input data and sending it to a free isolate later.
 
 ## **Table Of Contents**
 
 - [Benchmark](#benchmark)
 - [Setup](#setup)
 - [One-off Isolate](#one-off-isolate)
-- [Isolate Manager Shared (For Multiple Functions)](#isolatemanagershared-method)
-- [Isolate Manager (For A Single Function)](#isolatemanager-method)
+- [Long-lived Isolates For Multi Funtions](#long-lived-isolates-for-multi-funtions)
+- [Long-lived Isolates For A Single Funtion](#long-lived-isolates-for-a-single-funtion)
   - [Basic Usage](#basic-usage)
   - [Custom Function Usage](#custom-function-usage)
   - [Progress Values (Receives multiple values from a single `compute`)](#progress-values)
@@ -118,7 +119,7 @@ Run this command to generate the Javascript Workers:
 dart run isolate_manager:generate
 ```
 
-## **IsolateManagerShared Method**
+## **Long-lived Isolates For Multi Funtions**
 
 ```dart
 void main() async {
@@ -176,7 +177,7 @@ dart run isolate_manager:generate
 
 Add flag `--shared` if you want to generate only for the `IsolateManagerShared`.
 
-## **IsolateManager Method**
+## **Long-lived Isolates For A Single Funtion**
 
 ### **Basic Usage**
 
