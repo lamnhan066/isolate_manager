@@ -3,8 +3,6 @@
 @TestOn('chrome')
 library;
 
-import 'dart:isolate';
-
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
@@ -108,19 +106,13 @@ Future<String> execute(
     }
   }
 
-  Future<void> runIsolateRun() async {
-    for (var i = 0; i < iterations; i++) {
-      await Isolate.run(() => fibonacciRecursive(fibonacciNumber));
-    }
-  }
-
   if (warmupOnly) {
     await runMainApp();
     await runOneIsolate();
     await runThreeIsolates();
     await runIsolateManagerFunction();
     await runIsolateManagerRun();
-    await runIsolateRun();
+
     return '';
   }
 
