@@ -22,24 +22,22 @@ class IsolateContactorControllerImpl<R, P>
         _initialParams = params is List ? params.first : null,
         _delegate = params is List
             ? IsolateChannel.connectSend(params.last as SendPort)
-            : IsolateChannel.connectReceive(params as ReceivePort) {
-    _delegateSubscription = _delegate.stream.listen(
+            : IsolateChannel.connectReceive(params as ReceivePort),
+        _mainStreamController = StreamController<R>.broadcast(sync: true),
+        _isolateStreamController = StreamController<P>.broadcast(sync: true) {
+    _streamSubscription = _delegate.stream.listen(
       _handleEvent,
       onError: _mainStreamController.addError,
     );
   }
 
   final IsolateChannel<dynamic> _delegate;
-  late final StreamSubscription<dynamic> _delegateSubscription;
-
-  final StreamController<R> _mainStreamController =
-      StreamController<R>.broadcast();
-  final StreamController<P> _isolateStreamController =
-      StreamController<P>.broadcast();
-
+  final StreamController<R> _mainStreamController;
+  final StreamController<P> _isolateStreamController;
   final void Function()? _onDispose;
   final R Function(dynamic)? _converter;
   final dynamic _initialParams;
+  late final StreamSubscription<dynamic> _streamSubscription;
 
   @override
   final Completer<void> ensureInitialized = Completer<void>();
@@ -55,45 +53,35 @@ class IsolateContactorControllerImpl<R, P>
 
   @override
   void initialized() {
-    _delegate.sink.add({
-      IsolatePort.main: IsolateState.initialized,
-    });
+    _delegate.sink.add({IsolatePort.main: IsolateState.initialized});
   }
 
   @override
   void sendIsolate(P message) {
-    _delegate.sink.add({
-      IsolatePort.isolate: message,
-    });
+    _delegate.sink.add({IsolatePort.isolate: message});
   }
 
   @override
   void sendIsolateState(IsolateState state) {
-    _delegate.sink.add({
-      IsolatePort.isolate: state,
-    });
+    _delegate.sink.add({IsolatePort.isolate: state});
   }
 
   @override
   void sendResult(R message) {
-    _delegate.sink.add({
-      IsolatePort.main: message,
-    });
+    _delegate.sink.add({IsolatePort.main: message});
   }
 
   @override
   void sendResultError(IsolateException exception) {
-    _delegate.sink.add({
-      IsolatePort.main: exception,
-    });
+    _delegate.sink.add({IsolatePort.main: exception});
   }
 
   @override
   Future<void> close() async {
     await Future.wait([
-      _delegateSubscription.cancel(),
       _mainStreamController.close(),
       _isolateStreamController.close(),
+      _streamSubscription.cancel(),
     ]);
   }
 
@@ -111,36 +99,37 @@ class IsolateContactorControllerImpl<R, P>
   }
 
   void _handleMainPort(dynamic value) {
-    if (value is IsolateException) {
-      _mainStreamController.addError(value.error, value.stack);
-      return;
-    }
-    if (value == IsolateState.initialized) {
-      if (!ensureInitialized.isCompleted) {
-        ensureInitialized.complete();
-      }
-      return;
-    }
-    try {
-      _mainStreamController.add(_converter?.call(value) ?? value as R);
-    } catch (e, stack) {
-      _mainStreamController.addError(e, stack);
+    switch (value) {
+      case final R r:
+        try {
+          _mainStreamController.add(_converter?.call(r) ?? r);
+        } catch (e, stack) {
+          _mainStreamController.addError(e, stack);
+        }
+      case == IsolateState.initialized:
+        if (!ensureInitialized.isCompleted) {
+          ensureInitialized.complete();
+        }
+      case final IsolateException e:
+        _mainStreamController.addError(e.error, e.stack);
+      default:
+        throw IsolateException('Unhandled $value from the Isolate');
     }
   }
 
   void _handleIsolatePort(dynamic value) {
-    if (value == IsolateState.dispose) {
-      _onDispose?.call();
-      unawaited(close());
-      return;
-    }
-
-    if (!_isolateStreamController.isClosed) {
-      try {
-        _isolateStreamController.add(value as P);
-      } catch (e, stack) {
-        _isolateStreamController.addError(e, stack);
-      }
+    switch (value) {
+      case P _:
+        try {
+          _isolateStreamController.add(value);
+        } catch (e, stack) {
+          _isolateStreamController.addError(e, stack);
+        }
+      case == IsolateState.dispose:
+        _onDispose?.call();
+        unawaited(close());
+      default:
+        throw IsolateException('Unhandled $value from the App');
     }
   }
 }

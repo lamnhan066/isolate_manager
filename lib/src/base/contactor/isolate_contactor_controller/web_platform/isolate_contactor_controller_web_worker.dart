@@ -21,7 +21,8 @@ class IsolateContactorControllerImplWorker<R, P>
             ? (params.last as IsolateContactorControllerImpl).controller
                 as Worker
             : params as Worker,
-        _initialParams = params is List ? params.first : null {
+        _initialParams = params is List ? params.first : null,
+        _mainStreamController = StreamController<R>.broadcast(sync: true) {
     _delegate.onmessage = _handleMessage.toJS;
   }
 
@@ -29,9 +30,7 @@ class IsolateContactorControllerImplWorker<R, P>
   final void Function()? _onDispose;
   final IsolateConverter<R> _workerConverter;
   final dynamic _initialParams;
-
-  final StreamController<R> _mainStreamController =
-      StreamController<R>.broadcast();
+  final StreamController<R> _mainStreamController;
 
   @override
   final Completer<void> ensureInitialized = Completer<void>();
@@ -116,7 +115,7 @@ class IsolateContactorControllerImplWorker<R, P>
       }
 
       _mainStreamController.addError(
-        IsolateException('Unhandled $data from the Isolate').toString(),
+        IsolateException('Unhandled $data from the Isolate').error.toString(),
       );
     } catch (e, stack) {
       _mainStreamController.addError(e, stack);

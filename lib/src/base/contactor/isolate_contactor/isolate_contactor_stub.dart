@@ -27,7 +27,19 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,
-        );
+        ),
+        _mainStreamController = StreamController.broadcast(sync: true) {
+    _streamSubscription = _isolateContactorController.onMessage.listen(
+      (message) {
+        printDebug(() => 'Message received from Isolate: $message');
+        _mainStreamController.sink.add(message);
+      },
+      onError: (Object err, StackTrace stack) {
+        printDebug(() => 'Error message received from Isolate: $err');
+        _mainStreamController.sink.addError(err, stack);
+      },
+    );
+  }
 
   /// Create receive port
   final ReceivePort _receivePort;
@@ -39,8 +51,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   Isolate? _isolate;
 
   /// Check for current computing state in enum with listener
-  final StreamController<R> _mainStreamController =
-      StreamController.broadcast();
+  final StreamController<R> _mainStreamController;
 
   /// Control the function of isolate
   final void Function(dynamic) _isolateFunction;
@@ -52,7 +63,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   // ignore: unused_field
   final String _workerName;
 
-  StreamSubscription<dynamic>? _streamSubscription;
+  late final StreamSubscription<dynamic> _streamSubscription;
 
   /// Create an instance with your own function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
@@ -80,16 +91,6 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
 
   /// Initialize
   Future<void> _initial() async {
-    _streamSubscription =
-        _isolateContactorController.onMessage.listen((message) {
-      printDebug(() => 'Message received from Isolate: $message');
-      _mainStreamController.sink.add(message);
-    })
-          ..onError((Object err, StackTrace stack) {
-            printDebug(() => 'Error message received from Isolate: $err');
-            _mainStreamController.sink.addError(err, stack);
-          });
-
     _isolate = await Isolate.spawn(
       _isolateFunction,
       <Object?>[_isolateParam, _receivePort.sendPort],
@@ -105,31 +106,20 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   @override
   Future<void> dispose() async {
     _isolateContactorController.sendIsolateState(IsolateState.dispose);
-    await _isolateContactorController.close();
+    await Future.wait<dynamic>([
+      _isolateContactorController.close(),
+      _mainStreamController.close(),
+      _streamSubscription.cancel(),
+    ]);
     _receivePort.close();
-    _isolate!.kill();
+    _isolate?.kill();
     _isolate = null;
-    await _mainStreamController.close();
-    await _streamSubscription?.cancel();
     printDebug(() => 'Disposed');
   }
 
   @override
   Future<R> sendMessage(P message) async {
-    final completer = Completer<R>();
-    final sub = _isolateContactorController.onMessage.listen((result) async {
-      if (!completer.isCompleted) completer.complete(result);
-    })
-      ..onError((Object err, StackTrace stack) async {
-        if (!completer.isCompleted) completer.completeError(err, stack);
-      });
-
-    try {
-      printDebug(() => 'Message sent to isolate: $message');
-      _isolateContactorController.sendIsolate(message);
-      return await completer.future;
-    } finally {
-      await sub.cancel();
-    }
+    _isolateContactorController.sendIsolate(message);
+    return _isolateContactorController.onMessage.first;
   }
 }

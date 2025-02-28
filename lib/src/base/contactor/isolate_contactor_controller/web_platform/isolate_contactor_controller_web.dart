@@ -15,8 +15,10 @@ class IsolateContactorControllerImplFuture<R, P>
   })  : _converter = converter,
         _onDispose = onDispose,
         _delegate = _extractController(params),
-        _initialParams = params is List ? params.first : null {
-    _delegateSubscription = _delegate.stream.listen(_handleEvent);
+        _initialParams = params is List ? params.first : null,
+        _mainStreamController = StreamController<R>.broadcast(sync: true),
+        _isolateStreamController = StreamController<P>.broadcast(sync: true) {
+    _streamSubscription = _delegate.stream.listen(_handleEvent);
   }
 
   static StreamController<dynamic> _extractController(dynamic params) {
@@ -28,15 +30,12 @@ class IsolateContactorControllerImplFuture<R, P>
   }
 
   final StreamController<dynamic> _delegate;
-  late final StreamSubscription<dynamic> _delegateSubscription;
-  final StreamController<R> _mainStreamController =
-      StreamController<R>.broadcast();
-  final StreamController<P> _isolateStreamController =
-      StreamController<P>.broadcast();
-
+  final StreamController<R> _mainStreamController;
+  final StreamController<P> _isolateStreamController;
   final void Function()? _onDispose;
   final R Function(dynamic)? _converter;
   final dynamic _initialParams;
+  late final StreamSubscription<dynamic> _streamSubscription;
 
   @override
   Completer<void> ensureInitialized = Completer<void>();
@@ -97,9 +96,9 @@ class IsolateContactorControllerImplFuture<R, P>
   Future<void> close() async {
     await Future.wait([
       _delegate.close(),
-      _delegateSubscription.cancel(),
       _mainStreamController.close(),
       _isolateStreamController.close(),
+      _streamSubscription.cancel(),
     ]);
   }
 
@@ -117,30 +116,41 @@ class IsolateContactorControllerImplFuture<R, P>
   }
 
   void _handleMainPort(dynamic value) {
-    if (value is IsolateException) {
-      _mainStreamController.addError(value.error, value.stack);
-      return;
+    switch (value) {
+      case final R r:
+        try {
+          _mainStreamController.add(_converter?.call(r) ?? r);
+        } catch (e, stack) {
+          _mainStreamController.addError(e, stack);
+        }
+      case == IsolateState.initialized:
+        if (!ensureInitialized.isCompleted) {
+          ensureInitialized.complete();
+        }
+      case final IsolateException e:
+        _mainStreamController.addError(e.error, e.stack);
+      default:
+        _mainStreamController.addError(
+          IsolateException('Unhandled $value from the Isolate'),
+        );
     }
-
-    if (value == IsolateState.initialized) {
-      if (!ensureInitialized.isCompleted) {
-        ensureInitialized.complete();
-      }
-      return;
-    }
-
-    _mainStreamController.add(_converter?.call(value) ?? value as R);
   }
 
   void _handleIsolatePort(dynamic value) {
-    if (value == IsolateState.dispose) {
-      _onDispose?.call();
-      unawaited(close());
-      return;
-    }
-
-    if (!_isolateStreamController.isClosed) {
-      _isolateStreamController.add(value as P);
+    switch (value) {
+      case P _:
+        try {
+          _isolateStreamController.add(value);
+        } catch (e, stack) {
+          _isolateStreamController.addError(e, stack);
+        }
+      case == IsolateState.dispose:
+        _onDispose?.call();
+        unawaited(close());
+      default:
+        _isolateStreamController.addError(
+          IsolateException('Unhandled $value from the App'),
+        );
     }
   }
 }

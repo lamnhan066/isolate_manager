@@ -46,7 +46,8 @@ class IsolateManager<R, P> {
   })  : isCustomIsolate = false,
         initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
+        workerName = workerName ?? _workerMappings[isolateFunction] ?? '',
+        _streamController = StreamController.broadcast(sync: true) {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
@@ -80,7 +81,8 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   })  : isCustomIsolate = true,
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
+        workerName = workerName ?? _workerMappings[isolateFunction] ?? '',
+        _streamController = StreamController.broadcast(sync: true) {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -289,8 +291,8 @@ class IsolateManager<R, P> {
       <IsolateContactor<R, P>, bool>{};
 
   /// Controller for stream.
-  final StreamController<R> _streamController = StreamController.broadcast();
-  StreamSubscription<dynamic>? _streamSubscription;
+  final StreamController<R> _streamController;
+  late StreamSubscription<dynamic> _streamSubscription;
 
   /// Is the `start` method is starting.
   bool _isStarting = false;
@@ -388,10 +390,10 @@ class IsolateManager<R, P> {
     await Future.wait(
       <Future<void>>[
         for (final isolate in _isolates.keys) isolate.dispose(),
+        _streamSubscription.cancel(),
       ],
     );
     _isolates.clear();
-    await _streamSubscription?.cancel();
   }
 
   /// Stop the isolate.
