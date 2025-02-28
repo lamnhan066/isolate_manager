@@ -100,12 +100,6 @@ class IsolateContactorControllerImpl<R, P>
 
   void _handleMainPort(dynamic value) {
     switch (value) {
-      case final R r:
-        try {
-          _mainStreamController.add(_converter?.call(r) ?? r);
-        } catch (e, stack) {
-          _mainStreamController.addError(e, stack);
-        }
       case == IsolateState.initialized:
         if (!ensureInitialized.isCompleted) {
           ensureInitialized.complete();
@@ -113,23 +107,25 @@ class IsolateContactorControllerImpl<R, P>
       case final IsolateException e:
         _mainStreamController.addError(e.error, e.stack);
       default:
-        throw IsolateException('Unhandled $value from the Isolate');
+        try {
+          _mainStreamController.add(_converter?.call(value) ?? value as R);
+        } catch (e, stack) {
+          _mainStreamController.addError(e, stack);
+        }
     }
   }
 
   void _handleIsolatePort(dynamic value) {
     switch (value) {
-      case P _:
-        try {
-          _isolateStreamController.add(value);
-        } catch (e, stack) {
-          _isolateStreamController.addError(e, stack);
-        }
       case == IsolateState.dispose:
         _onDispose?.call();
         unawaited(close());
       default:
-        throw IsolateException('Unhandled $value from the App');
+        try {
+          _isolateStreamController.add(value as P);
+        } catch (e, stack) {
+          _isolateStreamController.addError(e, stack);
+        }
     }
   }
 }
