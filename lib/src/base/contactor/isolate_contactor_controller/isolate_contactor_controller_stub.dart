@@ -23,8 +23,8 @@ class IsolateContactorControllerImpl<R, P>
         _delegate = params is List
             ? IsolateChannel.connectSend(params.last as SendPort)
             : IsolateChannel.connectReceive(params as ReceivePort),
-        _mainStreamController = StreamController<R>.broadcast(sync: true),
-        _isolateStreamController = StreamController<P>.broadcast(sync: true) {
+        _mainStreamController = StreamController<R>.broadcast(),
+        _isolateStreamController = StreamController<P>.broadcast() {
     _streamSubscription = _delegate.stream.listen(
       _handleEvent,
       onError: _mainStreamController.addError,
@@ -115,11 +115,11 @@ class IsolateContactorControllerImpl<R, P>
     }
   }
 
-  void _handleIsolatePort(dynamic value) {
+  Future<void> _handleIsolatePort(dynamic value) async {
     switch (value) {
       case == IsolateState.dispose:
         _onDispose?.call();
-        unawaited(close());
+        await close();
       default:
         try {
           _isolateStreamController.add(value as P);

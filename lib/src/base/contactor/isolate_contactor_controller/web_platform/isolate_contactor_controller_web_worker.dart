@@ -22,7 +22,7 @@ class IsolateContactorControllerImplWorker<R, P>
                 as Worker
             : params as Worker,
         _initialParams = params is List ? params.first : null,
-        _mainStreamController = StreamController<R>.broadcast(sync: true) {
+        _mainStreamController = StreamController<R>.broadcast() {
     _delegate.onmessage = _handleMessage.toJS;
   }
 
@@ -81,7 +81,7 @@ class IsolateContactorControllerImplWorker<R, P>
   }
 
   /// Centralizes the event processing for the incoming worker messages.
-  void _handleMessage(MessageEvent event) {
+  Future<void> _handleMessage(MessageEvent event) async {
     try {
       final data = event.data.dartify() as Map?;
       if (data == null) return;
@@ -102,7 +102,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
       if (IsolateState.dispose.isValidMap(data)) {
         _onDispose?.call();
-        unawaited(close());
+        await close();
         return;
       }
 

@@ -16,8 +16,8 @@ class IsolateContactorControllerImplFuture<R, P>
         _onDispose = onDispose,
         _delegate = _extractController(params),
         _initialParams = params is List ? params.first : null,
-        _mainStreamController = StreamController<R>.broadcast(sync: true),
-        _isolateStreamController = StreamController<P>.broadcast(sync: true) {
+        _mainStreamController = StreamController<R>.broadcast(),
+        _isolateStreamController = StreamController<P>.broadcast() {
     _streamSubscription = _delegate.stream.listen(_handleEvent);
   }
 

@@ -28,7 +28,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
           workerConverter: workerConverter,
           onDispose: null,
         ),
-        _mainStreamController = StreamController.broadcast(sync: true) {
+        _mainStreamController = StreamController.broadcast() {
     _streamSubscription = _isolateContactorController.onMessage.listen(
       (message) {
         printDebug(() => 'Message received from Isolate: $message');
