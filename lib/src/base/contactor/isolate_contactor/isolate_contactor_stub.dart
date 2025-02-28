@@ -119,6 +119,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
 
   @override
   Future<R> sendMessage(P message) async {
+    printDebug(() => 'Message sent to isolate: $message');
     _isolateContactorController.sendIsolate(message);
     return _isolateContactorController.onMessage.first;
   }
