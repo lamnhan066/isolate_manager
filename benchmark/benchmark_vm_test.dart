@@ -1,10 +1,11 @@
+// ignore_for_file: avoid_print
+
 @TestOn('vm')
 library;
 
 import 'dart:isolate';
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/utils/print.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -118,5 +119,5 @@ Future<void> execute(int fibonacciNumber) async {
 }
 
 void printDebug(Object? Function() log) {
-  debugPrinter(log, debug: true);
+  print(log());
 }

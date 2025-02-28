@@ -1,8 +1,9 @@
+// ignore_for_file: avoid_print
+
 @TestOn('chrome')
 library;
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/utils/print.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -13,7 +14,7 @@ void main() {
         () =>
             '|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run (Unsupported)|',
       );
-      printDebug(() => '|:-:|-:|-:|-:|-:|');
+      printDebug(() => '|:-:|-:|-:|-:|-:|-:|');
 
       // Fibonacci 30
       await execute(30);
@@ -107,5 +108,5 @@ Future<void> execute(int fibonacciNumber) async {
 }
 
 void printDebug(Object? Function() log) {
-  debugPrinter(log, debug: true);
+  print(log());
 }

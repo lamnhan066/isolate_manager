@@ -48,17 +48,17 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 |Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run|
 |:-:|-:|-:|-:|-:|-:|
-|30|761,423|780,398|279,172|784,649|761,381|
-|33|3,205,501|3,249,139|1,171,256|3,236,956|3,180,707|
-|36|13,605,980|13,633,074|4,944,189|13,671,389|13,424,013|
+|30|773,544|777,532|306,348|810,432|771,169|
+|33|3,277,408|3,243,318|1,149,241|3,276,180|3,251,812|
+|36|13,846,053|13,793,604|4,871,384|13,974,220|13,819,452|
 
 - Chrome (With `Worker` supported)
 
 |Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run (Unsupported)|
 |:-:|-:|-:|-:|-:|-:|
-|30|2,139,400|572,100|201,100|1,078,500|-|
-|33|9,040,700|2,301,700|816,800|2,850,000|-|
-|36|38,641,400|9,739,000|3,438,800|10,243,600|-|
+|30|2,146,900|572,100|201,900|1,078,200|-|
+|33|9,053,800|2,310,500|818,400|2,861,100|-|
+|36|38,235,100|9,877,700|3,481,600|10,327,800|-|
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/benchmarks/README.md) for the test details.
 
