@@ -369,11 +369,11 @@ class IsolateManager<R, P> {
     }
 
     _streamSubscription = _streamController.stream.listen(
-      (_) => _excuteQueue(),
-      onError: (_, __) => _excuteQueue(),
+      (_) => _executeQueue(),
+      onError: (_, __) => _executeQueue(),
     );
 
-    _excuteQueue();
+    _executeQueue();
 
     // Mark the `start()` to be completed.
     _startedCompleter.complete();
@@ -493,13 +493,13 @@ class IsolateManager<R, P> {
 
     final queue = IsolateQueue<R, P>(params, callback);
     queueStrategy.add(queue, addToTop: priority);
-    _excuteQueue();
+    _executeQueue();
 
     return queue.completer.future;
   }
 
   /// Exccute the element in the queues.
-  void _excuteQueue() {
+  void _executeQueue() {
     printDebug(() => 'Number of queues: ${queueStrategy.queuesCount}');
     for (final isolate in _isolates.keys) {
       /// Allow calling `compute` before `start`.
