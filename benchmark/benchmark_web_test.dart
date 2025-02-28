@@ -96,13 +96,21 @@ Future<String> execute(
 
   Future<void> runIsolateManagerFunction() async {
     for (var i = 0; i < iterations; i++) {
-      await IsolateManager.runFunction(fibonacciRecursive, fibonacciNumber);
+      await IsolateManager.runFunction(
+        fibonacciRecursive,
+        fibonacciNumber,
+        workerName: 'fibonacciRecursive',
+      );
     }
   }
 
   Future<void> runIsolateManagerRun() async {
     for (var i = 0; i < iterations; i++) {
-      await IsolateManager.run(() => fibonacciRecursive(fibonacciNumber));
+      await IsolateManager.run(
+        () => fibonacciRecursive(fibonacciNumber),
+        workerName: 'fibonacciRecursive',
+        workerParameter: fibonacciNumber,
+      );
     }
   }
 
