@@ -21,7 +21,7 @@
 
 - [Benchmark](#benchmark)
 - [Setup](#setup)
-- [Isolate Manager Run](#isolatemanager-run)
+- [One-off Isolate](#One-off-isolate)
 - [Isolate Manager Shared (For Multiple Functions)](#isolatemanagershared-method)
 - [Isolate Manager (For A Single Function)](#isolatemanager-method)
   - [Basic Usage](#basic-usage)
@@ -85,7 +85,7 @@ int add(List<int> values) {
   - These functions **MUST NOT** depend on any Flutter library like `dart:ui`, `material`,... The best way is to move these functions into a separate file so we can control the imports easily.
   - The Worker's input parameters and the return type can be a Dart primitive types (like `int`, `double`, `String` and `bool`), a `Map<dynamic, dynamic>` or a `List<dynamic>`.
 
-## **IsolateManager Run**
+## **One-off Isolate**
 
 Since version `6.0.0`, the `IsolateManager.run` method matches the behavior of `Isolate.run` but also supports Web Workers on the web.
 
@@ -104,6 +104,12 @@ final fibo40 = await IsolateManager.run(
   workerName: 'fibonacciRecursive',
   workerParameter: 40,
 );
+```
+
+An inconvenient aspect of the `IsolateManager.run` method is that it does not automatically apply the `workerName` if we already used the `IsolateManager.addWorkerMapping`. Therefore, we can use `IsolateManager.runFunction` in this way:
+
+```dart
+final fibo40 = await IsolateManager.runFunction(fibonacciRecursive, 40);
 ```
 
 Run this command to generate the Javascript Workers:

@@ -763,6 +763,15 @@ void main() {
 
     expect(result, equals(6765));
   });
+
+  test('IsolateManager.runFunction method', () async {
+    final result = await IsolateManager.runFunction(
+      fibonacciRecursive,
+      20,
+    );
+
+    expect(result, equals(6765));
+  });
 }
 
 @isolateManagerWorker

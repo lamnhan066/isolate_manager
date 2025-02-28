@@ -85,10 +85,11 @@ class IsolateManager<R, P> {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
-  /// Runs [computation] in a new isolate and returns the result. Similar to `Isolate.run`,
-  /// but supports Web Worker for the web.
+  /// Executes [computation] in a one-off isolate and returns its result.
+  /// This function behaves similarly to `Isolate.run` but also supports Web Workers.
   ///
-  /// If [workerName] is provided, it will run the named worker using [workerParameter].
+  /// When a [workerName] is provided, the corresponding Web Worker is used,
+  /// and [workerParameter] is passed to the worker.
   ///
   /// Example:
   /// ```dart
@@ -105,7 +106,8 @@ class IsolateManager<R, P> {
   ///   workerParameter: 40,
   /// );
   /// ```
-  /// Set [isDebug] to `true` if you want to print the debug log.
+  ///
+  /// Set [isDebug] to `true` to enable debug logging.
   static Future<R> run<R>(
     FutureOr<R> Function() computation, {
     String? workerName,
@@ -120,6 +122,44 @@ class IsolateManager<R, P> {
 
     await im.start();
     final result = await im.compute(workerParameter);
+    await im.stop();
+
+    return result;
+  }
+
+  /// Executes [function] in a dedicated, one-off isolate and returns its result.
+  ///
+  /// Use [run] when you want behavior similar to `Isolate.run`. Unlike [runFunction],
+  /// this method automatically applies the [workerName] for web Workers when specified
+  /// via [addWorkerMapping] or a generator.
+  ///
+  /// Example:
+  /// ```dart
+  /// @isolateManagerWorker
+  /// int fibonacciRecursive(int n) {
+  ///   if (n == 0) return 0;
+  ///   if (n == 1) return 1;
+  ///   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+  /// }
+  ///
+  /// final result = await IsolateManager.run(fibonacciRecursive, 40);
+  /// ```
+  ///
+  /// Set [isDebug] to `true` to enable debug logging.
+  static Future<R> runFunction<R, P>(
+    IsolateFunction<R, P> function,
+    P parameter, {
+    String? workerName,
+    bool isDebug = false,
+  }) async {
+    final im = IsolateManager<R, P>.create(
+      function,
+      workerName: workerName,
+      isDebug: isDebug,
+    );
+
+    await im.start();
+    final result = await im.compute(parameter);
     await im.stop();
 
     return result;
