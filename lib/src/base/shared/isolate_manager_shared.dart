@@ -87,7 +87,7 @@ class IsolateManagerShared {
     Object? workerParams,
     bool priority = false,
   }) {
-    return _excute(
+    return _execute(
       function,
       params,
       workerFunction: workerFunction,
@@ -109,7 +109,7 @@ class IsolateManagerShared {
     Object? workerParams,
     bool priority = false,
   }) {
-    return _excute(
+    return _execute(
       function,
       params,
       workerFunction: workerFunction,
@@ -119,7 +119,7 @@ class IsolateManagerShared {
   }
 
   /// Execute the given [function] with its' [params].
-  Future<R> _excute<R extends Object?, P extends Object?>(
+  Future<R> _execute<R extends Object?, P extends Object?>(
     IsolateFunction<R, P> function,
     P params, {
     String? workerFunction,
