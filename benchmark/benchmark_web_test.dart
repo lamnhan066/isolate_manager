@@ -103,10 +103,10 @@ Future<void> execute(int fibonacciNumber) async {
     ..reset();
 
   printDebug(
-    () => '|$fibonacciNumber|${singleInMain.inMicroseconds.asThousands}|'
-        '${singleInIsolate.inMicroseconds.asThousands}|'
-        '${threeIsolatesInIsolate.inMicroseconds.asThousands}|'
-        '${runMethodInIsolateManager.inMicroseconds.asThousands}|-|',
+    () => '|$fibonacciNumber|${singleInMain.inMicroseconds.asThousands()}|'
+        '${singleInIsolate.inMicroseconds.asThousands()}|'
+        '${threeIsolatesInIsolate.inMicroseconds.asThousands()}|'
+        '${runMethodInIsolateManager.inMicroseconds.asThousands()}|-|',
   );
 }
 
