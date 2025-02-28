@@ -1,7 +1,12 @@
 /// Print the debug log.
 void debugPrinter(Object? Function() log, {bool debug = false}) {
-  if (debug) {
-    // ignore: avoid_print
-    print('[Isolate Manager]: ${log()}');
-  }
+  assert(
+    () {
+      // ignore: avoid_print
+      if (debug) print('[Isolate Manager]: ${log()}');
+
+      return true;
+    }(),
+    'Only print debug log in debug mode.',
+  );
 }
