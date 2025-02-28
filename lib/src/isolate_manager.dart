@@ -521,9 +521,7 @@ class IsolateManager<R, P> {
     StreamSubscription<dynamic>? sub;
     sub = isolate.onMessage.listen(
       (event) async {
-        // Callbacks on every event.
-        final completer = Completer<bool>()..complete(queue.callback(event));
-        if (await completer.future) {
+        if (await queue.callback(event)) {
           await sub?.cancel();
 
           // Send the result back to the main app.
