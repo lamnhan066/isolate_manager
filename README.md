@@ -21,7 +21,7 @@
 
 - [Benchmark](#benchmark)
 - [Setup](#setup)
-- [One-off Isolate](#One-off-isolate)
+- [One-off Isolate](#one-off-isolate)
 - [Isolate Manager Shared (For Multiple Functions)](#isolatemanagershared-method)
 - [Isolate Manager (For A Single Function)](#isolatemanager-method)
   - [Basic Usage](#basic-usage)
@@ -54,11 +54,11 @@ Execute a recursive Fibonacci function 70 times, computing the sequence for the 
 
 - Chrome (With `Worker` supported)
 
-[Isolate Manager]: |Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run (Unsupported)|
-[Isolate Manager]: |:-:|-:|-:|-:|-:|
-[Isolate Manager]: |30|2,139,400|572,100|201,100|1,078,500|-|
-[Isolate Manager]: |33|9,040,700|2,301,700|816,800|2,850,000|-|
-[Isolate Manager]: |36|38,641,400|9,739,000|3,438,800|10,243,600|-|
+|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.run|Isolate.run (Unsupported)|
+|:-:|-:|-:|-:|-:|
+|30|2,139,400|572,100|201,100|1,078,500|-|
+|33|9,040,700|2,301,700|816,800|2,850,000|-|
+|36|38,641,400|9,739,000|3,438,800|10,243,600|-|
 
 [See here](https://github.com/lamnhan066/isolate_manager/blob/main/benchmarks/README.md) for the test details.
 
