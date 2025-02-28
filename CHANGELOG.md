@@ -1,3 +1,7 @@
+## 6.0.0-rc.14
+
+* Add an `IsolateManager.runFunction` method that automatically applies the appropriate `workerName` when executing a function.
+
 ## 6.0.0-rc.13
 
 * Improve README.
