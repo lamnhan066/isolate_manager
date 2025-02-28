@@ -52,6 +52,8 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   // ignore: unused_field
   final String _workerName;
 
+  StreamSubscription<dynamic>? _streamSubscription;
+
   /// Create an instance with your own function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
     required CustomIsolateFunction isolateFunction,
@@ -78,13 +80,15 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
 
   /// Initialize
   Future<void> _initial() async {
-    _isolateContactorController.onMessage.listen((message) {
+    _streamSubscription =
+        _isolateContactorController.onMessage.listen((message) {
       printDebug(() => 'Message received from Isolate: $message');
       _mainStreamController.sink.add(message);
-    }).onError((Object err, StackTrace stack) {
-      printDebug(() => 'Error message received from Isolate: $err');
-      _mainStreamController.sink.addError(err, stack);
-    });
+    })
+          ..onError((Object err, StackTrace stack) {
+            printDebug(() => 'Error message received from Isolate: $err');
+            _mainStreamController.sink.addError(err, stack);
+          });
 
     _isolate = await Isolate.spawn(
       _isolateFunction,
@@ -95,21 +99,18 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     printDebug(() => 'Initialized');
   }
 
-  Future<void> _dispose() async {
-    _isolateContactorController.sendIsolateState(IsolateState.dispose);
-    await _isolateContactorController.close();
-    _receivePort.close();
-    _isolate!.kill();
-    _isolate = null;
-  }
-
   @override
   Stream<R> get onMessage => _mainStreamController.stream;
 
   @override
   Future<void> dispose() async {
-    await _dispose();
+    _isolateContactorController.sendIsolateState(IsolateState.dispose);
+    await _isolateContactorController.close();
+    _receivePort.close();
+    _isolate!.kill();
+    _isolate = null;
     await _mainStreamController.close();
+    await _streamSubscription?.cancel();
     printDebug(() => 'Disposed');
   }
 

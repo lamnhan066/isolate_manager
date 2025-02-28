@@ -36,6 +36,8 @@ class IsolateContactorInternalFuture<R, P>
   /// Control the parameters of isolate
   final dynamic _isolateParam;
 
+  StreamSubscription<dynamic>? _streamSubscription;
+
   /// Create modified isolate function
   static Future<IsolateContactorInternalFuture<R, P>> createCustom<R, P>({
     required CustomIsolateFunction isolateFunction,
@@ -60,17 +62,19 @@ class IsolateContactorInternalFuture<R, P>
 
   /// Initialize
   Future<void> _initial() async {
-    _isolateContactorController.onMessage.listen((message) {
+    _streamSubscription =
+        _isolateContactorController.onMessage.listen((message) {
       printDebug(
         () => '[Main Stream] Message received from Future: $message',
       );
       _mainStreamController.sink.add(message);
-    }).onError((Object err, StackTrace stack) {
-      printDebug(
-        () => '[Main Stream] Error message received from Future: $err',
-      );
-      _mainStreamController.sink.addError(err, stack);
-    });
+    })
+          ..onError((Object err, StackTrace stack) {
+            printDebug(
+              () => '[Main Stream] Error message received from Future: $err',
+            );
+            _mainStreamController.sink.addError(err, stack);
+          });
 
     _isolateFunction([_isolateParam, _isolateContactorController]);
 
@@ -88,6 +92,7 @@ class IsolateContactorInternalFuture<R, P>
 
     await _isolateContactorController.close();
     await _mainStreamController.close();
+    await _streamSubscription?.cancel();
 
     printDebug(() => 'Disposed');
   }

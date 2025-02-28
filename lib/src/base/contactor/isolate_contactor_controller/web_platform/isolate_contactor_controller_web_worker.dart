@@ -7,15 +7,14 @@ import 'package:isolate_manager/src/models/isolate_types.dart';
 import 'package:isolate_manager/src/utils/check_subtype.dart';
 import 'package:web/web.dart';
 
-/// Implementation of the [IsolateContactorController] in `web` with `Worker`.
+/// Implementation using [Worker] as the communication channel.
 class IsolateContactorControllerImplWorker<R, P>
     implements IsolateContactorControllerImpl<R, P> {
   /// Implementation of the [IsolateContactorController] in `web` with `Worker`.
   IsolateContactorControllerImplWorker(
     dynamic params, {
-    required void Function()? onDispose, // Converter for native
-    required R Function(dynamic)
-        workerConverter, // Converter for Worker (Web Only)
+    required void Function()? onDispose,
+    required R Function(dynamic) workerConverter,
   })  : _workerConverter = workerConverter,
         _onDispose = onDispose,
         _delegate = params is List
@@ -23,57 +22,19 @@ class IsolateContactorControllerImplWorker<R, P>
                 as Worker
             : params as Worker,
         _initialParams = params is List ? params.first : null {
-    _delegate.onmessage = (MessageEvent event) {
-      final data = event.data.dartify()! as Map;
-
-      if (data['type'] == 'data') {
-        dynamic result = data['value'];
-        if (isSubtype<R, IsolateType<Object?>>()) {
-          result = IsolateType.encode<IsolateType<Object?>>(result);
-        }
-        _mainStreamController.add(_workerConverter(result));
-        return;
-      }
-
-      if (IsolateState.initialized.isValidMap(data)) {
-        if (!ensureInitialized.isCompleted) {
-          ensureInitialized.complete();
-        }
-        return;
-      }
-
-      if (IsolateState.dispose.isValidMap(data)) {
-        _onDispose!();
-        unawaited(close());
-        return;
-      }
-
-      if (IsolateException.isValidMap(data)) {
-        final exception = IsolateException.fromMap(data);
-        _mainStreamController.addError(
-          exception.error.toString(),
-          StackTrace.empty,
-        );
-        return;
-      }
-
-      // There is an unhandled `type` of the `data`.
-      _mainStreamController.addError(
-        IsolateException('Unhandled $data from the Isolate').toString(),
-      );
-    }.toJS;
+    _delegate.onmessage = _handleMessage.toJS;
   }
+
   final Worker _delegate;
-
-  final StreamController<R> _mainStreamController =
-      StreamController.broadcast();
-
   final void Function()? _onDispose;
   final IsolateConverter<R> _workerConverter;
   final dynamic _initialParams;
 
+  final StreamController<R> _mainStreamController =
+      StreamController<R>.broadcast();
+
   @override
-  Completer<void> ensureInitialized = Completer();
+  final Completer<void> ensureInitialized = Completer<void>();
 
   @override
   Worker get controller => _delegate;
@@ -85,10 +46,12 @@ class IsolateContactorControllerImplWorker<R, P>
   Stream<R> get onMessage => _mainStreamController.stream;
 
   @override
-  Stream<P> get onIsolateMessage => throw UnimplementedError();
+  Stream<P> get onIsolateMessage =>
+      throw UnimplementedError('onIsolateMessage is not implemented');
 
   @override
-  Future<void> initialized() => throw UnimplementedError();
+  Future<void> initialized() =>
+      throw UnimplementedError('initialized method is not implemented');
 
   @override
   void sendIsolate(P message) {
@@ -105,15 +68,58 @@ class IsolateContactorControllerImplWorker<R, P>
   }
 
   @override
-  void sendResult(R message) => throw UnimplementedError();
+  void sendResult(R message) =>
+      throw UnimplementedError('sendResult is not implemented');
 
   @override
   void sendResultError(IsolateException exception) =>
-      throw UnimplementedError();
+      throw UnimplementedError('sendResultError is not implemented');
 
   @override
   Future<void> close() async {
     _delegate.terminate();
     await _mainStreamController.close();
+  }
+
+  /// Centralizes the event processing for the incoming worker messages.
+  void _handleMessage(MessageEvent event) {
+    try {
+      final data = event.data.dartify() as Map?;
+      if (data == null) return;
+
+      if (data['type'] == 'data') {
+        var result = data['value'];
+        if (isSubtype<R, IsolateType<Object?>>()) {
+          result = IsolateType.encode(result);
+        }
+        _mainStreamController.add(_workerConverter(result));
+        return;
+      }
+
+      if (IsolateState.initialized.isValidMap(data)) {
+        if (!ensureInitialized.isCompleted) ensureInitialized.complete();
+        return;
+      }
+
+      if (IsolateState.dispose.isValidMap(data)) {
+        _onDispose?.call();
+        unawaited(close());
+        return;
+      }
+
+      if (IsolateException.isValidMap(data)) {
+        _mainStreamController.addError(
+          IsolateException.fromMap(data).error.toString(),
+          StackTrace.empty,
+        );
+        return;
+      }
+
+      _mainStreamController.addError(
+        IsolateException('Unhandled $data from the Isolate').toString(),
+      );
+    } catch (e, stack) {
+      _mainStreamController.addError(e, stack);
+    }
   }
 }

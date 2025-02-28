@@ -45,6 +45,8 @@ class IsolateContactorInternalWorker<R, P>
   // ignore: unused_field
   final dynamic _isolateParam;
 
+  StreamSubscription<dynamic>? _streamSubscription;
+
   /// Create modified isolate function
   static Future<IsolateContactorInternalWorker<R, P>> createCustom<R, P>({
     required CustomIsolateFunction isolateFunction,
@@ -70,17 +72,19 @@ class IsolateContactorInternalWorker<R, P>
 
   /// Initialize
   Future<void> _initial() async {
-    _isolateContactorController.onMessage.listen((message) {
+    _streamSubscription =
+        _isolateContactorController.onMessage.listen((message) {
       printDebug(
         () => '[Main Stream] Message received from Worker: $message',
       );
       _mainStreamController.sink.add(message);
-    }).onError((Object err, StackTrace stack) {
-      printDebug(
-        () => '[Main Stream] Error message received from Worker: $err',
-      );
-      _mainStreamController.sink.addError(err, stack);
-    });
+    })
+          ..onError((Object err, StackTrace stack) {
+            printDebug(
+              () => '[Main Stream] Error message received from Worker: $err',
+            );
+            _mainStreamController.sink.addError(err, stack);
+          });
 
     await _isolateContactorController.ensureInitialized.future;
 
@@ -96,6 +100,7 @@ class IsolateContactorInternalWorker<R, P>
 
     await _isolateContactorController.close();
     await _mainStreamController.close();
+    await _streamSubscription?.cancel();
 
     printDebug(() => 'Disposed');
   }
