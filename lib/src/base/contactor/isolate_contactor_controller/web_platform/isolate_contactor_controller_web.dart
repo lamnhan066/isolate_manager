@@ -55,41 +55,36 @@ class IsolateContactorControllerImplFuture<R, P>
   @override
   void initialized() {
     if (_delegate.isClosed) return;
-    _delegate.sink.add({
-      IsolatePort.main: IsolateState.initialized,
-    });
+
+    _delegate.sink.add({IsolatePort.main: IsolateState.initialized});
   }
 
   @override
   void sendIsolate(P message) {
     if (_delegate.isClosed) return;
-    _delegate.sink.add({
-      IsolatePort.isolate: message,
-    });
+
+    _delegate.sink.add({IsolatePort.isolate: message});
   }
 
   @override
   void sendIsolateState(IsolateState state) {
     if (_delegate.isClosed) return;
-    _delegate.sink.add({
-      IsolatePort.isolate: state,
-    });
+
+    _delegate.sink.add({IsolatePort.isolate: state});
   }
 
   @override
   void sendResult(R message) {
     if (_delegate.isClosed) return;
-    _delegate.sink.add({
-      IsolatePort.main: message,
-    });
+
+    _delegate.sink.add({IsolatePort.main: message});
   }
 
   @override
   void sendResultError(IsolateException exception) {
     if (_delegate.isClosed) return;
-    _delegate.sink.add({
-      IsolatePort.main: exception,
-    });
+
+    _delegate.sink.add({IsolatePort.main: exception});
   }
 
   @override
@@ -102,17 +97,17 @@ class IsolateContactorControllerImplFuture<R, P>
     ]);
   }
 
-  void _handleEvent(dynamic event) {
+  Future<void> _handleEvent(dynamic event) async {
     if (event is! Map<IsolatePort, dynamic>) return;
 
-    event.forEach((IsolatePort port, dynamic value) {
-      switch (port) {
+    for (final entry in event.entries) {
+      switch (entry.key) {
         case IsolatePort.main:
-          _handleMainPort(value);
+          _handleMainPort(entry.value);
         case IsolatePort.isolate:
-          _handleIsolatePort(value);
+          await _handleIsolatePort(entry.value);
       }
-    });
+    }
   }
 
   void _handleMainPort(dynamic value) {
@@ -132,11 +127,11 @@ class IsolateContactorControllerImplFuture<R, P>
     }
   }
 
-  void _handleIsolatePort(dynamic value) {
+  Future<void> _handleIsolatePort(dynamic value) async {
     switch (value) {
       case == IsolateState.dispose:
         _onDispose?.call();
-        unawaited(close());
+        await close();
       default:
         try {
           _isolateStreamController.add(value as P);
