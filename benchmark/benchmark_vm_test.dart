@@ -8,6 +8,8 @@ import 'dart:isolate';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
+import 'utils.dart';
+
 void main() {
   test(
     'benchmark',
@@ -112,9 +114,9 @@ Future<void> execute(int fibonacciNumber) async {
     ..reset();
 
   printDebug(
-    () => '|$fibonacciNumber|${singleInMain.inMicroseconds}|'
-        '${singleInIsolate.inMicroseconds}|${threeIsolatesInIsolate.inMicroseconds}'
-        '|${runMethodInIsolateManager.inMicroseconds}|${runMethodInIsolate.inMicroseconds}|',
+    () => '|$fibonacciNumber|${singleInMain.inMicroseconds.asThousands}|'
+        '${singleInIsolate.inMicroseconds.asThousands}|${threeIsolatesInIsolate.inMicroseconds.asThousands}'
+        '|${runMethodInIsolateManager.inMicroseconds.asThousands}|${runMethodInIsolate.inMicroseconds.asThousands}|',
   );
 }
 
