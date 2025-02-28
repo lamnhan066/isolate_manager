@@ -1,3 +1,10 @@
+## 6.0.0-rc.15
+
+* Refactored multiple components to improve performance.  
+* Rewrote benchmarks, regenerated JS worker for benchmarks, and updated benchmark results in README.  
+* Used `assert` to log messages, enhancing performance in release mode.  
+* Fixed several typos.
+
 ## 6.0.0-rc.14+1
 
 * Fix README typos.
