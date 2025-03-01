@@ -46,7 +46,7 @@ class IsolateManager<R, P> {
   })  : isCustomIsolate = false,
         initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        workerName = workerName ?? _workerMappings[isolateFunction] ?? '',
+        _workerName = workerName,
         _streamController = StreamController.broadcast() {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -81,7 +81,7 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   })  : isCustomIsolate = true,
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        workerName = workerName ?? _workerMappings[isolateFunction] ?? '',
+        _workerName = workerName,
         _streamController = StreamController.broadcast() {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
@@ -263,7 +263,9 @@ class IsolateManager<R, P> {
   ///
   /// Ex: Worker: `worker.js` => workerName: 'worker;
   ///     Worker: `workers/worker.js` => workerName: 'workers/worker'
-  final String workerName;
+  String get workerName =>
+      _workerName ?? _workerMappings[isolateFunction] ?? '';
+  final String? _workerName;
 
   /// Initial parameters.
   final Object? initialParams;
