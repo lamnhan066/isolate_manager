@@ -126,9 +126,9 @@ class IsolateManager<R, P> {
 
   /// Executes [function] in a dedicated, one-off isolate and returns its result.
   ///
-  /// Use [run] when you want behavior similar to `Isolate.run`. Unlike [runFunction],
-  /// this method automatically applies the [workerName] for web Workers when specified
-  /// via [addWorkerMapping] or a generator.
+  /// This method behaves similarly to `Isolate.run`, but with additional support for
+  /// web Workers when a [workerName] is provided. The [workerName] is automatically
+  /// assigned if previously mapped via [addWorkerMapping] or a generator.
   ///
   /// Example:
   /// ```dart
@@ -158,6 +158,48 @@ class IsolateManager<R, P> {
     await im.start();
     try {
       return await im.compute(parameter);
+    } finally {
+      await im.stop();
+    }
+  }
+
+  /// Executes [function] in a dedicated, one-off isolate and returns its result.
+  ///
+  /// This method behaves similarly to `Isolate.run`, but with additional support for
+  /// web Workers when a [workerName] is provided. The [workerName] is automatically
+  /// assigned if previously mapped via [addWorkerMapping] or a generator.
+  ///
+  /// If [callback] is provided, it will be invoked with the result before returning.
+  ///
+  /// Example:
+  /// ```dart
+  /// @isolateManagerWorker
+  /// int fibonacciRecursive(int n) {
+  ///   if (n == 0) return 0;
+  ///   if (n == 1) return 1;
+  ///   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+  /// }
+  ///
+  /// final result = await IsolateManager.run(fibonacciRecursive, 40);
+  /// ```
+  ///
+  /// Set [isDebug] to `true` to enable debug logging.
+  static Future<R> runCustomFunction<R, P>(
+    CustomIsolateFunction function,
+    P parameter, {
+    String? workerName,
+    IsolateCallback<R>? callback,
+    bool isDebug = false,
+  }) async {
+    final im = IsolateManager<R, P>.createCustom(
+      function,
+      workerName: workerName,
+      isDebug: isDebug,
+    );
+
+    await im.start();
+    try {
+      return await im.compute(parameter, callback: callback);
     } finally {
       await im.stop();
     }
