@@ -190,6 +190,8 @@ final isolateManager = IsolateManager.createCustom(
 Receive progress updates before the final result:
 
 ```dart
+final isolateManager = IsolateManager.createCustom(progressFunction);
+
 final result = await isolateManager.compute(100, callback: (value) {
   final data = jsonDecode(value);
   if (data.containsKey('progress')) {
@@ -199,6 +201,23 @@ final result = await isolateManager.compute(100, callback: (value) {
   print('Final result: ${data['result']}');
   return true; // Final result received
 });
+
+@isolateManagerCustomWorker
+void progressFunction(dynamic params) {
+  IsolateManagerFunction.customFunction<String, int>(
+    params,
+    onEvent: (controller, message) {
+      // This value is sent as the progress values.
+      for (int i = 0; i < message; i++) {
+        final progress = jsonEncode({'progress' : messsage});
+        controller.sendResult(progress);
+      }
+
+      // This is a final value.
+      return jsonEncode({'result' : messsage});
+    },
+  );
+}
 ```
 
 ### Type Safety for Web Workers
