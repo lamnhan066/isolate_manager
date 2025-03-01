@@ -334,56 +334,27 @@ QueueStrategyDiscardIncoming()
 You can extend the `QueueStrategy` and use the `queues`, `maxCount` and `queuesCount` to create your own strategy. These are how the basic strategies are created:
 
 ```dart
-class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
-  /// Unlimited queued computations.
-  QueueStrategyUnlimited();
+class CustomQueueStrategy<R, P> extends QueueStrategy<R, P> {
+  CustomQueueStrategy();
 
   @override
   bool continueIfMaxCountExceeded() {
-
-    // It means the current computation should be added to the Queue
-    // without doing anything with the `queues`.
-    return true; 
-  }
-}
-
-class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
-  /// Remove the newest computation if the [maxCount] is exceeded.
-  QueueStrategyRemoveNewest({super.maxCount = 0});
-
-  @override
-  bool continueIfMaxCountExceeded() {
-    // Remove the last computation if the Queue (mean the newest one).
-    queues.removeLast();
-
-    // It means the current computation should be added to the Queue.
-    return true; 
-  }
-}
-
-class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
-  /// Remove the oldest computation if the [maxCount] is exceeded.
-  QueueStrategyRemoveOldest({super.maxCount = 0});
-
-  @override
-  bool continueIfMaxCountExceeded() {
-    // Remove the first computation if the Queue (mean the oldest one).
-    queues.removeFirst();
-
-    // It means the current computation should be added to the Queue.
+    // Determines whether a new computation should be queued 
+    // when the maximum queue count is exceeded.
+    //
+    // This method is intended to be overridden to define 
+    // custom queue management behavior. It allows checking 
+    // the current state of the queue and deciding whether to allow 
+    // additional computations beyond the specified [maxCount].
+    //
+    // Available properties for decision-making:
+    // - `queues`: The collection of currently queued computations.
+    // - `queuesCount`: The total number of computations in the queue.
+    // - `maxCount`: The maximum allowed number of queued computations.
+    
+    // Return `true` to allow the new computation to be added to the queue,
+    // or `false` to prevent additional computations from being queued.
     return true;
-  }
-}
-
-class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
-  /// Discard the new incoming computation if the [maxCount] is exceeded.
-  QueueStrategyDiscardIncoming({super.maxCount = 0});
-
-  @override
-  bool continueIfMaxCountExceeded() {
-
-    // It means the current computation should NOT be added to the Queue.
-    return false;
   }
 }
 ```
