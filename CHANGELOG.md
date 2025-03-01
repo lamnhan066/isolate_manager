@@ -1,3 +1,11 @@
+## 6.0.0-rc.16
+
+* Add `runCustomFunction` method to support custom isolate execution with optional callback and debug logging
+* The `workerName` now gets the latest mapping value dynamically, avoid the need to recreate the `IsolateManager` after updates.
+* Refactored the codebase to remove redundant streams.
+* Rename `CustomIsolateFunction` to `IsolateCustomFunction`, update references and mark the old one as deprecated.
+* Improve README.
+
 ## 6.0.0-rc.15
 
 * Refactored multiple components to improve performance.  
