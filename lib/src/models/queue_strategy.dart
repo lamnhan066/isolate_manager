@@ -32,9 +32,12 @@ abstract class QueueStrategy<R, P> {
   /// Number of the current queues.
   int get queuesCount => queues.length;
 
-  /// Run this method before adding a new computation to the Queue if the max
-  /// queue count is exceeded. If this method returns `false`, the new computation
-  /// will not be added to the Queue.
+  /// Determines if a new computation should be added to the queue when
+  /// the maximum count is exceeded.
+  ///
+  /// Returns:
+  ///   - true: to continue adding the new computation to the queue.
+  ///   - false: to stop adding new computations.
   bool continueIfMaxCountExceeded();
 
   /// Add a new computation to the Queue.
