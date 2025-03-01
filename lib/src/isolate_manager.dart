@@ -223,7 +223,7 @@ class IsolateManager<R, P> {
   ///
   /// This method is used by the generator to associate an [IsolateFunction] with a
   /// unique worker name. If the function is already mapped and [overwrite] is `false`,
-  /// an [IsolateException] will be thrown.
+  /// an [IsolateException] will be thrown. To update an existing mapping, set [overwrite] to `true`.
   ///
   /// - [function]: The function to be mapped.
   /// - [name]: The unique worker name associated with the function.
@@ -237,7 +237,8 @@ class IsolateManager<R, P> {
 
     if (contains && !overwrite) {
       throw IsolateException(
-        'The function $function is already mapped to ${_workerMappings[function]}.',
+        'The function `$function` is already mapped to `${_workerMappings[function]}`.\n'
+        'To replace the existing mapping, set `overwrite` to `true` when calling `IsolateManager.addWorkerMapping`.',
       );
     }
 
