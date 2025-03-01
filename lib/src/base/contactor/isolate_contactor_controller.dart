@@ -25,6 +25,7 @@ abstract class IsolateContactorController<R, P> {
       onDispose: onDispose,
       converter: converter,
       workerConverter: converter,
+      debugMode: false,
     );
   }
 

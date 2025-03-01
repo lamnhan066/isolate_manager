@@ -26,26 +26,8 @@ class IsolateContactorInternalWorker<R, P>
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,
-        ) {
-    _streamSubscription = _isolateContactorController.onMessage.listen(
-      (message) {
-        printDebug(
-          () => '[Main Stream] Message received from Worker: $message',
+          debugMode: debugMode,
         );
-        _mainStreamController.sink.add(message);
-      },
-      onError: (Object err, StackTrace stack) {
-        printDebug(
-          () => '[Main Stream] Error message received from Worker: $err',
-        );
-        _mainStreamController.sink.addError(err, stack);
-      },
-    );
-  }
-
-  /// Check for current cumputing state in enum with listener
-  final StreamController<R> _mainStreamController =
-      StreamController.broadcast();
 
   /// Listener for result
   final IsolateContactorController<R, P> _isolateContactorController;
@@ -59,8 +41,6 @@ class IsolateContactorInternalWorker<R, P>
   /// Control the parameters of isolate
   // ignore: unused_field
   final dynamic _isolateParam;
-
-  late final StreamSubscription<dynamic> _streamSubscription;
 
   /// Create modified isolate function
   static Future<IsolateContactorInternalWorker<R, P>> createCustom<R, P>({
@@ -93,24 +73,18 @@ class IsolateContactorInternalWorker<R, P>
   }
 
   @override
-  Stream<R> get onMessage => _mainStreamController.stream;
+  Stream<R> get onMessage => _isolateContactorController.onMessage;
 
   @override
   Future<void> dispose() async {
     _isolateContactorController.sendIsolateState(IsolateState.dispose);
-
-    await Future.wait([
-      _isolateContactorController.close(),
-      _mainStreamController.close(),
-      _streamSubscription.cancel(),
-    ]);
-
+    await _isolateContactorController.close();
     printDebug(() => 'Disposed');
   }
 
   @override
   Future<R> sendMessage(P message) async {
-    printDebug(() => 'Message sent to isolate: $message');
+    printDebug(() => '[Main App] Message sent to the Web Worker: $message');
     _isolateContactorController.sendIsolate(message);
     return _isolateContactorController.onMessage.first;
   }

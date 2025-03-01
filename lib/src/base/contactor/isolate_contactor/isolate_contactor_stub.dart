@@ -27,19 +27,8 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,
-        ),
-        _mainStreamController = StreamController.broadcast() {
-    _streamSubscription = _isolateContactorController.onMessage.listen(
-      (message) {
-        printDebug(() => 'Message received from Isolate: $message');
-        _mainStreamController.sink.add(message);
-      },
-      onError: (Object err, StackTrace stack) {
-        printDebug(() => 'Error message received from Isolate: $err');
-        _mainStreamController.sink.addError(err, stack);
-      },
-    );
-  }
+          debugMode: debugMode,
+        );
 
   /// Create receive port
   final ReceivePort _receivePort;
@@ -50,9 +39,6 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   /// Create isolate
   Isolate? _isolate;
 
-  /// Check for current computing state in enum with listener
-  final StreamController<R> _mainStreamController;
-
   /// Control the function of isolate
   final void Function(dynamic) _isolateFunction;
 
@@ -62,8 +48,6 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   /// Only for web platform
   // ignore: unused_field
   final String _workerName;
-
-  late final StreamSubscription<dynamic> _streamSubscription;
 
   /// Create an instance with your own function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
@@ -101,16 +85,12 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   }
 
   @override
-  Stream<R> get onMessage => _mainStreamController.stream;
+  Stream<R> get onMessage => _isolateContactorController.onMessage;
 
   @override
   Future<void> dispose() async {
     _isolateContactorController.sendIsolateState(IsolateState.dispose);
-    await Future.wait<dynamic>([
-      _isolateContactorController.close(),
-      _mainStreamController.close(),
-      _streamSubscription.cancel(),
-    ]);
+    await _isolateContactorController.close();
     _receivePort.close();
     _isolate?.kill();
     _isolate = null;
@@ -119,7 +99,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
 
   @override
   Future<R> sendMessage(P message) async {
-    printDebug(() => 'Message sent to isolate: $message');
+    printDebug(() => '[Main App] Message sent to isolate: $message');
     _isolateContactorController.sendIsolate(message);
     return _isolateContactorController.onMessage.first;
   }

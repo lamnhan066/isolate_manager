@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_web.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
+import 'package:isolate_manager/src/utils/print.dart';
 
 /// Implementation of the [IsolateContactorController] on `web` using `Future`.
 class IsolateContactorControllerImplFuture<R, P>
@@ -12,7 +13,9 @@ class IsolateContactorControllerImplFuture<R, P>
     dynamic params, {
     required void Function()? onDispose,
     required R Function(dynamic)? converter,
-  })  : _converter = converter,
+    required bool debugMode,
+  })  : _debugMode = debugMode,
+        _converter = converter,
         _onDispose = onDispose,
         _delegate = _extractController(params),
         _initialParams = params is List ? params.first : null,
@@ -36,6 +39,7 @@ class IsolateContactorControllerImplFuture<R, P>
   final R Function(dynamic)? _converter;
   final dynamic _initialParams;
   late final StreamSubscription<dynamic> _streamSubscription;
+  final bool _debugMode;
 
   @override
   Completer<void> ensureInitialized = Completer<void>();
@@ -111,6 +115,10 @@ class IsolateContactorControllerImplFuture<R, P>
   }
 
   void _handleMainPort(dynamic value) {
+    debugPrinter(
+      () => '[Main App] Message received from the Web Future: $value',
+      debug: _debugMode,
+    );
     switch (value) {
       case == IsolateState.initialized:
         if (!ensureInitialized.isCompleted) {
@@ -128,6 +136,10 @@ class IsolateContactorControllerImplFuture<R, P>
   }
 
   Future<void> _handleIsolatePort(dynamic value) async {
+    debugPrinter(
+      () => '[Isolate] Message received from Main App: $value',
+      debug: _debugMode,
+    );
     switch (value) {
       case == IsolateState.dispose:
         _onDispose?.call();

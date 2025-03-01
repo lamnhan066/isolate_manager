@@ -5,6 +5,7 @@ import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
 import 'package:isolate_manager/src/models/isolate_types.dart';
 import 'package:isolate_manager/src/utils/check_subtype.dart';
+import 'package:isolate_manager/src/utils/print.dart';
 import 'package:web/web.dart';
 
 /// Implementation using [Worker] as the communication channel.
@@ -15,7 +16,9 @@ class IsolateContactorControllerImplWorker<R, P>
     dynamic params, {
     required void Function()? onDispose,
     required R Function(dynamic) workerConverter,
-  })  : _workerConverter = workerConverter,
+    required bool debugMode,
+  })  : _debugMode = debugMode,
+        _workerConverter = workerConverter,
         _onDispose = onDispose,
         _delegate = params is List
             ? (params.last as IsolateContactorControllerImpl).controller
@@ -31,6 +34,7 @@ class IsolateContactorControllerImplWorker<R, P>
   final IsolateConverter<R> _workerConverter;
   final dynamic _initialParams;
   final StreamController<R> _mainStreamController;
+  final bool _debugMode;
 
   @override
   final Completer<void> ensureInitialized = Completer<void>();
@@ -84,8 +88,14 @@ class IsolateContactorControllerImplWorker<R, P>
   // Can't return `Future<void>` because of the `onmessage` signature.
   // ignore: avoid_void_async
   void _handleMessage(MessageEvent event) async {
+    debugPrinter(
+      () => '[Main App] Message received from the Web Worker: ${event.data}',
+      debug: _debugMode,
+    );
+
     try {
       final data = event.data.dartify() as Map?;
+
       if (data == null) return;
 
       if (data['type'] == 'data') {

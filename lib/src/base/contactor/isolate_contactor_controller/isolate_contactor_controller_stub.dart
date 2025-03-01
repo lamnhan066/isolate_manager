@@ -5,6 +5,7 @@ import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller.
 import 'package:isolate_manager/src/base/contactor/models/exception.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:isolate_manager/src/utils/print.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 /// Implementation of the [IsolateContactorController] in `io`.
@@ -17,7 +18,9 @@ class IsolateContactorControllerImpl<R, P>
     required R Function(dynamic)? converter,
     // ignore: avoid_unused_constructor_parameters
     required R Function(dynamic)? workerConverter,
-  })  : _onDispose = onDispose,
+    required bool debugMode,
+  })  : _debugMode = debugMode,
+        _onDispose = onDispose,
         _converter = converter,
         _initialParams = params is List ? params.first : null,
         _delegate = params is List
@@ -38,6 +41,7 @@ class IsolateContactorControllerImpl<R, P>
   final R Function(dynamic)? _converter;
   final dynamic _initialParams;
   late final StreamSubscription<dynamic> _streamSubscription;
+  final bool _debugMode;
 
   @override
   final Completer<void> ensureInitialized = Completer<void>();
@@ -99,6 +103,10 @@ class IsolateContactorControllerImpl<R, P>
   }
 
   void _handleMainPort(dynamic value) {
+    debugPrinter(
+      () => '[Main App] Message received from the Isolate: $value',
+      debug: _debugMode,
+    );
     switch (value) {
       case == IsolateState.initialized:
         if (!ensureInitialized.isCompleted) {
@@ -116,6 +124,10 @@ class IsolateContactorControllerImpl<R, P>
   }
 
   Future<void> _handleIsolatePort(dynamic value) async {
+    debugPrinter(
+      () => '[Isolate] Message received from the Main App: $value',
+      debug: _debugMode,
+    );
     switch (value) {
       case == IsolateState.dispose:
         _onDispose?.call();

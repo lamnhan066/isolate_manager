@@ -17,6 +17,7 @@ abstract class IsolateContactorControllerImpl<R, P>
     required IsolateConverter<R> converter, // Converter for native
     required IsolateConverter<R>
         workerConverter, // Converter for Worker (Web Only)
+    required bool debugMode,
   }) {
     if (params is StreamController ||
         params is List &&
@@ -26,6 +27,7 @@ abstract class IsolateContactorControllerImpl<R, P>
         params,
         onDispose: onDispose,
         converter: converter,
+        debugMode: debugMode,
       );
     }
 
@@ -33,6 +35,7 @@ abstract class IsolateContactorControllerImpl<R, P>
       params,
       onDispose: onDispose,
       workerConverter: workerConverter,
+      debugMode: debugMode,
     );
   }
 }

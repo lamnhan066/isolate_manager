@@ -21,28 +21,10 @@ class IsolateContactorInternalFuture<R, P>
           converter: converter,
           workerConverter: workerConverter,
           onDispose: null,
+          debugMode: debugMode,
         ) {
-    _streamSubscription = _isolateContactorController.onMessage.listen(
-      (message) {
-        printDebug(
-          () => '[Main Stream] Message received from Future: $message',
-        );
-        _mainStreamController.sink.add(message);
-      },
-      onError: (Object err, StackTrace stack) {
-        printDebug(
-          () => '[Main Stream] Error message received from Future: $err',
-        );
-        _mainStreamController.sink.addError(err, stack);
-      },
-    );
-
     _isolateFunction([_isolateParam, _isolateContactorController]);
   }
-
-  /// Check for current cumputing state in enum with listener
-  final StreamController<R> _mainStreamController =
-      StreamController.broadcast();
 
   /// Listener for result
   final IsolateContactorController<R, P> _isolateContactorController;
@@ -52,8 +34,6 @@ class IsolateContactorInternalFuture<R, P>
 
   /// Control the parameters of isolate
   final dynamic _isolateParam;
-
-  late final StreamSubscription<dynamic> _streamSubscription;
 
   /// Create modified isolate function
   static Future<IsolateContactorInternalFuture<R, P>> createCustom<R, P>({
@@ -85,24 +65,18 @@ class IsolateContactorInternalFuture<R, P>
   }
 
   @override
-  Stream<R> get onMessage => _mainStreamController.stream;
+  Stream<R> get onMessage => _isolateContactorController.onMessage;
 
   @override
   Future<void> dispose() async {
     _isolateContactorController.sendIsolateState(IsolateState.dispose);
-
-    await Future.wait([
-      _isolateContactorController.close(),
-      _mainStreamController.close(),
-      _streamSubscription.cancel(),
-    ]);
-
+    await _isolateContactorController.close();
     printDebug(() => 'Disposed');
   }
 
   @override
   Future<R> sendMessage(P message) async {
-    printDebug(() => 'Message sent to isolate: $message');
+    printDebug(() => '[Main App] Message sent to the Web Future: $message');
     _isolateContactorController.sendIsolate(message);
     return _isolateContactorController.onMessage.first;
   }
