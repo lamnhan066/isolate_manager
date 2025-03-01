@@ -1,3 +1,7 @@
+## 6.0.0-rc.16+1
+
+* Update README.
+
 ## 6.0.0-rc.16
 
 * Add `runCustomFunction` method to support custom isolate execution with optional callback and debug logging
