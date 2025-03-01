@@ -16,7 +16,10 @@ import '../test/isolate_manager_shared_test.dart';
 */
 
 void main() {
-  _addWorkerMappings();
+  setUp(_addWorkerMappings);
+
+  tearDown(IsolateManager.clearWorkerMappings);
+
   group('Models', () {
     test('IsolateState', () {
       for (final state in IsolateState.values) {
@@ -36,6 +39,60 @@ void main() {
       final json = exception.toMap();
       expect(IsolateException.isValidMap(json), equals(true));
       expect(IsolateException.fromMap(json), isA<IsolateException>());
+    });
+  });
+
+  group('IsolateManager.addWorkerMapping', () {
+    setUp(IsolateManager.clearWorkerMappings);
+
+    test('should add a new function mapping', () {
+      void testFunction(_) {}
+      const workerName = 'testFunction';
+
+      final isolate = IsolateManager.create(testFunction);
+      expect(isolate.workerName, equals(''));
+
+      IsolateManager.addWorkerMapping(testFunction, workerName);
+
+      expect(isolate.workerName, equals(workerName));
+    });
+
+    test(
+        'should throw an exception when adding a duplicate function without overwrite',
+        () {
+      void testFunction(_) {}
+      const workerName = 'testFunction';
+
+      IsolateManager.addWorkerMapping(testFunction, workerName);
+
+      expect(
+        () => IsolateManager.addWorkerMapping(testFunction, 'newWorker'),
+        throwsA(isA<IsolateException>()),
+      );
+
+      // Ensure the mapping remains unchanged
+      final isolate = IsolateManager.create(testFunction);
+      expect(isolate.workerName, equals(workerName));
+    });
+
+    test('should overwrite an existing function mapping when overwrite is true',
+        () {
+      void testFunction(_) {}
+      const oldWorkerName = 'testFunction';
+      const newWorkerName = 'newWorker';
+
+      IsolateManager.addWorkerMapping(testFunction, oldWorkerName);
+      final isolate = IsolateManager.create(testFunction);
+
+      expect(isolate.workerName, equals(oldWorkerName));
+
+      IsolateManager.addWorkerMapping(
+        testFunction,
+        newWorkerName,
+        overwrite: true,
+      );
+
+      expect(isolate.workerName, equals(newWorkerName));
     });
   });
 
