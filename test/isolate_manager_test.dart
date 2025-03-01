@@ -16,9 +16,7 @@ import '../test/isolate_manager_shared_test.dart';
 */
 
 void main() {
-  setUp(_addWorkerMappings);
-
-  tearDown(IsolateManager.clearWorkerMappings);
+  _addWorkerMappings();
 
   group('Models', () {
     test('IsolateState', () {
@@ -44,6 +42,11 @@ void main() {
 
   group('IsolateManager.addWorkerMapping', () {
     setUp(IsolateManager.clearWorkerMappings);
+
+    tearDown(() {
+      IsolateManager.clearWorkerMappings();
+      _addWorkerMappings();
+    });
 
     test('should add a new function mapping', () {
       void testFunction(_) {}
