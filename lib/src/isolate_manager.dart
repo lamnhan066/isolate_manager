@@ -10,9 +10,6 @@ import 'package:isolate_manager/src/utils/print.dart';
 /// Type for the callback of the isolate.
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
 
-/// Callback for the `createCustom`'s `function`.
-typedef IsolateCustomFunction = IsolateFunction<void, dynamic>;
-
 /// Create a new [IsolateManager] instance by using [IsolateManager.create],
 /// [IsolateManager.createCustom] or [IsolateManager.createShared].
 class IsolateManager<R, P> {
@@ -185,7 +182,7 @@ class IsolateManager<R, P> {
   ///
   /// Set [isDebug] to `true` to enable debug logging.
   static Future<R> runCustomFunction<R, P>(
-    CustomIsolateFunction function,
+    IsolateCustomFunction function,
     P parameter, {
     String? workerName,
     IsolateCallback<R>? callback,

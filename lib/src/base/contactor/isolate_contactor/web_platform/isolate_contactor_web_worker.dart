@@ -13,7 +13,7 @@ class IsolateContactorInternalWorker<R, P>
     extends IsolateContactorInternal<R, P> {
   /// Create an instance
   IsolateContactorInternalWorker._({
-    required CustomIsolateFunction isolateFunction,
+    required IsolateCustomFunction isolateFunction,
     required Object? isolateParam,
     required String workerName,
     required IsolateConverter<R> converter,
@@ -44,7 +44,7 @@ class IsolateContactorInternalWorker<R, P>
 
   /// Create modified isolate function
   static Future<IsolateContactorInternalWorker<R, P>> createCustom<R, P>({
-    required CustomIsolateFunction isolateFunction,
+    required IsolateCustomFunction isolateFunction,
     required String workerName,
     required Object? initialParams,
     required IsolateConverter<R> converter,

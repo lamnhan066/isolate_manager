@@ -9,7 +9,7 @@ import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
 class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   /// Internal instance
   IsolateContactorInternal._({
-    required CustomIsolateFunction isolateFunction,
+    required IsolateCustomFunction isolateFunction,
     required dynamic isolateParam,
     required String workerName,
     required IsolateConverter<R> converter,
@@ -51,7 +51,7 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
 
   /// Create an instance with your own function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
-    required CustomIsolateFunction isolateFunction,
+    required IsolateCustomFunction isolateFunction,
     required Object? initialParams,
     required String workerName,
     required IsolateConverter<R> converter,

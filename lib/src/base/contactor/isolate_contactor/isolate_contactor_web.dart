@@ -11,7 +11,7 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
 
   /// Create modified isolate function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
-    required CustomIsolateFunction isolateFunction,
+    required IsolateCustomFunction isolateFunction,
     required String workerName,
     required Object? initialParams,
     required IsolateConverter<R> converter,

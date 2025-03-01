@@ -8,7 +8,11 @@ import 'package:isolate_manager/src/utils/print.dart';
 typedef IsolateFunction<R, P> = FutureOr<R> Function(P params);
 
 /// The type of the `function` of the `.createCustom` method.
-typedef CustomIsolateFunction = FutureOr<void> Function(dynamic);
+typedef IsolateCustomFunction = FutureOr<void> Function(dynamic);
+
+/// The type of the `function` of the `.createCustom` method.
+@Deprecated('Use `IsolateCustomFunction` instead')
+typedef CustomIsolateFunction = IsolateCustomFunction;
 
 /// The type of the `converter` and `workerConverter`.
 typedef IsolateConverter<R> = R Function(dynamic);
@@ -46,7 +50,7 @@ abstract class IsolateContactor<R, P> {
   ///
   /// `debugMode` allow printing debug data in console. Default is set to false.
   static Future<IsolateContactor<R, P>> createCustom<R, P>(
-    CustomIsolateFunction function, {
+    IsolateCustomFunction function, {
     String workerName = '',
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
