@@ -219,16 +219,38 @@ class IsolateManager<R, P> {
   /// Store the global mappings between functions and Workers.
   static final _workerMappings = <Function, String>{};
 
-  /// Add the mapping between a function and a Worker to the [_workerMappings].
+  /// Adds a mapping between a function and a Worker.
   ///
-  /// This method is used by the generator.
+  /// This method is used by the generator to associate an [IsolateFunction] with a
+  /// unique worker name. If the function is already mapped and [overwrite] is `false`,
+  /// an [IsolateException] will be thrown.
+  ///
+  /// - [function]: The function to be mapped.
+  /// - [name]: The unique worker name associated with the function.
+  /// - [overwrite]: If `true`, replaces an existing mapping; otherwise, throws an [IsolateException].
   static void addWorkerMapping<R, P>(
     IsolateFunction<R, P> function,
-    String name,
-  ) {
-    if (!_workerMappings.containsKey(function)) {
-      _workerMappings.addAll({function: name});
+    String name, {
+    bool overwrite = false,
+  }) {
+    final contains = _workerMappings.containsKey(function);
+
+    if (contains && !overwrite) {
+      throw IsolateException(
+        'The function $function is already mapped to ${_workerMappings[function]}.',
+      );
     }
+
+    _workerMappings[function] = name;
+  }
+
+  /// Clears all worker mappings.
+  ///
+  /// This method removes all stored function-to-worker associations,
+  /// effectively resetting the mapping. It should be used with caution,
+  /// as it erases all previously registered workers.
+  static void clearWorkerMappings() {
+    _workerMappings.clear();
   }
 
   /// Number of concurrent isolates.
