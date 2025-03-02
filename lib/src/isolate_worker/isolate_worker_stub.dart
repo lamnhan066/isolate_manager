@@ -1,6 +1,3 @@
-// coverage:ignore-file
-// Tested by compiling to `js` for the Web Worker.
-
 import 'dart:async';
 
 import 'package:isolate_manager/src/isolate_manager_function.dart';
