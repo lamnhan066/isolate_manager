@@ -920,10 +920,7 @@ Future<void> isolateFunction(dynamic params) async {
       }
       return 0;
     },
-    onInitial: (
-      IsolateManagerController<int, int> controller,
-      Object? initialParams,
-    ) {},
+    onInit: (IsolateManagerController<int, int> controller) {},
     onDispose: (IsolateManagerController<int, int> controller) {},
     autoHandleException: false,
     autoHandleResult: false,
@@ -937,10 +934,7 @@ void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
     onEvent: (IsolateManagerController<int, int> controller, int message) {
       return fibonacci(message);
     },
-    onInitial: (
-      IsolateManagerController<int, int> controller,
-      Object? initialParams,
-    ) {},
+    onInit: (IsolateManagerController<int, int> controller) {},
     onDispose: (IsolateManagerController<int, int> controller) {},
   );
 }

@@ -41,6 +41,8 @@ class IsolateManager<R, P> {
     QueueStrategy<R, P>? queueStrategy,
     this.isDebug = false,
   })  : isCustomIsolate = false,
+        // This API will be removed in v6.0.0 when we reach the stable release.
+        // ignore: deprecated_member_use_from_same_package
         initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
         _workerName = workerName,
@@ -70,6 +72,8 @@ class IsolateManager<R, P> {
   IsolateManager.createCustom(
     IsolateCustomFunction this.isolateFunction, {
     String? workerName,
+    // This API will be removed in v6.0.0 when we reach the stable release.
+    // ignore: deprecated_consistency
     this.initialParams,
     this.concurrent = 1,
     this.converter,
@@ -308,6 +312,9 @@ class IsolateManager<R, P> {
   final String? _workerName;
 
   /// Initial parameters.
+  @Deprecated(
+    'This API will be removed in v6.0.0 when we reach the stable release.',
+  )
   final Object? initialParams;
 
   /// Is using your own isolate function.
@@ -398,6 +405,8 @@ class IsolateManager<R, P> {
             IsolateContactor.createCustom<R, P>(
               isolateFunction as IsolateCustomFunction,
               workerName: workerName,
+              // This API will be removed in v6.0.0 when we reach the stable release.
+              // ignore: deprecated_member_use_from_same_package
               initialParams: initialParams,
               converter: converter,
               workerConverter: workerConverter,

@@ -7,9 +7,18 @@ import 'package:isolate_manager/src/isolate_worker/isolate_worker_web.dart'
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
+@Deprecated(
+  'Use `IsolateOnInitCallback` instead. This API will be removed in v6.0.0 when we reach the stable release.',
+)
 typedef IsolateOnInitialCallback<R, P, T> = FutureOr<void> Function(
   IsolateManagerController<R, P> controller,
   T initialParams,
+);
+
+/// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
+/// before all events.
+typedef IsolateOnInitCallback<R, P> = FutureOr<void> Function(
+  IsolateManagerController<R, P> controller,
 );
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
@@ -64,7 +73,11 @@ abstract class IsolateManagerFunction {
     /// A default parameter that used by the package.
     dynamic params, {
     required IsolateOnEventCallback<R, P> onEvent,
+    @Deprecated(
+      ' Use `onInit` instead. This API will be removed in v6.0.0 when we reach the stable release.',
+    )
     IsolateOnInitialCallback<R, P, Object?>? onInitial,
+    IsolateOnInitCallback<R, P>? onInit,
     IsolateOnDisposeCallback<R, P>? onDispose,
     bool autoHandleException = true,
     bool autoHandleResult = true,
@@ -144,9 +157,17 @@ abstract class IsolateManagerFunction {
   /// ```
   static Future<void> workerFunction<R, P>(
     IsolateWorkerFunction<R, P> function, {
+    @Deprecated(
+      'Use `onInit` instead. This API will be removed in v6.0.0 when we reach the stable release.',
+    )
     FutureOr<void> Function()? onInitial,
+    IsolateOnInitCallback<R, P>? onInit,
   }) {
-    return isolateWorkerImpl<R, P>(function, onInitial);
+    assert(
+      onInitial == null || onInit == null,
+      'Provide either `onInit` or `onInitial`, not both.',
+    );
+    return isolateWorkerImpl<R, P>(function, onInitial, onInit);
   }
 
   /// Create a custom Worker function.
