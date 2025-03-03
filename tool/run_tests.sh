@@ -2,6 +2,9 @@
 
 dart test --platform=chrome
 
+# Restore all backup .js to keep the original files
+trap 'find . -type f -name "*.js.bak" -exec sh -c "mv \"\$0\" \"\${0%.bak}\"" {} \;' EXIT INT TERM
+
 # Backup all .js by renaming to .js.bak
 find . -type f -name "*.js" -exec mv {} {}.bak \;
 
@@ -16,6 +19,3 @@ dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info 
 
 # Rename the covered file paths to relative paths
 sed -i '' 's|SF:.*/lib|SF:lib|' coverage/lcov.info
-
-# Restore all backup .js to keep the original files
-find . -type f -name "*.js.bak" -exec sh -c 'mv "$0" "${0%.bak}"' {} \;
