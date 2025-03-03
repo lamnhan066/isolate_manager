@@ -781,11 +781,75 @@ void main() {
     });
   });
 
-  test('Nullable type', () async {
-    final isolates = IsolateManager.create(isolateNullableInt);
-    final result = await isolates(null);
+  group('Isolate Types -', () {
+    test('num', () async {
+      final isolates = IsolateManager.create(isolateTypeNum, isDebug: true);
 
-    expect(result, equals(null));
+      const value = IsolateNum(15);
+
+      final result = await isolates.compute(value);
+
+      expect(result, isA<IsolateNum>());
+      expect(result, equals(value));
+    });
+
+    test('String', () async {
+      const value = IsolateString('abc');
+      final isolates = IsolateManager.create(isolateTypeString);
+
+      final result = await isolates.compute(value);
+
+      expect(result, isA<IsolateString>());
+      expect(result, equals(value));
+    });
+
+    test('bool', () async {
+      const value = IsolateBool(false);
+      final isolates = IsolateManager.create(isolateTypeBool);
+
+      final result = await isolates.compute(value);
+
+      expect(result, isA<IsolateBool>());
+      expect(result, equals(value));
+    });
+
+    test('List', () async {
+      const value = IsolateList(<IsolateNum>[IsolateNum(100)]);
+      final isolates = IsolateManager.create(isolateTypeList);
+
+      final result = await isolates.compute(value);
+
+      expect(result, isA<IsolateList>());
+      expect(
+        result,
+        equals(const IsolateList(<IsolateString>[IsolateString('100')])),
+      );
+    });
+
+    test('Map', () async {
+      final isolates = IsolateManager.create(isolateTypeMap);
+      final result = await isolates.compute(
+        const IsolateList([IsolateNum(5), IsolateNum(7)]),
+      );
+
+      expect(result, isA<IsolateMap>());
+      expect(
+        result,
+        equals(
+          IsolateMap(<IsolateString, IsolateNum>{
+            const IsolateString('5'): const IsolateNum(5),
+            const IsolateString('7'): const IsolateNum(7),
+          }),
+        ),
+      );
+    });
+
+    test('Nullable type', () async {
+      final isolates = IsolateManager.create(isolateNullableInt);
+      final result = await isolates(null);
+
+      expect(result, equals(null));
+    });
   });
 
   test('IsolateManager.run method', () async {
@@ -971,6 +1035,37 @@ void isolateCallbackSimpleFunctionWithSpecifiedType(dynamic params) {
 }
 
 @isolateManagerWorker
+IsolateNum isolateTypeNum(IsolateNum number) {
+  return IsolateNum(number.decode);
+}
+
+@isolateManagerWorker
+IsolateString isolateTypeString(IsolateString string) {
+  return IsolateString(string.decode);
+}
+
+@isolateManagerWorker
+IsolateBool isolateTypeBool(IsolateBool boolean) {
+  return IsolateBool(boolean.decode);
+}
+
+@isolateManagerWorker
+IsolateList isolateTypeList(IsolateList numbers) {
+  return IsolateList(numbers.decode!.map((e) => IsolateString('$e')).toList());
+}
+
+@isolateManagerWorker
+IsolateMap isolateTypeMap(IsolateList numbers) {
+  return IsolateMap(
+    Map.fromEntries(
+      numbers.decode!.map(
+        (e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num)),
+      ),
+    ),
+  );
+}
+
+@isolateManagerWorker
 int? isolateNullableInt(int? number) {
   return number;
 }
@@ -995,6 +1090,11 @@ Future<int> errorFunctionFuture(List<int> value) async {
 
 void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
+  IsolateManager.addWorkerMapping(isolateTypeString, 'isolateTypeString');
+  IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');
+  IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
+  IsolateManager.addWorkerMapping(isolateTypeMap, 'isolateTypeMap');
+  IsolateManager.addWorkerMapping(isolateTypeNum, 'isolateTypeNum');
   IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
   IsolateManager.addWorkerMapping(concat, 'concat');
   IsolateManager.addWorkerMapping(addException, 'addException');
