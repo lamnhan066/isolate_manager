@@ -18,22 +18,21 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
   final isDebug = manager.isDebug;
   if (isDebug && isWorker && workerFunction == null) {
     debugPrinter(
-      () =>
-          '[Isolate Manager] Worker is available but `workerFunction` is null, '
+      () => 'Worker is available but `workerFunction` is null, '
           'so `Future` will be used instead',
     );
   }
 
   final func = (isWorker && workerFunction != null) ? workerFunction : function;
   var finalParams = workerParams ?? params;
-  final isParameterIsolateType = finalParams is IsolateType;
+  final isUseIsolateType = finalParams is IsolateType;
 
   // Decode to a sendable object.
-  if (isParameterIsolateType) {
+  if (isUseIsolateType) {
     finalParams = finalParams.decode;
   }
   var result = await manager.compute(
-    [func, finalParams, isParameterIsolateType],
+    [func, finalParams, isUseIsolateType],
     priority: priority,
   );
 
