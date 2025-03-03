@@ -1,3 +1,46 @@
+## 6.0.0-rc.17
+
+* Fixes an issue in the shared isolate manager that `useWorker` is true but there is no `workerName` provided.
+* Add new `onInit` callback to replace `onInitial` and make it as deprecated.
+* Mark `initialParameter` in the `IsolateManager.createCustom` as deprecated:
+
+  Before:
+
+  ```dart
+  void customIsolateFunction(dynamic params) {
+    IsolateManangerFunction.customFunction(
+      params,
+      onInitial: (controller, initialParams) {
+        // Do something here with the `initialParams`.
+      },
+    );
+  }
+
+  final isolate = IsolateManager.createCustom<R, P>(
+    customIsolateFunction,
+    initialParams: 'initialParams',
+  );
+  ```
+
+  Now:
+
+  ```dart
+  void customIsolateFunction(dynamic params) {
+    IsolateManangerFunction.customFunction(
+      params,
+      onInit: (controller) {
+        // Do something here with your own `initialParams` value.
+      },
+    );
+  }
+
+  final isolate = IsolateManager.createCustom<R, P>(
+    customIsolateFunction,
+  );
+  ```
+  
+* Improve tests.
+
 ## 6.0.0-rc.16+1
 
 * Update README.
