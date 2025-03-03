@@ -15,9 +15,16 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
 }) async {
   final isWorker = manager.workerName != '';
   final isDebug = manager.isDebug;
-  if (isDebug && isWorker && workerFunction == null) {
-    print('[Isolate Manager] Worker is available but `workerFunction` is null, '
-        'so `Future` will be used instead');
+
+  if (isWorker && workerFunction == null) {
+    if (isDebug) {
+      print(
+        () => 'Worker is available but `workerFunction` is null, '
+            'so `Future` will be used instead',
+      );
+    }
+
+    return function(params);
   }
 
   final func = (isWorker && workerFunction != null) ? workerFunction : function;
