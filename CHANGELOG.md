@@ -1,3 +1,8 @@
+## 5.7.4
+
+* Fixes an issue in the shared isolate manager that `useWorker` is true but there is no `workerName` provided.
+* Update tests.
+
 ## 5.7.3
 
 * Update the `web` package version to re-support a wider range (">=0.5.1 <2.0.0").
