@@ -309,7 +309,21 @@ void main() async {
 
     expect(result, equals(null));
   });
+
+  test('`useWorker` is `true` but `workerFunction` is not provided', () async {
+    final isolates = IsolateManager.createShared(
+      useWorker: true,
+      isDebug: true,
+    );
+
+    expect(
+      await isolates.compute(addWithoutWorker, <int>[2, 3]),
+      equals(5),
+    );
+  });
 }
+
+int addWithoutWorker(List<int> params) => params[0] + params[1];
 
 @isolateManagerSharedWorker
 Future<double> addFuture(List<double> values) async {
