@@ -4,7 +4,6 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
-import 'models/user.dart';
 
 /*
   dart run isolate_manager:generate -i test -o test --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
@@ -194,115 +193,6 @@ void main() async {
     }
   });
 
-  group('Isolate Types -', () {
-    final isolates = IsolateManager.createShared(useWorker: true);
-
-    setUpAll(() async {
-      await isolates.start();
-    });
-
-    tearDownAll(() async {
-      await isolates.stop();
-    });
-
-    test('Unimplemented Type', () {
-      final user = User(name: 'user', email: 'user@user.com');
-      expect(
-        () => IsolateType.encode<IsolateType<Object?>>(user),
-        throwsUnimplementedError,
-      );
-    });
-
-    test('num', () async {
-      const value = IsolateNum(15);
-
-      final result = await isolates.compute(isolateTypeNum, value);
-
-      expect(result, isA<IsolateNum>());
-      expect(result, equals(value));
-    });
-
-    test('num toDouble', () {
-      const doubleValue = 15.0;
-      final value = const IsolateNum(doubleValue).toDouble();
-
-      expect(value, isA<double>());
-      expect(value, equals(doubleValue));
-    });
-
-    test('num toInt', () {
-      const doubleValue = 15;
-      final value = const IsolateNum(doubleValue).toInt();
-
-      expect(value, isA<int>());
-      expect(value, equals(doubleValue));
-    });
-
-    test('encode, decode IsolateList', () {
-      final list = <Object>['1', 1, 1.0, false];
-      final value = IsolateType.encode<IsolateType<Object?>>(list);
-
-      expect(value, isA<IsolateList>());
-      expect(value.decode, equals(list));
-    });
-
-    test('encode, decode IsolateMap', () {
-      final map = <String, Object>{'k1': '1', 'k2': 1, 'k3': 1.0, 'k4': false};
-      final value = IsolateType.encode<IsolateType<Object?>>(map);
-
-      expect(value, isA<IsolateMap>());
-      expect(value.decode, equals(map));
-    });
-
-    test('String', () async {
-      const value = IsolateString('abc');
-
-      final result = await isolates.compute(isolateTypeString, value);
-
-      expect(result, isA<IsolateString>());
-      expect(result, equals(value));
-    });
-
-    test('bool', () async {
-      const value = IsolateBool(false);
-
-      final result = await isolates.compute(isolateTypeBool, value);
-
-      expect(result, isA<IsolateBool>());
-      expect(result, equals(value));
-    });
-
-    test('List', () async {
-      const value = IsolateList(<IsolateNum>[IsolateNum(100)]);
-
-      final result = await isolates.compute(isolateTypeList, value);
-
-      expect(result, isA<IsolateList>());
-      expect(
-        result,
-        equals(const IsolateList(<IsolateString>[IsolateString('100')])),
-      );
-    });
-
-    test('Map', () async {
-      final result = await isolates.compute(
-        isolateTypeMap,
-        const IsolateList([IsolateNum(5), IsolateNum(7)]),
-      );
-
-      expect(result, isA<IsolateMap>());
-      expect(
-        result,
-        equals(
-          IsolateMap({
-            const IsolateString('5'): const IsolateNum(5),
-            const IsolateString('7'): const IsolateNum(7),
-          }),
-        ),
-      );
-    });
-  });
-
   test('Nullable type', () async {
     final isolates = IsolateManager.createShared(useWorker: true);
     final result = await isolates.compute(isolateNullableInt, null);
@@ -356,47 +246,12 @@ Map<dynamic, dynamic> aDynamicMap(Map<dynamic, dynamic> params) {
 }
 
 @isolateManagerSharedWorker
-IsolateNum isolateTypeNum(IsolateNum number) {
-  return IsolateNum(number.decode);
-}
-
-@isolateManagerSharedWorker
-IsolateString isolateTypeString(IsolateString string) {
-  return IsolateString(string.decode);
-}
-
-@isolateManagerSharedWorker
-IsolateBool isolateTypeBool(IsolateBool boolean) {
-  return IsolateBool(boolean.decode);
-}
-
-@isolateManagerSharedWorker
-IsolateList isolateTypeList(IsolateList numbers) {
-  return IsolateList(numbers.decode?.map((e) => IsolateString('$e')).toList());
-}
-
-@isolateManagerSharedWorker
-IsolateMap isolateTypeMap(IsolateList numbers) {
-  return IsolateMap(
-    Map.fromEntries(
-      numbers.decode!
-          .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num))),
-    ),
-  );
-}
-
-@isolateManagerSharedWorker
 int? isolateNullableInt(int? number) {
   return number;
 }
 
 void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
-  IsolateManager.addWorkerMapping(isolateTypeMap, 'isolateTypeMap');
-  IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
-  IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');
-  IsolateManager.addWorkerMapping(isolateTypeString, 'isolateTypeString');
-  IsolateManager.addWorkerMapping(isolateTypeNum, 'isolateTypeNum');
   IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
   IsolateManager.addWorkerMapping(aStringList, 'aStringList');
   IsolateManager.addWorkerMapping(

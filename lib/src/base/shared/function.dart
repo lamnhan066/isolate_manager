@@ -8,16 +8,9 @@ import 'package:isolate_manager/src/base/shared/platforms/web.dart'
 /// Values of [params]
 ///   0. Function
 ///   1. Parameter of the function
-///   3. Is the parameter IsolateType
 Future<dynamic> internalFunction(List<dynamic> params) async {
-  final isIsolateTypeParameter = (params.elementAtOrNull(2) as bool?) ?? false;
-
-  dynamic parameter = params[1];
-  if (isIsolateTypeParameter) {
-    parameter = IsolateType.encode<IsolateType<Object?>>(parameter);
-  }
   final completer = Completer<dynamic>()
-    ..complete((params[0] as Function)(parameter));
+    ..complete((params[0] as Function)(params[1]));
   return completer.future;
 }
 

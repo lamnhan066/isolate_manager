@@ -15,7 +15,6 @@
 - **Web & WASM Support:** Automatically compiles functions to JavaScript Workers on the web (fallback to `Future`/`Stream` if Workers are unavailable).
 - **Robust Exception Handling:** Supports try-catch blocks and custom error handling.
 - **Queue Management:** Automatically queues multiple computations, supports priority tasks, and offers customizable queue strategies.
-- **Type Safety Helpers:** Use specialized types (`IsolateNum`, `IsolateString`, etc.) to ensure only transferable data (primitives, Maps, Lists) is exchanged between isolates.
 
 ## Setup
 
@@ -219,28 +218,9 @@ void progressFunction(dynamic params) {
 }
 ```
 
-### Type Safety for Web Workers
-
-Use helper types to ensure safe data transfer:
-
-```dart
-@isolateManagerWorker
-IsolateMap isolateFunction(IsolateList numbers) {
-  // Decode the list into standard Dart types.
-  final data = numbers.decode!;
-  final map = Map.fromEntries(
-    data.map((e) => MapEntry(IsolateString('$e'), IsolateNum(e as num))),
-  );
-  return IsolateMap(map);
-}
-
-// Convert native Dart objects to IsolateTypes:
-final encoded = IsolateType.encode({'k1': 'v1', 'k2': 'v2'});
-```
-
 ### Handling Complex Data Structures
 
-For functions that process lists or maps, simply pass the data using the `IsolateType`s or through:
+For functions that process lists or maps, simply pass the data using through:
 
 - **List Example:**
 
