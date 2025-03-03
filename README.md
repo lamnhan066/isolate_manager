@@ -145,7 +145,7 @@ void customIsolateFunction(dynamic params) {
       }
       return 0;
     },
-    onInitial: (controller, initialParams) {
+    onInit: (controller) {
       // Initialization logic here.
     },
     onDispose: (controller) {
@@ -156,7 +156,6 @@ void customIsolateFunction(dynamic params) {
 
 final isolateManager = IsolateManager.createCustom(
   customIsolateFunction,
-  initialParams: 'Initial parameters',
   workerName: 'customIsolateFunction',
   debugMode: true,
 );
