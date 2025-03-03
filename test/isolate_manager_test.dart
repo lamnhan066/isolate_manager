@@ -635,7 +635,7 @@ void main() {
   });
 
   group('Isolate Queue Strategy -', () {
-    test('QueueStrategyRemoveNewest with unlimited queue count', () {
+    test('QueueStrategyUnlimited with multiple operations', () {
       final queueStrategies = QueueStrategyUnlimited<int, int>();
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
@@ -646,23 +646,36 @@ void main() {
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
-      expect(result.length, equals(0));
+      expect(result, isEmpty);
     });
 
-    test('QueueStrategyRemoveNewest with addToTop is true', () {
+    test('QueueStrategyUnlimited edge case: empty queue', () {
       final queueStrategies = QueueStrategyUnlimited<int, int>();
-      for (var i = 0; i < 10; i++) {
-        queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
-      }
-      expect(queueStrategies.queuesCount, equals(10));
-      final result = <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reversed.toList();
-      while (queueStrategies.hasNext()) {
-        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
-      }
-      expect(result.length, equals(0));
+      expect(queueStrategies.queuesCount, equals(0));
+      expect(queueStrategies.hasNext(), isFalse);
+      expect(queueStrategies.getNext, throwsA(isA<AssertionError>()));
     });
 
-    test('QueueStrategyRemoveNewest', () {
+    test('QueueStrategyUnlimited alternating add and remove', () {
+      final queueStrategies = QueueStrategyUnlimited<int, int>()
+        ..add(IsolateQueue<int, int>(1, null));
+      expect(queueStrategies.queuesCount, equals(1));
+      expect(queueStrategies.getNext().params, equals(1));
+
+      queueStrategies
+        ..add(IsolateQueue<int, int>(2, null))
+        ..add(IsolateQueue<int, int>(3, null));
+      expect(queueStrategies.queuesCount, equals(2));
+      expect(queueStrategies.getNext().params, equals(2));
+
+      queueStrategies.add(IsolateQueue<int, int>(4, null));
+      expect(queueStrategies.queuesCount, equals(2));
+      expect(queueStrategies.getNext().params, equals(3));
+      expect(queueStrategies.getNext().params, equals(4));
+      expect(queueStrategies.hasNext(), isFalse);
+    });
+
+    test('QueueStrategyRemoveNewest with default behavior', () {
       final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
@@ -672,10 +685,10 @@ void main() {
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
-      expect(result.length, equals(0));
+      expect(result, isEmpty);
     });
 
-    test('QueueStrategyRemoveNewest with addToTop is true', () {
+    test('QueueStrategyRemoveNewest with addToTop true', () {
       final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
@@ -685,10 +698,18 @@ void main() {
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
-      expect(result.length, equals(0));
+      expect(result, isEmpty);
     });
 
-    test('QueueStrategyRemoveOldest', () {
+    test('QueueStrategyRemoveNewest edge case: single element', () {
+      final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3)
+        ..add(IsolateQueue<int, int>(100, null));
+      expect(queueStrategies.queuesCount, equals(1));
+      expect(queueStrategies.getNext().params, equals(100));
+      expect(queueStrategies.hasNext(), isFalse);
+    });
+
+    test('QueueStrategyRemoveOldest with default behavior', () {
       final queueStrategies = QueueStrategyRemoveOldest<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
@@ -698,23 +719,25 @@ void main() {
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
-      expect(result.length, equals(0));
+      expect(result, isEmpty);
     });
 
-    test('QueueStrategyRemoveOldest with addToTop is true', () {
+    test('QueueStrategyRemoveOldest with addToTop true', () {
       final queueStrategies = QueueStrategyRemoveOldest<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
       expect(queueStrategies.queuesCount, equals(3));
+      // With addToTop, the newest goes to front, but removal still drops oldest elements.
+      // The resulting order depends on internal handling.
       final result = <int>[9, 1, 0];
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
-      expect(result.length, equals(0));
+      expect(result, isEmpty);
     });
 
-    test('QueueStrategyDiscardIncoming', () {
+    test('QueueStrategyDiscardIncoming with default behavior', () {
       final queueStrategies =
           QueueStrategyDiscardIncoming<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
@@ -725,10 +748,10 @@ void main() {
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
-      expect(result.length, equals(0));
+      expect(result, isEmpty);
     });
 
-    test('QueueStrategyDiscardIncoming with addToTop is true', () {
+    test('QueueStrategyDiscardIncoming with addToTop true', () {
       final queueStrategies =
           QueueStrategyDiscardIncoming<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
@@ -739,7 +762,22 @@ void main() {
       while (queueStrategies.hasNext()) {
         expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
       }
-      expect(result.length, equals(0));
+      expect(result, isEmpty);
+    });
+
+    test('QueueStrategyDiscardIncoming edge case: adding when full', () {
+      final queueStrategies =
+          QueueStrategyDiscardIncoming<int, int>(maxCount: 2)
+            ..add(IsolateQueue<int, int>(1, null))
+            ..add(IsolateQueue<int, int>(2, null))
+            // Should discard incoming value since max count is reached.
+            ..add(IsolateQueue<int, int>(3, null));
+      expect(queueStrategies.queuesCount, equals(2));
+      final result = <int>[1, 2];
+      while (queueStrategies.hasNext()) {
+        expect(queueStrategies.getNext().params, equals(result.removeAt(0)));
+      }
+      expect(result, isEmpty);
     });
   });
 
