@@ -313,7 +313,44 @@ class IsolateManager<R, P> {
 
   /// Initial parameters.
   @Deprecated(
-    'This API will be removed in v6.0.0 when we reach the stable release.',
+    '''
+This parameter will be removed in v6.0.0 when we reach the stable release.
+
+Before:
+
+```dart
+void customIsolateFunction(dynamic params) {
+  IsolateManangerFunction.customFunction(
+    params,
+    onInitial: (controller, initialParams) {
+      // Do something here.
+    },
+  );
+}
+
+final isolate = IsolateManager.createCustom<R, P>(
+  customIsolateFunction,
+  initialParams: 'initialParams',
+);
+```
+
+Now:
+
+```dart
+void customIsolateFunction(dynamic params) {
+  IsolateManangerFunction.customFunction(
+    params,
+    onInit: (controller) {
+      // Do something here with your own `initialParams` value.
+    },
+  );
+}
+
+final isolate = IsolateManager.createCustom<R, P>(
+  customIsolateFunction,
+);
+```
+''',
   )
   final Object? initialParams;
 
