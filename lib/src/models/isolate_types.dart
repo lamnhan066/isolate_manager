@@ -29,17 +29,10 @@ sealed class IsolateType<T extends Object> with EquatableMixin {
       final String s => IsolateString(s),
       final bool b => IsolateBool(b),
       final Iterable<dynamic> list => IsolateList(
-          list.map((e) {
-            return wrap<IsolateType>(e as Object);
-          }),
+          list.map((e) => wrap(e as Object)),
         ),
       final Map<dynamic, dynamic> map => IsolateMap(
-          map.map(
-            (k, v) => MapEntry(
-              wrap<IsolateType>(k as Object),
-              wrap<IsolateType>(v as Object),
-            ),
-          ),
+          map.map((k, v) => MapEntry(wrap(k as Object), wrap(v as Object))),
         ),
       _ => throw UnimplementedError(
           'Unsupported type ${object.runtimeType} when wrapping an IsolateType',
