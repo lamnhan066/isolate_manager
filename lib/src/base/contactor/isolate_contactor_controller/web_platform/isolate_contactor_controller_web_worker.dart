@@ -119,10 +119,7 @@ class IsolateContactorControllerImplWorker<R, P>
       }
 
       if (IsolateException.isValidMap(data)) {
-        _mainStreamController.addError(
-          IsolateException.fromMap(data).error.toString(),
-          StackTrace.empty,
-        );
+        _mainStreamController.addError(data);
         return;
       }
 
@@ -130,7 +127,7 @@ class IsolateContactorControllerImplWorker<R, P>
         IsolateException('Unhandled $data from the Isolate').toMap(),
       );
     } catch (e, stack) {
-      _mainStreamController.addError(e, stack);
+      _mainStreamController.addError(IsolateException(e, stack).toMap());
     }
   }
 }
