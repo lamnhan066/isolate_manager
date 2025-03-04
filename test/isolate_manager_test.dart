@@ -103,50 +103,50 @@ void main() {
     group('IsolateType.wrap', () {
       test('wraps num as IsolateNum', () {
         const numValue = 42;
-        final encoded = IsolateType.wrap(numValue);
-        expect(encoded, isA<IsolateNum>());
-        expect((encoded as IsolateNum).unwrap, equals(numValue));
+        final encoded = ImType.wrap(numValue);
+        expect(encoded, isA<ImNum>());
+        expect((encoded as ImNum).unwrap, equals(numValue));
         expect(encoded.toDouble(), equals(numValue.toDouble()));
         expect(encoded.toInt(), equals(numValue));
       });
 
       test('can convert IsolateNum from different number types', () {
         // Integer test
-        final intIsolate = IsolateType.wrap(10) as IsolateNum;
+        final intIsolate = ImType.wrap(10) as ImNum;
         expect(intIsolate.toInt(), equals(10));
         expect(intIsolate.toDouble(), equals(10.0));
 
         // Double test
-        final doubleIsolate = IsolateType.wrap(10.5) as IsolateNum;
+        final doubleIsolate = ImType.wrap(10.5) as ImNum;
         expect(doubleIsolate.toInt(), equals(10));
         expect(doubleIsolate.toDouble(), equals(10.5));
       });
 
       test('wraps String as IsolateString', () {
         const strValue = 'Hello, Isolate!';
-        final encoded = IsolateType.wrap(strValue);
-        expect(encoded, isA<IsolateString>());
-        expect((encoded as IsolateString).unwrap, equals(strValue));
+        final encoded = ImType.wrap(strValue);
+        expect(encoded, isA<ImString>());
+        expect((encoded as ImString).unwrap, equals(strValue));
       });
 
       test('wraps bool as IsolateBool', () {
         const boolValue = true;
-        final encoded = IsolateType.wrap(boolValue);
-        expect(encoded, isA<IsolateBool>());
-        expect((encoded as IsolateBool).unwrap, equals(boolValue));
+        final encoded = ImType.wrap(boolValue);
+        expect(encoded, isA<ImBool>());
+        expect((encoded as ImBool).unwrap, equals(boolValue));
       });
 
       test('wraps List as IsolateList and can decode iterable', () {
         final listValue = [1, 'two', false];
-        final encoded = IsolateType.wrap(listValue);
-        expect(encoded, isA<IsolateList>());
-        final isolateList = encoded as IsolateList;
-        final wrappedList = isolateList.toList<IsolateType>();
+        final encoded = ImType.wrap(listValue);
+        expect(encoded, isA<ImList>());
+        final isolateList = encoded as ImList;
+        final wrappedList = isolateList.toList<ImType>();
         expect(wrappedList, isNotNull);
         // Test that each element is wrapped accordingly.
-        expect(wrappedList[0], isA<IsolateNum>());
-        expect(wrappedList[1], isA<IsolateString>());
-        expect(wrappedList[2], isA<IsolateBool>());
+        expect(wrappedList[0], isA<ImNum>());
+        expect(wrappedList[1], isA<ImString>());
+        expect(wrappedList[2], isA<ImBool>());
         // Test decoded value.
         final decoded = isolateList.unwrap;
         expect(decoded, equals(listValue));
@@ -158,12 +158,12 @@ void main() {
           'b': false,
           'c': 'three',
         };
-        final encoded = IsolateType.wrap(mapValue);
-        expect(encoded, isA<IsolateMap>());
-        final isolateMap = encoded as IsolateMap;
+        final encoded = ImType.wrap(mapValue);
+        expect(encoded, isA<ImMap>());
+        final isolateMap = encoded as ImMap;
         // Test that toMap returns a map with proper key/value types.
-        final wrappedMap = isolateMap.toMap<IsolateString, IsolateType>();
-        expect(wrappedMap, isA<Map<IsolateString, IsolateType>>());
+        final wrappedMap = isolateMap.toMap<ImString, ImType>();
+        expect(wrappedMap, isA<Map<ImString, ImType>>());
         // Since keys are encoded, we check the decoded map.
         final decoded = isolateMap.unwrap;
         expect(decoded, equals(mapValue));
@@ -172,7 +172,7 @@ void main() {
       test('throws UnimplementedError for unsupported types', () {
         final unsupportedValue = DateTime.now();
         expect(
-          () => IsolateType.wrap(unsupportedValue),
+          () => ImType.wrap(unsupportedValue),
           throwsA(isA<UnimplementedError>()),
         );
       });
@@ -181,11 +181,11 @@ void main() {
     group('IsolateList helper methods', () {
       test('toIterable and toDecodedList work correctly', () {
         final listValue = [10, 20, 30];
-        final encoded = IsolateType.wrap(listValue) as IsolateList;
+        final encoded = ImType.wrap(listValue) as ImList;
 
         // Use toList to get the wrapped items.
-        final wrappedList = encoded.toList<IsolateType>();
-        expect(wrappedList, isA<List<IsolateType>>());
+        final wrappedList = encoded.toList<ImType>();
+        expect(wrappedList, isA<List<ImType>>());
         expect(wrappedList.length, equals(listValue.length));
 
         // Using toDecodedList to return the original values.
@@ -200,11 +200,11 @@ void main() {
           'x': 100,
           'y': 200,
         };
-        final encoded = IsolateType.wrap(mapValue) as IsolateMap;
+        final encoded = ImType.wrap(mapValue) as ImMap;
 
         // Testing toMap which casts the internal map to specified types.
-        final wrappedMap = encoded.toMap<IsolateString, IsolateType>();
-        expect(wrappedMap, isA<Map<IsolateString, IsolateType>>());
+        final wrappedMap = encoded.toMap<ImString, ImType>();
+        expect(wrappedMap, isA<Map<ImString, ImType>>());
         expect(wrappedMap.length, equals(mapValue.length));
 
         // Using toDecodedMap to get original Map.
@@ -215,22 +215,22 @@ void main() {
 
     test('Isolate types conversion and equality', () {
       // Test number conversions
-      expect(const IsolateNum(10) == const IsolateNum(10), isTrue);
-      expect(const IsolateNum(10) == const IsolateNum(11), isFalse);
+      expect(const ImNum(10) == const ImNum(10), isTrue);
+      expect(const ImNum(10) == const ImNum(11), isFalse);
 
       // Test string equality
       expect(
-        const IsolateString('test') == const IsolateString('test'),
+        const ImString('test') == const ImString('test'),
         isTrue,
       );
       expect(
-        const IsolateString('test') == const IsolateString('other'),
+        const ImString('test') == const ImString('other'),
         isFalse,
       );
 
       // Test bool equality
-      expect(const IsolateBool(true) == const IsolateBool(true), isTrue);
-      expect(const IsolateBool(true) == const IsolateBool(false), isFalse);
+      expect(const ImBool(true) == const ImBool(true), isTrue);
+      expect(const ImBool(true) == const ImBool(false), isFalse);
     });
   });
 
@@ -1326,31 +1326,31 @@ void isolateCallbackSimpleFunctionWithSpecifiedType(dynamic params) {
 }
 
 @isolateManagerWorker
-IsolateNum isolateTypeNum(IsolateNum number) {
-  return IsolateNum(number.unwrap);
+ImNum isolateTypeNum(ImNum number) {
+  return ImNum(number.unwrap);
 }
 
 @isolateManagerWorker
-IsolateString isolateTypeString(IsolateString string) {
-  return IsolateString(string.unwrap);
+ImString isolateTypeString(ImString string) {
+  return ImString(string.unwrap);
 }
 
 @isolateManagerWorker
-IsolateBool isolateTypeBool(IsolateBool boolean) {
-  return IsolateBool(boolean.unwrap);
+ImBool isolateTypeBool(ImBool boolean) {
+  return ImBool(boolean.unwrap);
 }
 
 @isolateManagerWorker
-IsolateList isolateTypeList(IsolateList numbers) {
-  return IsolateList(numbers.unwrap.map((e) => IsolateString('$e')).toList());
+ImList isolateTypeList(ImList numbers) {
+  return ImList(numbers.unwrap.map((e) => ImString('$e')).toList());
 }
 
 @isolateManagerWorker
-IsolateMap isolateTypeMap(IsolateList numbers) {
-  return IsolateMap(
+ImMap isolateTypeMap(ImList numbers) {
+  return ImMap(
     Map.fromEntries(
       numbers.unwrap.map(
-        (e) => MapEntry(IsolateString('$e'), IsolateNum(e as num)),
+        (e) => MapEntry(ImString('$e'), ImNum(e as num)),
       ),
     ),
   );

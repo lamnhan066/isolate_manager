@@ -50,7 +50,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
   @override
   void sendIsolate(P message) {
-    if (message is IsolateType) {
+    if (message is ImType) {
       _delegate.postMessage(message.unwrap.jsify());
     } else {
       _delegate.postMessage(message.jsify());
@@ -104,7 +104,7 @@ class IsolateContactorControllerImplWorker<R, P>
       if (data['type'] == 'data') {
         var result = data['value'];
         if (isIsolateTypeSubtype<R>()) {
-          result = IsolateType.wrap(result as Object);
+          result = ImType.wrap(result as Object);
         }
         _mainStreamController.add(_workerConverter(result));
         return;

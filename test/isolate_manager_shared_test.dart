@@ -208,23 +208,23 @@ void main() async {
     test('Unimplemented Type', () {
       final user = User(name: 'user', email: 'user@user.com');
       expect(
-        () => IsolateType.wrap(user),
+        () => ImType.wrap(user),
         throwsUnimplementedError,
       );
     });
 
     test('num', () async {
-      const value = IsolateNum(15);
+      const value = ImNum(15);
 
       final result = await isolates.compute(isolateTypeNum, value);
 
-      expect(result, isA<IsolateNum>());
+      expect(result, isA<ImNum>());
       expect(result, equals(value));
     });
 
     test('num toDouble', () {
       const doubleValue = 15.0;
-      final value = const IsolateNum(doubleValue).toDouble();
+      final value = const ImNum(doubleValue).toDouble();
 
       expect(value, isA<double>());
       expect(value, equals(doubleValue));
@@ -232,7 +232,7 @@ void main() async {
 
     test('num toInt', () {
       const doubleValue = 15;
-      final value = const IsolateNum(doubleValue).toInt();
+      final value = const ImNum(doubleValue).toInt();
 
       expect(value, isA<int>());
       expect(value, equals(doubleValue));
@@ -240,63 +240,63 @@ void main() async {
 
     test('encode, decode IsolateList', () {
       final list = <Object>['1', 1, 1.0, false];
-      final value = IsolateType.wrap(list);
+      final value = ImType.wrap(list);
 
-      expect(value, isA<IsolateList>());
+      expect(value, isA<ImList>());
       expect(value.unwrap, equals(list));
     });
 
     test('encode, decode IsolateMap', () {
       final map = <String, Object>{'k1': '1', 'k2': 1, 'k3': 1.0, 'k4': false};
-      final value = IsolateType.wrap(map);
+      final value = ImType.wrap(map);
 
-      expect(value, isA<IsolateMap>());
+      expect(value, isA<ImMap>());
       expect(value.unwrap, equals(map));
     });
 
     test('String', () async {
-      const value = IsolateString('abc');
+      const value = ImString('abc');
 
       final result = await isolates.compute(isolateTypeString, value);
 
-      expect(result, isA<IsolateString>());
+      expect(result, isA<ImString>());
       expect(result, equals(value));
     });
 
     test('bool', () async {
-      const value = IsolateBool(false);
+      const value = ImBool(false);
 
       final result = await isolates.compute(isolateTypeBool, value);
 
-      expect(result, isA<IsolateBool>());
+      expect(result, isA<ImBool>());
       expect(result, equals(value));
     });
 
     test('List', () async {
-      const value = IsolateList(<IsolateNum>[IsolateNum(100)]);
+      const value = ImList(<ImNum>[ImNum(100)]);
 
       final result = await isolates.compute(isolateTypeList, value);
 
-      expect(result, isA<IsolateList>());
+      expect(result, isA<ImList>());
       expect(
         result,
-        equals(const IsolateList(<IsolateString>[IsolateString('100')])),
+        equals(const ImList(<ImString>[ImString('100')])),
       );
     });
 
     test('Map', () async {
       final result = await isolates.compute(
         isolateTypeMap,
-        const IsolateList([IsolateNum(5), IsolateNum(7)]),
+        const ImList([ImNum(5), ImNum(7)]),
       );
 
-      expect(result, isA<IsolateMap>());
+      expect(result, isA<ImMap>());
       expect(
         result,
         equals(
-          IsolateMap({
-            const IsolateString('5'): const IsolateNum(5),
-            const IsolateString('7'): const IsolateNum(7),
+          ImMap({
+            const ImString('5'): const ImNum(5),
+            const ImString('7'): const ImNum(7),
           }),
         ),
       );
@@ -482,31 +482,30 @@ Map<dynamic, dynamic> aDynamicMap(Map<dynamic, dynamic> params) {
 }
 
 @isolateManagerSharedWorker
-IsolateNum isolateTypeNum(IsolateNum number) {
-  return IsolateNum(number.unwrap);
+ImNum isolateTypeNum(ImNum number) {
+  return ImNum(number.unwrap);
 }
 
 @isolateManagerSharedWorker
-IsolateString isolateTypeString(IsolateString string) {
-  return IsolateString(string.unwrap);
+ImString isolateTypeString(ImString string) {
+  return ImString(string.unwrap);
 }
 
 @isolateManagerSharedWorker
-IsolateBool isolateTypeBool(IsolateBool boolean) {
-  return IsolateBool(boolean.unwrap);
+ImBool isolateTypeBool(ImBool boolean) {
+  return ImBool(boolean.unwrap);
 }
 
 @isolateManagerSharedWorker
-IsolateList isolateTypeList(IsolateList numbers) {
-  return IsolateList(numbers.unwrap.map((e) => IsolateString('$e')).toList());
+ImList isolateTypeList(ImList numbers) {
+  return ImList(numbers.unwrap.map((e) => ImString('$e')).toList());
 }
 
 @isolateManagerSharedWorker
-IsolateMap isolateTypeMap(IsolateList numbers) {
-  return IsolateMap(
+ImMap isolateTypeMap(ImList numbers) {
+  return ImMap(
     Map.fromEntries(
-      numbers.unwrap
-          .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e as num))),
+      numbers.unwrap.map((e) => MapEntry(ImString('$e'), ImNum(e as num))),
     ),
   );
 }

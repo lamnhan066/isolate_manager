@@ -29,7 +29,7 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
 
   final func = (isWorker && workerFunction != null) ? workerFunction : function;
   var finalParams = workerParams ?? params;
-  final isUseIsolateType = finalParams is IsolateType;
+  final isUseIsolateType = finalParams is ImType;
 
   // Decode to a sendable object.
   if (isUseIsolateType) {
@@ -42,7 +42,7 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
 
   // Encode to IsolateType.
   if (isIsolateTypeSubtype<R>()) {
-    result = IsolateType.wrap(result!);
+    result = ImType.wrap(result!);
   }
 
   return result as R;

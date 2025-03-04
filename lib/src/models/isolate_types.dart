@@ -5,33 +5,87 @@ import 'package:equatable/equatable.dart';
 ///
 /// Use this class as the parameter or return type in your isolate communication
 /// methods. It provides safe wrapping for these Dart types:
-///   - num (wrapped in [IsolateNum])
-///   - String (wrapped in [IsolateString])
-///   - bool (wrapped in [IsolateBool])
-///   - List (wrapped in [IsolateList])
-///   - Map (wrapped in [IsolateMap])
+///   - num (wrapped in [ImNum])
+///   - String (wrapped in [ImString])
+///   - bool (wrapped in [ImBool])
+///   - List (wrapped in [ImList])
+///   - Map (wrapped in [ImMap])
 ///
-/// The static [wrap] method wraps a Dart object in the appropriate [IsolateType].
-sealed class IsolateType<T extends Object> with EquatableMixin {
-  /// Creates an instance of [IsolateType] holding the provided [_value].
-  const IsolateType(this._value);
+/// The static `wrap` method wraps a Dart object in the appropriate [ImType].
+@Deprecated(
+  'Use `ImType` instead. This class will be removed in the stable release.',
+)
+typedef IsolateType<T extends Object> = ImType<T>;
 
-  /// Converts a plain Dart object into its corresponding [IsolateType] instance.
+/// A wrapper for numeric values.
+/// Use [ImNum] to safely transfer a numeric value between isolates.
+/// It also provides helper methods for converting the value.
+@Deprecated(
+  'Use `ImNum` instead. This class will be removed in the stable release.',
+)
+typedef IsolateNum = ImNum;
+
+/// A wrapper for [String] values.
+/// Use [ImString] to safely transfer strings between isolates.
+@Deprecated(
+  'Use `ImString` instead. This class will be removed in the stable release.',
+)
+typedef IsolateString = ImString;
+
+/// A wrapper for boolean values.
+/// Use [ImBool] when transferring boolean values between isolates.
+@Deprecated(
+  'Use `ImBool` instead. This class will be removed in the stable release.',
+)
+typedef IsolateBool = ImBool;
+
+/// A wrapper for lists of [ImType] objects specific to [Object] types.
+/// This class safely transfers lists between isolates and decodes to a list
+/// of original Dart values.
+@Deprecated(
+  'Use `ImList` instead. This class will be removed in the stable release.',
+)
+typedef IsolateList = ImList;
+
+/// A wrapper for maps with both keys and values of [Object] types.
+/// Use [ImMap] to safely transfer maps between isolates.
+@Deprecated(
+  'Use `ImMap` instead. This class will be removed in the stable release.',
+)
+typedef IsolateMap = ImMap;
+
+/// An abstract wrapper for simple transferable types between the main thread
+/// and worker isolates.
+///
+/// Use this class as the parameter or return type in your isolate communication
+/// methods. It provides safe wrapping for these Dart types:
+///   - num (wrapped in [ImNum])
+///   - String (wrapped in [ImString])
+///   - bool (wrapped in [ImBool])
+///   - List (wrapped in [ImList])
+///   - Map (wrapped in [ImMap])
+///
+/// The static [wrap] method wraps a Dart object in the appropriate [ImType].
+sealed class ImType<T extends Object> with EquatableMixin {
+  /// Creates an instance of [ImType] holding the provided [_value].
+  const ImType(this._value);
+
+  /// Converts a plain Dart object into its corresponding [ImType] instance.
   ///
   /// Supported types include:
   ///   num, String, bool, List, and Map that contain these types.
   ///
   /// Throws an [UnimplementedError] if the object's type is not supported.
-  static R wrap<R extends IsolateType<Object>>(Object object) {
+  static R wrap<R extends ImType<Object>>(Object object) {
     return switch (object) {
       final R r => r,
-      final num n => IsolateNum(n),
-      final String s => IsolateString(s),
-      final bool b => IsolateBool(b),
-      final Iterable<dynamic> list => IsolateList(
+      final num n => ImNum(n),
+      final String s => ImString(s),
+      final bool b => ImBool(b),
+      final Iterable<dynamic> list => ImList(
           list.map((e) => wrap(e as Object)),
         ),
-      final Map<dynamic, dynamic> map => IsolateMap(
+      final Map<dynamic, dynamic> map => ImMap(
           map.map((k, v) => MapEntry(wrap(k as Object), wrap(v as Object))),
         ),
       _ => throw UnimplementedError(
@@ -40,7 +94,7 @@ sealed class IsolateType<T extends Object> with EquatableMixin {
     } as R;
   }
 
-  /// Converts a plain Dart object into its corresponding [IsolateType] instance.
+  /// Converts a plain Dart object into its corresponding [ImType] instance.
   ///
   /// Supported types include:
   ///   num, String, bool, List, and Map that contain these types.
@@ -49,7 +103,7 @@ sealed class IsolateType<T extends Object> with EquatableMixin {
   @Deprecated(
     'Use `IsolateType.wrap` instead. This method will be removed in the stable release.',
   )
-  static R encode<R extends IsolateType<Object>>(Object object) {
+  static R encode<R extends ImType<Object>>(Object object) {
     return wrap<R>(object);
   }
 
@@ -71,11 +125,11 @@ sealed class IsolateType<T extends Object> with EquatableMixin {
 
 /// A wrapper for numeric values.
 ///
-/// Use [IsolateNum] to safely transfer a numeric value between isolates.
+/// Use [ImNum] to safely transfer a numeric value between isolates.
 /// It also provides helper methods for converting the value.
-class IsolateNum extends IsolateType<num> {
-  /// Creates an [IsolateNum] with the given numeric [value].
-  const IsolateNum(super.value);
+class ImNum extends ImType<num> {
+  /// Creates an [ImNum] with the given numeric [value].
+  const ImNum(super.value);
 
   /// Returns the numeric value as a [double], or null if the value is null.
   double toDouble() => _value.toDouble();
@@ -86,42 +140,42 @@ class IsolateNum extends IsolateType<num> {
 
 /// A wrapper for [String] values.
 ///
-/// Use [IsolateString] to safely transfer strings between isolates.
-class IsolateString extends IsolateType<String> {
-  /// Creates an [IsolateString] with the given string [value].
-  const IsolateString(super.value);
+/// Use [ImString] to safely transfer strings between isolates.
+class ImString extends ImType<String> {
+  /// Creates an [ImString] with the given string [value].
+  const ImString(super.value);
 }
 
 /// A wrapper for boolean values.
 ///
-/// Use [IsolateBool] when transferring boolean values between isolates.
-class IsolateBool extends IsolateType<bool> {
-  /// Creates an [IsolateBool] with the given boolean [value].
+/// Use [ImBool] when transferring boolean values between isolates.
+class ImBool extends ImType<bool> {
+  /// Creates an [ImBool] with the given boolean [value].
   // ignore: avoid_positional_boolean_parameters
-  const IsolateBool(super.value);
+  const ImBool(super.value);
 }
 
-/// A wrapper for lists of [IsolateType] objects specific to [Object] types.
+/// A wrapper for lists of [ImType] objects specific to [Object] types.
 ///
 /// This class safely transfers lists between isolates and decodes to a list
 /// of original Dart values.
-class IsolateList extends _IsolateTypedIterable<Object> {
-  /// Creates an [IsolateList] with the provided list of wrapped objects.
-  const IsolateList(super.list);
+class ImList extends _ImTypedIterable<Object> {
+  /// Creates an [ImList] with the provided list of wrapped objects.
+  const ImList(super.list);
 
-  /// Converts a plain Dart object into its corresponding [IsolateList] instance.
+  /// Converts a plain Dart object into its corresponding [ImList] instance.
   ///
   /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
   /// Throws an [UnimplementedError] if the object's type is not supported.
-  static IsolateList wrap<T extends Object>(Iterable<T> object) {
-    return IsolateType.wrap<IsolateList>(object);
+  static ImList wrap<T extends Object>(Iterable<T> object) {
+    return ImType.wrap<ImList>(object);
   }
 
   /// Converts the wrapped list to an Iterable of the specified IsolateType [T].
-  Iterable<T> toIterable<T extends IsolateType>() => _list.cast<T>();
+  Iterable<T> toIterable<T extends ImType>() => _list.cast<T>();
 
   /// Converts the wrapped list to a List of the specified IsolateType [T].
-  List<T> toList<T extends IsolateType>() => toIterable<T>().toList();
+  List<T> toList<T extends ImType>() => toIterable<T>().toList();
 
   /// Converts the decoded value to a iterable of type [T].
   ///
@@ -142,57 +196,56 @@ class IsolateList extends _IsolateTypedIterable<Object> {
 
 /// A wrapper for maps with both keys and values of [Object] types.
 ///
-/// Use [IsolateMap] to safely transfer maps between isolates.
-class IsolateMap extends _IsolateTypedMap<Object, Object> {
-  /// Creates an [IsolateMap] with the provided map of wrapped objects.
-  const IsolateMap(super.map);
+/// Use [ImMap] to safely transfer maps between isolates.
+class ImMap extends _ImTypedMap<Object, Object> {
+  /// Creates an [ImMap] with the provided map of wrapped objects.
+  const ImMap(super.map);
 
-  /// Converts a plain Dart object into its corresponding [IsolateMap] instance.
+  /// Converts a plain Dart object into its corresponding [ImMap] instance.
   ///
   /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
   /// Throws an [UnimplementedError] if the object's type is not supported.
-  static IsolateMap wrap<K extends Object, V extends Object>(
+  static ImMap wrap<K extends Object, V extends Object>(
     Map<K, V> object,
   ) {
-    return IsolateType.wrap<IsolateMap>(object);
+    return ImType.wrap<ImMap>(object);
   }
 
   /// Converts the internal wrapped map to a Dart map.
-  /// The map keys and values are cast to the specified [IsolateType] types.
-  Map<K, V> toMap<K extends IsolateType, V extends IsolateType>() =>
-      _map.cast<K, V>();
+  /// The map keys and values are cast to the specified [ImType] types.
+  Map<K, V> toMap<K extends ImType, V extends ImType>() => _map.cast<K, V>();
 
-  /// Converts the wrapped [IsolateMap] to a Dart [Map] of type `<K, V>`.
+  /// Converts the wrapped [ImMap] to a Dart [Map] of type `<K, V>`.
   Map<K, V> toDecodedMap<K extends Object, V extends Object>() {
     return unwrap.cast<K, V>();
   }
 }
 
-/// A generic wrapper for iterables containing [IsolateType] elements.
+/// A generic wrapper for iterables containing [ImType] elements.
 ///
-/// This class wraps each element in an [IsolateType] and decodes the iterable
+/// This class wraps each element in an [ImType] and decodes the iterable
 /// back to its original unwrapped values.
-class _IsolateTypedIterable<T extends Object> extends IsolateType<Iterable<T>> {
-  /// Creates an instance that wraps the provided iterable of [IsolateType] elements.
-  const _IsolateTypedIterable(this._list) : super(const []);
+class _ImTypedIterable<T extends Object> extends ImType<Iterable<T>> {
+  /// Creates an instance that wraps the provided iterable of [ImType] elements.
+  const _ImTypedIterable(this._list) : super(const []);
 
-  final Iterable<IsolateType<T>> _list;
+  final Iterable<ImType<T>> _list;
 
   @override
   Iterable<T> get unwrap => _list.map((e) => e.unwrap);
 }
 
-/// A generic wrapper for maps that have keys and values wrapped in [IsolateType].
+/// A generic wrapper for maps that have keys and values wrapped in [ImType].
 ///
 /// This class enables safe transfer of maps between isolates. The [unwrap]
 /// getter reconstructs the original map by unwrapping the keys and values.
-class _IsolateTypedMap<K extends Object, V extends Object>
-    extends IsolateType<Map<K, V>> {
-  /// Creates an instance that wraps a map with both keys and values as [IsolateType] objects.
-  const _IsolateTypedMap(this._map) : super(const {});
+class _ImTypedMap<K extends Object, V extends Object>
+    extends ImType<Map<K, V>> {
+  /// Creates an instance that wraps a map with both keys and values as [ImType] objects.
+  const _ImTypedMap(this._map) : super(const {});
 
   /// The internal map with wrapped keys and values.
-  final Map<IsolateType<K>, IsolateType<V>> _map;
+  final Map<ImType<K>, ImType<V>> _map;
 
   @override
   Map<K, V> get unwrap => _map.map((k, v) => MapEntry(k.unwrap, v.unwrap));
