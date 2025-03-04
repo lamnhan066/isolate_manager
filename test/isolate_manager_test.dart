@@ -946,29 +946,29 @@ void isolateCallbackSimpleFunctionWithSpecifiedType(dynamic params) {
 
 @isolateManagerWorker
 IsolateNum isolateTypeNum(IsolateNum number) {
-  return IsolateNum(number.decode);
+  return IsolateNum(number.unwrap);
 }
 
 @isolateManagerWorker
 IsolateString isolateTypeString(IsolateString string) {
-  return IsolateString(string.decode);
+  return IsolateString(string.unwrap);
 }
 
 @isolateManagerWorker
 IsolateBool isolateTypeBool(IsolateBool boolean) {
-  return IsolateBool(boolean.decode);
+  return IsolateBool(boolean.unwrap);
 }
 
 @isolateManagerWorker
 IsolateList isolateTypeList(IsolateList numbers) {
-  return IsolateList(numbers.decode!.map((e) => IsolateString('$e')).toList());
+  return IsolateList(numbers.unwrap!.map((e) => IsolateString('$e')).toList());
 }
 
 @isolateManagerWorker
 IsolateMap isolateTypeMap(IsolateList numbers) {
   return IsolateMap(
     Map.fromEntries(
-      numbers.decode!.map(
+      numbers.unwrap!.map(
         (e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num)),
       ),
     ),

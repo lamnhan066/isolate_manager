@@ -227,7 +227,7 @@ Use helper types to ensure safe data transfer:
 @isolateManagerWorker
 IsolateMap isolateFunction(IsolateList numbers) {
   // Decode the list into standard Dart types.
-  final data = numbers.decode!;
+  final data = numbers.unwrap!;
   final map = Map.fromEntries(
     data.map((e) => MapEntry(IsolateString('$e'), IsolateNum(e as num))),
   );
@@ -235,7 +235,7 @@ IsolateMap isolateFunction(IsolateList numbers) {
 }
 
 // Convert native Dart objects to IsolateTypes:
-final encoded = IsolateType.encode({'k1': 'v1', 'k2': 'v2'});
+final encoded = IsolateType.wrap({'k1': 'v1', 'k2': 'v2'});
 ```
 
 ### Handling Complex Data Structures

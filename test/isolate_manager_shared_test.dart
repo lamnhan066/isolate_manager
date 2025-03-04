@@ -208,7 +208,7 @@ void main() async {
     test('Unimplemented Type', () {
       final user = User(name: 'user', email: 'user@user.com');
       expect(
-        () => IsolateType.encode<IsolateType<Object?>>(user),
+        () => IsolateType.wrap<IsolateType<Object?>>(user),
         throwsUnimplementedError,
       );
     });
@@ -240,18 +240,18 @@ void main() async {
 
     test('encode, decode IsolateList', () {
       final list = <Object>['1', 1, 1.0, false];
-      final value = IsolateType.encode<IsolateType<Object?>>(list);
+      final value = IsolateType.wrap<IsolateType<Object?>>(list);
 
       expect(value, isA<IsolateList>());
-      expect(value.decode, equals(list));
+      expect(value.unwrap, equals(list));
     });
 
     test('encode, decode IsolateMap', () {
       final map = <String, Object>{'k1': '1', 'k2': 1, 'k3': 1.0, 'k4': false};
-      final value = IsolateType.encode<IsolateType<Object?>>(map);
+      final value = IsolateType.wrap<IsolateType<Object?>>(map);
 
       expect(value, isA<IsolateMap>());
-      expect(value.decode, equals(map));
+      expect(value.unwrap, equals(map));
     });
 
     test('String', () async {
@@ -357,29 +357,29 @@ Map<dynamic, dynamic> aDynamicMap(Map<dynamic, dynamic> params) {
 
 @isolateManagerSharedWorker
 IsolateNum isolateTypeNum(IsolateNum number) {
-  return IsolateNum(number.decode);
+  return IsolateNum(number.unwrap);
 }
 
 @isolateManagerSharedWorker
 IsolateString isolateTypeString(IsolateString string) {
-  return IsolateString(string.decode);
+  return IsolateString(string.unwrap);
 }
 
 @isolateManagerSharedWorker
 IsolateBool isolateTypeBool(IsolateBool boolean) {
-  return IsolateBool(boolean.decode);
+  return IsolateBool(boolean.unwrap);
 }
 
 @isolateManagerSharedWorker
 IsolateList isolateTypeList(IsolateList numbers) {
-  return IsolateList(numbers.decode?.map((e) => IsolateString('$e')).toList());
+  return IsolateList(numbers.unwrap?.map((e) => IsolateString('$e')).toList());
 }
 
 @isolateManagerSharedWorker
 IsolateMap isolateTypeMap(IsolateList numbers) {
   return IsolateMap(
     Map.fromEntries(
-      numbers.decode!
+      numbers.unwrap!
           .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num))),
     ),
   );

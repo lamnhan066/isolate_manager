@@ -61,7 +61,7 @@ class _IsolateManagerWorkerController<R, P>
     self.onmessage = (MessageEvent event) {
       dynamic result = event.data.dartify();
       if (isSubtype<P, IsolateType<Object?>>()) {
-        result = IsolateType.encode<IsolateType<Object?>>(result);
+        result = IsolateType.wrap<IsolateType<Object?>>(result);
       }
       _streamController.sink.add(result as P);
     }.toJS;
@@ -81,7 +81,7 @@ class _IsolateManagerWorkerController<R, P>
   void sendResult(R m) {
     if (m is IsolateType) {
       self.postMessage(
-        <String, Object?>{'type': 'data', 'value': m.decode}.jsify(),
+        <String, Object?>{'type': 'data', 'value': m.unwrap}.jsify(),
       );
     } else {
       self.postMessage(<String, Object?>{'type': 'data', 'value': m}.jsify());

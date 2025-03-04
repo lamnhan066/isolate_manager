@@ -33,7 +33,7 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
 
   // Decode to a sendable object.
   if (isUseIsolateType) {
-    finalParams = finalParams.decode;
+    finalParams = finalParams.unwrap;
   }
   var result = await manager.compute(
     [func, finalParams, isUseIsolateType],
@@ -42,7 +42,7 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
 
   // Encode to IsolateType.
   if (isSubtype<R, IsolateType<Object?>>()) {
-    result = IsolateType.encode<IsolateType<Object?>>(result);
+    result = IsolateType.wrap<IsolateType<Object?>>(result);
   }
 
   return result as R;
