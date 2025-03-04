@@ -212,6 +212,272 @@ void main() {
         expect(decodedMap, equals(mapValue));
       });
     });
+
+    test('Isolate types conversion and equality', () {
+      // Test number conversions
+      expect(const IsolateNum(10) == const IsolateNum(10), isTrue);
+      expect(const IsolateNum(10) == const IsolateNum(11), isFalse);
+
+      // Test string equality
+      expect(
+        const IsolateString('test') == const IsolateString('test'),
+        isTrue,
+      );
+      expect(
+        const IsolateString('test') == const IsolateString('other'),
+        isFalse,
+      );
+
+      // Test bool equality
+      expect(const IsolateBool(true) == const IsolateBool(true), isTrue);
+      expect(const IsolateBool(true) == const IsolateBool(false), isFalse);
+    });
+  });
+
+  group('IsolateManager additional tests', () {
+    test('Test restart() when isolate is not started', () async {
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+        concurrent: 2,
+      );
+
+      // Restart without starting first
+      await isolateManager.restart();
+      expect(isolateManager.isStarted, equals(true));
+
+      final result = await isolateManager.compute(5);
+      expect(result, equals(fibonacci(5)));
+
+      await isolateManager.stop();
+    });
+
+    test('Test multiple starts have no effect', () async {
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+      );
+
+      await isolateManager.start();
+      final firstStart = isolateManager.isStarted;
+
+      // Second start should have no effect
+      await isolateManager.start();
+      expect(isolateManager.isStarted, equals(firstStart));
+
+      await isolateManager.stop();
+    });
+
+    test('Test stop() when isolate is not started', () async {
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+      );
+
+      // Stop without starting
+      await isolateManager.stop();
+      expect(isolateManager.isStarted, equals(false));
+    });
+
+    test('Test compute() with priority parameter', () async {
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+      );
+
+      // Add several tasks
+      final futures = <Future<int>>[];
+      for (var i = 0; i < 5; i++) {
+        futures.add(isolateManager.compute(i));
+      }
+
+      // Add a high priority task
+      final priorityResult = await isolateManager.compute(10, priority: true);
+      expect(priorityResult, equals(fibonacci(10)));
+
+      // Complete other tasks
+      await Future.wait(futures);
+
+      await isolateManager.stop();
+    });
+
+    test('Test stream broadcasts to multiple listeners', () async {
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+      );
+
+      final receivedValues1 = <int>[];
+      final receivedValues2 = <int>[];
+
+      // Add multiple listeners to stream
+      final subscription1 = isolateManager.stream.listen(receivedValues1.add);
+
+      final subscription2 = isolateManager.stream.listen(receivedValues2.add);
+
+      // Compute a value
+      await isolateManager.compute(5);
+
+      // Give some time for streams to process
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(receivedValues1, contains(5));
+      expect(receivedValues2, contains(5));
+
+      await subscription1.cancel();
+      await subscription2.cancel();
+      await isolateManager.stop();
+    });
+
+    test('Test ensureStarted future completes after start', () async {
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+      );
+
+      // Start in background
+      isolateManager.start().ignore();
+
+      // Wait for start to complete
+      await isolateManager.ensureStarted;
+      expect(isolateManager.isStarted, equals(true));
+
+      await isolateManager.stop();
+    });
+
+    test('Test run static method with debug enabled', () async {
+      final result = await IsolateManager.run(
+        () => fibonacci(5),
+        isDebug: true,
+      );
+
+      expect(result, equals(fibonacci(5)));
+    });
+
+    test('Test runFunction static method with named worker', () async {
+      final result = await IsolateManager.runFunction(
+        fibonacci,
+        5,
+        workerName: 'fibonacci',
+        isDebug: true,
+      );
+
+      expect(result, equals(fibonacci(5)));
+    });
+
+    test('Test runCustomFunction static method with callback', () async {
+      var progressCount = 0;
+
+      final result = await IsolateManager.runCustomFunction(
+        isolateCallbackSimpleFunction,
+        5,
+        workerName: 'isolateCallbackSimpleFunction',
+        callback: (value) {
+          // Count progress updates
+          progressCount++;
+          return progressCount >
+              8; // Return true after receiving 9 progress updates
+        },
+        isDebug: true,
+      );
+
+      expect(progressCount, greaterThanOrEqualTo(9));
+      expect(result, isNotNull);
+    });
+
+    test('Test IsolateManager with custom debug prefix', () async {
+      final originalPrefix = IsolateManager.debugLogPrefix;
+      IsolateManager.debugLogPrefix = 'Custom Debug';
+
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+        isDebug: true,
+      );
+
+      await isolateManager.start();
+      final result = await isolateManager.compute(5);
+      expect(result, equals(fibonacci(5)));
+
+      await isolateManager.stop();
+
+      // Restore original prefix
+      IsolateManager.debugLogPrefix = originalPrefix;
+    });
+
+    test('Test IsolateManager with converter function', () async {
+      final isolateManager = IsolateManager.create(
+        fibonacci,
+        converter: (value) => 'Result: $value',
+        workerConverter: (value) => 'Result: $value',
+      );
+
+      await isolateManager.start();
+      final result = await isolateManager.compute(5);
+      expect(result, equals('Result: ${fibonacci(5)}'));
+
+      await isolateManager.stop();
+    });
+
+    test('Test IsolateManager.run with worker parameter', () async {
+      final result = await IsolateManager.run(
+        () => fibonacciRecursive(5),
+        workerName: 'fibonacciRecursive',
+        workerParameter: 5,
+      );
+
+      expect(result, equals(fibonacciRecursive(5)));
+    });
+
+    test('Test QueueStrategy clear method', () async {
+      final strategy = QueueStrategyRemoveNewest<int, int>(maxCount: 10);
+
+      for (var i = 0; i < 5; i++) {
+        strategy.add(IsolateQueue<int, int>(i, null));
+      }
+
+      expect(strategy.queuesCount, equals(5));
+      strategy.clear();
+      expect(strategy.queuesCount, equals(0));
+      expect(strategy.hasNext(), equals(false));
+    });
+
+    test('Test IsolateManager pause and restart behavior', () async {
+      final isolateManager = IsolateManager<int, int>.create(
+        fibonacci,
+        concurrent: 2,
+        isDebug: true,
+      );
+
+      await isolateManager.start();
+      expect(isolateManager.isStarted, equals(true));
+
+      final resultBefore = await isolateManager.compute(10);
+      expect(resultBefore, equals(fibonacci(10)));
+
+      await isolateManager.pause();
+      expect(isolateManager.isStarted, equals(false));
+
+      await isolateManager.restart();
+      expect(isolateManager.isStarted, equals(true));
+
+      final resultAfter = await isolateManager.compute(10);
+      expect(resultAfter, equals(fibonacci(10)));
+
+      await isolateManager.stop();
+    });
+
+    test('Stop after stop should not throw', () async {
+      final isolates = IsolateManager.createShared();
+      await isolates.stop();
+
+      // Should not throw
+      await isolates.stop();
+
+      // Verify isolate is still stopped
+      expect(isolates.isStarted, isFalse);
+
+      // Additional check - computation should not work
+      try {
+        await isolates.compute(add, <int>[1, 2]);
+        fail('Should not reach here - compute should fail on stopped isolate');
+      } catch (e) {
+        // Expected exception
+      }
+    });
   });
 
   test('Test IsolateManager.create: Basic Usage', () async {

@@ -321,6 +321,132 @@ void main() async {
       equals(5),
     );
   });
+
+  test('Test multiple stop calls', () async {
+    final isolates = IsolateManager.createShared();
+    await isolates.stop();
+    // This should not throw any errors
+    await isolates.stop();
+  });
+
+  test('Test restart on stopped isolate', () async {
+    final isolates = IsolateManager.createShared();
+    await isolates.stop();
+
+    await expectLater(isolates.pause, throwsA(isA<IsolateException>()));
+    await expectLater(isolates.restart, throwsA(isA<IsolateException>()));
+
+    expect(isolates.isStarted, isFalse);
+
+    await isolates.stop();
+  });
+
+  test('Test Stream after stop', () async {
+    final isolates = IsolateManager.createShared();
+    await isolates.stop();
+
+    // Should not throw an error when accessing stream after stop
+    final subscription = isolates.stream.listen((_) {});
+    await subscription.cancel();
+  });
+
+  test('Test with automatic restart', () async {
+    final isolates = IsolateManager.createShared();
+
+    // Force an error condition that should trigger restart
+    // This would depend on implementation details, but you could try:
+    try {
+      await isolates.compute(addException, <int>[1, 1]);
+    } catch (_) {
+      // Expected
+    }
+
+    // Should still work after exception
+    final result = await isolates.compute(add, <int>[2, 3]);
+    expect(result, equals(5));
+
+    await isolates.stop();
+  });
+
+  test('Test pause and resume', () async {
+    final isolates = IsolateManager.createShared(
+      concurrent: 2,
+      isDebug: true,
+    );
+
+    // First computation should work
+    final result1 = await isolates.compute(add, <int>[5, 7]);
+    expect(result1, equals(12));
+
+    // Pause the isolates
+    await isolates.pause();
+
+    // Create a delayed computation that should be queued during pause
+    final computeFuture = isolates.compute(add, <int>[3, 4]);
+
+    // Wait a bit to ensure computation is queued
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    // Now restart/resume the isolates
+    await isolates.restart();
+
+    // The queued computation should now complete
+    final result2 = await computeFuture;
+    expect(result2, equals(7));
+
+    await isolates.stop();
+  });
+
+  test('Multiple pause and restart operations', () async {
+    final isolates = IsolateManager.createShared();
+
+    // Initial computation
+    expect(await isolates.compute(add, <int>[1, 2]), equals(3));
+
+    // First pause
+    await isolates.pause();
+    await isolates.restart();
+
+    // Computation after first restart
+    expect(await isolates.compute(add, <int>[3, 4]), equals(7));
+
+    // Second pause
+    await isolates.pause();
+    await isolates.restart();
+
+    // Computation after second restart
+    expect(await isolates.compute(add, <int>[5, 6]), equals(11));
+
+    await isolates.stop();
+  });
+
+  test('Pause and restart after stop should throw', () async {
+    final isolates = IsolateManager.createShared();
+    await isolates.stop();
+
+    // Should not throw
+    await expectLater(
+      isolates.pause,
+      throwsA(isA<IsolateException>()),
+    );
+
+    // Try to restart after pause on stopped isolates
+    await expectLater(
+      isolates.restart,
+      throwsA(isA<IsolateException>()),
+    );
+
+    // Verify isolate is still stopped
+    expect(isolates.isStarted, isFalse);
+
+    // Additional check - computation should not work
+    try {
+      await isolates.compute(add, <int>[1, 2]);
+      fail('Should not reach here - compute should fail on stopped isolate');
+    } catch (e) {
+      // Expected exception
+    }
+  });
 }
 
 int addWithoutWorker(List<int> params) => params[0] + params[1];
