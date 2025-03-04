@@ -55,6 +55,8 @@ class IsolateManagerControllerImpl<R, P>
       _delegate.sendResultError(exception);
 }
 
+// Only use for Worker
+// coverage:ignore-start
 class _IsolateManagerWorkerController<R, P>
     implements IsolateContactorController<R, P> {
   _IsolateManagerWorkerController(this.self, {this.onDispose}) {
@@ -118,3 +120,4 @@ class _IsolateManagerWorkerController<R, P>
   @override
   void sendIsolateState(IsolateState state) => throw UnimplementedError();
 }
+// coverage:ignore-end
