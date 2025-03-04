@@ -961,15 +961,15 @@ IsolateBool isolateTypeBool(IsolateBool boolean) {
 
 @isolateManagerWorker
 IsolateList isolateTypeList(IsolateList numbers) {
-  return IsolateList(numbers.unwrap!.map((e) => IsolateString('$e')).toList());
+  return IsolateList(numbers.unwrap.map((e) => IsolateString('$e')).toList());
 }
 
 @isolateManagerWorker
 IsolateMap isolateTypeMap(IsolateList numbers) {
   return IsolateMap(
     Map.fromEntries(
-      numbers.unwrap!.map(
-        (e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num)),
+      numbers.unwrap.map(
+        (e) => MapEntry(IsolateString('$e'), IsolateNum(e as num)),
       ),
     ),
   );

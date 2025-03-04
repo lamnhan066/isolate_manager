@@ -34,7 +34,7 @@ void main() {
       final wrappedList = isolateList.toList<IsolateType>();
       expect(wrappedList, isNotNull);
       // Test that each element is wrapped accordingly.
-      expect(wrappedList![0], isA<IsolateNum>());
+      expect(wrappedList[0], isA<IsolateNum>());
       expect(wrappedList[1], isA<IsolateString>());
       expect(wrappedList[2], isA<IsolateBool>());
       // Test decoded value.
@@ -76,7 +76,7 @@ void main() {
       // Use toList to get the wrapped items.
       final wrappedList = encoded.toList<IsolateType>();
       expect(wrappedList, isA<List<IsolateType>>());
-      expect(wrappedList!.length, equals(listValue.length));
+      expect(wrappedList.length, equals(listValue.length));
 
       // Using toDecodedList to return the original values.
       final decodedList = encoded.toDecodedList<num>();
@@ -95,7 +95,7 @@ void main() {
       // Testing toMap which casts the internal map to specified types.
       final wrappedMap = encoded.toMap<IsolateString, IsolateType>();
       expect(wrappedMap, isA<Map<IsolateString, IsolateType>>());
-      expect(wrappedMap!.length, equals(mapValue.length));
+      expect(wrappedMap.length, equals(mapValue.length));
 
       // Using toDecodedMap to get original Map.
       final decodedMap = encoded.toDecodedMap<String, int>();

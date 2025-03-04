@@ -208,7 +208,7 @@ void main() async {
     test('Unimplemented Type', () {
       final user = User(name: 'user', email: 'user@user.com');
       expect(
-        () => IsolateType.wrap<IsolateType<Object?>>(user),
+        () => IsolateType.wrap<IsolateType<Object>>(user),
         throwsUnimplementedError,
       );
     });
@@ -240,7 +240,7 @@ void main() async {
 
     test('encode, decode IsolateList', () {
       final list = <Object>['1', 1, 1.0, false];
-      final value = IsolateType.wrap<IsolateType<Object?>>(list);
+      final value = IsolateType.wrap<IsolateType<Object>>(list);
 
       expect(value, isA<IsolateList>());
       expect(value.unwrap, equals(list));
@@ -248,7 +248,7 @@ void main() async {
 
     test('encode, decode IsolateMap', () {
       final map = <String, Object>{'k1': '1', 'k2': 1, 'k3': 1.0, 'k4': false};
-      final value = IsolateType.wrap<IsolateType<Object?>>(map);
+      final value = IsolateType.wrap<IsolateType<Object>>(map);
 
       expect(value, isA<IsolateMap>());
       expect(value.unwrap, equals(map));
@@ -372,15 +372,15 @@ IsolateBool isolateTypeBool(IsolateBool boolean) {
 
 @isolateManagerSharedWorker
 IsolateList isolateTypeList(IsolateList numbers) {
-  return IsolateList(numbers.unwrap?.map((e) => IsolateString('$e')).toList());
+  return IsolateList(numbers.unwrap.map((e) => IsolateString('$e')).toList());
 }
 
 @isolateManagerSharedWorker
 IsolateMap isolateTypeMap(IsolateList numbers) {
   return IsolateMap(
     Map.fromEntries(
-      numbers.unwrap!
-          .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e! as num))),
+      numbers.unwrap
+          .map((e) => MapEntry(IsolateString('$e'), IsolateNum(e as num))),
     ),
   );
 }

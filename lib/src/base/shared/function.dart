@@ -14,7 +14,7 @@ Future<dynamic> internalFunction(List<dynamic> params) async {
 
   dynamic parameter = params[1];
   if (isIsolateTypeParameter) {
-    parameter = IsolateType.wrap<IsolateType<Object?>>(parameter);
+    parameter = IsolateType.wrap<IsolateType<Object>>(parameter as Object);
   }
   final completer = Completer<dynamic>()
     ..complete((params[0] as Function)(parameter));
