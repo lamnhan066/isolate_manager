@@ -91,8 +91,23 @@ class IsolateList extends _IsolateTypedIterable<Object?> {
   /// Creates an [IsolateList] with the provided list of wrapped objects.
   const IsolateList(super.list);
 
-  @override
-  List<Object?>? get decode => super.decode?.toList();
+  /// Converts the wrapped list to an Iterable of the specified IsolateType [T].
+  Iterable<T>? toIterable<T extends IsolateType>() => _list?.cast<T>();
+
+  /// Converts the wrapped list to a List of the specified IsolateType [T].
+  List<T>? toList<T extends IsolateType>() => toIterable<T>()?.toList();
+
+  /// Converts the decoded value to a iterable of type [T].
+  ///
+  /// This method attempts to cast the value stored in `decode` to a [Iterable] of type [T].
+  /// If `decode` is null, the method returns null.
+  Iterable<T>? toDecodedIterable<T>() => decode?.cast<T>();
+
+  /// Converts the decoded value to a list of type [T].
+  ///
+  /// This method attempts to cast the value stored in `decode` to a [List] of type [T].
+  /// If `decode` is null, the method returns null.
+  List<T>? toDecodedList<T>() => toDecodedIterable<T>()?.toList();
 }
 
 /// A wrapper for maps with both keys and values of [Object?] types.
@@ -101,6 +116,14 @@ class IsolateList extends _IsolateTypedIterable<Object?> {
 class IsolateMap extends _IsolateTypedMap<Object?, Object?> {
   /// Creates an [IsolateMap] with the provided map of wrapped objects.
   const IsolateMap(super.map);
+
+  /// Converts the internal wrapped map to a Dart map.
+  /// The map keys and values are cast to the specified [IsolateType] types.
+  Map<K, V>? toMap<K extends IsolateType, V extends IsolateType>() =>
+      _map?.cast<K, V>();
+
+  /// Converts the wrapped [IsolateMap] to a Dart [Map] of type `<K, V>`.
+  Map<K, V>? toDecodedMap<K, V>() => decode?.cast<K, V>();
 }
 
 /// A generic wrapper for iterables containing [IsolateType] elements.
