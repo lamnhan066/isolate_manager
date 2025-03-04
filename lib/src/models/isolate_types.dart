@@ -28,10 +28,11 @@ sealed class IsolateType<T extends Object?> extends Object with EquatableMixin {
       final num? n => IsolateNum(n),
       final String? s => IsolateString(s),
       final bool? b => IsolateBool(b),
-      final List<Object?>? list => IsolateList(list?.map(encode<R>).toList()),
+      final List<Object?>? list =>
+        IsolateList(list?.map(encode<IsolateType>).toList()),
       final Map<Object?, Object?>? map => IsolateMap(
           map?.map(
-            (k, v) => MapEntry(encode<R>(k), encode<R>(v)),
+            (k, v) => MapEntry(encode<IsolateType>(k), encode<IsolateType>(v)),
           ),
         ),
       _ => throw UnimplementedError(

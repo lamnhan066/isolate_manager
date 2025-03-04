@@ -870,6 +870,55 @@ void main() {
 
     expect(result, equals(6765));
   });
+
+  group('IsolateType.encode', () {
+    test('encodes num as IsolateNum', () {
+      final encoded = IsolateType.encode<IsolateNum>(42);
+      expect(encoded, isA<IsolateNum>());
+      expect(encoded.decode, equals(42));
+      expect(encoded.toDouble(), equals(42.0));
+      expect(encoded.toInt(), equals(42));
+    });
+
+    test('encodes String as IsolateString', () {
+      final encoded = IsolateType.encode<IsolateString>('test');
+      expect(encoded, isA<IsolateString>());
+      expect(encoded.decode, equals('test'));
+    });
+
+    test('encodes bool as IsolateBool', () {
+      final encoded = IsolateType.encode<IsolateBool>(true);
+      expect(encoded, isA<IsolateBool>());
+      expect(encoded.decode, equals(true));
+    });
+
+    test('encodes List as IsolateList', () {
+      // A list containing a num, a string, and a bool.
+      final list = [1, 'hello', false];
+      final encoded = IsolateType.encode<IsolateList>(list);
+      expect(encoded, isA<IsolateList>());
+      // Decode returns an Iterable, we convert it to a list.
+      expect(encoded.decode?.toList(), equals(list));
+    });
+
+    test('encodes Map as IsolateMap', () {
+      final map = {
+        'number': 100,
+        'flag': true,
+        'message': 'hello',
+      };
+      final encoded = IsolateType.encode<IsolateMap>(map);
+      expect(encoded, isA<IsolateMap>());
+      expect(encoded.decode, equals(map));
+    });
+
+    test('throws for unsupported type', () {
+      expect(
+        () => IsolateType.encode(DateTime.now()),
+        throwsUnimplementedError,
+      );
+    });
+  });
 }
 
 @isolateManagerWorker
