@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+// TODO(lamnhan066): Remove the deprecated types in the stable release
+// coverage:ignore-start
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
 ///
@@ -53,6 +55,7 @@ typedef IsolateList = ImList;
   'Use `ImMap` instead. This class will be removed in the stable release.',
 )
 typedef IsolateMap = ImMap;
+// coverage:ignore-end
 
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
