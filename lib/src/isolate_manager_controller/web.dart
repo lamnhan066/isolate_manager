@@ -55,7 +55,7 @@ class IsolateManagerControllerImpl<R, P>
       _delegate.sendResultError(exception);
 }
 
-// Only use for Worker
+// TODO(lamnhan066): Find a way to test these methods because it only used by the compiled JS Worker.
 // coverage:ignore-start
 class _IsolateManagerWorkerController<R, P>
     implements IsolateContactorController<R, P> {

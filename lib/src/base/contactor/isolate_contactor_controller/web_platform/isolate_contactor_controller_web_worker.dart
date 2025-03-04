@@ -49,16 +49,8 @@ class IsolateContactorControllerImplWorker<R, P>
   Stream<R> get onMessage => _mainStreamController.stream;
 
   @override
-  Stream<P> get onIsolateMessage =>
-      throw UnimplementedError('onIsolateMessage is not implemented');
-
-  @override
-  Future<void> initialized() =>
-      throw UnimplementedError('initialized method is not implemented');
-
-  @override
   void sendIsolate(P message) {
-    if (message is IsolateType<Object?>) {
+    if (message is IsolateType) {
       _delegate.postMessage(message.unwrap.jsify());
     } else {
       _delegate.postMessage(message.jsify());
@@ -70,6 +62,16 @@ class IsolateContactorControllerImplWorker<R, P>
     _delegate.postMessage(state.toMap().jsify());
   }
 
+  // TODO(lamnhan066): Find a way to test these methods because it only used by the compiled JS Worker.
+  // coverage:ignore-start
+  @override
+  Stream<P> get onIsolateMessage =>
+      throw UnimplementedError('onIsolateMessage is not implemented');
+
+  @override
+  Future<void> initialized() =>
+      throw UnimplementedError('initialized method is not implemented');
+
   @override
   void sendResult(R message) =>
       throw UnimplementedError('sendResult is not implemented');
@@ -77,6 +79,7 @@ class IsolateContactorControllerImplWorker<R, P>
   @override
   void sendResultError(IsolateException exception) =>
       throw UnimplementedError('sendResultError is not implemented');
+  // coverage:ignore-end
 
   @override
   Future<void> close() async {

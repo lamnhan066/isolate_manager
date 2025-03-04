@@ -1,3 +1,4 @@
+// TODO(lamnhan066): Find a way to test these methods because it only used by the compiled JS Worker.
 // coverage:ignore-file
 // Tested by compiling to `js` for the Web Worker.
 

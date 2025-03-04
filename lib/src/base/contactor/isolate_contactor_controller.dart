@@ -19,7 +19,7 @@ abstract class IsolateContactorController<R, P> {
     FutureOr<void> Function()? onDispose,
   }) {
     // This method is not used in this controller
-    R converter(dynamic value) => value as R; // coverage:ignore-line
+    R converter(dynamic value) => value as R;
     return IsolateContactorControllerImpl<R, P>(
       params,
       onDispose: onDispose,
