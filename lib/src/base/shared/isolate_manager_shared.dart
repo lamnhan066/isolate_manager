@@ -139,13 +139,62 @@ class IsolateManagerShared {
   /// Get the result as stream.
   Stream<Object?> get stream => _manager.stream;
 
-  /// Start all the isolates. This method is optional because it will be started
-  /// automatically when it needs to calculate.
+  /// Starts all the isolates in the managed isolate pool.
+  ///
+  /// This method initializes the isolates if they haven't been started yet.
+  /// While starting is optional (isolates start automatically when needed),
+  /// calling this method explicitly ensures the isolates are ready
+  /// before any computation is requested.
+  ///
+  /// Returns a [Future] that completes when all isolates have been started.
   Future<void> start() => _manager.start();
 
-  /// Restart all the isolates.
+  /// Pauses the isolate manager, stopping all current operations without terminating the instance.
+  ///
+  /// This method:
+  /// - Cancels all running isolate operations
+  /// - Clears the task queue
+  /// - Resets the internal state
+  /// - Maintains the stream controller active
+  ///
+  /// Unlike [stop], this allows the manager to be restarted later with [start] or [restart]
+  /// without creating a new instance.
+  ///
+  /// Throws [IsolateException] if the manager has already been stopped.
+  Future<void> pause() => _manager.pause();
+
+  /// Restarts the isolate manager by stopping and restarting all isolates.
+  ///
+  /// This method:
+  /// 1. Pauses all running isolates
+  /// 2. Clears the queue state
+  /// 3. Creates new isolates with the original configuration
+  ///
+  /// This is useful when you need to:
+  /// - Reset the isolate's internal state
+  /// - Recover from error conditions
+  /// - Apply new configuration changes
+  ///
+  /// Note: Any pending tasks in the queue will be lost during restart.
+  /// Throws [IsolateException] if the manager is already stopped.
   Future<void> restart() => _manager.restart();
 
-  /// Stop all the isolates.
+  /// Stops and completely terminates the isolate manager instance.
+  ///
+  /// This method:
+  /// - Cancels all running isolate operations
+  /// - Closes the stream controller, preventing any future operations
+  /// - Releases all resources associated with this isolate manager
+  ///
+  /// After calling this method, the isolate manager cannot be restarted.
+  ///
+  /// This permanently releases all resources and closes the stream controller.
+  /// If [start] or [restart] is called after stopping, an [IsolateException]
+  /// will be thrown.
+  ///
+  /// To temporarily suspend operations with the ability to resume later,
+  /// use [pause] instead.
+  ///
+  /// Returns a [Future] that completes when all resources have been released.
   Future<void> stop() => _manager.stop();
 }

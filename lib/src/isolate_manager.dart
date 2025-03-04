@@ -45,8 +45,7 @@ class IsolateManager<R, P> {
         // ignore: deprecated_member_use_from_same_package
         initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        _workerName = workerName,
-        _streamController = StreamController.broadcast() {
+        _workerName = workerName {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
@@ -82,8 +81,7 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   })  : isCustomIsolate = true,
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        _workerName = workerName,
-        _streamController = StreamController.broadcast() {
+        _workerName = workerName {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -399,7 +397,7 @@ final isolate = IsolateManager.createCustom<R, P>(
       <IsolateContactor<R, P>, bool>{};
 
   /// Controller for stream.
-  final StreamController<R> _streamController;
+  final StreamController<R> _streamController = StreamController.broadcast();
   late StreamSubscription<dynamic> _streamSubscription;
 
   /// Is the `start` method is starting.
@@ -423,7 +421,9 @@ final isolate = IsolateManager.createCustom<R, P>(
   /// called when the first `compute()` has been made.
   Future<void> start() async {
     // This instance is stoped.
-    if (_streamController.isClosed) return;
+    if (_streamController.isClosed) {
+      throw IsolateException('The IsolateManager is already stopped.');
+    }
 
     // Return here if this method is already completed.
     if (_startedCompleter.isCompleted) return;
@@ -482,8 +482,36 @@ final isolate = IsolateManager.createCustom<R, P>(
     _startedCompleter.complete();
   }
 
-  /// Stop isolate manager without close streamController.
-  Future<void> _tempStop() async {
+  /// Pauses the isolate manager, stopping all current operations without terminating the instance.
+  ///
+  /// This method:
+  /// - Cancels all running isolate operations
+  /// - Clears the task queue
+  /// - Resets the internal state
+  /// - Maintains the stream controller active
+  ///
+  /// Unlike [stop], this allows the manager to be restarted later with [start] or [restart]
+  /// without creating a new instance.
+  ///
+  /// Throws [IsolateException] if the manager has already been stopped.
+  Future<void> pause() async {
+    if (_streamController.isClosed) {
+      throw IsolateException(
+        'Cannot pause IsolateManager: Instance is already stopped. Create a new instance to perform operations.',
+      );
+    }
+
+    if (_isStarting) {
+      // If the `start()` method is still running, wait for it to complete.
+      await ensureStarted;
+    } else {
+      printDebug(
+        () =>
+            'Pause operation skipped: IsolateManager is not active. No isolates are running.',
+      );
+      return;
+    }
+
     _isStarting = false;
     _startedCompleter = Completer();
     queueStrategy.clear();
@@ -496,15 +524,57 @@ final isolate = IsolateManager.createCustom<R, P>(
     _isolates.clear();
   }
 
-  /// Stop the isolate.
+  /// Stops and completely terminates the isolate manager instance.
+  ///
+  /// This method:
+  /// - Cancels all running isolate operations
+  /// - Closes the stream controller, preventing any future operations
+  /// - Releases all resources associated with this isolate manager
+  ///
+  /// After calling this method, the isolate manager cannot be restarted.
+  ///
+  /// This permanently releases all resources and closes the stream controller.
+  /// If [start] or [restart] is called after stopping, an [IsolateException]
+  /// will be thrown.
+  ///
+  /// To temporarily suspend operations with the ability to resume later,
+  /// use [pause] instead.
+  ///
+  /// Returns a [Future] that completes when all resources have been released.
   Future<void> stop() async {
-    await _tempStop();
+    if (_streamController.isClosed) {
+      printDebug(
+        () => 'Stop operation skipped: IsolateManager is already stopped.',
+      );
+      return;
+    }
+
+    await pause();
     await _streamController.close();
   }
 
-  /// Restart the isolate.
+  /// Restarts the isolate manager by stopping and restarting all isolates.
+  ///
+  /// This method:
+  /// 1. Pauses all running isolates
+  /// 2. Clears the queue state
+  /// 3. Creates new isolates with the original configuration
+  ///
+  /// This is useful when you need to:
+  /// - Reset the isolate's internal state
+  /// - Recover from error conditions
+  /// - Apply new configuration changes
+  ///
+  /// Note: Any pending tasks in the queue will be lost during restart.
+  /// Throws [IsolateException] if the manager is already stopped.
   Future<void> restart() async {
-    await _tempStop();
+    if (_streamController.isClosed) {
+      throw IsolateException(
+        'Cannot restart IsolateManager: Instance is already stopped. Create a new instance to perform operations.',
+      );
+    }
+
+    await pause();
     await start();
   }
 
