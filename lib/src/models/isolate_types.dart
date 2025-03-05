@@ -1,6 +1,7 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 // TODO(lamnhan066): Remove the deprecated types in the stable release
 // coverage:ignore-start
-import 'package:equatable/equatable.dart';
 
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
@@ -69,7 +70,7 @@ typedef IsolateMap = ImMap;
 ///   - Map (wrapped in [ImMap])
 ///
 /// The static [wrap] method wraps a Dart object in the appropriate [ImType].
-sealed class ImType<T extends Object> with EquatableMixin {
+sealed class ImType<T extends Object> {
   /// Creates an instance of [ImType] holding the provided [_value].
   const ImType(this._value);
 
@@ -123,7 +124,14 @@ sealed class ImType<T extends Object> with EquatableMixin {
   T get unwrap => _value;
 
   @override
-  List<Object> get props => [_value];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImType<T> &&
+          runtimeType == other.runtimeType &&
+          _value == other._value;
+
+  @override
+  int get hashCode => _value.hashCode;
 }
 
 /// A wrapper for numeric values.
@@ -144,6 +152,7 @@ class ImNum extends ImType<num> {
 /// A wrapper for [String] values.
 ///
 /// Use [ImString] to safely transfer strings between isolates.
+
 class ImString extends ImType<String> {
   /// Creates an [ImString] with the given string [value].
   const ImString(super.value);
@@ -195,6 +204,26 @@ class ImList extends _ImTypedIterable<Object> {
   List<T> toDecodedList<T extends Object>() {
     return toDecodedIterable<T>().toList();
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImList &&
+          runtimeType == other.runtimeType &&
+          _listEquals(other._list);
+
+  @override
+  int get hashCode => Object.hashAll(_list);
+
+  bool _listEquals(Iterable<ImType<Object>> otherList) {
+    if (_list.length != otherList.length) return false;
+    final iterator1 = _list.iterator;
+    final iterator2 = otherList.iterator;
+    while (iterator1.moveNext() && iterator2.moveNext()) {
+      if (iterator1.current != iterator2.current) return false;
+    }
+    return true;
+  }
 }
 
 /// A wrapper for maps with both keys and values of [Object] types.
@@ -236,9 +265,6 @@ class _ImTypedIterable<T extends Object> extends ImType<Iterable<T>> {
 
   @override
   Iterable<T> get unwrap => _list.map((e) => e.unwrap);
-
-  @override
-  List<Object> get props => [_list];
 }
 
 /// A generic wrapper for maps that have keys and values wrapped in [ImType].
@@ -257,5 +283,25 @@ class _ImTypedMap<K extends Object, V extends Object>
   Map<K, V> get unwrap => _map.map((k, v) => MapEntry(k.unwrap, v.unwrap));
 
   @override
-  List<Object> get props => [_map];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImMap &&
+          runtimeType == other.runtimeType &&
+          _mapEquals(other._map);
+
+  @override
+  int get hashCode => Object.hashAll(_map.entries);
+
+  bool _mapEquals(Map<ImType<Object>, ImType<Object>> otherMap) {
+    if (_map.length != otherMap.length) return false;
+
+    for (final entry in _map.entries) {
+      if (!otherMap.containsKey(entry.key) ||
+          otherMap[entry.key] != entry.value) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
