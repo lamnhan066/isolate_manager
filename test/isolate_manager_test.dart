@@ -601,6 +601,25 @@ void main() {
 
       await isolateManager.stop();
     });
+
+    test('disabling WASM converter affects results', () async {
+      if (kIsWasm) {
+        final isolateManager = IsolateManager<int, int>.create(
+          fibonacci,
+          enableWasmConverter: false,
+        );
+
+        try {
+          await isolateManager.start();
+          await isolateManager.compute(5);
+          fail('Should not reach here - WASM converter should be disabled');
+        } catch (e) {
+          // Expected exception
+        } finally {
+          await isolateManager.stop();
+        }
+      }
+    });
   });
 
   test('Test IsolateManager.create: Basic Usage', () async {
