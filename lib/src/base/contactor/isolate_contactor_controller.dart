@@ -4,6 +4,7 @@ import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/
     if (dart.library.io) 'isolate_contactor_controller/isolate_contactor_controller_stub.dart';
 import 'package:isolate_manager/src/base/contactor/models/exception.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:isolate_manager/src/utils/converter.dart';
 
 /// Create controller for current `IsolateContactor`
 abstract class IsolateContactorController<R, P> {
@@ -19,12 +20,11 @@ abstract class IsolateContactorController<R, P> {
     FutureOr<void> Function()? onDispose,
   }) {
     // This method is not used in this controller
-    R converter(dynamic value) => value as R;
     return IsolateContactorControllerImpl<R, P>(
       params,
       onDispose: onDispose,
-      converter: converter,
-      workerConverter: converter,
+      converter: converterHelper,
+      workerConverter: converterHelper,
       debugMode: false,
     );
   }

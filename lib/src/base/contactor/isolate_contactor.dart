@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:isolate_manager/src/base/contactor/isolate_contactor/isolate_contactor_web.dart'
     if (dart.library.io) 'isolate_contactor/isolate_contactor_stub.dart';
+import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 
 /// The type of the `function` of the `.create` method.
@@ -15,7 +16,7 @@ typedef IsolateCustomFunction = FutureOr<void> Function(dynamic);
 typedef CustomIsolateFunction = IsolateCustomFunction;
 
 /// The type of the `converter` and `workerConverter`.
-typedef IsolateConverter<R> = R Function(dynamic);
+typedef IsolateConverter<R> = R Function(dynamic value);
 
 /// This [IsolateContactor] needs [P] as an input param type and [R]
 /// as a return type.
@@ -57,16 +58,11 @@ abstract class IsolateContactor<R, P> {
     Object? initialParams,
     bool debugMode = false,
   }) async {
-    // The `workerConverter` is not covered when running `flutter test --coverage`
-    // so this is just a hack to make it covered.
-    R tempConverter(dynamic value) => value as R;
-    converter ??= tempConverter;
-    workerConverter ??= tempConverter;
     return IsolateContactorInternal.createCustom<R, P>(
       isolateFunction: function,
       workerName: workerName,
-      converter: converter,
-      workerConverter: workerConverter,
+      converter: converter ??= converterHelper,
+      workerConverter: workerConverter ??= converterHelper,
       initialParams: initialParams,
       debugMode: debugMode,
     );
