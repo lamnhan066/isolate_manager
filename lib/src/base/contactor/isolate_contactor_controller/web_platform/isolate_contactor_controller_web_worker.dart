@@ -103,7 +103,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
       if (data['type'] == 'data') {
         var result = data['value'];
-        if (isIsolateTypeSubtype<R>()) {
+        if (isImTypeSubtype<R>()) {
           result = ImType.wrap(result as Object);
         }
         _mainStreamController.add(_workerConverter(result));

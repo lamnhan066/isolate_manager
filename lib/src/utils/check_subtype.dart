@@ -4,4 +4,4 @@ import 'package:isolate_manager/isolate_manager.dart';
 bool isSubtype<S, T>() => <S>[] is List<T>;
 
 /// Check if [S] is subtype of [ImType]
-bool isIsolateTypeSubtype<S>() => isSubtype<S, ImType>();
+bool isImTypeSubtype<S>() => isSubtype<S, ImType>();
