@@ -1,7 +1,7 @@
-import 'package:equatable/equatable.dart';
-
 // TODO(lamnhan066): Remove the deprecated types in the stable release
 // coverage:ignore-start
+import 'package:equatable/equatable.dart';
+
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
 ///
@@ -123,7 +123,7 @@ sealed class ImType<T extends Object> with EquatableMixin {
   T get unwrap => _value;
 
   @override
-  List<Object> get props => [unwrap];
+  List<Object> get props => [_value];
 }
 
 /// A wrapper for numeric values.
@@ -236,6 +236,9 @@ class _ImTypedIterable<T extends Object> extends ImType<Iterable<T>> {
 
   @override
   Iterable<T> get unwrap => _list.map((e) => e.unwrap);
+
+  @override
+  List<Object> get props => [_list];
 }
 
 /// A generic wrapper for maps that have keys and values wrapped in [ImType].
@@ -252,4 +255,7 @@ class _ImTypedMap<K extends Object, V extends Object>
 
   @override
   Map<K, V> get unwrap => _map.map((k, v) => MapEntry(k.unwrap, v.unwrap));
+
+  @override
+  List<Object> get props => [_map];
 }
