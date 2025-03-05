@@ -12,6 +12,8 @@
 * Improve the `ImType` equality and hash code implementations to replace `Equatable`.
 * Add a converter helper to ensure proper type handling for `int`, `Iterable<int>`, `Set<int>` and `List<int>` when compiling to WASM.
 * Update tests and README.
+* Able to run tests on WASM via `dart test --platform=chrome --compiler dart2wasm`.
+* Update the workflows to run test on WASM.
 
 ## 6.0.0-rc.17
 
