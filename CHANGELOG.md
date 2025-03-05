@@ -1,3 +1,18 @@
+## 6.0.0-rc.18
+
+* **BREAKING CHANGE** Refactor `IsolateType` to prevent nullable values.
+* Replace `encode` with `wrap` and `decode` with `unwrap` in IsolateType handling across and mark the old ones as deprecated.
+* Replace `Isolate`Types with `Im`Types and mark the old ones as deprecated.
+* Add some useful methods:
+
+  * `IsolateList`: `toIterable`, `toList`, `toDecodedIterable` and `toDecodedList`.
+  * `IsolateMap`: `toMap` and `toDecodedMap`.
+
+* Improve error handling when sending exception from Worker to main.
+* Improve the `IsolateType` equality and hash code implementations to replace `Equatable`.
+* Add a converter helper to ensure proper type handling for `int`, `Iterable<int>`, `Set<int>` and `List<int>` when compiling to WASM.
+* Update tests and README.
+
 ## 6.0.0-rc.17
 
 * Fixes an issue in the shared isolate manager that `useWorker` is true but there is no `workerName` provided.
