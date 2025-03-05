@@ -50,7 +50,14 @@ int add(List<int> values) {
 
     to generate the JavaScript Workers.
 
-    **WASM Note:** When using WebAssembly, `int` types (including collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false` if needed.
+    **WASM Note:**
+
+    - When using WebAssembly, `int` types (including collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false` if needed.
+    - When running the app with `flutter run -d chrome --wasm`, the app can be hang because of this [issue](https://github.com/lamnhan066/isolate_manager/issues/45) that related to COEP/COOP headers. If you met that issue, you need to run:
+
+      ```shell
+      flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
+      ```
 
 ## Usage Examples
 
