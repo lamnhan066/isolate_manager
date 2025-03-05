@@ -50,6 +50,8 @@ int add(List<int> values) {
 
     to generate the JavaScript Workers.
 
+    **WASM Note:** When using WebAssembly, `int` types (including collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false` if needed.
+
 ## Usage Examples
 
 ### One-off Isolate
