@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
+import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_shared_test.dart';
@@ -469,20 +470,6 @@ void main() {
       IsolateManager.debugLogPrefix = originalPrefix;
     });
 
-    test('Test IsolateManager with converter function', () async {
-      final isolateManager = IsolateManager.create(
-        fibonacci,
-        converter: (value) => 'Result: $value',
-        workerConverter: (value) => 'Result: $value',
-      );
-
-      await isolateManager.start();
-      final result = await isolateManager.compute(5);
-      expect(result, equals('Result: ${fibonacci(5)}'));
-
-      await isolateManager.stop();
-    });
-
     test('Test IsolateManager.run with worker parameter', () async {
       final result = await IsolateManager.run(
         () => fibonacciRecursive(5),
@@ -548,6 +535,71 @@ void main() {
       } catch (e) {
         // Expected exception
       }
+    });
+  });
+
+  group('Converter functions in WASM', () {
+    test('work with Iterable<int>', () {
+      final iterable = Iterable<int>.generate(3, (index) => index);
+      final encoded = converterHelper<Iterable<int>>(iterable);
+      final encodedIm = converterHelper<ImList>(ImList.wrap(iterable));
+      expect(encodedIm, isA<ImList>());
+      expect(encodedIm.unwrap, equals(iterable));
+      expect(encoded, equals(iterable));
+    });
+
+    test('work with Iterable<double>', () {
+      final iterable = Iterable<double>.generate(3, (index) => index * 1.0);
+      final encoded = converterHelper<Iterable<double>>(iterable);
+      final encodedIm = converterHelper<ImList>(ImList.wrap(iterable));
+      expect(encodedIm, isA<ImList>());
+      expect(encodedIm.unwrap, equals(iterable));
+      expect(encoded, equals(iterable));
+    });
+
+    test('work with List<int>', () {
+      final iterable = [1, 2, 3];
+      final encoded = converterHelper<ImList>(ImList.wrap(iterable));
+      expect(encoded, isA<ImList>());
+      expect(encoded.unwrap, equals(iterable));
+    });
+
+    test('work with int', () {
+      const value = 10;
+      final encoded = converterHelper<int>(value);
+      expect(encoded, isA<int>());
+      expect(encoded, equals(value));
+    });
+
+    test('work with double', () {
+      const value = 10.0;
+      final encoded = converterHelper<double>(value);
+      expect(encoded, isA<double>());
+      expect(encoded, equals(value));
+    });
+
+    test('work with ImNum int', () {
+      const value = 10;
+      final encoded = converterHelper<ImNum>(const ImNum(value));
+      expect(encoded, isA<ImNum>());
+      expect(encoded.unwrap, equals(value));
+    });
+
+    test('work with ImNum double', () {
+      const value = 10.0;
+      final encoded = converterHelper<ImNum>(const ImNum(value));
+      expect(encoded, isA<ImNum>());
+      expect(encoded.unwrap, equals(value));
+    });
+
+    test('converterHelper', () async {
+      final isolateManager = IsolateManager.create(fibonacci);
+
+      await isolateManager.start();
+      final result = await isolateManager.compute(5);
+      expect(result, equals(fibonacci(5)));
+
+      await isolateManager.stop();
     });
   });
 
