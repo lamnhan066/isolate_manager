@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:isolate_manager/src/base/contactor/isolate_contactor/isolate_contactor_web.dart'
     if (dart.library.io) 'isolate_contactor/isolate_contactor_stub.dart';
-import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 
 /// The type of the `function` of the `.create` method.
@@ -52,17 +51,17 @@ abstract class IsolateContactor<R, P> {
   /// `debugMode` allow printing debug data in console. Default is set to false.
   static Future<IsolateContactor<R, P>> createCustom<R, P>(
     IsolateCustomFunction function, {
-    String workerName = '',
-    IsolateConverter<R>? converter,
-    IsolateConverter<R>? workerConverter,
-    Object? initialParams,
-    bool debugMode = false,
+    required String workerName,
+    required IsolateConverter<R> converter,
+    required IsolateConverter<R> workerConverter,
+    required Object? initialParams,
+    required bool debugMode,
   }) async {
     return IsolateContactorInternal.createCustom<R, P>(
       isolateFunction: function,
       workerName: workerName,
-      converter: (value) => converterHelper(value, converter),
-      workerConverter: (value) => converterHelper(value, workerConverter),
+      converter: converter,
+      workerConverter: workerConverter,
       initialParams: initialParams,
       debugMode: debugMode,
     );

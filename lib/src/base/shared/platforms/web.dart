@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/shared/function.dart';
 import 'package:isolate_manager/src/utils/check_subtype.dart';
+import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 
 /// Web platform does not need to use the `function`
@@ -13,6 +14,7 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
   required String? workerFunction,
   required Object? workerParams,
   required bool priority,
+  required bool enableWasmConverter,
 }) async {
   final isWorker = manager.workerName != '';
   final isDebug = manager.isDebug;
@@ -45,7 +47,10 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
     result = ImType.wrap(result!);
   }
 
-  return result as R;
+  return converterHelper<R>(
+    result,
+    enableWasmConverter: enableWasmConverter,
+  );
 }
 
 /// Create a Worker on Web.

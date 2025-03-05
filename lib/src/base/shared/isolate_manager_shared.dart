@@ -46,6 +46,7 @@ class IsolateManagerShared {
     bool autoStart = true,
     String subPath = '',
     QueueStrategy<Object, List<Object>>? queueStrategy,
+    this.enableWasmConverter = true,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
           internalFunction,
@@ -53,6 +54,7 @@ class IsolateManagerShared {
           workerConverter: workerConverter,
           concurrent: concurrent,
           queueStrategy: queueStrategy,
+          enableWasmConverter: false,
           isDebug: isDebug,
         ) {
     if (autoStart) start();
@@ -65,6 +67,19 @@ class IsolateManagerShared {
   /// so we can ignore the `workerName` parameter when we compute a function
   /// multiple times.
   final Map<Function, String> workerMappings;
+
+  /// Flag to enable WebAssembly type conversion for numerical values.
+  ///
+  /// When an application is compiled to WebAssembly (WASM), JavaScript represents all
+  /// numeric types as IEEE-754 doubles. This causes integer types (`int`, `List<int>`,
+  /// `Iterable<int>`, etc.) to be automatically converted to `double` during serialization.
+  ///
+  /// When this flag is set to `true`, the isolate manager will automatically convert
+  /// numeric values back to their intended types during message passing. This ensures
+  /// type consistency between Dart and WASM/JavaScript environments.
+  ///
+  /// Default is `true`. Enable this when working with integer data in WASM environments.
+  final bool enableWasmConverter;
 
   /// Check that the [IsolateManager] is started or not.
   bool get isStarted => _manager.isStarted;
@@ -85,6 +100,7 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool enableWasmConverter = true,
     bool priority = false,
   }) {
     return _execute(
@@ -93,6 +109,7 @@ class IsolateManagerShared {
       workerFunction: workerFunction,
       workerParams: workerParams,
       priority: priority,
+      enableWasmConverter: enableWasmConverter,
     );
   }
 
@@ -107,6 +124,7 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool enableWasmConverter = true,
     bool priority = false,
   }) {
     return _execute(
@@ -115,6 +133,7 @@ class IsolateManagerShared {
       workerFunction: workerFunction,
       workerParams: workerParams,
       priority: priority,
+      enableWasmConverter: enableWasmConverter,
     );
   }
 
@@ -124,6 +143,7 @@ class IsolateManagerShared {
     P params, {
     String? workerFunction,
     Object? workerParams,
+    bool enableWasmConverter = true,
     bool priority = false,
   }) async {
     return platformExecute<R, P>(
@@ -133,6 +153,7 @@ class IsolateManagerShared {
       workerFunction: workerFunction ?? workerMappings[function],
       workerParams: workerParams,
       priority: priority,
+      enableWasmConverter: enableWasmConverter,
     );
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/utils/converter.dart';
 
 /// Execute
 Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
@@ -10,12 +11,16 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
   required String? workerFunction,
   required Object? workerParams,
   required bool priority,
+  required bool enableWasmConverter,
 }) async {
   final result = await manager.compute(
     [function, params],
     priority: priority,
   );
-  return result as R;
+  return converterHelper<R>(
+    result,
+    enableWasmConverter: enableWasmConverter,
+  );
 }
 
 /// Create a Worker on Web.

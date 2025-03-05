@@ -5,6 +5,7 @@ import 'package:isolate_manager/src/base/isolate_manager_shared.dart';
 import 'package:isolate_manager/src/isolate_manager_function.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:isolate_manager/src/models/queue_strategy.dart';
+import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 
 /// Type for the callback of the isolate.
@@ -22,7 +23,14 @@ class IsolateManager<R, P> {
   ///
   /// [concurrent] decides how many isolates to spawn.
   ///
-  /// [converter] and [workerConverter] optionally transform the results before returning.
+  /// Transforms results using [converter] and [workerConverter] before returning them.
+  ///
+  /// When [enableWasmConverter] is `true` (default), numeric values are automatically
+  /// converted back to their intended types during message passing between isolates
+  /// or web workers. This ensures proper type handling in WebAssembly environments.
+  ///
+  /// The conversion pipeline applies WASM conversions first, then passes results through
+  /// any custom converter functions provided.
   ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
@@ -39,6 +47,7 @@ class IsolateManager<R, P> {
     this.converter,
     this.workerConverter,
     QueueStrategy<R, P>? queueStrategy,
+    this.enableWasmConverter = true,
     this.isDebug = false,
   })  : isCustomIsolate = false,
         // This API will be removed in v6.0.0 when we reach the stable release.
@@ -58,7 +67,14 @@ class IsolateManager<R, P> {
   ///
   /// [concurrent] decides how many isolates to spawn.
   ///
-  /// [converter] and [workerConverter] optionally transform results before returning.
+  /// Transforms results using [converter] and [workerConverter] before returning them.
+  ///
+  /// When [enableWasmConverter] is `true` (default), numeric values are automatically
+  /// converted back to their intended types during message passing between isolates
+  /// or web workers. This ensures proper type handling in WebAssembly environments.
+  ///
+  /// The conversion pipeline applies WASM conversions first, then passes results through
+  /// any custom converter functions provided.
   ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
@@ -78,6 +94,7 @@ class IsolateManager<R, P> {
     this.converter,
     this.workerConverter,
     QueueStrategy<R, P>? queueStrategy,
+    this.enableWasmConverter = true,
     this.isDebug = false,
   })  : isCustomIsolate = true,
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
@@ -92,7 +109,14 @@ class IsolateManager<R, P> {
   /// When a [workerName] is provided, the corresponding Web Worker is used,
   /// and [workerParameter] is passed to the worker.
   ///
-  /// [converter] and [workerConverter] can be used to transform results before returning.
+  /// Transforms results using [converter] and [workerConverter] before returning them.
+  ///
+  /// When [enableWasmConverter] is `true` (default), numeric values are automatically
+  /// converted back to their intended types during message passing between isolates
+  /// or web workers. This ensures proper type handling in WebAssembly environments.
+  ///
+  /// The conversion pipeline applies WASM conversions first, then passes results through
+  /// any custom converter functions provided.
   ///
   /// Example:
   /// ```dart
@@ -117,6 +141,7 @@ class IsolateManager<R, P> {
     Object? workerParameter,
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
+    bool enableWasmConverter = true,
     bool isDebug = false,
   }) {
     return runFunction<R, Object?>(
@@ -135,7 +160,14 @@ class IsolateManager<R, P> {
   /// web Workers when a [workerName] is provided. The [workerName] is automatically
   /// assigned if previously mapped via [addWorkerMapping] or a generator.
   ///
-  /// [converter] and [workerConverter] can be used to transform results before returning.
+  /// Transforms results using [converter] and [workerConverter] before returning them.
+  ///
+  /// When [enableWasmConverter] is `true` (default), numeric values are automatically
+  /// converted back to their intended types during message passing between isolates
+  /// or web workers. This ensures proper type handling in WebAssembly environments.
+  ///
+  /// The conversion pipeline applies WASM conversions first, then passes results through
+  /// any custom converter functions provided.
   ///
   /// Example:
   /// ```dart
@@ -156,6 +188,7 @@ class IsolateManager<R, P> {
     String? workerName,
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
+    bool enableWasmConverter = true,
     bool isDebug = false,
   }) async {
     final im = IsolateManager<R, P>.create(
@@ -163,6 +196,7 @@ class IsolateManager<R, P> {
       workerName: workerName,
       converter: converter,
       workerConverter: workerConverter,
+      enableWasmConverter: enableWasmConverter,
       isDebug: isDebug,
     );
 
@@ -182,7 +216,14 @@ class IsolateManager<R, P> {
   ///
   /// If [callback] is provided, it will be invoked with the result before returning.
   ///
-  /// [converter] and [workerConverter] can be used to transform results before returning.
+  /// Transforms results using [converter] and [workerConverter] before returning them.
+  ///
+  /// When [enableWasmConverter] is `true` (default), numeric values are automatically
+  /// converted back to their intended types during message passing between isolates
+  /// or web workers. This ensures proper type handling in WebAssembly environments.
+  ///
+  /// The conversion pipeline applies WASM conversions first, then passes results through
+  /// any custom converter functions provided.
   ///
   /// Example:
   /// ```dart
@@ -259,6 +300,7 @@ class IsolateManager<R, P> {
     String subPath = '',
     int maxQueueCount = 0,
     QueueStrategy<Object, List<Object>>? queueStrategy,
+    bool enableWasmConverter = true,
     bool isDebug = false,
   }) =>
       IsolateManagerShared(
@@ -269,6 +311,7 @@ class IsolateManager<R, P> {
         autoStart: autoStart,
         subPath: subPath,
         queueStrategy: queueStrategy,
+        enableWasmConverter: enableWasmConverter,
         isDebug: isDebug,
       );
 
@@ -403,6 +446,19 @@ final isolate = IsolateManager.createCustom<R, P>(
   ///   - [QueueStrategyDiscardIncoming]
   final QueueStrategy<R, P> queueStrategy;
 
+  /// Flag to enable WebAssembly type conversion for numerical values.
+  ///
+  /// When an application is compiled to WebAssembly (WASM), JavaScript represents all
+  /// numeric types as IEEE-754 doubles. This causes integer types (`int`, `List<int>`,
+  /// `Iterable<int>`, etc.) to be automatically converted to `double` during serialization.
+  ///
+  /// When this flag is set to `true`, the isolate manager will automatically convert
+  /// numeric values back to their intended types during message passing. This ensures
+  /// type consistency between Dart and WASM/JavaScript environments.
+  ///
+  /// Default is `true`. Enable this when working with integer data in WASM environments.
+  final bool enableWasmConverter;
+
   /// If you want to call the [start] method manually without `await`, you can `await`
   /// later by using [ensureStarted] to ensure that all the isolates are started.
   Future<void> get ensureStarted => _startedCompleter.future;
@@ -463,8 +519,16 @@ final isolate = IsolateManager.createCustom<R, P>(
               // This API will be removed in v6.0.0 when we reach the stable release.
               // ignore: deprecated_member_use_from_same_package
               initialParams: initialParams,
-              converter: converter,
-              workerConverter: workerConverter,
+              converter: (value) => converterHelper(
+                value,
+                customConverter: converter,
+                enableWasmConverter: enableWasmConverter,
+              ),
+              workerConverter: (value) => converterHelper(
+                value,
+                customConverter: workerConverter,
+                enableWasmConverter: enableWasmConverter,
+              ),
               debugMode: isDebug,
             ).then(
               (IsolateContactor<R, P> value) => _isolates
@@ -481,8 +545,16 @@ final isolate = IsolateManager.createCustom<R, P>(
               _defaultIsolateFunction<R, P>,
               initialParams: isolateFunction as IsolateFunction<R, P>,
               workerName: workerName,
-              converter: converter,
-              workerConverter: workerConverter,
+              converter: (value) => converterHelper(
+                value,
+                customConverter: converter,
+                enableWasmConverter: enableWasmConverter,
+              ),
+              workerConverter: (value) => converterHelper(
+                value,
+                customConverter: workerConverter,
+                enableWasmConverter: enableWasmConverter,
+              ),
               debugMode: isDebug,
             ).then((value) => _isolates[value] = false),
         ],

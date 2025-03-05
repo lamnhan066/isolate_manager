@@ -29,6 +29,7 @@ Future<R> platformExecute<R extends Object?, P extends Object?>({
   required String? workerFunction,
   required Object? workerParams,
   required bool priority,
+  required bool enableWasmConverter,
 }) async {
   return platformExecuteImpl<R, P>(
     manager: manager,
@@ -37,6 +38,7 @@ Future<R> platformExecute<R extends Object?, P extends Object?>({
     workerFunction: workerFunction,
     workerParams: workerParams,
     priority: priority,
+    enableWasmConverter: enableWasmConverter,
   );
 }
 

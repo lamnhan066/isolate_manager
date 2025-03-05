@@ -5,9 +5,13 @@ import 'package:isolate_manager/src/utils/check_subtype.dart';
 const bool kIsWasm = bool.fromEnvironment('dart.tool.dart2wasm');
 
 /// Converts [value] to type [R], handling numeric conversions for WASM.
-R converterHelper<R>(dynamic value, [IsolateConverter<R>? customConverter]) {
+R converterHelper<R>(
+  dynamic value, {
+  IsolateConverter<R>? customConverter,
+  bool enableWasmConverter = true,
+}) {
   dynamic effectiveValue = value;
-  if (kIsWasm) {
+  if (enableWasmConverter && kIsWasm) {
     if (isSubtype<R, int>()) {
       effectiveValue = (effectiveValue as num).toInt() as R;
     } else if (isSubtype<R, Iterable<int>>()) {
