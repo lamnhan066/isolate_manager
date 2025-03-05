@@ -92,6 +92,8 @@ class IsolateManager<R, P> {
   /// When a [workerName] is provided, the corresponding Web Worker is used,
   /// and [workerParameter] is passed to the worker.
   ///
+  /// [converter] and [workerConverter] can be used to transform results before returning.
+  ///
   /// Example:
   /// ```dart
   /// @isolateManagerWorker
@@ -113,12 +115,16 @@ class IsolateManager<R, P> {
     FutureOr<R> Function() computation, {
     String? workerName,
     Object? workerParameter,
+    IsolateConverter<R>? converter,
+    IsolateConverter<R>? workerConverter,
     bool isDebug = false,
   }) {
     return runFunction<R, Object?>(
       (_) => computation(),
       workerParameter,
       workerName: workerName,
+      converter: converter,
+      workerConverter: workerConverter,
       isDebug: isDebug,
     );
   }
@@ -128,6 +134,8 @@ class IsolateManager<R, P> {
   /// This method behaves similarly to `Isolate.run`, but with additional support for
   /// web Workers when a [workerName] is provided. The [workerName] is automatically
   /// assigned if previously mapped via [addWorkerMapping] or a generator.
+  ///
+  /// [converter] and [workerConverter] can be used to transform results before returning.
   ///
   /// Example:
   /// ```dart
@@ -146,11 +154,15 @@ class IsolateManager<R, P> {
     IsolateFunction<R, P> function,
     P parameter, {
     String? workerName,
+    IsolateConverter<R>? converter,
+    IsolateConverter<R>? workerConverter,
     bool isDebug = false,
   }) async {
     final im = IsolateManager<R, P>.create(
       function,
       workerName: workerName,
+      converter: converter,
+      workerConverter: workerConverter,
       isDebug: isDebug,
     );
 
@@ -170,6 +182,8 @@ class IsolateManager<R, P> {
   ///
   /// If [callback] is provided, it will be invoked with the result before returning.
   ///
+  /// [converter] and [workerConverter] can be used to transform results before returning.
+  ///
   /// Example:
   /// ```dart
   /// @isolateManagerWorker
@@ -187,12 +201,16 @@ class IsolateManager<R, P> {
     IsolateCustomFunction function,
     P parameter, {
     String? workerName,
+    IsolateConverter<R>? converter,
+    IsolateConverter<R>? workerConverter,
     IsolateCallback<R>? callback,
     bool isDebug = false,
   }) async {
     final im = IsolateManager<R, P>.createCustom(
       function,
       workerName: workerName,
+      converter: converter,
+      workerConverter: workerConverter,
       isDebug: isDebug,
     );
 
