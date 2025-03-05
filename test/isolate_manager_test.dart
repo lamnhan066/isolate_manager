@@ -101,7 +101,7 @@ void main() {
 
   group('IsolateType - ', () {
     group('IsolateType.wrap', () {
-      test('wraps num as IsolateNum', () {
+      test('wraps num as ImNum', () {
         const numValue = 42;
         final encoded = ImType.wrap(numValue);
         expect(encoded, isA<ImNum>());
@@ -110,7 +110,7 @@ void main() {
         expect(encoded.toInt(), equals(numValue));
       });
 
-      test('can convert IsolateNum from different number types', () {
+      test('can convert ImNum from different number types', () {
         // Integer test
         final intIsolate = ImType.wrap(10) as ImNum;
         expect(intIsolate.toInt(), equals(10));
@@ -122,21 +122,21 @@ void main() {
         expect(doubleIsolate.toDouble(), equals(10.5));
       });
 
-      test('wraps String as IsolateString', () {
+      test('wraps String as ImString', () {
         const strValue = 'Hello, Isolate!';
         final encoded = ImType.wrap(strValue);
         expect(encoded, isA<ImString>());
         expect((encoded as ImString).unwrap, equals(strValue));
       });
 
-      test('wraps bool as IsolateBool', () {
+      test('wraps bool as ImBool', () {
         const boolValue = true;
         final encoded = ImType.wrap(boolValue);
         expect(encoded, isA<ImBool>());
         expect((encoded as ImBool).unwrap, equals(boolValue));
       });
 
-      test('wraps List as IsolateList and can decode iterable', () {
+      test('wraps List as ImList and can decode iterable', () {
         final listValue = [1, 'two', false];
         final encoded = ImType.wrap(listValue);
         expect(encoded, isA<ImList>());
@@ -152,7 +152,7 @@ void main() {
         expect(decoded, equals(listValue));
       });
 
-      test('wraps Map as IsolateMap and can decode map', () {
+      test('wraps Map as ImMap and can decode map', () {
         final mapValue = {
           'a': 1,
           'b': false,
@@ -178,7 +178,7 @@ void main() {
       });
     });
 
-    group('IsolateList helper methods', () {
+    group('ImList helper methods', () {
       test('toIterable and toDecodedList work correctly', () {
         final listValue = [10, 20, 30];
         final encoded = ImType.wrap(listValue) as ImList;
@@ -194,7 +194,7 @@ void main() {
       });
     });
 
-    group('IsolateMap helper methods', () {
+    group('ImMap helper methods', () {
       test('toMap and toDecodedMap work correctly', () {
         final mapValue = {
           'x': 100,
@@ -210,6 +210,77 @@ void main() {
         // Using toDecodedMap to get original Map.
         final decodedMap = encoded.toDecodedMap<String, int>();
         expect(decodedMap, equals(mapValue));
+      });
+
+      group('real IsolateManager', () {
+        test('num', () async {
+          final isolates = IsolateManager.create(isolateTypeNum, isDebug: true);
+
+          const value = ImNum(15);
+
+          final result = await isolates.compute(value);
+
+          expect(result, isA<ImNum>());
+          expect(result, equals(value));
+        });
+
+        test('String', () async {
+          const value = ImString('abc');
+          final isolates = IsolateManager.create(isolateTypeString);
+
+          final result = await isolates.compute(value);
+
+          expect(result, isA<ImString>());
+          expect(result, equals(value));
+        });
+
+        test('bool', () async {
+          const value = ImBool(false);
+          final isolates = IsolateManager.create(isolateTypeBool);
+
+          final result = await isolates.compute(value);
+
+          expect(result, isA<ImBool>());
+          expect(result, equals(value));
+        });
+
+        test('List', () async {
+          const value = ImList(<ImNum>[ImNum(100)]);
+          final isolates = IsolateManager.create(isolateTypeList);
+
+          final result = await isolates.compute(value);
+
+          expect(result, isA<ImList>());
+          expect(
+            result,
+            equals(const ImList(<ImString>[ImString('100')])),
+          );
+        });
+
+        test('Map', () async {
+          final isolates = IsolateManager.create(isolateTypeMap);
+          final result = await isolates.compute(
+            const ImList([ImNum(5), ImNum(7)]),
+          );
+
+          expect(result, isA<ImMap>());
+          expect(
+            result,
+            equals(
+              ImMap(<ImString, ImNum>{
+                const ImString('5'): const ImNum(5),
+                const ImString('7'): const ImNum(7),
+              }),
+            ),
+          );
+        });
+
+        test('Nullable type', () async {
+          final isolates = IsolateManager.create(isolateNullableInt);
+          final result = await isolates(null);
+
+          expect(result, equals(null));
+        });
       });
     });
 
