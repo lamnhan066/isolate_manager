@@ -61,8 +61,8 @@ abstract class IsolateContactor<R, P> {
     return IsolateContactorInternal.createCustom<R, P>(
       isolateFunction: function,
       workerName: workerName,
-      converter: converter ??= converterHelper,
-      workerConverter: workerConverter ??= converterHelper,
+      converter: (value) => converterHelper(value, converter),
+      workerConverter: (value) => converterHelper(value, workerConverter),
       initialParams: initialParams,
       debugMode: debugMode,
     );
