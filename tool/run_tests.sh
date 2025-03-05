@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dart test --platform=chrome
+dart test --platform=chrome --compiler dart2js,dart2wasm
 
 # Restore all backup .js to keep the original files
 trap 'find . -type f -name "*.js.bak" -exec sh -c "mv \"\$0\" \"\${0%.bak}\"" {} \;' EXIT INT TERM
@@ -12,8 +12,11 @@ dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=t
 dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_shared_test.dart --obfuscate 0
 dart run isolate_manager:generate -i test -o test/workers --obfuscate 0
 
-dart test --platform=chrome --coverage=coverage
-dart test --platform=vm --coverage=coverage
+dart test --platform=chrome --compiler dart2js
+dart test --platform=chrome --compiler dart2wasm
+dart test --platform=vm
+
+dart test --platform=vm,chrome --compiler dart2js,dart2wasm --coverage=coverage
 
 dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
 
