@@ -16,7 +16,13 @@ R converterHelper<R>(
       effectiveValue = (effectiveValue as num).toInt() as R;
     } else if (isSubtype<R, Iterable<int>>()) {
       effectiveValue =
-          (effectiveValue as Iterable).cast<num>().map((e) => e.toInt()) as R;
+          (effectiveValue as Iterable).cast<num>().map((e) => e.toInt());
+
+      if (isSubtype<R, List<int>>()) {
+        effectiveValue = effectiveValue.toList() as R;
+      } else if (isSubtype<R, Set<int>>()) {
+        effectiveValue = effectiveValue.toSet() as R;
+      }
     }
   }
   return customConverter?.call(effectiveValue) ?? effectiveValue as R;
