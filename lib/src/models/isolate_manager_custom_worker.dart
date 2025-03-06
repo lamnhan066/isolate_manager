@@ -1,9 +1,9 @@
-/// A default annotation for the [IsolateManagerWorker] with empty name.
-const IsolateManagerWorker isolateManagerWorker = IsolateManagerWorker();
+/// An annotation that you want to use for the custom function.
+const isolateManagerCustomWorker = IsolateManagerCustomWorker();
 
 /// The annotation to generate a Worker JS for a specific method.
-class IsolateManagerWorker {
-  /// The annotation to generate a Worker JS for a specific method.
+class IsolateManagerCustomWorker {
+  /// The annotation to generate a custom Worker JS for a specific method.
   ///
   /// If the [name] is specified, the Worker JS will be named `<name>.js`, otherwise
   /// the name of the function will be used.
@@ -13,7 +13,7 @@ class IsolateManagerWorker {
   /// For instance:
   ///
   /// ```dart
-  /// @IsolateManagerWorker('workers/add')
+  /// @IsolateManagerCustomWorker('workers/add')
   /// int add(List<int> params) {
   ///   return params[0] + params[1];
   /// }
@@ -26,7 +26,7 @@ class IsolateManagerWorker {
   /// |-- workers
   /// |-- |-- add.js
   /// ```
-  const IsolateManagerWorker([this.name = '']);
+  const IsolateManagerCustomWorker([this.name = '']);
 
   /// Name of the Worker JS.
   final String name;
