@@ -13,12 +13,25 @@ class IsolateException implements Exception {
     );
 
     final values = map['value'] as Map;
+    final subType = map['subType'] as String?;
 
-    return IsolateException(
-      values['e'] as Object,
-      StackTrace.fromString(values['s'] as String),
-    );
+    switch (subType) {
+      case 'UnsupportedImTypeWrappingException':
+        return UnsupportedImTypeWrappingException(
+          values['e'] as Object,
+          StackTrace.fromString(values['s'] as String),
+        );
+      default:
+        return IsolateException(
+          values['e'] as Object,
+          StackTrace.fromString(values['s'] as String),
+        );
+    }
   }
+
+  /// Returns the subtype of the exception.
+  /// This is used for serialization to determine the specific type of exception.
+  String get _subType => 'IsolateException';
 
   /// Error object.
   final Object error;
@@ -29,6 +42,7 @@ class IsolateException implements Exception {
   /// Convert to JSON.
   Map<String, dynamic> toMap() => <String, dynamic>{
         'type': r'$IsolateException',
+        'subType': _subType,
         'value': <String, String>{
           'e': error.toString(),
           's': stackTrace.toString(),
@@ -55,4 +69,7 @@ class UnsupportedImTypeWrappingException extends IsolateException {
     super.error, [
     super.stackTrace = StackTrace.empty,
   ]);
+
+  @override
+  String get _subType => 'UnsupportedImTypeWrappingException';
 }
