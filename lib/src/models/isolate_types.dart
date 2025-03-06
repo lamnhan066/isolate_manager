@@ -132,6 +132,9 @@ sealed class ImType<T extends Object> {
 
   @override
   int get hashCode => _value.hashCode;
+
+  @override
+  String toString() => 'ImType($_value)';
 }
 
 /// A wrapper for numeric values.
@@ -147,6 +150,9 @@ class ImNum extends ImType<num> {
 
   /// Returns the numeric value as an [int], or null if the value is null.
   int toInt() => _value.toInt();
+
+  @override
+  String toString() => 'ImNum($_value)';
 }
 
 /// A wrapper for [String] values.
@@ -156,6 +162,9 @@ class ImNum extends ImType<num> {
 class ImString extends ImType<String> {
   /// Creates an [ImString] with the given string [value].
   const ImString(super.value);
+
+  @override
+  String toString() => 'ImString($_value)';
 }
 
 /// A wrapper for boolean values.
@@ -165,6 +174,9 @@ class ImBool extends ImType<bool> {
   /// Creates an [ImBool] with the given boolean [value].
   // ignore: avoid_positional_boolean_parameters
   const ImBool(super.value);
+
+  @override
+  String toString() => 'ImBool($_value)';
 }
 
 /// A wrapper for lists of [ImType] objects specific to [Object] types.
@@ -224,6 +236,9 @@ class ImList extends _ImTypedIterable<Object> {
     }
     return true;
   }
+
+  @override
+  String toString() => 'ImList($_list)';
 }
 
 /// A wrapper for maps with both keys and values of [Object] types.
@@ -251,6 +266,9 @@ class ImMap extends _ImTypedMap<Object, Object> {
   Map<K, V> toDecodedMap<K extends Object, V extends Object>() {
     return unwrap.cast<K, V>();
   }
+
+  @override
+  String toString() => 'ImMap($_map)';
 }
 
 /// A generic wrapper for iterables containing [ImType] elements.
