@@ -278,7 +278,7 @@ void main() {
 
         test('Nullable type', () async {
           final isolates = IsolateManager.create(isolateNullableInt);
-          final result = await isolates(null);
+          final result = await isolates.call(null);
 
           expect(result, equals(null));
         });

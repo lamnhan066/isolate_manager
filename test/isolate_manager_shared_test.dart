@@ -305,7 +305,7 @@ void main() async {
 
   test('Nullable type', () async {
     final isolates = IsolateManager.createShared(useWorker: true);
-    final result = await isolates.compute(isolateNullableInt, null);
+    final result = await isolates.call(isolateNullableInt, null);
 
     expect(result, equals(null));
   });
