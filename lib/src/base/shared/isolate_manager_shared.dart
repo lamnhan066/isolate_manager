@@ -32,7 +32,7 @@ class IsolateManagerShared {
   ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
-  ///   - [UnlimitedStrategy] - default.
+  ///   - [QueueStrategyUnlimited] - default.
   ///   - [QueueStrategyRemoveNewest]
   ///   - [QueueStrategyRemoveOldest]
   ///   - [QueueStrategyDiscardIncoming]
