@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
-import 'package:isolate_manager/src/models/exceptions.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:test/test.dart';

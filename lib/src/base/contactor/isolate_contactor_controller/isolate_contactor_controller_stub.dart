@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller.dart';
-import 'package:isolate_manager/src/base/contactor/models/exception.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
+import 'package:isolate_manager/src/models/exceptions.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
