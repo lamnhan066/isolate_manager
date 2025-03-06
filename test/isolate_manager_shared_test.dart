@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
+import 'package:isolate_manager/src/models/exceptions.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
@@ -206,11 +207,11 @@ void main() async {
       await isolates.stop();
     });
 
-    test('Unimplemented Type', () {
+    test('Unsupported Type', () {
       final user = User(name: 'user', email: 'user@user.com');
       expect(
         () => ImType.wrap(user),
-        throwsUnimplementedError,
+        throwsA(isA<UnsupportedImTypeWrappingException>()),
       );
     });
 

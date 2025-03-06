@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
+import 'package:isolate_manager/src/models/exceptions.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:test/test.dart';
@@ -171,11 +172,12 @@ void main() {
         expect(decoded, equals(mapValue));
       });
 
-      test('throws UnimplementedError for unsupported types', () {
+      test('throws UnsupportedImTypeWrappingException for unsupported types',
+          () {
         final unsupportedValue = DateTime.now();
         expect(
           () => ImType.wrap(unsupportedValue),
-          throwsA(isA<UnimplementedError>()),
+          throwsA(isA<UnsupportedImTypeWrappingException>()),
         );
       });
     });
