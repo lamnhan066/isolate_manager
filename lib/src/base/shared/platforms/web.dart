@@ -33,7 +33,6 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
     return function(params);
   }
 
-  final func = (isWorker && workerFunction != null) ? workerFunction : function;
   var finalParams = workerParams ?? params;
   final isUseIsolateType = finalParams is ImType;
 
@@ -41,8 +40,9 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
   if (isUseIsolateType) {
     finalParams = finalParams.unwrap;
   }
+
   var result = await manager.compute(
-    [func, finalParams, isUseIsolateType],
+    [workerFunction, finalParams, isUseIsolateType],
     priority: priority,
   );
 
