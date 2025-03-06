@@ -16,6 +16,7 @@ import '../test/isolate_manager_shared_test.dart';
   dart test --platform=chrome
 */
 
+// TODO(lamnhan066): All tests need to be re-written to improve readability and maintainability.
 void main() {
   _addWorkerMappings();
 

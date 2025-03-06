@@ -13,6 +13,7 @@ import 'models/user.dart';
   dart test --platform=chrome
 */
 
+// TODO(lamnhan066): All tests need to be re-written to improve readability and maintainability.
 void main() async {
   _addWorkerMappings();
   test('test', () async {
@@ -516,6 +517,7 @@ int? isolateNullableInt(int? number) {
 }
 
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(isolateTypeMapToMap, 'isolateTypeMapToMap');
   IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
   IsolateManager.addWorkerMapping(isolateTypeMap, 'isolateTypeMap');
   IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
