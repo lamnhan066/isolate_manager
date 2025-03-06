@@ -20,7 +20,7 @@
 - **Web & WASM Support:** Automatically compiles functions to JavaScript Workers on the web (fallback to `Future`/`Stream` if Workers are unavailable).
 - **Robust Exception Handling:** Supports try-catch blocks and custom error handling.
 - **Queue Management:** Automatically queues multiple computations, supports priority tasks, and offers customizable queue strategies.
-- **Type Safety Helpers:** Use specialized types (`IsolateNum`, `IsolateString`, etc.) to ensure only transferable data (primitives, Maps, Lists) is exchanged between isolates.
+- **Type Safety Helpers:** Use specialized types (`ImNum`, `ImString`, etc.) to ensure only transferable data (primitives, Maps, Lists) is exchanged between isolates.
 
 ## Setup
 
@@ -239,17 +239,34 @@ Use helper types to ensure safe data transfer:
 
 ```dart
 @isolateManagerWorker
-IsolateMap isolateFunction(IsolateList numbers) {
+ImMap isolateFunction(ImList numbers) {
   // Decode the list into standard Dart types.
   final data = numbers.unwrap!;
   final map = Map.fromEntries(
-    data.map((e) => MapEntry(IsolateString('$e'), IsolateNum(e as num))),
+    data.map((e) => MapEntry(ImString('$e'), ImNum(e as num))),
   );
-  return IsolateMap(map);
+  return ImMap(map);
 }
 
-// Convert native Dart objects to IsolateTypes:
-final encoded = IsolateType.wrap({'k1': 'v1', 'k2': 'v2'});
+// Convert native Dart objects to ImType:
+try {
+  final isolate = IsolateManager.create(isolateFunction, workerName: 'isolateFunction');
+  final param = ImType.wrap({'k1': 'v1', 'k2': 'v2'});
+
+  final result = await isolate.compute(param);
+} on UnsupportedImTypeWrappingException catch (e) {
+  // Throws `UnsupportedImTypeWrappingException` when there is unsupported type.
+}
+```
+
+Available `ImType`s:
+
+```dart
+final number = ImNum(1); // or 1.0
+final string = ImString('text');
+final boolean = ImBool(true);
+final list = ImList(<ImType>[]);
+final map = ImMap(<ImType, ImType>{});
 ```
 
 ### Handling Complex Data Structures
