@@ -247,7 +247,8 @@ void main() {
 
         test('List', () async {
           const value = ImList(<ImNum>[ImNum(100)]);
-          final isolates = IsolateManager.create(isolateTypeList);
+          final isolates =
+              IsolateManager.create(isolateTypeList, isDebug: true);
 
           final result = await isolates.compute(value);
 
@@ -258,10 +259,31 @@ void main() {
           );
         });
 
-        test('Map', () async {
+        test('List to Map', () async {
           final isolates = IsolateManager.create(isolateTypeMap);
           final result = await isolates.compute(
             const ImList([ImNum(5), ImNum(7)]),
+          );
+
+          expect(result, isA<ImMap>());
+          expect(
+            result,
+            equals(
+              ImMap(<ImString, ImNum>{
+                const ImString('5'): const ImNum(5),
+                const ImString('7'): const ImNum(7),
+              }),
+            ),
+          );
+        });
+
+        test('Map to Map', () async {
+          final isolates = IsolateManager.create(isolateTypeMapToMap);
+          final result = await isolates.compute(
+            ImMap(<ImNum, ImNum>{
+              const ImNum(5): const ImNum(5),
+              const ImNum(7): const ImNum(7),
+            }),
           );
 
           expect(result, isA<ImMap>());
@@ -1552,6 +1574,15 @@ ImMap isolateTypeMap(ImList numbers) {
 }
 
 @isolateManagerWorker
+ImMap isolateTypeMapToMap(ImMap numbers) {
+  return ImMap(
+    numbers.toMap().map(
+          (k, v) => MapEntry(ImString('${k.unwrap}'), v),
+        ),
+  );
+}
+
+@isolateManagerWorker
 int? isolateNullableInt(int? number) {
   return number;
 }
@@ -1575,6 +1606,7 @@ Future<int> errorFunctionFuture(List<int> value) async {
 }
 
 void _addWorkerMappings() {
+  IsolateManager.addWorkerMapping(isolateTypeMapToMap, 'isolateTypeMapToMap');
   IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
   IsolateManager.addWorkerMapping(isolateTypeString, 'isolateTypeString');
   IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');
