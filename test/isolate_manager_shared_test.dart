@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/models/exceptions.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_test.dart';
