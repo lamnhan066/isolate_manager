@@ -563,141 +563,139 @@ void main() {
   });
 
   group(
-    'Converter functions in WASM',
-    () {
-      test('work with Iterable<int>', () {
-        final iterable = Iterable<int>.generate(3, (index) => index);
-        final encoded = converterHelper<Iterable<int>>(iterable);
-        final encodedIm = converterHelper<ImList>(ImList.wrap(iterable));
-        expect(encodedIm, isA<ImList>());
-        expect(encodedIm.unwrap, equals(iterable));
-        expect(encoded, equals(iterable));
-      });
+      skip: kIsWasm ? false : 'Only run on WebAssembly',
+      'Converter functions in WASM', () {
+    test('work with Iterable<int>', () {
+      final iterable = Iterable<int>.generate(3, (index) => index);
+      final encoded = converterHelper<Iterable<int>>(iterable);
+      final encodedIm = converterHelper<ImList>(ImList.wrap(iterable));
+      expect(encodedIm, isA<ImList>());
+      expect(encodedIm.unwrap, equals(iterable));
+      expect(encoded, equals(iterable));
+    });
 
-      test('work with Iterable<double>', () {
-        final iterable = Iterable<double>.generate(3, (index) => index * 1.0);
-        final encoded = converterHelper<Iterable<double>>(iterable);
-        final encodedIm = converterHelper<ImList>(ImList.wrap(iterable));
-        expect(encodedIm, isA<ImList>());
-        expect(encodedIm.unwrap, equals(iterable));
-        expect(encoded, equals(iterable));
-      });
+    test('work with Iterable<double>', () {
+      final iterable = Iterable<double>.generate(3, (index) => index * 1.0);
+      final encoded = converterHelper<Iterable<double>>(iterable);
+      final encodedIm = converterHelper<ImList>(ImList.wrap(iterable));
+      expect(encodedIm, isA<ImList>());
+      expect(encodedIm.unwrap, equals(iterable));
+      expect(encoded, equals(iterable));
+    });
 
-      test('work with List<int>', () {
-        final iterable = [1, 2, 3];
-        final encoded = converterHelper<ImList>(ImList.wrap(iterable));
-        expect(encoded, isA<ImList>());
-        expect(encoded.unwrap, equals(iterable));
-      });
+    test('work with List<int>', () {
+      final iterable = [1, 2, 3];
+      final encoded = converterHelper<ImList>(ImList.wrap(iterable));
+      expect(encoded, isA<ImList>());
+      expect(encoded.unwrap, equals(iterable));
+    });
 
-      test('work with int', () {
-        const value = 10;
-        final encoded = converterHelper<int>(value);
-        expect(encoded, isA<int>());
-        expect(encoded, equals(value));
-      });
+    test('work with int', () {
+      const value = 10;
+      final encoded = converterHelper<int>(value);
+      expect(encoded, isA<int>());
+      expect(encoded, equals(value));
+    });
 
-      test('work with double', () {
-        const value = 10.0;
-        final encoded = converterHelper<double>(value);
-        expect(encoded, isA<double>());
-        expect(encoded, equals(value));
-      });
+    test('work with double', () {
+      const value = 10.0;
+      final encoded = converterHelper<double>(value);
+      expect(encoded, isA<double>());
+      expect(encoded, equals(value));
+    });
 
-      test('work with ImNum int', () {
-        const value = 10;
-        final encoded = converterHelper<ImNum>(const ImNum(value));
-        expect(encoded, isA<ImNum>());
-        expect(encoded.unwrap, equals(value));
-      });
+    test('work with ImNum int', () {
+      const value = 10;
+      final encoded = converterHelper<ImNum>(const ImNum(value));
+      expect(encoded, isA<ImNum>());
+      expect(encoded.unwrap, equals(value));
+    });
 
-      test('work with ImNum double', () {
-        const value = 10.0;
-        final encoded = converterHelper<ImNum>(const ImNum(value));
-        expect(encoded, isA<ImNum>());
-        expect(encoded.unwrap, equals(value));
-      });
+    test('work with ImNum double', () {
+      const value = 10.0;
+      final encoded = converterHelper<ImNum>(const ImNum(value));
+      expect(encoded, isA<ImNum>());
+      expect(encoded.unwrap, equals(value));
+    });
 
-      test('converterHelper', () async {
-        final isolateManager = IsolateManager.create(fibonacci);
+    test('converterHelper', () async {
+      final isolateManager = IsolateManager.create(fibonacci);
 
-        await isolateManager.start();
-        final result = await isolateManager.compute(5);
-        expect(result, equals(fibonacci(5)));
+      await isolateManager.start();
+      final result = await isolateManager.compute(5);
+      expect(result, equals(fibonacci(5)));
 
-        await isolateManager.stop();
-      });
+      await isolateManager.stop();
+    });
 
-      test(
-        'disabling WASM converter affects results',
-        () async {
-          final isolateManager = IsolateManager<int, int>.create(
-            fibonacci,
-            enableWasmConverter: false,
-          );
+    test(
+      'disabling WASM converter affects results',
+      () async {
+        final isolateManager = IsolateManager<int, int>.create(
+          fibonacci,
+          enableWasmConverter: false,
+        );
 
-          try {
-            await isolateManager.start();
-            await isolateManager.compute(5);
-            fail('Should not reach here - WASM converter should be disabled');
-          } catch (e) {
-            // Expected exception
-          } finally {
-            await isolateManager.stop();
-          }
-        },
+        try {
+          await isolateManager.start();
+          await isolateManager.compute(5);
+          fail('Should not reach here - WASM converter should be disabled');
+        } catch (e) {
+          // Expected exception
+        } finally {
+          await isolateManager.stop();
+        }
+      },
+    );
+
+    test('Converts num to int', () {
+      expect(converterHelper<int>(4.7), equals(4));
+      expect(converterHelper<int>(10.1), equals(10));
+    });
+
+    test('Converts List<num> to List<int>', () {
+      expect(converterHelper<List<int>>([1.9, 2.1, 3.5]), equals([1, 2, 3]));
+      expect(
+        converterHelper<List<int>>([10.5, 20.8, 30.2]),
+        equals([10, 20, 30]),
       );
+    });
 
-      test('Converts num to int', () {
-        expect(converterHelper<int>(4.7), equals(4));
-        expect(converterHelper<int>(10.1), equals(10));
-      });
+    test('Converts Set<num> to Set<int>', () {
+      expect(converterHelper<Set<int>>({4.9, 5.1, 6.7}), equals({4, 5, 6}));
+      expect(
+        converterHelper<Set<int>>({10.2, 20.8, 30.9}),
+        equals({10, 20, 30}),
+      );
+    });
 
-      test('Converts List<num> to List<int>', () {
-        expect(converterHelper<List<int>>([1.9, 2.1, 3.5]), equals([1, 2, 3]));
-        expect(
-          converterHelper<List<int>>([10.5, 20.8, 30.2]),
-          equals([10, 20, 30]),
-        );
-      });
+    test('Converts Iterable<num> to Iterable<int>', () {
+      expect(converterHelper<Iterable<int>>([7.6, 8.3]), equals([7, 8]));
+      expect(converterHelper<Iterable<int>>({12.4, 15.9}), equals({12, 15}));
+    });
 
-      test('Converts Set<num> to Set<int>', () {
-        expect(converterHelper<Set<int>>({4.9, 5.1, 6.7}), equals({4, 5, 6}));
-        expect(
-          converterHelper<Set<int>>({10.2, 20.8, 30.9}),
-          equals({10, 20, 30}),
-        );
-      });
+    test('Handles empty collections', () {
+      expect(converterHelper<List<int>>(<int>[]), equals([]));
+      expect(converterHelper<Set<int>>(<int>{}), equals(<int>{}));
+      expect(converterHelper<Iterable<int>>(<int>[]), equals([]));
+    });
 
-      test('Converts Iterable<num> to Iterable<int>', () {
-        expect(converterHelper<Iterable<int>>([7.6, 8.3]), equals([7, 8]));
-        expect(converterHelper<Iterable<int>>({12.4, 15.9}), equals({12, 15}));
-      });
+    test('Returns value as-is when not using wasm', () {
+      expect(converterHelper<int>(5, enableWasmConverter: false), equals(5));
+      expect(
+        converterHelper<List<int>>([1, 2, 3], enableWasmConverter: false),
+        equals([1, 2, 3]),
+      );
+    });
 
-      test('Handles empty collections', () {
-        expect(converterHelper<List<int>>(<int>[]), equals([]));
-        expect(converterHelper<Set<int>>(<int>{}), equals(<int>{}));
-        expect(converterHelper<Iterable<int>>(<int>[]), equals([]));
-      });
-
-      test('Returns value as-is when not using wasm', () {
-        expect(converterHelper<int>(5, enableWasmConverter: false), equals(5));
-        expect(
-          converterHelper<List<int>>([1, 2, 3], enableWasmConverter: false),
-          equals([1, 2, 3]),
-        );
-      });
-
-      test('Custom converter function is applied', () {
-        int customConverter(dynamic value) => (value as int) * 2;
-        expect(
-          converterHelper<int>(4.5, customConverter: customConverter),
-          equals(8),
-        );
-      });
-    },
-    skip: kIsWasm ? false : 'Only run on WebAssembly',
-  );
+    test('Custom converter function is applied', () {
+      int customConverter(dynamic value) => (value as int) * 2;
+      expect(
+        converterHelper<int>(4.5, customConverter: customConverter),
+        equals(8),
+      );
+    });
+  });
 
   test('Test IsolateManager.create: Basic Usage', () async {
     // Create IsolateContactor
