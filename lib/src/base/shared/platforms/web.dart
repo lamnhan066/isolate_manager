@@ -19,10 +19,14 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
   final isWorker = manager.workerName != '';
   final isDebug = manager.isDebug;
 
-  if (isWorker && workerFunction == null) {
+  // Avoid running `wrap` and `unwrap` when the Worker is not available.
+  if (!isWorker || (isWorker && workerFunction == null)) {
     debugPrinter(
-      () => 'Worker is available but `workerFunction` is null, '
-          'so `Future` will be used instead',
+      () => isWorker
+          ? 'Worker is available but `workerFunction` is null, '
+              'so `Future` will be used instead'
+          : 'Worker is not available, '
+              'so `Future` will be used instead',
       debug: isDebug,
     );
 
