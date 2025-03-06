@@ -113,7 +113,7 @@ class IsolateContactorControllerImpl<R, P>
           ensureInitialized.complete();
         }
       case final IsolateException e:
-        _mainStreamController.addError(e.error, e.stack);
+        _mainStreamController.addError(e.error, e.stackTrace);
       default:
         try {
           _mainStreamController.add(_converter?.call(value) ?? value as R);
