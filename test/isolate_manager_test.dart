@@ -8,6 +8,7 @@ import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:test/test.dart';
 
 import '../test/isolate_manager_shared_test.dart';
+import 'models/custom_isolate_exception.dart';
 
 /*
   dart run isolate_manager:generate -i test -o test --single --worker-mappings-experiment=test/isolate_manager_test.dart
@@ -1400,6 +1401,25 @@ void main() {
         throwsA(isA<UnsupportedImTypeWrappingException>()),
       );
     });
+
+    test('CustomIsolateException', () async {
+      IsolateManager.registerIsolateException(
+        'CustomIsolateException',
+        (message, stackTrace) => CustomIsolateException(message),
+      );
+
+      final isolate = IsolateManager.create(
+        throwsCustomIsolateException,
+        isDebug: true,
+      );
+
+      await expectLater(
+        isolate.compute(const ImNum(10)),
+        throwsA(isA<CustomIsolateException>()),
+      );
+
+      IsolateManager.unregisterIsolateException('CustomIsolateException');
+    });
   });
 }
 
@@ -1413,6 +1433,11 @@ ImNum throwsUnsupportedImTypeWrappingException(ImNum number) {
   throw const UnsupportedImTypeWrappingException(
     'UnsupportedImTypeWrappingException',
   );
+}
+
+@isolateManagerWorker
+ImNum throwsCustomIsolateException(ImNum number) {
+  throw const CustomIsolateException('CustomIsolateException');
 }
 
 @isolateManagerWorker
