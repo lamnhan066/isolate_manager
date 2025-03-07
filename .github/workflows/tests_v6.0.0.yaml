@@ -19,6 +19,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.sdk }}
+          cache: true
 
       - name: Install dependencies
         run: dart pub get
@@ -55,7 +56,12 @@ jobs:
         run: dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
 
       - name: Convert to relative paths
+        if: runner.os == 'Linux' || runner.os == 'Windows'
         run: sed -i 's|SF:.*/lib|SF:lib|' coverage/lcov.info
+      
+      - name: Convert to relative paths (macOS)
+        if: runner.os == 'macOS'
+        run: sed -i '' 's|SF:.*/lib|SF:lib|' coverage/lcov.info
 
       - name: Show code coverage reports
         uses: romeovs/lcov-reporter-action@v0.4.0
