@@ -122,8 +122,8 @@ class IsolateContactorControllerImplWorker<R, P>
       }
 
       if (IsolateException.isValidMap(data)) {
-        final exception = IsolateException.fromMap(data);
-        _mainStreamController.addError(exception, exception.stackTrace);
+        final e = IsolateException.fromMap(data);
+        _mainStreamController.addError(e, e.stackTrace);
         return;
       }
 

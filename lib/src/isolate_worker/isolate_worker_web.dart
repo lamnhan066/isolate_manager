@@ -30,7 +30,11 @@ Future<void> isolateWorkerImpl<R, P>(
       final result = await function(message);
       controller.sendResult(result);
     } catch (err, stack) {
-      controller.sendResultError(IsolateException(err, stack));
+      if (err is IsolateException) {
+        controller.sendResultError(err);
+      } else {
+        controller.sendResultError(IsolateException(err, stack));
+      }
     }
   });
 
