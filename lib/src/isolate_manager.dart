@@ -103,6 +103,34 @@ class IsolateManager<R, P> {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
+  /// Registers a custom exception type with the IsolateException system.
+  ///
+  /// This allows for serialization and deserialization of specialized exception types
+  /// across isolate boundaries.
+  ///
+  /// Parameters:
+  ///   [name] - A unique string identifier for this exception type
+  ///   [exception] - A factory function that creates instances of this exception type
+  ///
+  /// Throws an assertion error if the type is already registered.
+  static void registerIsolateException(
+    String name,
+    IsolateExceptionFactory exception,
+  ) {
+    IsolateException.register(name, exception);
+  }
+
+  /// Unregisters a custom exception type from the IsolateException system.
+  ///
+  /// This removes a previously registered exception type, preventing it from being
+  /// automatically deserialized.
+  ///
+  /// Parameters:
+  ///   [name] - The unique string identifier of the exception type to unregister
+  static void unregisterIsolateException(String name) {
+    IsolateException.unregister(name);
+  }
+
   /// Executes [computation] in a one-off isolate and returns its result.
   /// This function behaves similarly to `Isolate.run` but also supports Web Workers.
   ///
@@ -496,7 +524,7 @@ final isolate = IsolateManager.createCustom<R, P>(
   Future<void> start() async {
     // This instance is stoped.
     if (_streamController.isClosed) {
-      throw IsolateException('The IsolateManager is already stopped.');
+      throw const IsolateException('The IsolateManager is already stopped.');
     }
 
     // Return here if this method is already completed.
@@ -586,7 +614,7 @@ final isolate = IsolateManager.createCustom<R, P>(
   /// Throws [IsolateException] if the manager has already been stopped.
   Future<void> pause() async {
     if (_streamController.isClosed) {
-      throw IsolateException(
+      throw const IsolateException(
         'Cannot pause IsolateManager: Instance is already stopped. Create a new instance to perform operations.',
       );
     }
@@ -659,7 +687,7 @@ final isolate = IsolateManager.createCustom<R, P>(
   /// Throws [IsolateException] if the manager is already stopped.
   Future<void> restart() async {
     if (_streamController.isClosed) {
-      throw IsolateException(
+      throw const IsolateException(
         'Cannot restart IsolateManager: Instance is already stopped. Create a new instance to perform operations.',
       );
     }
