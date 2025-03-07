@@ -1403,14 +1403,19 @@ void main() {
     });
 
     test('CustomIsolateException', () async {
+      IsolateException customException(
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        return CustomIsolateException(error);
+      }
+
       IsolateManager.registerIsolateException(
-        'CustomIsolateException',
-        (message, stackTrace) => CustomIsolateException(message),
+        customException,
       );
 
       final isolate = IsolateManager.create(
         throwsCustomIsolateException,
-        isDebug: true,
       );
 
       await expectLater(
@@ -1418,7 +1423,7 @@ void main() {
         throwsA(isA<CustomIsolateException>()),
       );
 
-      IsolateManager.unregisterIsolateException('CustomIsolateException');
+      IsolateManager.unregisterIsolateException(customException);
     });
   });
 }
