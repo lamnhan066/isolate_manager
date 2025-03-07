@@ -81,7 +81,7 @@ sealed class ImType<T extends Object> {
   /// Supported types include:
   ///   num, String, bool, List, and Map that contain these types.
   ///
-  /// Throws an [UnsupportedImTypeWrappingException] if the object's type is not supported.
+  /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static R wrap<R extends ImType<Object>>(Object object) {
     return switch (object) {
       final R r => r,
@@ -94,7 +94,7 @@ sealed class ImType<T extends Object> {
       final Map<dynamic, dynamic> map => ImMap(
           map.map((k, v) => MapEntry(wrap(k as Object), wrap(v as Object))),
         ),
-      _ => throw UnsupportedImTypeWrappingException(
+      _ => throw UnsupportedImTypeException(
           'Unsupported type ${object.runtimeType} when wrapping an IsolateType',
         ),
     } as R;
@@ -105,7 +105,7 @@ sealed class ImType<T extends Object> {
   /// Supported types include:
   ///   num, String, bool, List, and Map that contain these types.
   ///
-  /// Throws an [UnsupportedImTypeWrappingException] if the object's type is not supported.
+  /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   @Deprecated(
     'Use `IsolateType.wrap` instead. This method will be removed in the stable release.',
   )
@@ -192,7 +192,7 @@ class ImList extends _ImTypedIterable<Object> {
   /// Converts a plain Dart object into its corresponding [ImList] instance.
   ///
   /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
-  /// Throws an [UnsupportedImTypeWrappingException] if the object's type is not supported.
+  /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static ImList wrap<T extends Object>(Iterable<T> object) {
     return ImType.wrap<ImList>(object);
   }
@@ -253,7 +253,7 @@ class ImMap extends _ImTypedMap<Object, Object> {
   /// Converts a plain Dart object into its corresponding [ImMap] instance.
   ///
   /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
-  /// Throws an [UnsupportedImTypeWrappingException] if the object's type is not supported.
+  /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static ImMap wrap<K extends Object, V extends Object>(
     Map<K, V> object,
   ) {

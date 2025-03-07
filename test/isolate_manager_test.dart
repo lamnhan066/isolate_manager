@@ -172,12 +172,11 @@ void main() {
         expect(decoded, equals(mapValue));
       });
 
-      test('throws UnsupportedImTypeWrappingException for unsupported types',
-          () {
+      test('throws UnsupportedImTypeException for unsupported types', () {
         final unsupportedValue = DateTime.now();
         expect(
           () => ImType.wrap(unsupportedValue),
-          throwsA(isA<UnsupportedImTypeWrappingException>()),
+          throwsA(isA<UnsupportedImTypeException>()),
         );
       });
     });
@@ -1390,15 +1389,15 @@ void main() {
       );
     });
 
-    test('UnsupportedImTypeWrappingException', () async {
+    test('UnsupportedImTypeException', () async {
       final isolate = IsolateManager.create(
-        throwsUnsupportedImTypeWrappingException,
+        throwsUnsupportedImTypeException,
         isDebug: true,
       );
 
       await expectLater(
         isolate.compute(const ImNum(10)),
-        throwsA(isA<UnsupportedImTypeWrappingException>()),
+        throwsA(isA<UnsupportedImTypeException>()),
       );
     });
 
@@ -1434,9 +1433,9 @@ ImNum throwsIsolateException(ImNum number) {
 }
 
 @isolateManagerWorker
-ImNum throwsUnsupportedImTypeWrappingException(ImNum number) {
-  throw const UnsupportedImTypeWrappingException(
-    'UnsupportedImTypeWrappingException',
+ImNum throwsUnsupportedImTypeException(ImNum number) {
+  throw const UnsupportedImTypeException(
+    'UnsupportedImTypeException',
   );
 }
 

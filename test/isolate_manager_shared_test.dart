@@ -210,7 +210,7 @@ void main() async {
       final user = User(name: 'user', email: 'user@user.com');
       expect(
         () => ImType.wrap(user),
-        throwsA(isA<UnsupportedImTypeWrappingException>()),
+        throwsA(isA<UnsupportedImTypeException>()),
       );
     });
 

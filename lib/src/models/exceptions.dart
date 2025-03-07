@@ -60,7 +60,7 @@ class IsolateException implements Exception {
   /// that can be deserialized from JSON.
   static final List<IsolateExceptionFactory> _registeredFactories = [
     IsolateException.new,
-    UnsupportedImTypeWrappingException.new,
+    UnsupportedImTypeException.new,
   ];
 
   /// Registers a custom exception type for serialization across isolates.
@@ -130,17 +130,17 @@ class IsolateException implements Exception {
 ///
 /// This exception is typically thrown when attempting to pass objects that cannot be
 /// serialized between isolates.
-class UnsupportedImTypeWrappingException extends IsolateException {
-  /// Creates a new [UnsupportedImTypeWrappingException].
+class UnsupportedImTypeException extends IsolateException {
+  /// Creates a new [UnsupportedImTypeException].
   ///
   /// Parameters:
   ///   [error] - The error message or unsupported object
   ///   [stackTrace] - The stack trace associated with the exception
-  const UnsupportedImTypeWrappingException(
+  const UnsupportedImTypeException(
     super.error, [
     super.stackTrace = StackTrace.empty,
   ]);
 
   @override
-  String get name => 'UnsupportedImTypeWrappingException';
+  String get name => 'UnsupportedImTypeException';
 }
