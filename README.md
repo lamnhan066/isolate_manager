@@ -258,6 +258,18 @@ void progressFunction(dynamic params) {
 Use helper types to ensure safe data transfer:
 
 ```dart
+main() {
+  // Convert native Dart objects to ImType:
+  try {
+    final isolate = IsolateManager.create(isolateFunction, workerName: 'isolateFunction');
+    final param = ImList.wrap({'k1': 'v1', 'k2': 'v2'});
+
+    final result = await isolate.compute(param);
+  } on UnsupportedImTypeException catch (e) {
+    // Throws `UnsupportedImTypeException` when there is unsupported type
+  }
+}
+
 @isolateManagerWorker
 ImMap isolateFunction(ImList numbers) {
   // Decode the list into standard Dart types
@@ -268,15 +280,6 @@ ImMap isolateFunction(ImList numbers) {
   return ImMap(map);
 }
 
-// Convert native Dart objects to ImType:
-try {
-  final isolate = IsolateManager.create(isolateFunction, workerName: 'isolateFunction');
-  final param = ImList.wrap({'k1': 'v1', 'k2': 'v2'});
-
-  final result = await isolate.compute(param);
-} on UnsupportedImTypeException catch (e) {
-  // Throws `UnsupportedImTypeException` when there is unsupported type
-}
 ```
 
 Available `ImType`s:
