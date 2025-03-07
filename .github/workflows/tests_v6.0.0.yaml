@@ -8,19 +8,23 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        sdk: [main, stable, beta]
     steps:
-      - name: Checkout the code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install and set Flutter version
-        uses: subosito/flutter-action@v2
+      - uses: dart-lang/setup-dart@v1
         with:
-          channel: "stable"
+          sdk: ${{ matrix.sdk }}
 
-      - name: Restore packages
+      - name: Install dependencies
         run: dart pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze
         run: dart analyze
