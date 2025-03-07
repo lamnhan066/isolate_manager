@@ -16,7 +16,7 @@ class IsolateException implements Exception {
   const IsolateException(
     this.error, [
     this.stackTrace = StackTrace.empty,
-  ]) : _subType = '';
+  ]) : name = '';
 
   /// Convert from JSON.
   factory IsolateException.fromMap(Map<dynamic, dynamic> map) {
@@ -26,7 +26,7 @@ class IsolateException implements Exception {
     );
 
     final values = map['value'] as Map<dynamic, dynamic>;
-    final subType = map['subType'] as String?;
+    final subType = map['name'] as String?;
 
     for (final entry in _registered.entries) {
       if (entry.key == subType) {
@@ -55,24 +55,24 @@ class IsolateException implements Exception {
   /// across isolate boundaries.
   ///
   /// Parameters:
-  ///   [type] - A unique string identifier for this exception type
+  ///   [name] - A unique string identifier for this exception type
   ///   [exception] - A factory function that creates instances of this exception type
   ///
   /// Throws an assertion error if the type is already registered.
   static void register<E extends IsolateException>(
-    String type,
+    String name,
     IsolateExceptionFactory exception,
   ) {
     assert(
-      !_registered.containsKey(type),
-      'The type $type is already registered',
+      !_registered.containsKey(name),
+      'The type $name is already registered',
     );
-    _registered[type] = exception;
+    _registered[name] = exception;
   }
 
   /// Returns the subtype of the exception.
   /// This is used for serialization to determine the specific type of exception.
-  final String _subType;
+  final String name;
 
   /// Error object.
   final Object error;
@@ -83,7 +83,7 @@ class IsolateException implements Exception {
   /// Convert to JSON.
   Map<String, dynamic> toMap() => <String, dynamic>{
         'type': r'$IsolateException',
-        'subType': _subType,
+        'subType': name,
         'value': <String, String>{
           'e': error.toString(),
           's': stackTrace.toString(),
@@ -112,5 +112,5 @@ class UnsupportedImTypeWrappingException extends IsolateException {
   ]);
 
   @override
-  String get _subType => 'UnsupportedImTypeWrappingException';
+  String get name => 'UnsupportedImTypeWrappingException';
 }
