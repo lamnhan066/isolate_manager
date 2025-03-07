@@ -8,90 +8,104 @@ typedef IsolateExceptionFactory = IsolateException Function(
   StackTrace stackTrace,
 );
 
-/// This [IsolateException] mainly use to transfer an [Exception] between
-/// an `Isolate` and the main app.
+/// An exception that can be safely transferred between isolates.
+///
+/// This class provides serialization and deserialization capabilities
+/// for exceptions, allowing them to cross isolate boundaries while
+/// preserving type information and stack traces.
 class IsolateException implements Exception {
-  /// This [IsolateException] mainly use to transfer an [Exception] between
-  /// an `Isolate` and the main app.
+  /// Creates a new [IsolateException].
+  ///
+  /// Parameters:
+  ///   [error] - The error message or object
+  ///   [stackTrace] - The stack trace associated with the exception
   const IsolateException(
     this.error, [
     this.stackTrace = StackTrace.empty,
-  ]) : name = '';
+    this.name = '',
+  ]);
 
-  /// Convert from JSON.
+  /// Creates an [IsolateException] from a serialized map.
+  ///
+  /// The map must have been created by [toMap] and validated with [isValidMap].
+  ///
+  /// Returns the appropriate subclass of [IsolateException] if one is registered
+  /// with the matching [name].
   factory IsolateException.fromMap(Map<dynamic, dynamic> map) {
     assert(
       isValidMap(map),
       'json should be checked by `isValidMap` before using',
     );
 
+    final name = map['name'] as String;
     final values = map['value'] as Map<dynamic, dynamic>;
-    final subType = map['name'] as String?;
+    final error = values['e'] as Object;
+    final stackTrace = StackTrace.fromString(values['s'] as String);
 
-    for (final entry in _registered.entries) {
-      if (entry.key == subType) {
-        return entry.value(
-          values['e'] as Object,
-          StackTrace.fromString(values['s'] as String),
-        );
+    // Try to create a specific subclass instance based on the registered factories
+    for (final factory in _registeredFactories) {
+      final exception = factory(error, stackTrace);
+      if (exception.name == name) {
+        return exception;
       }
     }
 
-    return IsolateException(
-      values['e'] as Object,
-      StackTrace.fromString(values['s'] as String),
-    );
+    // Fall back to basic IsolateException if no matching subclass is found
+    return IsolateException(error, stackTrace);
   }
 
-  static final Map<String, IsolateExceptionFactory> _registered = {
-    '': IsolateException.new,
-    'UnsupportedImTypeWrappingException':
-        UnsupportedImTypeWrappingException.new,
-  };
-
-  /// Registers a custom exception type with the IsolateException system.
+  /// Registry of exception factories for deserialization.
   ///
-  /// This allows for serialization and deserialization of specialized exception types
-  /// across isolate boundaries.
+  /// This list contains factory functions for all registered exception types
+  /// that can be deserialized from JSON.
+  static final List<IsolateExceptionFactory> _registeredFactories = [
+    IsolateException.new,
+    UnsupportedImTypeWrappingException.new,
+  ];
+
+  /// Registers a custom exception type for serialization across isolates.
+  ///
+  /// Each subclass of [IsolateException] must be registered before it can be
+  /// properly deserialized when crossing isolate boundaries.
   ///
   /// Parameters:
-  ///   [name] - A unique string identifier for this exception type
-  ///   [exception] - A factory function that creates instances of this exception type
+  ///   [factory] - A factory function that creates instances of this exception type
   ///
-  /// Throws an assertion error if the type is already registered.
-  static void register(
-    String name,
-    IsolateExceptionFactory exception,
-  ) {
+  /// Throws an [AssertionError] if the factory is already registered.
+  static void register(IsolateExceptionFactory factory) {
     assert(
-      !_registered.containsKey(name),
-      'The type $name is already registered',
+      !_registeredFactories.contains(factory),
+      'This exception factory is already registered',
     );
-    _registered[name] = exception;
+    _registeredFactories.add(factory);
   }
 
-  /// Unregisters a custom exception type from the IsolateException system.
+  /// Unregisters a previously registered exception factory.
   ///
-  /// This removes a previously registered exception type, preventing it from being
-  /// automatically deserialized.
+  /// After unregistering, exceptions of this type will be deserialized as
+  /// generic [IsolateException] instances.
   ///
   /// Parameters:
-  ///   [name] - The unique string identifier of the exception type to unregister
-  static void unregister(String name) {
-    _registered.remove(name);
+  ///   [factory] - The factory function to unregister
+  static void unregister(IsolateExceptionFactory factory) {
+    _registeredFactories.remove(factory);
   }
 
-  /// Returns the subtype of the exception.
-  /// This is used for serialization to determine the specific type of exception.
+  /// Subtype identifier for this exception.
+  ///
+  /// Used during serialization to identify the concrete subclass. The base
+  /// [IsolateException] class uses an empty string as its [name].
   final String name;
 
-  /// Error object.
+  /// The original error object or message.
   final Object error;
 
-  /// StackTrace.
+  /// The stack trace where the exception occurred.
   final StackTrace stackTrace;
 
-  /// Convert to JSON.
+  /// Serializes this exception to a map that can be sent across isolates.
+  ///
+  /// Returns a map containing the exception type, name, error message, and stack trace.
   Map<String, dynamic> toMap() => <String, dynamic>{
         'type': r'$IsolateException',
         'name': name,
@@ -101,22 +115,27 @@ class IsolateException implements Exception {
         },
       };
 
-  /// Check if the [map] is a valid [IsolateException].
+  /// Checks if the given [map] represents a valid [IsolateException].
+  ///
+  /// Returns true if the map has the correct format and type marker.
   static bool isValidMap(Map<dynamic, dynamic> map) {
     return map['type'] == r'$IsolateException';
   }
+
+  @override
+  String toString() => '$name: $error\n$stackTrace';
 }
 
-/// An exception that is thrown when an unsupported type is encountered during isolate operations.
+/// An exception thrown when an unsupported type is encountered during isolate operations.
 ///
-/// This exception is typically thrown when attempting to pass a type that cannot be serialized
-/// or is not supported for communication between isolates.
+/// This exception is typically thrown when attempting to pass objects that cannot be
+/// serialized between isolates.
 class UnsupportedImTypeWrappingException extends IsolateException {
-  /// Creates a new [UnsupportedImTypeWrappingException] instance.
+  /// Creates a new [UnsupportedImTypeWrappingException].
   ///
   /// Parameters:
-  ///   [error] - The error message or object that caused the exception
-  ///   [stackTrace] - Optional stack trace associated with the exception, defaults to [StackTrace.empty]
+  ///   [error] - The error message or unsupported object
+  ///   [stackTrace] - The stack trace associated with the exception
   const UnsupportedImTypeWrappingException(
     super.error, [
     super.stackTrace = StackTrace.empty,
