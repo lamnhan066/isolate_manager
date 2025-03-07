@@ -269,28 +269,6 @@ final list = ImList(<ImType>[]);
 final map = ImMap(<ImType, ImType>{});
 ```
 
-### Handling Complex Data Structures
-
-For functions that process lists or maps, simply pass the data using the `IsolateType`s or through:
-
-- **List Example:**
-
-  ```dart
-  @isolateManagerWorker
-  List processList(List params) {
-    return params;
-  }
-  ```
-
-- **Map Example:**
-
-  ```dart
-  @isolateManagerWorker
-  Map processMap(Map params) {
-    return params;
-  }
-  ```
-
 ## Generator Commands & Flags
 
 Generate JavaScript Workers after adding or modifying annotated functions:
