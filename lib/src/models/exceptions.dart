@@ -4,9 +4,9 @@
 ///   [message] - The error message or object
 ///   [stackTrace] - The stack trace associated with the exception
 typedef IsolateExceptionFactory = IsolateException Function(
-  Object message, [
+  Object message,
   StackTrace stackTrace,
-]);
+);
 
 /// This [IsolateException] mainly use to transfer an [Exception] between
 /// an `Isolate` and the main app.
@@ -59,7 +59,7 @@ class IsolateException implements Exception {
   ///   [exception] - A factory function that creates instances of this exception type
   ///
   /// Throws an assertion error if the type is already registered.
-  static void register<E extends IsolateException>(
+  static void register(
     String name,
     IsolateExceptionFactory exception,
   ) {
@@ -68,6 +68,17 @@ class IsolateException implements Exception {
       'The type $name is already registered',
     );
     _registered[name] = exception;
+  }
+
+  /// Unregisters a custom exception type from the IsolateException system.
+  ///
+  /// This removes a previously registered exception type, preventing it from being
+  /// automatically deserialized.
+  ///
+  /// Parameters:
+  ///   [name] - The unique string identifier of the exception type to unregister
+  static void unregister(String name) {
+    _registered.remove(name);
   }
 
   /// Returns the subtype of the exception.
