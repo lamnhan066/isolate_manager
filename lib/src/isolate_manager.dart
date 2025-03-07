@@ -112,7 +112,7 @@ class IsolateManager<R, P> {
   ///   [exception] - A factory function that creates instances of this exception type
   ///
   /// Throws an [AssertionError] if the factory is already registered.
-  static void registerIsolateException(IsolateExceptionFactory exception) {
+  static void registerException(IsolateExceptionFactory exception) {
     IsolateException.register(exception);
   }
 
@@ -123,7 +123,7 @@ class IsolateManager<R, P> {
   ///
   /// Parameters:
   ///   [exception] - A factory function that creates instances of this exception type
-  static void unregisterIsolateException(IsolateExceptionFactory exception) {
+  static void unregisterException(IsolateExceptionFactory exception) {
     IsolateException.unregister(exception);
   }
 
