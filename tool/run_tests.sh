@@ -3,10 +3,10 @@
 dart test --platform=chrome --compiler dart2js,dart2wasm
 
 # Restore all backup .js to keep the original files
-trap 'find . -type f -name "*.js.bak" -exec sh -c "mv \"\$0\" \"\${0%.bak}\"" {} \;' EXIT INT TERM
+trap 'find ./test -type f -name "*.js.bak" -exec sh -c "mv \"\$0\" \"\${0%.bak}\"" {} \;' EXIT INT TERM
 
 # Backup all .js by renaming to .js.bak
-find . -type f -name "*.js" -exec mv {} {}.bak \;
+find ./test -type f -name "*.js" -exec mv {} {}.bak \;
 
 dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_test.dart --obfuscate 0
 dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_shared_test.dart --obfuscate 0
