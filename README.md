@@ -146,16 +146,18 @@ int fibonacci(int n) {
 Define a custom function with full control over events, error handling, and progress updates:
 
 ```dart
-final isolateManager = IsolateManager.createCustom(
-  customIsolateFunction,
-  workerName: 'customIsolateFunction',
-  debugMode: true,
-);
+main() {
+  final isolateManager = IsolateManager.createCustom(
+    customIsolateFunction,
+    workerName: 'customIsolateFunction',
+    debugMode: true,
+  );
 
-try {
-  final fibo40 =  await isolateManager.compute(40);
-} catch (e) {
-  // Exception
+  try {
+    final fibo40 =  await isolateManager.compute(40);
+  } catch (e) {
+    // Exception
+  }
 }
 
 @isolateManagerCustomWorker
@@ -211,17 +213,19 @@ void customIsolateFunction(dynamic params) {
 Receive progress updates before the final result:
 
 ```dart
-final isolateManager = IsolateManager.createCustom(progressFunction);
+main() {
+  final isolateManager = IsolateManager.createCustom(progressFunction);
 
-final result = await isolateManager.compute(100, callback: (value) {
-  final data = jsonDecode(value);
-  if (data.containsKey('progress')) {
-    print('Progress: ${data['progress']}');
-    return false; // Indicates this is a progress update
-  }
-  print('Final result: ${data['result']}');
-  return true; // Final result received
-});
+  final result = await isolateManager.compute(100, callback: (value) {
+    final data = jsonDecode(value);
+    if (data.containsKey('progress')) {
+      print('Progress: ${data['progress']}');
+      return false; // Indicates this is a progress update
+    }
+    print('Final result: ${data['result']}');
+    return true; // Final result received
+  });
+}
 
 @isolateManagerCustomWorker
 void progressFunction(dynamic params) {
@@ -282,18 +286,6 @@ final map = ImMap(<ImType, ImType>{});
 An exception that can be safely transferred between isolates.
 
 ```dart
-class CustomIsolateException extends IsolateException {
-  const CustomIsolateException(super.error);
-
-  @override
-  String get name => 'CustomIsolateException';
-}
-
-@isolateManagerWorker
-ImNum throwsCustomIsolateException(ImNum number) {
-  throw const CustomIsolateException('Custom Isolate Exception');
-}
-
 main() {
   IsolateManager.registerException(
     (message, stackTrace) => CustomIsolateException(message),
@@ -306,6 +298,18 @@ main() {
   } on CustomIsolateException catch (e, s) {
     print(e); // 'Custom Isolate Exception'
   } 
+}
+
+class CustomIsolateException extends IsolateException {
+  const CustomIsolateException(super.error);
+
+  @override
+  String get name => 'CustomIsolateException';
+}
+
+@isolateManagerWorker
+ImNum throwsCustomIsolateException(ImNum number) {
+  throw const CustomIsolateException('Custom Isolate Exception');
 }
 ```
 
