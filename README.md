@@ -1,8 +1,7 @@
 # Isolate Manager
 
 [![codecov](https://codecov.io/gh/lamnhan066/isolate_manager/graph/badge.svg?token=MSREWDRA4E)](https://codecov.io/gh/lamnhan066/isolate_manager)
-[![Pub Version](https://img.shields.io/pub/v/isolate_manager)](https://pub.dev/packages/isolate_manager)  
-
+[![Pub Version](https://img.shields.io/pub/v/isolate_manager)](https://pub.dev/packages/isolate_manager)
 [![Pub Points](https://img.shields.io/pub/points/isolate_manager)](https://pub.dev/packages/isolate_manager)
 [![Pub Downloads](https://img.shields.io/pub/dm/isolate_manager)](https://pub.dev/packages/isolate_manager)
 [![Pub Likes](https://img.shields.io/pub/likes/isolate_manager)](https://pub.dev/packages/isolate_manager)
@@ -11,20 +10,34 @@
 [![PubStats Rank](https://pubstats.dev/badges/packages/isolate_manager/rank.svg)](https://pubstats.dev/packages/isolate_manager)
 [![PubStats Dependents](https://pubstats.dev/badges/packages/isolate_manager/dependents.svg)](https://pubstats.dev/packages/isolate_manager)
 
+## What is Isolate Manager?
+
+A powerful Flutter/Dart package that simplifies concurrent programming using isolates, with cross-platform support including web and WebAssembly.
+
 ## Features
 
-- **Flexible Isolate Management**:
-  - **One-off Isolates:** For single computations (similar to `Isolate.run`) with support for Web Workers.
-  - **Long-lived Single Function Isolates:** One instance per function with stream support.
-  - **Long-lived Multi-Function Isolates:** One instance to handle multiple functions (ideal for shared compute operations).
-- **Web & WASM Support:** Automatically compiles functions to JavaScript Workers on the web (fallback to `Future`/`Stream` if Workers are unavailable).
-- **Queue Management:** Automatically queues multiple computations, supports priority tasks, and offers customizable queue strategies.
-- **Type Safety Helpers:** Use specialized types (`ImNum`, `ImString`, `ImBool`, `ImList` and `ImMap`) to ensure only transferable data (primitives, Maps, Lists) is exchanged between isolates.
-- **Exception Safety:** Supports try-catch blocks and custom error handling. Transfer exceptions safely between isolates (VM, Web JS/WASM) by extending `IsolateException` and registering with `IsolateManager.registerException`.
+- **Flexible Isolate Management:**
+  - **One-off Isolates:** For single computations (similar to `Isolate.run`) with web worker support
+  - **Long-lived Single Function Isolates:** One instance per function with stream capabilities
+  - **Long-lived Multi-Function Isolates:** One instance to handle multiple functions (ideal for shared operations)
+  
+- **Cross-Platform Support:** 
+  - **Web & WASM Compatible:** Automatically compiles functions to JavaScript Workers on web
+  - Falls back to `Future`/`Stream` if Workers aren't available
+  - Full support for VMs, Web JS and WASM
+
+- **Smart Queue Management:**
+  - Automatically queues multiple computations
+  - Supports priority tasks
+  - Customizable queue strategies with different behaviors when queue limits are reached
+
+- **Type Safety & Error Handling:**
+  - Specialized types (`ImNum`, `ImString`, `ImBool`, `ImList` and `ImMap`) ensure only transferable data is exchanged
+  - Robust exception handling across VMs, Web JS, and WASM by extending `IsolateException`
 
 ## Setup
 
-Functions used in isolates **must** be `static` or top-level. Also, add `@pragma('vm:entry-point')` to prevent tree-shaking:
+Functions used in isolates **must** be `static` or top-level. Add `@pragma('vm:entry-point')` to prevent tree-shaking:
 
 ```dart
 @pragma('vm:entry-point')
@@ -35,26 +48,21 @@ int add(List<int> values) {
 
 ## Annotations & Platform Setup
 
-- **Annotations:**
-  - `@isolateManagerWorker` – For one-off or single-function isolates.
-  - `@isolateManagerSharedWorker` – For shared multi-function isolates.
-  - `@isolateManagerCustomWorker` – For custom isolate functions with manual control.
+- **Function Annotations:**
+  - `@isolateManagerWorker` – For one-off or single-function isolates
+  - `@isolateManagerSharedWorker` – For shared multi-function isolates
+  - `@isolateManagerCustomWorker` – For custom isolate functions with manual control
 
-- **Platform Setup:**
-  - **Mobile/Desktop:** No additional setup.
-  - **Web:** Functions must not depend on Flutter libraries. Only Dart primitives, Maps, and Lists are allowed. Run:
-
+- **Platform-Specific Setup:**
+  - **Mobile/Desktop:** No additional setup required
+  - **Web:** Functions must not depend on Flutter libraries. Only Dart primitives, Maps, and Lists are allowed. Generate the JavaScript Workers with:
     ```shell
     dart run isolate_manager:generate
     ```
 
-    to generate the JavaScript Workers.
-
-    **WASM Note:**
-
-    - When using WebAssembly, `int` types (including collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false` if needed.
-    - When running the app with `flutter run -d chrome --wasm`, the app can be hang because of this [issue](https://github.com/lamnhan066/isolate_manager/issues/45) that related to COEP/COOP headers. If you met that issue, you need to run:
-
+  - **WASM Notes:**
+    - When using WebAssembly, `int` types (including in collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false`
+    - If the app hangs when running with `flutter run -d chrome --wasm`, use:
       ```shell
       flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
       ```
@@ -63,7 +71,7 @@ int add(List<int> values) {
 
 ### One-off Isolate
 
-Use a one-off isolate with either method:
+Use a one-off isolate with either of these methods:
 
 ```dart
 @isolateManagerWorker
@@ -154,9 +162,9 @@ main() {
   );
 
   try {
-    final fibo40 =  await isolateManager.compute(40);
+    final fibo40 = await isolateManager.compute(40);
   } catch (e) {
-    // Exception
+    // Exception handling
   }
 }
 
@@ -174,10 +182,10 @@ void customIsolateFunction(dynamic params) {
       return 0;
     },
     onInit: (controller) {
-      // Initialization logic here.
+      // Initialization logic here
     },
     onDispose: (controller) {
-      // Cleanup actions here.
+      // Cleanup actions here
     },
     autoHandleException: false,
     autoHandleResult: false,
@@ -189,14 +197,14 @@ void customIsolateFunction(dynamic params) {
 
 ### Queue Management
 
-- **Priority:** Set `priority: true` to move critical computations to the front.
-- **Queue Limits:** Define `maxCount` to limit queued tasks.
+- **Priority Tasks:** Set `priority: true` to move critical computations to the front of the queue
+- **Queue Limits:** Define `maxCount` to limit queued tasks
 - **Queue Strategies:** Customize behavior when the limit is reached:
   - `QueueStrategyUnlimited()` – No limit (default)
   - `QueueStrategyRemoveNewest()` – Removes the newest task when full
   - `QueueStrategyRemoveOldest()` – Removes the oldest task when full
   - `QueueStrategyDiscardIncoming()` – Discards new tasks when full
-- **Custom Strategy:** Extend `QueueStrategy` to implement your own logic:
+- **Custom Queue Strategy:** Extend `QueueStrategy` to implement your own logic:
 
   ```dart
   class CustomQueueStrategy<R, P> extends QueueStrategy<R, P> {
@@ -232,14 +240,14 @@ void progressFunction(dynamic params) {
   IsolateManagerFunction.customFunction<String, int>(
     params,
     onEvent: (controller, message) {
-      // This value is sent as the progress values.
+      // Send progress updates
       for (int i = 0; i < message; i++) {
-        final progress = jsonEncode({'progress' : messsage});
+        final progress = jsonEncode({'progress': i});
         controller.sendResult(progress);
       }
 
-      // This is a final value.
-      return jsonEncode({'result' : messsage});
+      // Send final result
+      return jsonEncode({'result': message});
     },
   );
 }
@@ -252,7 +260,7 @@ Use helper types to ensure safe data transfer:
 ```dart
 @isolateManagerWorker
 ImMap isolateFunction(ImList numbers) {
-  // Decode the list into standard Dart types.
+  // Decode the list into standard Dart types
   final data = numbers.unwrap!;
   final map = Map.fromEntries(
     data.map((e) => MapEntry(ImString('$e'), ImNum(e as num))),
@@ -267,7 +275,7 @@ try {
 
   final result = await isolate.compute(param);
 } on UnsupportedImTypeException catch (e) {
-  // Throws `UnsupportedImTypeException` when there is unsupported type.
+  // Throws `UnsupportedImTypeException` when there is unsupported type
 }
 ```
 
@@ -283,7 +291,7 @@ final map = ImMap(<ImType, ImType>{});
 
 ### Exception Safety for Web Workers
 
-An exception that can be safely transferred between isolates.
+Create exceptions that can be safely transferred between isolates:
 
 ```dart
 main() {
@@ -323,20 +331,20 @@ dart run isolate_manager:generate
 
 Additional options:
 
-- `--single` – Generate only single-function isolates.
-- `--shared` – Generate only shared-function isolates.
-- `--in <path>` (or `-i <path>`) – Input folder.
-- `--out <path>` (or `-o <path>`) – Output folder.
-- `--obfuscate <level>` – JS obfuscation level (0–4, default is 4).
-- `--debug` – Retain temporary files for debugging.
-- `--worker-mappings-experiment=lib/main.dart` – Auto-generate worker mappings (experiment).
+- `--single` – Generate only single-function isolates
+- `--shared` – Generate only shared-function isolates
+- `--in <path>` (or `-i <path>`) – Input folder
+- `--out <path>` (or `-o <path>`) – Output folder
+- `--obfuscate <level>` – JS obfuscation level (0–4, default is 4)
+- `--debug` – Retain temporary files for debugging
+- `--worker-mappings-experiment=lib/main.dart` – Auto-generate worker mappings (experiment)
 
 ## Additional Information
 
-- **Queue Info:** Use `queuesLength` to get the current queue size.
-- **Startup Control:** Use `ensureStarted` to await manual start; check `isStarted` to see if initialization is complete.
-- **Static Methods:** For static functions, specify the worker name as `"ClassName.functionName"`.
-- **Data Flow:** When using converters, data flows from Main → Worker → Main → Converter → Final Result.
+- **Queue Info:** Use `queuesLength` to get the current queue size
+- **Startup Control:** Use `ensureStarted` to await manual start; check `isStarted` to see if initialization is complete
+- **Static Methods:** For static functions, specify the worker name as `"ClassName.functionName"`
+- **Data Flow:** When using converters, data flows from Main → Worker → Main → Converter → Final Result
 
 ## Benchmark
 
