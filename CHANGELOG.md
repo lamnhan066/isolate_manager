@@ -1,3 +1,12 @@
+## 6.0.0-rc.19
+
+* **BREAKING CHANGE** Replace `UnimplementedError` with `UnsupportedImTypeException` in `ImType` wrapper methods.
+* Improve worker function handling to avoid unnecessary wrapping when the worker is not available.
+* Add `toString()` method to `ImType` subclasses for improved debugging.
+* Able to throw and catch `UnsupportedImTypeException` correctly across io, js and wasm.
+* Able to register the custom exceptions (extends `IsolateException`) that can be safely transferred between isolates.
+* Improve README.
+
 ## 6.0.0-rc.18
 
 * Replace `Isolate`Types with `Im`Types and mark the old ones as deprecated.
