@@ -257,11 +257,11 @@ ImMap isolateFunction(ImList numbers) {
 // Convert native Dart objects to ImType:
 try {
   final isolate = IsolateManager.create(isolateFunction, workerName: 'isolateFunction');
-  final param = ImType.wrap({'k1': 'v1', 'k2': 'v2'});
+  final param = ImList.wrap({'k1': 'v1', 'k2': 'v2'});
 
   final result = await isolate.compute(param);
-} on UnsupportedImTypeWrappingException catch (e) {
-  // Throws `UnsupportedImTypeWrappingException` when there is unsupported type.
+} on UnsupportedImTypeException catch (e) {
+  // Throws `UnsupportedImTypeException` when there is unsupported type.
 }
 ```
 
