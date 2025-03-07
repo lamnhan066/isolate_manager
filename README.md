@@ -146,6 +146,18 @@ int fibonacci(int n) {
 Define a custom function with full control over events, error handling, and progress updates:
 
 ```dart
+final isolateManager = IsolateManager.createCustom(
+  customIsolateFunction,
+  workerName: 'customIsolateFunction',
+  debugMode: true,
+);
+
+try {
+  final fibo40 =  await isolateManager.compute(40);
+} catch (e) {
+  // Exception
+}
+
 @isolateManagerCustomWorker
 void customIsolateFunction(dynamic params) {
   IsolateManagerFunction.customFunction<int, int>(
@@ -167,12 +179,6 @@ void customIsolateFunction(dynamic params) {
     },
   );
 }
-
-final isolateManager = IsolateManager.createCustom(
-  customIsolateFunction,
-  workerName: 'customIsolateFunction',
-  debugMode: true,
-);
 ```
 
 ## Advanced Features
@@ -267,6 +273,38 @@ final string = ImString('text');
 final boolean = ImBool(true);
 final list = ImList(<ImType>[]);
 final map = ImMap(<ImType, ImType>{});
+```
+
+### Exception Safety for Web Workers
+
+An exception that can be safely transferred between isolates.
+
+```dart
+class CustomIsolateException extends IsolateException {
+  const CustomIsolateException(super.error);
+
+  @override
+  String get name => 'CustomIsolateException';
+}
+
+@isolateManagerWorker
+ImNum throwsCustomIsolateException(ImNum number) {
+  throw const CustomIsolateException('Custom Isolate Exception');
+}
+
+main() {
+  IsolateManager.registerException(
+    (message, stackTrace) => CustomIsolateException(message),
+  );
+
+  final isolate = IsolateManager.create(throwsCustomIsolateException);
+
+  try {
+    await isolate.compute(ImNum(0));
+  } on CustomIsolateException catch (e, s) {
+    print(e); // 'Custom Isolate Exception'
+  } 
+}
 ```
 
 ## Generator Commands & Flags
