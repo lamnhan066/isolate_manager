@@ -109,15 +109,11 @@ class IsolateManager<R, P> {
   /// across isolate boundaries.
   ///
   /// Parameters:
-  ///   [name] - A unique string identifier for this exception type
   ///   [exception] - A factory function that creates instances of this exception type
   ///
-  /// Throws an assertion error if the type is already registered.
-  static void registerIsolateException(
-    String name,
-    IsolateExceptionFactory exception,
-  ) {
-    IsolateException.register(name, exception);
+  /// Throws an [AssertionError] if the factory is already registered.
+  static void registerIsolateException(IsolateExceptionFactory exception) {
+    IsolateException.register(exception);
   }
 
   /// Unregisters a custom exception type from the IsolateException system.
@@ -126,9 +122,9 @@ class IsolateManager<R, P> {
   /// automatically deserialized.
   ///
   /// Parameters:
-  ///   [name] - The unique string identifier of the exception type to unregister
-  static void unregisterIsolateException(String name) {
-    IsolateException.unregister(name);
+  ///   [exception] - A factory function that creates instances of this exception type
+  static void unregisterIsolateException(IsolateExceptionFactory exception) {
+    IsolateException.unregister(exception);
   }
 
   /// Executes [computation] in a one-off isolate and returns its result.
