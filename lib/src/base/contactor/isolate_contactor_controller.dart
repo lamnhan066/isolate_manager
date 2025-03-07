@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/isolate_contactor_controller_web.dart'
     if (dart.library.io) 'isolate_contactor_controller/isolate_contactor_controller_stub.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_state.dart';
-import 'package:isolate_manager/src/models/exceptions.dart';
+import 'package:isolate_manager/src/models/isolate_exceptions.dart';
 import 'package:isolate_manager/src/utils/converter.dart';
 
 /// Create controller for current `IsolateContactor`

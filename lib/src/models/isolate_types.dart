@@ -3,7 +3,7 @@
 // TODO(lamnhan066): Remove the deprecated types in the stable release
 // coverage:ignore-start
 
-import 'package:isolate_manager/src/models/exceptions.dart';
+import 'package:isolate_manager/src/models/isolate_exceptions.dart';
 
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
