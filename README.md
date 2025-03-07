@@ -18,9 +18,9 @@
   - **Long-lived Single Function Isolates:** One instance per function with stream support.
   - **Long-lived Multi-Function Isolates:** One instance to handle multiple functions (ideal for shared compute operations).
 - **Web & WASM Support:** Automatically compiles functions to JavaScript Workers on the web (fallback to `Future`/`Stream` if Workers are unavailable).
-- **Robust Exception Handling:** Supports try-catch blocks and custom error handling.
 - **Queue Management:** Automatically queues multiple computations, supports priority tasks, and offers customizable queue strategies.
-- **Type Safety Helpers:** Use specialized types (`ImNum`, `ImString`, etc.) to ensure only transferable data (primitives, Maps, Lists) is exchanged between isolates.
+- **Type Safety Helpers:** Use specialized types (`ImNum`, `ImString`, `ImBool`, `ImList` and `ImMap`) to ensure only transferable data (primitives, Maps, Lists) is exchanged between isolates.
+- **Exception Safety:** Supports try-catch blocks and custom error handling. Transfer exceptions safely between isolates (VM, Web JS/WASM) by extending `IsolateException` and registering with `IsolateManager.registerException`.
 
 ## Setup
 
