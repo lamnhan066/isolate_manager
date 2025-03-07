@@ -1378,6 +1378,41 @@ void main() {
       expect(result, isEmpty);
     });
   });
+
+  group('IsolateException', () {
+    test('IsolateException', () async {
+      final isolate = IsolateManager.create(throwsIsolateException);
+
+      await expectLater(
+        isolate.compute(const ImNum(10)),
+        throwsA(isA<IsolateException>()),
+      );
+    });
+
+    test('UnsupportedImTypeWrappingException', () async {
+      final isolate = IsolateManager.create(
+        throwsUnsupportedImTypeWrappingException,
+        isDebug: true,
+      );
+
+      await expectLater(
+        isolate.compute(const ImNum(10)),
+        throwsA(isA<UnsupportedImTypeWrappingException>()),
+      );
+    });
+  });
+}
+
+@isolateManagerWorker
+ImNum throwsIsolateException(ImNum number) {
+  throw const IsolateException('IsolateException');
+}
+
+@isolateManagerWorker
+ImNum throwsUnsupportedImTypeWrappingException(ImNum number) {
+  throw const UnsupportedImTypeWrappingException(
+    'UnsupportedImTypeWrappingException',
+  );
 }
 
 @isolateManagerWorker
