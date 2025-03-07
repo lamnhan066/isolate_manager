@@ -1410,7 +1410,7 @@ void main() {
         return CustomIsolateException(error);
       }
 
-      IsolateManager.registerIsolateException(
+      IsolateManager.registerException(
         customException,
       );
 
@@ -1423,7 +1423,7 @@ void main() {
         throwsA(isA<CustomIsolateException>()),
       );
 
-      IsolateManager.unregisterIsolateException(customException);
+      IsolateManager.unregisterException(customException);
     });
   });
 }
