@@ -94,7 +94,7 @@ class IsolateException implements Exception {
   /// Convert to JSON.
   Map<String, dynamic> toMap() => <String, dynamic>{
         'type': r'$IsolateException',
-        'subType': name,
+        'name': name,
         'value': <String, String>{
           'e': error.toString(),
           's': stackTrace.toString(),
