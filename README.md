@@ -177,6 +177,8 @@ void customIsolateFunction(dynamic params) {
     onDispose: (controller) {
       // Cleanup actions here.
     },
+    autoHandleException: false,
+    autoHandleResult: false,
   );
 }
 ```
