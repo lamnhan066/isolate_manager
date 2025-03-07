@@ -1,10 +1,10 @@
 /// A factory function type for creating [IsolateException] instances.
 ///
 /// Parameters:
-///   [message] - The error message or object
+///   [error] - The error message or object
 ///   [stackTrace] - The stack trace associated with the exception
 typedef IsolateExceptionFactory = IsolateException Function(
-  Object message,
+  Object error,
   StackTrace stackTrace,
 );
 
