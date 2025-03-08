@@ -5,6 +5,7 @@
 * Add `toString()` method to `ImType` subclasses for improved debugging.
 * Able to throw and catch `UnsupportedImTypeException` correctly across io, js and wasm.
 * Able to register the custom exceptions (extends `IsolateException`) that can be safely transferred between isolates.
+* Update benchmark for WASM and update the result.
 * Improve README.
 
 ## 6.0.0-rc.18
