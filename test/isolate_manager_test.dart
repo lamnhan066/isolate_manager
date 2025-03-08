@@ -192,7 +192,7 @@ void main() {
         expect(wrappedList.length, equals(listValue.length));
 
         // Using toDecodedList to return the original values.
-        final decodedList = encoded.toDecodedList<num>();
+        final decodedList = encoded.toUnwrappedList<num>();
         expect(decodedList, equals(listValue));
       });
     });
@@ -211,7 +211,7 @@ void main() {
         expect(wrappedMap.length, equals(mapValue.length));
 
         // Using toDecodedMap to get original Map.
-        final decodedMap = encoded.toDecodedMap<String, int>();
+        final decodedMap = encoded.toUnwrappedMap<String, int>();
         expect(decodedMap, equals(mapValue));
       });
 
