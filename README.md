@@ -355,19 +355,27 @@ Recursive Fibonacci benchmarks (measured in microseconds on a MacBook M1 Pro 14"
 
 - **VM**
 
-| Fibonacci | Main App  | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run |
-|:---------:|----------:|------------:|---------------:|---------------------------:|-------------------:|------------:|
-| 30        | 542,788   | 546,776     | 195,634        | 581,030                    | 556,381            | 539,848     |
-| 33        | 2,275,882 | 2,270,587   | 826,524        | 2,303,890                  | 2,297,313          | 2,285,464   |
-| 36        | 9,798,373 | 9,660,129   | 3,451,513      | 9,707,627                  | 9,641,757          | 9,643,465   |
+|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run|
+|:-:|-:|-:|-:|-:|-:|-:|
+|30|551,928|541,882|195,646|553,949|547,982|538,820|
+|33|2,273,956|2,268,299|816,148|2,288,071|2,282,269|2,271,376|
+|36|9,761,067|9,669,422|3,453,328|9,643,678|9,606,443|9,648,076|
 
-- **Chrome (with Worker support)**
+- **Chrome (with Worker support, JS compiler)**
 
-| Fibonacci | Main App   | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
-|:---------:|-----------:|------------:|---------------:|---------------------------:|-------------------:|---------------------------:|
-| 30        | 2,121,599  | 553,000     | 200,100        | 1,110,200                  | 1,085,899          | 0                         |
-| 33        | 9,022,701  | 2,303,101   | 820,800        | 2,834,500                  | 2,836,200          | 0                         |
-| 36        | 38,152,701 | 9,749,801   | 3,443,399      | 10,229,201                 | 10,254,599         | 0                         |
+|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|
+|:-:|-:|-:|-:|-:|-:|-:|
+|30|2,274,100|573,900|211,700|1,160,800|1,181,800|0|
+|33|9,493,100|2,330,900|821,400|2,860,800|2,866,300|0|
+|36|40,051,000|9,756,200|3,452,100|10,281,200|10,270,300|0|
+
+- **Chrome (with Worker support, WASM compiler)**
+
+|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|
+|:-:|-:|-:|-:|-:|-:|-:|
+|30|242,701|552,800|200,300|1,099,100|1,081,800|0|
+|33|1,027,300|2,315,700|819,800|2,863,700|2,852,600|0|
+|36|4,396,300|9,709,700|3,446,300|10,284,000|10,375,800|0|
 
 [Detailed benchmark info](https://github.com/lamnhan066/isolate_manager/tree/v6.0.0/benchmark)
 
