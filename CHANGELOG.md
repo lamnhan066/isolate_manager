@@ -1,3 +1,11 @@
+## 6.0.0-rc.20
+
+* Add, replace and deprecate the old methods:
+  * `ImMap.toUnwrappedMap` -> `ImMap.toDecodedMap`
+  * `ImList.toUnwrappedIterable` -> `ImList.toDecodedIterable`
+  * `ImList.toUnwrappedList` -> `ImList.toDecodedList`
+* Update tests.
+
 ## 6.0.0-rc.19
 
 * **BREAKING CHANGE** Replace `UnimplementedError` with `UnsupportedImTypeException` in `ImType` wrapper methods.
