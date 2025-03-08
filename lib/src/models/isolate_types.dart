@@ -207,7 +207,20 @@ class ImList extends _ImTypedIterable<Object> {
   ///
   /// This method attempts to cast the value stored in `decode` to a [Iterable] of type [T].
   /// If `decode` is null, the method returns null.
+  @Deprecated(
+    'Use `toUnwrappedIterable` instead. This method will be removed in the stable release.',
+  )
   Iterable<T> toDecodedIterable<T extends Object>() {
+    return toUnwrappedIterable<T>();
+  }
+
+  /// Converts the wrapped iterable to an unwrapped iterable of type [T].
+  ///
+  /// Returns a new iterable where each element from the wrapped collection
+  /// has been unwrapped and cast to the specified type [T].
+  ///
+  /// This is useful for accessing the original values without their [ImType] wrappers.
+  Iterable<T> toUnwrappedIterable<T extends Object>() {
     return unwrap.cast<T>();
   }
 
@@ -215,8 +228,22 @@ class ImList extends _ImTypedIterable<Object> {
   ///
   /// This method attempts to cast the value stored in `decode` to a [List] of type [T].
   /// If `decode` is null, the method returns null.
+  @Deprecated(
+    'Use `toUnwrappedList` instead. This method will be removed in the stable release.',
+  )
   List<T> toDecodedList<T extends Object>() {
-    return toDecodedIterable<T>().toList();
+    return toUnwrappedList<T>();
+  }
+
+  /// Converts the wrapped iterable to an unwrapped list of type [T].
+  ///
+  /// Returns a new list where each element from the wrapped collection
+  /// has been unwrapped and cast to the specified type [T].
+  ///
+  /// This is useful for accessing the original values without their [ImType] wrappers
+  /// in a standard List collection.
+  List<T> toUnwrappedList<T extends Object>() {
+    return toUnwrappedIterable<T>().toList();
   }
 
   @override
@@ -266,6 +293,11 @@ class ImMap extends _ImTypedMap<Object, Object> {
 
   /// Converts the wrapped [ImMap] to a Dart [Map] of type `<K, V>`.
   Map<K, V> toDecodedMap<K extends Object, V extends Object>() {
+    return toUnwrappedMap<K, V>();
+  }
+
+  /// Converts the wrapped [ImMap] to a Dart [Map] of type `<K, V>`.
+  Map<K, V> toUnwrappedMap<K extends Object, V extends Object>() {
     return unwrap.cast<K, V>();
   }
 
