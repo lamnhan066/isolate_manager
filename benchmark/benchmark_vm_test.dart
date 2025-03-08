@@ -8,6 +8,7 @@ import 'dart:isolate';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
+import 'functions.dart';
 import 'utils.dart';
 
 void main() {
@@ -71,7 +72,6 @@ Future<String> execute(
   Future<void> runOneIsolate() async {
     final singleIsolate = IsolateManager<int, int>.create(
       fibonacciRecursive,
-      workerName: 'fibonacciRecursive',
     );
     await singleIsolate.start();
     for (var i = 0; i < iterations; i++) {
@@ -84,7 +84,6 @@ Future<String> execute(
     final threeIsolates = IsolateManager<int, int>.create(
       fibonacciRecursive,
       concurrent: 3,
-      workerName: 'fibonacciRecursive',
     );
     await threeIsolates.start();
     await Future.wait(
@@ -136,13 +135,6 @@ Future<String> execute(
   String format(Duration d) => d.inMicroseconds.asThousands();
 
   return '|$fibonacciNumber|${format(results['Main App']!)}|${format(results['One Isolate']!)}|${format(results['Three Isolates']!)}|${format(results['IsolateManager.runFunction']!)}|${format(results['IsolateManager.run']!)}|${format(results['Isolate.run']!)}|';
-}
-
-@isolateManagerWorker
-int fibonacciRecursive(int n) {
-  if (n == 0) return 0;
-  if (n == 1) return 1;
-  return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
 }
 
 void printDebug(Object? Function() log) {
