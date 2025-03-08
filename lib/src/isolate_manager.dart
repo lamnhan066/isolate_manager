@@ -25,9 +25,9 @@ class IsolateManager<R, P> {
   ///
   /// Transforms results using [converter] and [workerConverter] before returning them.
   ///
-  /// When [enableWasmConverter] is `true` (default), numeric values are automatically
-  /// converted back to their intended types during message passing between isolates
-  /// or web workers. This ensures proper type handling in WebAssembly environments.
+  /// When [enableWasmConverter] is `true` (default), the `int` type is automatically
+  /// converted back to its intended type during message passing between web workers.
+  /// This ensures proper type handling in WebAssembly environments.
   ///
   /// The conversion pipeline applies WASM conversions first, then passes results through
   /// any custom converter functions provided.
@@ -69,9 +69,9 @@ class IsolateManager<R, P> {
   ///
   /// Transforms results using [converter] and [workerConverter] before returning them.
   ///
-  /// When [enableWasmConverter] is `true` (default), numeric values are automatically
-  /// converted back to their intended types during message passing between isolates
-  /// or web workers. This ensures proper type handling in WebAssembly environments.
+  /// When [enableWasmConverter] is `true` (default), the `int` type is automatically
+  /// converted back to its intended type during message passing between web workers.
+  /// This ensures proper type handling in WebAssembly environments.
   ///
   /// The conversion pipeline applies WASM conversions first, then passes results through
   /// any custom converter functions provided.
