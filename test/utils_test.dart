@@ -14,7 +14,7 @@ void main() {
       // Test with normal paths
       expect(
         normalizePath('/path/to/file'),
-        equals('/path${p.separator}to${p.separator}file'),
+        equals('${p.separator}path${p.separator}to${p.separator}file'),
       );
       expect(
         normalizePath(r'\path\to\file'),
@@ -24,7 +24,7 @@ void main() {
       // Test with mixed separators
       expect(
         normalizePath(r'/path\to/file'),
-        equals('/path${p.separator}to${p.separator}file'),
+        equals('${p.separator}path${p.separator}to${p.separator}file'),
       );
 
       // Test with consecutive separators
