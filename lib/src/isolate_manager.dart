@@ -6,6 +6,7 @@ import 'package:isolate_manager/src/isolate_manager_function.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:isolate_manager/src/models/queue_strategy.dart';
 import 'package:isolate_manager/src/utils/converter.dart';
+import 'package:isolate_manager/src/utils/normalize_path.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 
 /// Type for the callback of the isolate.
@@ -54,7 +55,7 @@ class IsolateManager<R, P> {
         // ignore: deprecated_member_use_from_same_package
         initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        _workerName = workerName {
+        _workerName = normalizePath(workerName) {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
@@ -98,7 +99,7 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   })  : isCustomIsolate = true,
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        _workerName = workerName {
+        _workerName = normalizePath(workerName) {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -368,7 +369,7 @@ class IsolateManager<R, P> {
       );
     }
 
-    _workerMappings[function] = name;
+    _workerMappings[function] = normalizePath(name)!;
   }
 
   /// Clears all worker mappings.
