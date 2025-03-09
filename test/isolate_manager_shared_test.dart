@@ -7,10 +7,7 @@ import 'functions.dart';
 import 'models/user.dart';
 
 /*
-  dart run isolate_manager:generate -i test -o test --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
-  dart run isolate_manager:generate -i test -o test/workers --shared --worker-mappings-experiment=test/isolate_manager_shared_test.dart
-  dart test --platform=vm
-  dart test --platform=chrome
+  tool/run_test.sh
 */
 
 // TODO(lamnhan066): All tests need to be re-written to improve readability and maintainability.
