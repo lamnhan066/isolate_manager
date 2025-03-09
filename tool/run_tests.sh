@@ -11,10 +11,6 @@ find ./test -type f -name "*.js" -exec mv {} {}.bak \;
 dart run isolate_manager:generate -i test -o test/workers --single --sub-dir workers --worker-mappings-experiment=test/isolate_manager_test.dart --obfuscate 0
 dart run isolate_manager:generate -i test -o test/workers --shared --sub-dir workers --worker-mappings-experiment=test/isolate_manager_shared_test.dart --obfuscate 0
 
-dart test --platform=chrome --compiler dart2js
-dart test --platform=chrome --compiler dart2wasm
-dart test --platform=vm
-
 dart test --platform=vm,chrome --compiler dart2js,dart2wasm --coverage=coverage
 
 dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
