@@ -1,3 +1,10 @@
+## 6.0.0-rc.21
+
+* The shared worker now only accept the basename of the `workerName` to compatible with the new generator (since v0.0.6).
+* Reorganize test file structures.
+* **BREADKING CHANGE:** Recompile test workers.
+* Simplify test flow.
+
 ## 6.0.0-rc.20
 
 * Add, replace and deprecate the old methods:
