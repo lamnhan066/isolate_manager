@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
-import '../test/isolate_manager_test.dart';
+import 'functions.dart';
 import 'models/user.dart';
 
 /*
@@ -21,7 +21,7 @@ void main() async {
     final isolates = IsolateManager.createShared(
       concurrent: 3,
       useWorker: true,
-      // subPath: 'workers',
+      subPath: 'workers',
       isDebug: true,
     );
 
@@ -70,8 +70,8 @@ void main() async {
     // Create 3 isolates to solve the problems
     final isolates = IsolateManager.createShared(
       concurrent: 3,
-      useWorker: true,
       subPath: 'workers',
+      useWorker: true,
     );
 
     isolates.stream.listen((result) {
@@ -147,7 +147,10 @@ void main() async {
       ..reset();
 
     // Calling the `compute` method after waiting for `ensureStarted`.
-    final isolates2 = IsolateManager.createShared(useWorker: true);
+    final isolates2 = IsolateManager.createShared(
+      useWorker: true,
+      subPath: 'workers',
+    );
     await isolates2.ensureStarted;
     expect(isolates1.isStarted, equals(true));
 
@@ -196,7 +199,10 @@ void main() async {
   });
 
   group('Isolate Types -', () {
-    final isolates = IsolateManager.createShared(useWorker: true);
+    final isolates = IsolateManager.createShared(
+      useWorker: true,
+      subPath: 'workers',
+    );
 
     setUpAll(() async {
       await isolates.start();
@@ -305,7 +311,10 @@ void main() async {
   });
 
   test('Nullable type', () async {
-    final isolates = IsolateManager.createShared(useWorker: true);
+    final isolates = IsolateManager.createShared(
+      useWorker: true,
+      subPath: 'workers',
+    );
     final result = await isolates.call(isolateNullableInt, null);
 
     expect(result, equals(null));
@@ -314,6 +323,7 @@ void main() async {
   test('`useWorker` is `true` but `workerFunction` is not provided', () async {
     final isolates = IsolateManager.createShared(
       useWorker: true,
+      subPath: 'workers',
       isDebug: true,
     );
 
@@ -450,102 +460,23 @@ void main() async {
   });
 }
 
-int addWithoutWorker(List<int> params) => params[0] + params[1];
-
-@isolateManagerSharedWorker
-Future<double> addFuture(List<double> values) async {
-  return values[0] + values[1];
-}
-
-@isolateManagerSharedWorker
-int add(List<int> values) {
-  return values[0] + values[1];
-}
-
-@isolateManagerSharedWorker
-int addException(dynamic values) {
-  return throw Exception('Has Exception');
-}
-
-@isolateManagerSharedWorker
-String concat(List<String> params) {
-  return '${params[0]} ${params[1]}';
-}
-
-@isolateManagerSharedWorker
-List<List<String>> complexReturn(List<List<String>> params) {
-  return params;
-}
-
-@isolateManagerSharedWorker
-Map<dynamic, dynamic> aDynamicMap(Map<dynamic, dynamic> params) {
-  return params;
-}
-
-@isolateManagerSharedWorker
-ImNum isolateTypeNum(ImNum number) {
-  return ImNum(number.unwrap);
-}
-
-@isolateManagerSharedWorker
-ImString isolateTypeString(ImString string) {
-  return ImString(string.unwrap);
-}
-
-@isolateManagerSharedWorker
-ImBool isolateTypeBool(ImBool boolean) {
-  return ImBool(boolean.unwrap);
-}
-
-@isolateManagerSharedWorker
-ImList isolateTypeList(ImList numbers) {
-  return ImList(numbers.unwrap.map((e) => ImString('$e')).toList());
-}
-
-@isolateManagerSharedWorker
-ImMap isolateTypeMap(ImList numbers) {
-  return ImMap(
-    Map.fromEntries(
-      numbers.unwrap.map((e) => MapEntry(ImString('$e'), ImNum(e as num))),
-    ),
-  );
-}
-
-@isolateManagerSharedWorker
-int? isolateNullableInt(int? number) {
-  return number;
-}
-
 void _addWorkerMappings() {
-  IsolateManager.addWorkerMapping(isolateTypeMapToMap, 'isolateTypeMapToMap');
-  IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
-  IsolateManager.addWorkerMapping(isolateTypeMap, 'isolateTypeMap');
-  IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
-  IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');
-  IsolateManager.addWorkerMapping(isolateTypeString, 'isolateTypeString');
-  IsolateManager.addWorkerMapping(isolateTypeNum, 'isolateTypeNum');
-  IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
-  IsolateManager.addWorkerMapping(aStringList, 'aStringList');
+  IsolateManager.addWorkerMapping(aDynamicMap, 'workers/aDynamicMap');
+  IsolateManager.addWorkerMapping(isolateTypeNum, 'workers/isolateTypeNum');
   IsolateManager.addWorkerMapping(
-    isolateCallbackFunction,
-    'isolateCallbackFunction',
+    isolateTypeString,
+    'workers/isolateTypeString',
   );
-  IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
+  IsolateManager.addWorkerMapping(isolateTypeBool, 'workers/isolateTypeBool');
+  IsolateManager.addWorkerMapping(isolateTypeList, 'workers/isolateTypeList');
+  IsolateManager.addWorkerMapping(isolateTypeMap, 'workers/isolateTypeMap');
   IsolateManager.addWorkerMapping(
-    isolateCallbackSimpleFunction,
-    'isolateCallbackSimpleFunction',
+    isolateNullableInt,
+    'workers/isolateNullableInt',
   );
-  IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
-  IsolateManager.addWorkerMapping(fibonacciFuture, 'fibonacciFuture');
-  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
-  IsolateManager.addWorkerMapping(
-    isolateCallbackSimpleFunctionWithSpecifiedType,
-    'isolateCallbackSimpleFunctionWithSpecifiedType',
-  );
-  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
-  IsolateManager.addWorkerMapping(add, 'add');
-  IsolateManager.addWorkerMapping(addException, 'addException');
-  IsolateManager.addWorkerMapping(concat, 'concat');
-  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
-  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
+  IsolateManager.addWorkerMapping(addFuture, 'workers/addFuture');
+  IsolateManager.addWorkerMapping(add, 'workers/add');
+  IsolateManager.addWorkerMapping(addException, 'workers/addException');
+  IsolateManager.addWorkerMapping(concat, 'workers/concat');
+  IsolateManager.addWorkerMapping(complexReturn, 'workers/complexReturn');
 }

@@ -7,7 +7,7 @@ import 'package:isolate_manager/src/models/isolate_queue.dart';
 import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:test/test.dart';
 
-import '../test/isolate_manager_shared_test.dart';
+import 'functions.dart';
 import 'models/custom_isolate_exception.dart';
 
 /*
@@ -448,7 +448,6 @@ void main() {
       final result = await IsolateManager.runFunction(
         fibonacci,
         5,
-        workerName: 'fibonacci',
         isDebug: true,
       );
 
@@ -461,7 +460,6 @@ void main() {
       final result = await IsolateManager.runCustomFunction(
         isolateCallbackSimpleFunction,
         5,
-        workerName: 'isolateCallbackSimpleFunction',
         callback: (value) {
           // Count progress updates
           progressCount++;
@@ -497,7 +495,7 @@ void main() {
     test('Test IsolateManager.run with worker parameter', () async {
       final result = await IsolateManager.run(
         () => fibonacciRecursive(5),
-        workerName: 'fibonacciRecursive',
+        workerName: 'workers/fibonacciRecursive',
         workerParameter: 5,
       );
 
@@ -1071,7 +1069,6 @@ void main() {
   test('Test with IsolateCallback', () async {
     final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackFunction,
-      workerName: 'workers/isolateCallbackFunction',
     );
     await isolateManager.start();
 
@@ -1101,7 +1098,6 @@ void main() {
   test('Test with IsolateCallback with simpler function', () async {
     final isolateManager = IsolateManager<String, int>.createCustom(
       isolateCallbackSimpleFunction,
-      workerName: 'workers/isolateCallbackSimpleFunction',
     );
     await isolateManager.start();
 
@@ -1427,278 +1423,55 @@ void main() {
   });
 }
 
-@isolateManagerWorker
-ImNum throwsIsolateException(ImNum number) {
-  throw const IsolateException('IsolateException');
-}
-
-@isolateManagerWorker
-ImNum throwsUnsupportedImTypeException(ImNum number) {
-  throw const UnsupportedImTypeException(
-    'UnsupportedImTypeException',
-  );
-}
-
-@isolateManagerWorker
-ImNum throwsCustomIsolateException(ImNum number) {
-  throw const CustomIsolateException('CustomIsolateException');
-}
-
-@isolateManagerWorker
-int fibonacci(int n) {
-  if (n < 0) throw StateError('n<0');
-  if (n == 0) return 0;
-  if (n == 1) return 1;
-
-  var f1 = 0;
-  var f2 = 1;
-  var r = 1;
-
-  for (var i = 2; i <= n; i++) {
-    r = f1 + f2;
-    f1 = f2;
-    f2 = r;
-  }
-
-  return r;
-}
-
-@isolateManagerWorker
-Future<int> fibonacciFuture(int n) async {
-  if (n < 0) throw StateError('n<0');
-  if (n == 0) return 0;
-  if (n == 1) return 1;
-
-  var f1 = 0;
-  var f2 = 1;
-  var r = 1;
-
-  for (var i = 2; i <= n; i++) {
-    r = f1 + f2;
-    f1 = f2;
-    f2 = r;
-  }
-
-  return r;
-}
-
-@isolateManagerWorker
-int fibonacciRecursive(int n) {
-  if (n == 0) return 0;
-  if (n == 1) return 1;
-
-  return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
-}
-
-@isolateManagerWorker
-List<dynamic> aStringList(List<dynamic> params) {
-  return params;
-}
-
-@isolateManagerWorker
-Map<dynamic, dynamic> aDynamicMap(Map<dynamic, dynamic> params) {
-  return params;
-}
-
-@isolateManagerWorker
-List<dynamic> a2DTo1DList(List<dynamic> params) {
-  return params.map((e) => (e as List).join()).toList();
-}
-
-@isolateManagerWorker
-List<dynamic> a1DTo2DList(List<dynamic> params) {
-  final result = <List<dynamic>>[<dynamic>[], <dynamic>[]];
-  for (var i = 0; i < params.length; i++) {
-    if (i.isEven) {
-      result[0].add(params[i]);
-    } else {
-      result[1].add(params[i]);
-    }
-  }
-  return result;
-}
-
-Future<void> isolateFunction(dynamic params) async {
-  await IsolateManagerFunction.customFunction<int, int>(
-    params,
-    onEvent: (IsolateManagerController<int, int> controller, int message) {
-      try {
-        final result = fibonacci(message);
-        controller.sendResult(result);
-      } catch (err, stack) {
-        controller.sendResultError(IsolateException(err, stack));
-      }
-      return 0;
-    },
-    onInit: (IsolateManagerController<int, int> controller) {},
-    onDispose: (IsolateManagerController<int, int> controller) {},
-    autoHandleException: false,
-    autoHandleResult: false,
-  );
-}
-
-@pragma('vm:entry-point')
-void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
-  IsolateManagerFunction.customFunction<int, int>(
-    params,
-    onEvent: (IsolateManagerController<int, int> controller, int message) {
-      return fibonacci(message);
-    },
-    onInit: (IsolateManagerController<int, int> controller) {},
-    onDispose: (IsolateManagerController<int, int> controller) {},
-  );
-}
-
-@isolateManagerCustomWorker
-void isolateCallbackFunction(dynamic params) {
-  IsolateManagerFunction.customFunction(
-    params,
-    onEvent: (
-      IsolateManagerController<Object?, Object?> controller,
-      Object? message,
-    ) {
-      try {
-        for (var i = 0; i < 10; i++) {
-          controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
-        }
-
-        controller.sendResult(jsonEncode(<String, String>{'data': 'data'}));
-      } catch (err, stack) {
-        controller.sendResultError(IsolateException(err, stack));
-      }
-
-      // Just returns something that unused to complete this method.
-      return '';
-    },
-    autoHandleException: false,
-    autoHandleResult: false,
-  );
-}
-
-@isolateManagerCustomWorker
-void isolateCallbackSimpleFunction(dynamic params) {
-  IsolateManagerFunction.customFunction(
-    params,
-    onEvent: (
-      IsolateManagerController<Object?, Object?> controller,
-      Object? message,
-    ) {
-      for (var i = 0; i < 10; i++) {
-        controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
-      }
-
-      return jsonEncode(<String, Object?>{'data': message});
-    },
-  );
-}
-
-@isolateManagerCustomWorker
-void isolateCallbackSimpleFunctionWithSpecifiedType(dynamic params) {
-  IsolateManagerFunction.customFunction<String, int>(
-    params,
-    onEvent: (IsolateManagerController<String, int> controller, int message) {
-      for (var i = 0; i < 10; i++) {
-        controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
-      }
-
-      return jsonEncode(<String, int>{'data': message});
-    },
-  );
-}
-
-@isolateManagerWorker
-ImNum isolateTypeNum(ImNum number) {
-  return ImNum(number.unwrap);
-}
-
-@isolateManagerWorker
-ImString isolateTypeString(ImString string) {
-  return ImString(string.unwrap);
-}
-
-@isolateManagerWorker
-ImBool isolateTypeBool(ImBool boolean) {
-  return ImBool(boolean.unwrap);
-}
-
-@isolateManagerWorker
-ImList isolateTypeList(ImList numbers) {
-  return ImList(numbers.unwrap.map((e) => ImString('$e')).toList());
-}
-
-@isolateManagerWorker
-ImMap isolateTypeMap(ImList numbers) {
-  return ImMap(
-    Map.fromEntries(
-      numbers.unwrap.map(
-        (e) => MapEntry(ImString('$e'), ImNum(e as num)),
-      ),
-    ),
-  );
-}
-
-@isolateManagerWorker
-ImMap isolateTypeMapToMap(ImMap numbers) {
-  return ImMap(
-    numbers.toMap().map(
-          (k, v) => MapEntry(ImString('${k.unwrap}'), v),
-        ),
-  );
-}
-
-@isolateManagerWorker
-int? isolateNullableInt(int? number) {
-  return number;
-}
-
-@pragma('vm:entry-point')
-int errorFunction(List<int> value) {
-  if (value[0] == 50) {
-    return throw StateError('The exception is threw at value[0] = ${value[0]}');
-  }
-  return value[0] + value[1];
-}
-
-@pragma('vm:entry-point')
-Future<int> errorFunctionFuture(List<int> value) async {
-  await Future<void>.delayed(const Duration(seconds: 1));
-
-  if (value[0] == 50) {
-    return throw StateError('The exception is threw at value[0] = ${value[0]}');
-  }
-  return value[0] + value[1];
-}
-
 void _addWorkerMappings() {
-  IsolateManager.addWorkerMapping(isolateTypeMapToMap, 'isolateTypeMapToMap');
-  IsolateManager.addWorkerMapping(isolateNullableInt, 'isolateNullableInt');
-  IsolateManager.addWorkerMapping(isolateTypeString, 'isolateTypeString');
-  IsolateManager.addWorkerMapping(isolateTypeBool, 'isolateTypeBool');
-  IsolateManager.addWorkerMapping(isolateTypeList, 'isolateTypeList');
-  IsolateManager.addWorkerMapping(isolateTypeMap, 'isolateTypeMap');
-  IsolateManager.addWorkerMapping(isolateTypeNum, 'isolateTypeNum');
-  IsolateManager.addWorkerMapping(complexReturn, 'complexReturn');
-  IsolateManager.addWorkerMapping(concat, 'concat');
-  IsolateManager.addWorkerMapping(addException, 'addException');
-  IsolateManager.addWorkerMapping(add, 'add');
-  IsolateManager.addWorkerMapping(addFuture, 'addFuture');
-  IsolateManager.addWorkerMapping(a2DTo1DList, 'a2DTo1DList');
-  IsolateManager.addWorkerMapping(a1DTo2DList, 'a1DTo2DList');
-  IsolateManager.addWorkerMapping(aDynamicMap, 'aDynamicMap');
-  IsolateManager.addWorkerMapping(aStringList, 'aStringList');
   IsolateManager.addWorkerMapping(
-    isolateCallbackSimpleFunctionWithSpecifiedType,
-    'isolateCallbackSimpleFunctionWithSpecifiedType',
+    throwsIsolateException,
+    'workers/throwsIsolateException',
   );
+  IsolateManager.addWorkerMapping(
+    throwsUnsupportedImTypeException,
+    'workers/throwsUnsupportedImTypeException',
+  );
+  IsolateManager.addWorkerMapping(
+    throwsCustomIsolateException,
+    'workers/throwsCustomIsolateException',
+  );
+  IsolateManager.addWorkerMapping(fibonacci, 'workers/fibonacci');
+  IsolateManager.addWorkerMapping(fibonacciFuture, 'workers/fibonacciFuture');
+  IsolateManager.addWorkerMapping(
+    fibonacciRecursive,
+    'workers/fibonacciRecursive',
+  );
+  IsolateManager.addWorkerMapping(aStringList, 'workers/aStringList');
+  IsolateManager.addWorkerMapping(aDynamicMap, 'workers/aDynamicMap');
+  IsolateManager.addWorkerMapping(a2DTo1DList, 'workers/a2DTo1DList');
+  IsolateManager.addWorkerMapping(a1DTo2DList, 'workers/a1DTo2DList');
   IsolateManager.addWorkerMapping(
     isolateCallbackFunction,
-    'isolateCallbackFunction',
+    'workers/isolateCallbackFunction',
   );
   IsolateManager.addWorkerMapping(
     isolateCallbackSimpleFunction,
-    'isolateCallbackSimpleFunction',
+    'workers/isolateCallbackSimpleFunction',
   );
-  IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
-  IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
-  IsolateManager.addWorkerMapping(fibonacciFuture, 'fibonacciFuture');
+  IsolateManager.addWorkerMapping(
+    isolateCallbackSimpleFunctionWithSpecifiedType,
+    'workers/isolateCallbackSimpleFunctionWithSpecifiedType',
+  );
+  IsolateManager.addWorkerMapping(isolateTypeNum, 'workers/isolateTypeNum');
+  IsolateManager.addWorkerMapping(
+    isolateTypeString,
+    'workers/isolateTypeString',
+  );
+  IsolateManager.addWorkerMapping(isolateTypeBool, 'workers/isolateTypeBool');
+  IsolateManager.addWorkerMapping(isolateTypeList, 'workers/isolateTypeList');
+  IsolateManager.addWorkerMapping(isolateTypeMap, 'workers/isolateTypeMap');
+  IsolateManager.addWorkerMapping(
+    isolateTypeMapToMap,
+    'workers/isolateTypeMapToMap',
+  );
+  IsolateManager.addWorkerMapping(
+    isolateNullableInt,
+    'workers/isolateNullableInt',
+  );
 }
