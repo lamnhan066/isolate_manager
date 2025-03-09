@@ -176,6 +176,24 @@ void main() {
           throwsA(isA<UnsupportedImTypeException>()),
         );
       });
+
+      test('throws UnsupportedImTypeException for unsupported types in ImList',
+          () {
+        final unsupportedValue = [null];
+        expect(
+          () => ImType.wrap(unsupportedValue),
+          throwsA(isA<UnsupportedImTypeException>()),
+        );
+      });
+
+      test('throws UnsupportedImTypeException for unsupported types in ImMap',
+          () {
+        final unsupportedValue = {'key': null};
+        expect(
+          () => ImType.wrap(unsupportedValue),
+          throwsA(isA<UnsupportedImTypeException>()),
+        );
+      });
     });
 
     group('ImList helper methods', () {
