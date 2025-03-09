@@ -35,9 +35,8 @@ jobs:
 
       - name: Recompile Workers
         run: |
-          dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_test.dart
-          dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_shared_test.dart
-          dart run isolate_manager:generate -i test -o test/workers
+          dart run isolate_manager:generate -i test -o test/workers --single --sub-path workers --worker-mappings-experiment=test/isolate_manager_test.dart --obfuscate 0
+          dart run isolate_manager:generate -i test -o test/workers --shared --sub-path workers --worker-mappings-experiment=test/isolate_manager_shared_test.dart --obfuscate 0
 
       # Should run on Chrome before the VM because it almost fails here when an issue occurs
       - name: Run tests on Chrome with dart2js compiler
