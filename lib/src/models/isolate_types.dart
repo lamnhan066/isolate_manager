@@ -82,17 +82,17 @@ sealed class ImType<T extends Object> {
   ///   num, String, bool, List, and Map that contain these types.
   ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
-  static R wrap<R extends ImType<Object>>(Object object) {
+  static R wrap<R extends ImType<Object>>(Object? object) {
     return switch (object) {
       final R r => r,
       final num n => ImNum(n),
       final String s => ImString(s),
       final bool b => ImBool(b),
       final Iterable<dynamic> list => ImList(
-          list.map((e) => wrap(e as Object)),
+          list.map((e) => wrap(e as Object?)),
         ),
       final Map<dynamic, dynamic> map => ImMap(
-          map.map((k, v) => MapEntry(wrap(k as Object), wrap(v as Object))),
+          map.map((k, v) => MapEntry(wrap(k as Object?), wrap(v as Object?))),
         ),
       _ => throw UnsupportedImTypeException(
           'Unsupported type ${object.runtimeType} when wrapping an IsolateType',
@@ -193,7 +193,7 @@ class ImList extends _ImTypedIterable<Object> {
   ///
   /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
-  static ImList wrap<T extends Object>(Iterable<T> object) {
+  static ImList wrap<T extends Object?>(Iterable<T> object) {
     return ImType.wrap<ImList>(object);
   }
 
@@ -281,7 +281,7 @@ class ImMap extends _ImTypedMap<Object, Object> {
   ///
   /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
-  static ImMap wrap<K extends Object, V extends Object>(
+  static ImMap wrap<K extends Object?, V extends Object?>(
     Map<K, V> object,
   ) {
     return ImType.wrap<ImMap>(object);
