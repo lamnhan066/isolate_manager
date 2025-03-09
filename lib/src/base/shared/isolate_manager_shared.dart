@@ -150,7 +150,13 @@ class IsolateManagerShared {
       manager: _manager,
       function: function,
       params: params,
-      workerFunction: workerFunction ?? workerMappings[function],
+      workerFunction: workerFunction ??
+          (workerMappings[function] == null
+              ? null
+              // We only need to get the basename of the worker function
+              // because it may contain the subpath when using the generator and
+              // the shared worker is only need the basename.
+              : basename(workerMappings[function] ?? '')),
       workerParams: workerParams,
       priority: priority,
       enableWasmConverter: enableWasmConverter,
