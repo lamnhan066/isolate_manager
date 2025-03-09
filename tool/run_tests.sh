@@ -8,9 +8,8 @@ trap 'find ./test -type f -name "*.js.bak" -exec sh -c "mv \"\$0\" \"\${0%.bak}\
 # Backup all .js by renaming to .js.bak
 find ./test -type f -name "*.js" -exec mv {} {}.bak \;
 
-dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_test.dart --obfuscate 0
-dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_shared_test.dart --obfuscate 0
-dart run isolate_manager:generate -i test -o test/workers --obfuscate 0
+dart run isolate_manager:generate -i test -o test/workers --single --sub-dir workers --worker-mappings-experiment=test/isolate_manager_test.dart --obfuscate 0
+dart run isolate_manager:generate -i test -o test/workers --shared --sub-dir workers --worker-mappings-experiment=test/isolate_manager_shared_test.dart --obfuscate 0
 
 dart test --platform=chrome --compiler dart2js
 dart test --platform=chrome --compiler dart2wasm
