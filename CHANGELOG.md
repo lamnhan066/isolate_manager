@@ -1,3 +1,7 @@
+## 6.0.0-rc.22
+
+* Update wrap methods to throw `UnsupportedImTypeException` when wrapping nullable types in ImType, ImList, and ImMap.
+
 ## 6.0.0-rc.21
 
 * The shared worker now only accept the basename of the `workerName` to compatible with the new generator (since v0.0.6).
