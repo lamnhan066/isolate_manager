@@ -9,7 +9,7 @@ import 'package:isolate_manager/src/models/isolate_exceptions.dart';
 /// and worker isolates.
 ///
 /// Use this class as the parameter or return type in your isolate communication
-/// methods. It provides safe wrapping for these Dart types:
+/// methods. It provides safe wrapping for these non-nullable Dart types:
 ///   - num (wrapped in [ImNum])
 ///   - String (wrapped in [ImString])
 ///   - bool (wrapped in [ImBool])
@@ -64,7 +64,7 @@ typedef IsolateMap = ImMap;
 /// and worker isolates.
 ///
 /// Use this class as the parameter or return type in your isolate communication
-/// methods. It provides safe wrapping for these Dart types:
+/// methods. It provides safe wrapping for these non-nullable Dart types:
 ///   - num (wrapped in [ImNum])
 ///   - String (wrapped in [ImString])
 ///   - bool (wrapped in [ImBool])
@@ -78,7 +78,7 @@ sealed class ImType<T extends Object> {
 
   /// Converts a plain Dart object into its corresponding [ImType] instance.
   ///
-  /// Supported types include:
+  /// Supported types include these non-nullable Dart types:
   ///   num, String, bool, List, and Map that contain these types.
   ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
@@ -102,7 +102,7 @@ sealed class ImType<T extends Object> {
 
   /// Converts a plain Dart object into its corresponding [ImType] instance.
   ///
-  /// Supported types include:
+  /// Supported types include these non-nullable Dart types:
   ///   num, String, bool, List, and Map that contain these types.
   ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
@@ -147,10 +147,10 @@ class ImNum extends ImType<num> {
   /// Creates an [ImNum] with the given numeric [value].
   const ImNum(super.value);
 
-  /// Returns the numeric value as a [double], or null if the value is null.
+  /// Returns the numeric value as a [double].
   double toDouble() => _value.toDouble();
 
-  /// Returns the numeric value as an [int], or null if the value is null.
+  /// Returns the numeric value as an [int].
   int toInt() => _value.toInt();
 
   @override
@@ -191,7 +191,9 @@ class ImList extends _ImTypedIterable<Object> {
 
   /// Converts a plain Dart object into its corresponding [ImList] instance.
   ///
-  /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
+  /// Supported types include these non-nullable Dart types:
+  ///   num, String, bool, List, and Map that contain these types.
+  ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static ImList wrap<T extends Object?>(Iterable<T> object) {
     return ImType.wrap<ImList>(object);
@@ -206,7 +208,6 @@ class ImList extends _ImTypedIterable<Object> {
   /// Converts the decoded value to a iterable of type [T].
   ///
   /// This method attempts to cast the value stored in `decode` to a [Iterable] of type [T].
-  /// If `decode` is null, the method returns null.
   @Deprecated(
     'Use `toUnwrappedIterable` instead. This method will be removed in the stable release.',
   )
@@ -227,7 +228,6 @@ class ImList extends _ImTypedIterable<Object> {
   /// Converts the decoded value to a list of type [T].
   ///
   /// This method attempts to cast the value stored in `decode` to a [List] of type [T].
-  /// If `decode` is null, the method returns null.
   @Deprecated(
     'Use `toUnwrappedList` instead. This method will be removed in the stable release.',
   )
@@ -279,7 +279,9 @@ class ImMap extends _ImTypedMap<Object, Object> {
 
   /// Converts a plain Dart object into its corresponding [ImMap] instance.
   ///
-  /// Only supports `String`, `bool`, `num` and `List`, `Map` of those types.
+  /// Supported types include these non-nullable Dart types:
+  ///   num, String, bool, List, and Map that contain these types.
+  ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static ImMap wrap<K extends Object?, V extends Object?>(
     Map<K, V> object,
