@@ -282,7 +282,7 @@ ImMap isolateFunction(ImList numbers) {
 
 ```
 
-Available `ImType`s:
+Available `ImType`s (non-nullable types only):
 
 ```dart
 final number = ImNum(1); // or 1.0
@@ -298,6 +298,7 @@ Create exceptions that can be safely transferred between isolates:
 
 ```dart
 main() {
+  // Register the custom exception type for proper isolate communication
   IsolateManager.registerException(
     (message, stackTrace) => CustomIsolateException(message),
   );
