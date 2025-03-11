@@ -48,7 +48,7 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
 
   // Encode to IsolateType.
   if (isImTypeSubtype<R>()) {
-    result = ImType.wrap(result!);
+    result = ImType.wrap(result);
   }
 
   return converterHelper<R>(
