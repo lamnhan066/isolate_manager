@@ -1,6 +1,8 @@
 ## 6.0.0-rc.22
 
 * Update wrap methods to throw `UnsupportedImTypeException` when wrapping nullable types in ImType, ImList, and ImMap.
+* Update tests.
+* Improve README.
 
 ## 6.0.0-rc.21
 
