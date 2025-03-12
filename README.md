@@ -17,23 +17,31 @@ A powerful Flutter/Dart package that simplifies concurrent programming using iso
 ## Features
 
 - **Flexible Isolate Management:**
-  - **One-off Isolates:** For single computations (similar to `Isolate.run`) with web worker support
-  - **Long-lived Single Function Isolates:** One instance per function with stream capabilities
-  - **Long-lived Multi-Function Isolates:** One instance to handle multiple functions (ideal for shared operations)
+  - [One-off Isolates:](#one-off-isolate) For single computations (similar to `Isolate.run`) with web worker support
+  - [Long-lived Multi-Function Isolates:](#long-lived-multi-function-isolates) One instance to handle multiple functions (ideal for shared operations)
+  - [Long-lived Single Function Isolates:](#long-lived-single-function-isolate) One instance per function with stream capabilities
   
-- **Cross-Platform Support:** 
-  - **Web & WASM Compatible:** Automatically compiles functions to JavaScript Workers on web
+- [Cross-Platform Support:](#annotations--platform-setup)
+  - [Web & WASM Compatible:](#web) Automatically compiles functions to JavaScript Workers on web
   - Falls back to `Future`/`Stream` if Workers aren't available
   - Full support for VMs, Web JS and WASM
 
-- **Smart Queue Management:**
+- [Smart Queue Management:](#queue-management)
   - Automatically queues multiple computations
   - Supports priority tasks
   - Customizable queue strategies with different behaviors when queue limits are reached
 
-- **Type Safety & Error Handling:**
+- [Type Safety:](#type-safety-for-web-workers)
   - Specialized types (`ImNum`, `ImString`, `ImBool`, `ImList` and `ImMap`) ensure only transferable data is exchanged
-  - Robust exception handling across VMs, Web JS, and WASM by extending `IsolateException`
+
+- [Exception Safety:](#exception-safety-for-web-workers)
+  - Exception handling across VMs, Web JS, and WASM by extending and registering `IsolateException`
+
+- **Additional Features:**
+  - [Custom Function:](#custom-function-usage--try-catch) Full manual control over isolate execution
+  - [Progress Reporting:](#progress-updates) Send progress updates during computation using the custom function
+  - [Code Generation:](#generator-commands--flags) Comprehensive worker generation tools and options
+  - [Benchmark:](#benchmark) Compare performance between native isolates, IsolateManager, and other concurrency approaches
 
 ## Setup
 
@@ -48,24 +56,32 @@ int add(List<int> values) {
 
 ## Annotations & Platform Setup
 
-- **Function Annotations:**
+### Mobile/Desktop
+
+- No additional setup required
+
+### Web
+
+- **Function Annotations:** Annotate the methods that you want to generate to the JS Worker.
   - `@isolateManagerWorker` – For one-off or single-function isolates
   - `@isolateManagerSharedWorker` – For shared multi-function isolates
   - `@isolateManagerCustomWorker` – For custom isolate functions with manual control
 
-- **Platform-Specific Setup:**
-  - **Mobile/Desktop:** No additional setup required
-  - **Web:** Functions must not depend on Flutter libraries. Only Dart primitives, Maps, and Lists are allowed. Generate the JavaScript Workers with:
-    ```shell
-    dart run isolate_manager:generate
-    ```
+- **Required:** Functions must not depend on Flutter libraries. Only Dart primitives, Maps, and Lists are allowed or using the [`ImType`s](#type-safety-for-web-workers).
 
-  - **WASM Notes:**
-    - When using WebAssembly, `int` types (including in collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false`
-    - If the app hangs when running with `flutter run -d chrome --wasm`, use:
-      ```shell
-      flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
-      ```
+- Generate the JavaScript Workers with:
+
+  ```shell
+  dart run isolate_manager:generate
+  ```
+
+- **WASM Notes:**
+  - When using WebAssembly, `int` types (including in collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false`
+  - If the app hangs when running with `flutter run -d chrome --wasm`, use:
+
+    ```shell
+    flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
+    ```
 
 ## Usage Examples
 
@@ -96,7 +112,7 @@ final fibo40 = await IsolateManager.runFunction(fibonacciRecursive, 40);
 
 ```dart
 void main() async {
-  final isolateShared = IsolateManager.createShared(
+  final sharedIsolate = IsolateManager.createShared(
     concurrent: 3,
     useWorker: true,
     workerMappings: {
@@ -105,11 +121,18 @@ void main() async {
     },
   );
 
-  final added1 = await isolateShared.compute(addFuture, [1.1, 2.2]);
+  sharedIsolate.stream.listen((value) {
+    print('Intermediate value: $value');
+  });
+
+
+  final added1 = await sharedIsolate.compute(addFuture, [1.1, 2.2]);
   print('addFuture: 1.1 + 2.2 = $added1');
 
-  final added2 = await isolateShared.compute(add, [1, 2]);
+  final added2 = await sharedIsolate.compute(add, [1, 2]);
   print('add: 1 + 2 = $added2');
+
+  await sharedIsolate.stop(); // Or `restart` if you want to restart
 }
 
 @isolateManagerSharedWorker
@@ -138,6 +161,7 @@ main() async {
   });
 
   final fibo = await isolate(20);
+
   await isolate.stop(); // Or `restart` if you want to restart
 }
 
@@ -326,6 +350,8 @@ ImNum throwsCustomIsolateException(ImNum number) {
 ```
 
 ## Generator Commands & Flags
+
+Ensure that [the platform setup for the web](#web) is completed before running the following commands.
 
 Generate JavaScript Workers after adding or modifying annotated functions:
 
