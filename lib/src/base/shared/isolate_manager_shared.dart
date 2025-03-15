@@ -153,9 +153,9 @@ class IsolateManagerShared {
       workerFunction: workerFunction ??
           (workerMappings[function] == null
               ? null
-              // We only need to get the basename of the worker function
-              // because it may contain the subpath when using the generator and
-              // the shared worker is only need the basename.
+              // Extract only the basename of the worker function path
+              // When using the generator, the workerMappings value might contain a full path
+              // but the shared worker only needs the basename without directories
               : basename(workerMappings[function] ?? '')),
       workerParams: workerParams,
       priority: priority,
