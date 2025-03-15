@@ -32,12 +32,6 @@ abstract class IsolateContactorController<R, P> {
   /// Mark as initialized.
   void initialized();
 
-  /// Get current controller. This method only needs for internal use only
-  ///
-  /// `StreamController` on Web platform
-  /// `IsolateChannel` on other platforms
-  // dynamic get controller => throw UnimplementedError();
-
   /// Get initial params for `createCustom`
   dynamic get initialParams;
 

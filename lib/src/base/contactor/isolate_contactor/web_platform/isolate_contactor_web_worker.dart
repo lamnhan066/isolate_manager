@@ -32,8 +32,6 @@ class IsolateContactorInternalWorker<R, P>
   /// Listener for result
   final IsolateContactorController<R, P> _isolateContactorController;
 
-  // final _isolateWorker = Worker("isolate.dart.js");
-
   /// Control the function of isolate
   // ignore: unused_field
   final void Function(dynamic) _isolateFunction;
