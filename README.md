@@ -404,7 +404,7 @@ Recursive Fibonacci benchmarks (measured in microseconds on a MacBook M1 Pro 14"
 |33|1,027,300|2,315,700|819,800|2,863,700|2,852,600|0|
 |36|4,396,300|9,709,700|3,446,300|10,284,000|10,375,800|0|
 
-[Detailed benchmark info](https://github.com/lamnhan066/isolate_manager/tree/v6.0.0/benchmark)
+[Detailed benchmark info](https://github.com/lamnhan066/isolate_manager/tree/v6/benchmark)
 
 ## Contributions
 

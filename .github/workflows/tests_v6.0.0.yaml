@@ -2,9 +2,9 @@ name: Flutter_Tests
 
 on:
   push:
-    branches: [v6.0.0]
+    branches: [v6]
   pull_request:
-    branches: [v6.0.0]
+    branches: [v6]
 
 jobs:
   tests:
