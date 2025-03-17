@@ -14,15 +14,10 @@ external DedicatedWorkerGlobalScope get _self;
 /// Create a worker in your `main`.
 Future<void> isolateWorkerImpl<R, P>(
   IsolateWorkerFunction<R, P> function,
-  @Deprecated(
-    'Use `onInit` instead. This API will be removed in v6.0.0 when we reach the stable release.',
-  )
-  FutureOr<void> Function()? onInitial,
   IsolateOnInitCallback<R, P>? onInit,
 ) async {
   final controller = IsolateManagerController<R, P>(_self);
 
-  await onInitial?.call();
   await onInit?.call(controller);
 
   controller.onIsolateMessage.listen((message) async {
