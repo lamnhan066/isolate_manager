@@ -51,9 +51,6 @@ class IsolateManager<R, P> {
     this.enableWasmConverter = true,
     this.isDebug = false,
   })  : isCustomIsolate = false,
-        // This API will be removed in v6.0.0 when we reach the stable release.
-        // ignore: deprecated_member_use_from_same_package
-        initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
         _workerName = normalizePath(workerName) {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
@@ -88,9 +85,6 @@ class IsolateManager<R, P> {
   IsolateManager.createCustom(
     IsolateCustomFunction this.isolateFunction, {
     String? workerName,
-    // This API will be removed in v6.0.0 when we reach the stable release.
-    // ignore: deprecated_consistency
-    this.initialParams,
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
@@ -395,49 +389,6 @@ class IsolateManager<R, P> {
       _workerName ?? _workerMappings[isolateFunction] ?? '';
   final String? _workerName;
 
-  /// Initial parameters.
-  @Deprecated(
-    '''
-This parameter will be removed in v6.0.0 when we reach the stable release.
-
-Before:
-
-```dart
-void customIsolateFunction(dynamic params) {
-  IsolateManangerFunction.customFunction(
-    params,
-    onInitial: (controller, initialParams) {
-      // Do something here.
-    },
-  );
-}
-
-final isolate = IsolateManager.createCustom<R, P>(
-  customIsolateFunction,
-  initialParams: 'initialParams',
-);
-```
-
-Now:
-
-```dart
-void customIsolateFunction(dynamic params) {
-  IsolateManangerFunction.customFunction(
-    params,
-    onInit: (controller) {
-      // Do something here with your own `initialParams` value.
-    },
-  );
-}
-
-final isolate = IsolateManager.createCustom<R, P>(
-  customIsolateFunction,
-);
-```
-''',
-  )
-  final Object? initialParams;
-
   /// Is using your own isolate function.
   final bool isCustomIsolate;
 
@@ -541,9 +492,7 @@ final isolate = IsolateManager.createCustom<R, P>(
             IsolateContactor.createCustom<R, P>(
               isolateFunction as IsolateCustomFunction,
               workerName: workerName,
-              // This API will be removed in v6.0.0 when we reach the stable release.
-              // ignore: deprecated_member_use_from_same_package
-              initialParams: initialParams,
+              initialParams: null,
               converter: (value) => converterHelper(
                 value,
                 customConverter: converter,

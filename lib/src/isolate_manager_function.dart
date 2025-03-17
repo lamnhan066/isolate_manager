@@ -7,16 +7,6 @@ import 'package:isolate_manager/src/isolate_worker/isolate_worker_web.dart'
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
-@Deprecated(
-  'Use `IsolateOnInitCallback` instead. This API will be removed in v6.0.0 when we reach the stable release.',
-)
-typedef IsolateOnInitialCallback<R, P, T> = FutureOr<void> Function(
-  IsolateManagerController<R, P> controller,
-  T initialParams,
-);
-
-/// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
-/// before all events.
 typedef IsolateOnInitCallback<R, P> = FutureOr<void> Function(
   IsolateManagerController<R, P> controller,
 );
@@ -41,7 +31,7 @@ typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
 abstract class IsolateManagerFunction {
   /// Create a custom isolate function.
   ///
-  /// The [onInitial] and [onDispose] will be executed only one time in the beginning
+  /// The [onInit] and [onDispose] will be executed only one time in the beginning
   /// and at the end. The [onEvent] will be executed every time the `message` is received
   /// from the main isolate, the return type should be specified to avoid
   /// the `NULL` return type. You can set the [autoHandleException] to `false` if
@@ -73,10 +63,6 @@ abstract class IsolateManagerFunction {
     /// A default parameter that used by the package.
     dynamic params, {
     required IsolateOnEventCallback<R, P> onEvent,
-    @Deprecated(
-      ' Use `onInit` instead. This API will be removed in v6.0.0 when we reach the stable release.',
-    )
-    IsolateOnInitialCallback<R, P, Object?>? onInitial,
     IsolateOnInitCallback<R, P>? onInit,
     IsolateOnDisposeCallback<R, P>? onDispose,
     bool autoHandleException = true,
@@ -98,7 +84,7 @@ abstract class IsolateManagerFunction {
             },
     );
 
-    await onInitial?.call(controller, controller.initialParams);
+    await onInit?.call(controller);
 
     // Listen to messages received from the main isolate; this code will be called each time
     // you use `compute` or `sendMessage`.
@@ -145,7 +131,7 @@ abstract class IsolateManagerFunction {
   /// Build it with `dart compile js worker.dart -o worker.js -O4` and copy the `worker.js` to
   /// your Web folder.
   ///
-  /// When you're using the [onInitial], you have to set the `autoInitialize` parameter
+  /// When you're using the [onInit], you have to set the `autoInitialize` parameter
   /// of the `create` and `createCustom` to `false`. Without it, the `Worker` will
   /// be stucked forever.
   ///
@@ -158,17 +144,9 @@ abstract class IsolateManagerFunction {
   /// ```
   static Future<void> workerFunction<R, P>(
     IsolateWorkerFunction<R, P> function, {
-    @Deprecated(
-      'Use `onInit` instead. This API will be removed in v6.0.0 when we reach the stable release.',
-    )
-    FutureOr<void> Function()? onInitial,
     IsolateOnInitCallback<R, P>? onInit,
   }) {
-    assert(
-      onInitial == null || onInit == null,
-      'Provide either `onInit` or `onInitial`, not both.',
-    );
-    return isolateWorkerImpl<R, P>(function, onInitial, onInit);
+    return isolateWorkerImpl<R, P>(function, onInit);
   }
 
   /// Create a custom Worker function.
