@@ -1,3 +1,13 @@
+## 6.0.0-rc.24
+
+* Rename the `QueueStrategy`s:
+  * `QueueStrategyUnlimited` → `UnlimitedStrategy`
+  * `QueueStrategyRemoveNewest` → `DropNewestStrategy`
+  * `QueueStrategyRemoveOldes`t → `DropOldestStrategy`
+  * `QueueStrategyDiscardIncoming` → `RejectIncomingStrategy`
+* Cleanup code.
+* Remove .vscode.
+
 ## 6.0.0-rc.23
 
 * Improve README.
