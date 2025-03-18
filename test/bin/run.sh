@@ -9,8 +9,7 @@ dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=t
 dart run isolate_manager:generate -i test -o test --worker-mappings-experiment=test/isolate_manager_shared_test.dart
 dart run isolate_manager:generate -i test -o test/workers
 
-dart test --platform=chrome --coverage=coverage
-dart test --platform=vm --coverage=coverage
+dart test --platform=vm,chrome --coverage=coverage
 
 dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
 

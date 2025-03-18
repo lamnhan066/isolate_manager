@@ -47,7 +47,8 @@ jobs:
       - name: Convert to relative paths
         run: sed -i 's|SF:.*/lib|SF:lib|' coverage/lcov.info
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
+      - name: Show code coverage reports
+        uses: romeovs/lcov-reporter-action@v0.4.0
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          lcov-file: ./coverage/lcov.info
+          filter-changed-files: true
