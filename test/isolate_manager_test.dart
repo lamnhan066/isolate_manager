@@ -797,6 +797,7 @@ void main() {
     final isolateManager = IsolateManager<int, int>.createCustom(
       isolateFunction,
       concurrent: 4,
+      initialParams: <String>['Test initialParams 0', 'Test initialParams 1'],
     )..start().ignore();
 
     isolateManager.stream
@@ -840,6 +841,7 @@ void main() {
     final isolateManager = IsolateManager<int, int>.createCustom(
       isolateFunctionWithAutomaticallyHandlers,
       concurrent: 4,
+      initialParams: <String>['Test initialParams 0', 'Test initialParams 1'],
     )..start().ignore();
 
     isolateManager.stream

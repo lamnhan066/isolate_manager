@@ -10,6 +10,10 @@ typedef IsolateFunction<R, P> = FutureOr<R> Function(P params);
 /// The type of the `function` of the `.createCustom` method.
 typedef IsolateCustomFunction = FutureOr<void> Function(dynamic);
 
+/// The type of the `function` of the `.createCustom` method.
+@Deprecated('Use `IsolateCustomFunction` instead')
+typedef CustomIsolateFunction = IsolateCustomFunction;
+
 /// The type of the `converter` and `workerConverter`.
 typedef IsolateConverter<R> = R Function(dynamic value);
 
