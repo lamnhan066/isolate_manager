@@ -1,3 +1,7 @@
+## 6.0.0-rc.24+1
+
+* Improve README.
+
 ## 6.0.0-rc.24
 
 * Rename the `QueueStrategy`s:
