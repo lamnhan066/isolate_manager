@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:isolate_manager/src/models/queue_strategy.dart';
+import 'package:isolate_manager/src/utils/normalize_path.dart';
 
 import 'base/isolate_contactor.dart';
 import 'base/isolate_manager_shared.dart';
@@ -46,7 +47,9 @@ class IsolateManager<R, P> {
   })  : isCustomIsolate = false,
         initialParams = '',
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
+        workerName = normalizePath(workerName) ??
+            _workerMappings[isolateFunction] ??
+            '' {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
 
@@ -80,7 +83,9 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   })  : isCustomIsolate = true,
         queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
-        workerName = workerName ?? _workerMappings[isolateFunction] ?? '' {
+        workerName = normalizePath(workerName) ??
+            _workerMappings[isolateFunction] ??
+            '' {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -149,7 +154,7 @@ class IsolateManager<R, P> {
     String name,
   ) {
     if (!_workerMappings.containsKey(function)) {
-      _workerMappings.addAll({function: name});
+      _workerMappings.addAll({function: normalizePath(name)!});
     }
   }
 
