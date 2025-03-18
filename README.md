@@ -223,19 +223,22 @@ void customIsolateFunction(dynamic params) {
 
 - **Priority Tasks:** Set `priority: true` to move critical computations to the front of the queue
 - **Queue Limits:** Define `maxCount` to limit queued tasks
-- **Queue Strategies:** Customize behavior when the limit is reached:
-  - `QueueStrategyUnlimited()` – No limit (default)
-  - `QueueStrategyRemoveNewest()` – Removes the newest task when full
-  - `QueueStrategyRemoveOldest()` – Removes the oldest task when full
-  - `QueueStrategyDiscardIncoming()` – Discards new tasks when full
+- **Queue Strategies:** Customize behavior when queue limit is reached:
+  - `UnlimitedStrategy()` – No limit (default)
+  - `DropNewestStrategy()` – Drops newest task when the `maxCount` is reached
+  - `DropOldestStrategy()` – Drops oldest task when the `maxCount` is reached
+  - `RejectIncomingStrategy()` – Rejects new tasks when the `maxCount` is reached
 - **Custom Queue Strategy:** Extend `QueueStrategy` to implement your own logic:
 
   ```dart
-  class CustomQueueStrategy<R, P> extends QueueStrategy<R, P> {
+  class CustomStrategy<R, P> extends QueueStrategy<R, P> {
     @override
     bool continueIfMaxCountExceeded() {
       // Custom logic using `queues`, `queuesCount`, and `maxCount`
-      return true; // Allow new tasks by default
+
+      return true; // Allow new tasks
+      // or
+      return false; // Reject new tasks
     }
   }
   ```
