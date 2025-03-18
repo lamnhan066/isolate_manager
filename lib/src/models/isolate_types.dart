@@ -7,11 +7,11 @@ import 'package:isolate_manager/src/models/isolate_exceptions.dart';
 ///
 /// Use this class as the parameter or return type in your isolate communication
 /// methods. It provides safe wrapping for these non-nullable Dart types:
-///   - num (wrapped in [ImNum])
-///   - String (wrapped in [ImString])
-///   - bool (wrapped in [ImBool])
-///   - List (wrapped in [ImList])
-///   - Map (wrapped in [ImMap])
+///   - [num] (wrapped in [ImNum])
+///   - [String] (wrapped in [ImString])
+///   - [bool] (wrapped in [ImBool])
+///   - [List] (wrapped in [ImList])
+///   - [Map] (wrapped in [ImMap])
 ///
 /// The static [wrap] method wraps a Dart object in the appropriate [ImType].
 sealed class ImType<T extends Object> {
@@ -21,7 +21,7 @@ sealed class ImType<T extends Object> {
   /// Converts a plain Dart object into its corresponding [ImType] instance.
   ///
   /// Supported types include these non-nullable Dart types:
-  ///   num, String, bool, List, and Map that contain these types.
+  ///   [num], [String], [bool], [List], and [Map] that contain these types.
   ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static R wrap<R extends ImType<Object>>(Object? object) {
@@ -62,7 +62,7 @@ sealed class ImType<T extends Object> {
   String toString() => 'ImType($_value)';
 }
 
-/// A wrapper for numeric values.
+/// A wrapper for [num] values.
 ///
 /// Use [ImNum] to safely transfer a numeric value between isolates.
 /// It also provides helper methods for converting the value.
@@ -92,7 +92,7 @@ class ImString extends ImType<String> {
   String toString() => 'ImString($_value)';
 }
 
-/// A wrapper for boolean values.
+/// A wrapper for [bool] values.
 ///
 /// Use [ImBool] when transferring boolean values between isolates.
 class ImBool extends ImType<bool> {
@@ -115,7 +115,7 @@ class ImList extends _ImTypedIterable<Object> {
   /// Converts a plain Dart object into its corresponding [ImList] instance.
   ///
   /// Supported types include these non-nullable Dart types:
-  ///   num, String, bool, List, and Map that contain these types.
+  ///   [num], [String], [bool], [List], and [Map] that contain these types.
   ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static ImList wrap<T extends Object?>(Iterable<T> object) {
@@ -183,7 +183,7 @@ class ImMap extends _ImTypedMap<Object, Object> {
   /// Converts a plain Dart object into its corresponding [ImMap] instance.
   ///
   /// Supported types include these non-nullable Dart types:
-  ///   num, String, bool, List, and Map that contain these types.
+  ///   [num], [String], [bool], [List], and [Map] that contain these types.
   ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static ImMap wrap<K extends Object?, V extends Object?>(
