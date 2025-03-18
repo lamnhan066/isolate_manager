@@ -1,64 +1,6 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-// TODO(lamnhan066): Remove the deprecated types in the stable release
-// coverage:ignore-start
-
 import 'package:isolate_manager/src/models/isolate_exceptions.dart';
-
-/// An abstract wrapper for simple transferable types between the main thread
-/// and worker isolates.
-///
-/// Use this class as the parameter or return type in your isolate communication
-/// methods. It provides safe wrapping for these non-nullable Dart types:
-///   - num (wrapped in [ImNum])
-///   - String (wrapped in [ImString])
-///   - bool (wrapped in [ImBool])
-///   - List (wrapped in [ImList])
-///   - Map (wrapped in [ImMap])
-///
-/// The static `wrap` method wraps a Dart object in the appropriate [ImType].
-@Deprecated(
-  'Use `ImType` instead. This class will be removed in the stable release.',
-)
-typedef IsolateType<T extends Object> = ImType<T>;
-
-/// A wrapper for numeric values.
-/// Use [ImNum] to safely transfer a numeric value between isolates.
-/// It also provides helper methods for converting the value.
-@Deprecated(
-  'Use `ImNum` instead. This class will be removed in the stable release.',
-)
-typedef IsolateNum = ImNum;
-
-/// A wrapper for [String] values.
-/// Use [ImString] to safely transfer strings between isolates.
-@Deprecated(
-  'Use `ImString` instead. This class will be removed in the stable release.',
-)
-typedef IsolateString = ImString;
-
-/// A wrapper for boolean values.
-/// Use [ImBool] when transferring boolean values between isolates.
-@Deprecated(
-  'Use `ImBool` instead. This class will be removed in the stable release.',
-)
-typedef IsolateBool = ImBool;
-
-/// A wrapper for lists of [ImType] objects specific to [Object] types.
-/// This class safely transfers lists between isolates and decodes to a list
-/// of original Dart values.
-@Deprecated(
-  'Use `ImList` instead. This class will be removed in the stable release.',
-)
-typedef IsolateList = ImList;
-
-/// A wrapper for maps with both keys and values of [Object] types.
-/// Use [ImMap] to safely transfer maps between isolates.
-@Deprecated(
-  'Use `ImMap` instead. This class will be removed in the stable release.',
-)
-typedef IsolateMap = ImMap;
-// coverage:ignore-end
 
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
@@ -100,27 +42,8 @@ sealed class ImType<T extends Object> {
     } as R;
   }
 
-  /// Converts a plain Dart object into its corresponding [ImType] instance.
-  ///
-  /// Supported types include these non-nullable Dart types:
-  ///   num, String, bool, List, and Map that contain these types.
-  ///
-  /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
-  @Deprecated(
-    'Use `IsolateType.wrap` instead. This method will be removed in the stable release.',
-  )
-  static R encode<R extends ImType<Object>>(Object object) {
-    return wrap<R>(object);
-  }
-
   /// The internal wrapped value.
   final T _value;
-
-  /// Returns the original Dart value by unwrapping this instance.
-  @Deprecated(
-    'Use `unwrap` instead. This getter will be removed in the stable release.',
-  )
-  T get decode => unwrap;
 
   /// Returns the original Dart value by unwrapping this instance.
   T get unwrap => _value;
@@ -205,16 +128,6 @@ class ImList extends _ImTypedIterable<Object> {
   /// Converts the wrapped list to a List of the specified IsolateType [T].
   List<T> toList<T extends ImType>() => toIterable<T>().toList();
 
-  /// Converts the decoded value to a iterable of type [T].
-  ///
-  /// This method attempts to cast the value stored in `decode` to a [Iterable] of type [T].
-  @Deprecated(
-    'Use `toUnwrappedIterable` instead. This method will be removed in the stable release.',
-  )
-  Iterable<T> toDecodedIterable<T extends Object>() {
-    return toUnwrappedIterable<T>();
-  }
-
   /// Converts the wrapped iterable to an unwrapped iterable of type [T].
   ///
   /// Returns a new iterable where each element from the wrapped collection
@@ -223,16 +136,6 @@ class ImList extends _ImTypedIterable<Object> {
   /// This is useful for accessing the original values without their [ImType] wrappers.
   Iterable<T> toUnwrappedIterable<T extends Object>() {
     return unwrap.cast<T>();
-  }
-
-  /// Converts the decoded value to a list of type [T].
-  ///
-  /// This method attempts to cast the value stored in `decode` to a [List] of type [T].
-  @Deprecated(
-    'Use `toUnwrappedList` instead. This method will be removed in the stable release.',
-  )
-  List<T> toDecodedList<T extends Object>() {
-    return toUnwrappedList<T>();
   }
 
   /// Converts the wrapped iterable to an unwrapped list of type [T].
