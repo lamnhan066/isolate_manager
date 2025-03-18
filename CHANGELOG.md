@@ -1,3 +1,8 @@
+## 5.7.5
+
+* Add normalizePath utility and apply it in IsolateManager for workerName to make it compatible with Windows (for testing).
+* Remove `.vscode`.
+
 ## 5.7.4
 
 * Fixes an issue in the shared isolate manager that `useWorker` is true but there is no `workerName` provided.
