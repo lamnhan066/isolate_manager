@@ -31,3 +31,5 @@ coverage/
 
 # FVM Version Cache
 .fvm/
+
+.vscode/
