@@ -32,10 +32,10 @@ class IsolateManagerShared {
   ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
-  ///   - [QueueStrategyUnlimited] - default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
+  ///   - [UnlimitedStrategy] - default.
+  ///   - [DropNewestStrategy]
+  ///   - [DropOldestStrategy]
+  ///   - [RejectIncomingStrategy]
   ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   IsolateManagerShared({

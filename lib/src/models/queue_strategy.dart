@@ -6,19 +6,19 @@ import 'package:isolate_manager/src/models/isolate_queue.dart';
 /// is reached.
 ///
 /// Some of strategies:
-///   - [QueueStrategyUnlimited] - is default.
-///   - [QueueStrategyRemoveNewest]
-///   - [QueueStrategyRemoveOldest]
-///   - [QueueStrategyDiscardIncoming]
+///   - [UnlimitedStrategy] - is default.
+///   - [DropNewestStrategy]
+///   - [DropOldestStrategy]
+///   - [RejectIncomingStrategy]
 abstract class QueueStrategy<R, P> {
   /// Strategy to control a new (incoming) computation if the maximum number of Queues
   /// is reached. The maximum number is unlimited if [maxCount] <= 0 (by default).
   ///
   /// Some of strategies:
-  ///   - [QueueStrategyUnlimited] is default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
+  ///   - [UnlimitedStrategy] is default.
+  ///   - [DropNewestStrategy]
+  ///   - [DropOldestStrategy]
+  ///   - [RejectIncomingStrategy]
   QueueStrategy({this.maxCount = 0});
 
   /// Queue of isolates.
@@ -71,18 +71,30 @@ abstract class QueueStrategy<R, P> {
 }
 
 /// Unlimited queued computations.
-class QueueStrategyUnlimited<R, P> extends QueueStrategy<R, P> {
+@Deprecated(
+  'Use `UnlimitedStrategy` instead. This strategy will be removed in the stable release.',
+)
+typedef QueueStrategyUnlimited<R, P> = UnlimitedStrategy<R, P>;
+
+/// Unlimited queued computations.
+class UnlimitedStrategy<R, P> extends QueueStrategy<R, P> {
   /// Unlimited queued computations.
-  QueueStrategyUnlimited();
+  UnlimitedStrategy();
 
   @override
   bool continueIfMaxCountExceeded() => true;
 }
 
+/// Remove the newest computation if the `maxCount` is exceeded.
+@Deprecated(
+  'Use `DropNewestStrategy` instead. This strategy will be removed in the stable release.',
+)
+typedef QueueStrategyRemoveNewest<R, P> = DropNewestStrategy<R, P>;
+
 /// Remove the newest computation if the [maxCount] is exceeded.
-class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
+class DropNewestStrategy<R, P> extends QueueStrategy<R, P> {
   /// Remove the newest computation if the [maxCount] is exceeded.
-  QueueStrategyRemoveNewest({super.maxCount = 0});
+  DropNewestStrategy({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
@@ -93,10 +105,16 @@ class QueueStrategyRemoveNewest<R, P> extends QueueStrategy<R, P> {
   }
 }
 
+/// Remove the oldest computation if the `maxCount` is exceeded.
+@Deprecated(
+  'Use `DropOldestStrategy` instead. This strategy will be removed in the stable release.',
+)
+typedef QueueStrategyRemoveOldest<R, P> = DropOldestStrategy<R, P>;
+
 /// Remove the oldest computation if the [maxCount] is exceeded.
-class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
+class DropOldestStrategy<R, P> extends QueueStrategy<R, P> {
   /// Remove the oldest computation if the [maxCount] is exceeded.
-  QueueStrategyRemoveOldest({super.maxCount = 0});
+  DropOldestStrategy({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
@@ -107,10 +125,16 @@ class QueueStrategyRemoveOldest<R, P> extends QueueStrategy<R, P> {
   }
 }
 
+/// Discard the new incoming computation if the `maxCount` is exceeded.
+@Deprecated(
+  'Use `RejectIncomingStrategy` instead. This strategy will be removed in the stable release.',
+)
+typedef QueueStrategyDiscardIncoming<R, P> = RejectIncomingStrategy<R, P>;
+
 /// Discard the new incoming computation if the [maxCount] is exceeded.
-class QueueStrategyDiscardIncoming<R, P> extends QueueStrategy<R, P> {
+class RejectIncomingStrategy<R, P> extends QueueStrategy<R, P> {
   /// Discard the new incoming computation if the [maxCount] is exceeded.
-  QueueStrategyDiscardIncoming({
+  RejectIncomingStrategy({
     super.maxCount = 0,
   });
 

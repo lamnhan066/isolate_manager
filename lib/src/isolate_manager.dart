@@ -35,10 +35,10 @@ class IsolateManager<R, P> {
   ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
-  ///   - [QueueStrategyUnlimited] - default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
+  ///   - [UnlimitedStrategy] - default.
+  ///   - [DropNewestStrategy]
+  ///   - [DropOldestStrategy]
+  ///   - [RejectIncomingStrategy]
   ///
   /// [isDebug] enables debug logs when set to true.
   IsolateManager.create(
@@ -54,7 +54,7 @@ class IsolateManager<R, P> {
         // This API will be removed in v6.0.0 when we reach the stable release.
         // ignore: deprecated_member_use_from_same_package
         initialParams = '',
-        queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
+        queueStrategy = queueStrategy ?? UnlimitedStrategy(),
         _workerName = normalizePath(workerName) {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -79,10 +79,10 @@ class IsolateManager<R, P> {
   ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
-  ///   - [QueueStrategyUnlimited] - default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
+  ///   - [UnlimitedStrategy] - default.
+  ///   - [DropNewestStrategy]
+  ///   - [DropOldestStrategy]
+  ///   - [RejectIncomingStrategy]
   ///
   /// Set [isDebug] to `true` to enable debug logs.
   IsolateManager.createCustom(
@@ -98,7 +98,7 @@ class IsolateManager<R, P> {
     this.enableWasmConverter = true,
     this.isDebug = false,
   })  : isCustomIsolate = true,
-        queueStrategy = queueStrategy ?? QueueStrategyUnlimited(),
+        queueStrategy = queueStrategy ?? UnlimitedStrategy(),
         _workerName = normalizePath(workerName) {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
@@ -310,10 +310,10 @@ class IsolateManager<R, P> {
   ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
-  ///   - [QueueStrategyUnlimited] - default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
+  ///   - [UnlimitedStrategy] - default.
+  ///   - [DropNewestStrategy]
+  ///   - [DropOldestStrategy]
+  ///   - [RejectIncomingStrategy]
   ///
   /// Set [isDebug] to `true` if you want to print the debug log.
   static IsolateManagerShared createShared({
@@ -465,10 +465,10 @@ final isolate = IsolateManager.createCustom<R, P>(
   /// Strategy to control a new (incoming) computation.
   ///
   /// Basic strategies:
-  ///   - [QueueStrategyUnlimited] - default.
-  ///   - [QueueStrategyRemoveNewest]
-  ///   - [QueueStrategyRemoveOldest]
-  ///   - [QueueStrategyDiscardIncoming]
+  ///   - [UnlimitedStrategy] - default.
+  ///   - [DropNewestStrategy]
+  ///   - [DropOldestStrategy]
+  ///   - [RejectIncomingStrategy]
   final QueueStrategy<R, P> queueStrategy;
 
   /// Flag to enable WebAssembly type conversion for numerical values.

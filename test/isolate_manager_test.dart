@@ -518,7 +518,7 @@ void main() {
     });
 
     test('Test QueueStrategy clear method', () async {
-      final strategy = QueueStrategyRemoveNewest<int, int>(maxCount: 10);
+      final strategy = DropNewestStrategy<int, int>(maxCount: 10);
 
       for (var i = 0; i < 5; i++) {
         strategy.add(IsolateQueue<int, int>(i, null));
@@ -1245,7 +1245,7 @@ void main() {
 
   group('Isolate Queue Strategy -', () {
     test('QueueStrategyUnlimited with multiple operations', () {
-      final queueStrategies = QueueStrategyUnlimited<int, int>();
+      final queueStrategies = UnlimitedStrategy<int, int>();
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -1259,14 +1259,14 @@ void main() {
     });
 
     test('QueueStrategyUnlimited edge case: empty queue', () {
-      final queueStrategies = QueueStrategyUnlimited<int, int>();
+      final queueStrategies = UnlimitedStrategy<int, int>();
       expect(queueStrategies.queuesCount, equals(0));
       expect(queueStrategies.hasNext(), isFalse);
       expect(queueStrategies.getNext, throwsA(isA<AssertionError>()));
     });
 
     test('QueueStrategyUnlimited alternating add and remove', () {
-      final queueStrategies = QueueStrategyUnlimited<int, int>()
+      final queueStrategies = UnlimitedStrategy<int, int>()
         ..add(IsolateQueue<int, int>(1, null));
       expect(queueStrategies.queuesCount, equals(1));
       expect(queueStrategies.getNext().params, equals(1));
@@ -1285,7 +1285,7 @@ void main() {
     });
 
     test('QueueStrategyRemoveNewest with default behavior', () {
-      final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3);
+      final queueStrategies = DropNewestStrategy<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -1298,7 +1298,7 @@ void main() {
     });
 
     test('QueueStrategyRemoveNewest with addToTop true', () {
-      final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3);
+      final queueStrategies = DropNewestStrategy<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
@@ -1311,7 +1311,7 @@ void main() {
     });
 
     test('QueueStrategyRemoveNewest edge case: single element', () {
-      final queueStrategies = QueueStrategyRemoveNewest<int, int>(maxCount: 3)
+      final queueStrategies = DropNewestStrategy<int, int>(maxCount: 3)
         ..add(IsolateQueue<int, int>(100, null));
       expect(queueStrategies.queuesCount, equals(1));
       expect(queueStrategies.getNext().params, equals(100));
@@ -1319,7 +1319,7 @@ void main() {
     });
 
     test('QueueStrategyRemoveOldest with default behavior', () {
-      final queueStrategies = QueueStrategyRemoveOldest<int, int>(maxCount: 3);
+      final queueStrategies = DropOldestStrategy<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -1332,7 +1332,7 @@ void main() {
     });
 
     test('QueueStrategyRemoveOldest with addToTop true', () {
-      final queueStrategies = QueueStrategyRemoveOldest<int, int>(maxCount: 3);
+      final queueStrategies = DropOldestStrategy<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
@@ -1347,8 +1347,7 @@ void main() {
     });
 
     test('QueueStrategyDiscardIncoming with default behavior', () {
-      final queueStrategies =
-          QueueStrategyDiscardIncoming<int, int>(maxCount: 3);
+      final queueStrategies = RejectIncomingStrategy<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null));
       }
@@ -1361,8 +1360,7 @@ void main() {
     });
 
     test('QueueStrategyDiscardIncoming with addToTop true', () {
-      final queueStrategies =
-          QueueStrategyDiscardIncoming<int, int>(maxCount: 3);
+      final queueStrategies = RejectIncomingStrategy<int, int>(maxCount: 3);
       for (var i = 0; i < 10; i++) {
         queueStrategies.add(IsolateQueue<int, int>(i, null), addToTop: true);
       }
@@ -1375,12 +1373,11 @@ void main() {
     });
 
     test('QueueStrategyDiscardIncoming edge case: adding when full', () {
-      final queueStrategies =
-          QueueStrategyDiscardIncoming<int, int>(maxCount: 2)
-            ..add(IsolateQueue<int, int>(1, null))
-            ..add(IsolateQueue<int, int>(2, null))
-            // Should discard incoming value since max count is reached.
-            ..add(IsolateQueue<int, int>(3, null));
+      final queueStrategies = RejectIncomingStrategy<int, int>(maxCount: 2)
+        ..add(IsolateQueue<int, int>(1, null))
+        ..add(IsolateQueue<int, int>(2, null))
+        // Should discard incoming value since max count is reached.
+        ..add(IsolateQueue<int, int>(3, null));
       expect(queueStrategies.queuesCount, equals(2));
       final result = <int>[1, 2];
       while (queueStrategies.hasNext()) {
