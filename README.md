@@ -45,6 +45,13 @@ A powerful Flutter/Dart package that simplifies concurrent programming using iso
 
 ## Setup
 
+Add the dependencies:
+
+```shell
+dart pub add isolate_manager
+dart pub add isolate_manager_generator --dev # Only when you want to use the JS Worker generator
+```
+
 Functions used in isolates **must** be `static` or top-level. Add `@pragma('vm:entry-point')` to prevent tree-shaking:
 
 ```dart
