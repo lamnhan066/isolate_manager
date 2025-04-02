@@ -36,8 +36,7 @@ dependency_overrides:
     path: ../
 
 dev_dependencies:
-  # isolate_manager_generator:
-  #   path: /Users/thanhnhan/Documents/Development/Projects/Flutter Plugin/isolate_manager_generator
+  isolate_manager_generator: ^0.0.12
   flutter_test:
     sdk: flutter
 
@@ -47,7 +46,6 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
-  isolate_manager_generator: ^0.0.12
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
