@@ -1,6 +1,12 @@
+## 6.0.0-rc.25+1
+
+* Add `isolate_manager_generator` to dev dependencies in the example.
+
 ## 6.0.0-rc.25
 
-* **BREAKING CHANGE:** The `isolate_manager_generator` MUST be added to `dev_dependencies` to use `dart run isolate_manager:generate`.
+* **BREAKING CHANGE:**
+  * The `isolate_manager_generator` MUST be added to `dev_dependencies` to use `dart run isolate_manager:generate`.
+  * Remove all deprecated methods.
 * Return non-zero exit code when errors occur during the `dart run isolate_manager:generate` execution for better error handling in CI/CD pipelines.
 
 ## 6.0.0-rc.24+1
