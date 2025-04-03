@@ -1,3 +1,102 @@
+## 6.0.0
+
+This major release incorporates numerous features, improvements, fixes, and breaking changes developed through the preceding release candidates.
+
+**BREAKING CHANGES:**
+
+* **JS Recompilation Required:** All JS worker files MUST be recompiled using `dart run isolate_manager:generate`. This is necessary due to internal changes in data transfer mechanisms (introduced in rc.1) and worker naming conventions (introduced in rc.21).
+* **Generator Package:** The generator functionality has been separated into the `isolate_manager_generator` package. This package MUST now be added to your `dev_dependencies` to use the `dart run isolate_manager:generate` command (separated in rc.10, made mandatory in rc.25).
+* **Deprecated Methods Removed:** All methods previously marked as deprecated have been removed. Please update your code to use their replacements.
+* **`ImType` Refactoring:** `ImType` and its subclasses (`ImList`, `ImMap`) have been refactored to prevent nullable values being wrapped directly, ensuring type safety. Use non-nullable types within `ImType`.
+* **`QueueStrategy` Renaming:** The `QueueStrategy` enums have been renamed for clarity:
+
+  * `QueueStrategyUnlimited` → `UnlimitedStrategy`
+  * `QueueStrategyRemoveNewest` → `DropNewestStrategy`
+  * `QueueStrategyRemoveOldest` → `DropOldestStrategy`
+  * `QueueStrategyDiscardIncoming` → `RejectIncomingStrategy`
+
+* **Exception Type Change:** `UnimplementedError` thrown by `ImType` wrapper methods has been replaced with the more specific `UnsupportedImTypeException`.
+* **Shared Worker Naming:** Shared workers now only accept the basename of the `workerName` (changed in rc.21).
+
+**New Features:**
+
+* **`IsolateManager.run`:** Added a method similar to `Isolate.run` that supports execution on both VM Isolates and Web Workers.
+* **`IsolateManager.runFunction`:** Added a method that automatically applies the correct `workerName` when running a function, simplifying shared worker usage.
+* **`IsolateManager.runCustomFunction`:** Added support for custom isolate execution logic with optional callbacks and debug logging.
+* **`ImType` System:** Introduced `ImType` (replacing `IsolateType`) and its subclasses (`ImList`, `ImMap`) to enforce type safety for parameters and return values, especially for Web Worker generation.
+* **`ImType` Helper Methods:** Added convenient methods to `ImList` (`toIterable`, `toList`, `toDecodedIterable`, `toDecodedList`) and `ImMap` (`toMap`, `toDecodedMap`). The `toDecoded...` methods replace previous `toUnwrapped...` methods.
+* **Custom Exception Transfer:** Added the ability to register custom exception classes (extending `IsolateException`) that can be safely transferred between the main isolate and workers.
+* **`ImType` Debugging:** Added `toString()` methods to `ImType` subclasses for easier debugging.
+* **[Experiment] Automatic Worker Mappings:** Introduced an experimental flag (`--worker-mappings-experiment=lib/main.dart`) for the generator to automatically create `workerMappings`.
+
+**Improvements:**
+
+* **Performance:**
+
+  * Improved data transfer performance between Web Workers and the main app by using `Map` instead of `json`.
+  * Enhanced performance by using native `dartify` and `jstify` for web interoperability.
+  * Improved performance by optimizing `IsolateState` detection.
+  * Refactored multiple components for better performance.
+  * Used `assert` for logging messages, improving release mode performance.
+
+* **Error Handling:**
+
+  * Generator (`dart run isolate_manager:generate`) now returns a non-zero exit code on errors, improving CI/CD integration.
+  * Wrap methods now throw `UnsupportedImTypeException` for unsupported nullable types in `ImType`, `ImList`, `ImMap`.
+  * Improved error handling when transferring exceptions from Workers back to the main isolate.
+  * Improved worker function handling to avoid unnecessary wrapping when the worker is not available.
+
+* **API & Usage:**
+
+  * Uses `wrap`/`unwrap` methods (replacing `encode`/`decode`) for `ImType` data handling.
+  * Introduced `onInit` callback for `IsolateManagerFunction.customFunction`, replacing the previous `onInitial`. The `initialParameter` argument for `IsolateManager.createCustom` is no longer used with `onInit`.
+  * Renamed internal type `CustomIsolateFunction` to `IsolateCustomFunction` for clarity.
+  * `workerName` for shared workers now uses the latest mapping value dynamically, avoiding the need to restart after updates.
+  * Improved `ImType` equality and hash code implementations (replacing `Equatable`).
+  * Added a converter helper for better `int`, `Iterable<int>`, `Set<int>`, `List<int>` handling when compiling to WASM.
+  * `ImType` can now be declared as `const`.
+  * Supported computing nullable functions with nullable parameters using `IsolateManagerShared`.
+  * `ImType.wrap` now accepts nullable values for the *outer* value being wrapped (note the Breaking Change regarding non-nullable *inner* types).
+
+* **Generator:**
+
+  * Improved generator logic for creating worker mappings.
+
+* **Code Quality:**
+
+  * Adopted `very_good_analysis` for stricter linting rules.
+  * Refactored codebase to remove redundant streams.
+  * Simplified internal code structures.
+  * General code cleanup.
+
+**Fixes:**
+
+* Fixed an issue in the shared isolate manager where `useWorker` was true but no `workerName` was provided.
+* Fixed an issue preventing subsequent task processing after an exception occurred.
+* Correctly parse Dart native arguments during generation (Fixes #36).
+* Fixed various typos in code and documentation.
+
+**Testing:**
+
+* **WASM Support:** Added support for running tests on WASM (`dart test --platform=chrome --compiler dart2wasm`) and updated CI workflows accordingly. Updated WASM benchmarks.
+* **Benchmarks:** Rewrote and updated benchmarks, including results in the README.
+* **Test Infrastructure:**
+
+  * Added a local script (`test/bin/run.sh`) to generate workers and run all tests.
+  * Switched code coverage calculation from `flutter test` to `dart test` for accurate VM and Chrome testing.
+  * Reorganized test file structures and simplified test flow.
+
+* **General:** Added and strengthened tests throughout the development cycle.
+
+**Dependencies:**
+
+* Requires `isolate_manager_generator` in `dev_dependencies` for code generation.
+* Bumped `web` package dependency to `^1.0.0`.
+
+**Documentation:**
+
+* Numerous improvements and updates to the README.
+
 ## 6.0.0-rc.25+1
 
 * Add `isolate_manager_generator` to dev dependencies in the example.
