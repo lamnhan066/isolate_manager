@@ -1,12 +1,12 @@
 ## 6.0.0
 
-This major release incorporates numerous features, improvements, fixes, and breaking changes developed through the preceding release candidates.
+This major release incorporates numerous features, improvements, fixes, and breaking changes developed through the preceding release candidates. For a smooth transition, review the breaking changes section below. If you need information about deprecated methods before upgrading, please use `v6.0.0-rc.24`.
 
 **BREAKING CHANGES:**
 
 * **JS Recompilation Required:** All JS worker files MUST be recompiled using `dart run isolate_manager:generate`. This is necessary due to internal changes in data transfer mechanisms (introduced in rc.1) and worker naming conventions (introduced in rc.21).
 * **Generator Package:** The generator functionality has been separated into the `isolate_manager_generator` package. This package MUST now be added to your `dev_dependencies` to use the `dart run isolate_manager:generate` command (separated in rc.10, made mandatory in rc.25).
-* **Deprecated Methods Removed:** All methods previously marked as deprecated have been removed. Please update your code to use their replacements.
+* **Deprecated Methods Removed:** All methods previously marked as deprecated have been removed (introduced in rc.25). Please update your code to use their replacements.
 * **`ImType` Refactoring:** `ImType` and its subclasses (`ImList`, `ImMap`) have been refactored to prevent nullable values being wrapped directly, ensuring type safety. Use non-nullable types within `ImType`.
 * **`QueueStrategy` Renaming:** The `QueueStrategy` enums have been renamed for clarity:
 
@@ -56,7 +56,6 @@ This major release incorporates numerous features, improvements, fixes, and brea
   * Added a converter helper for better `int`, `Iterable<int>`, `Set<int>`, `List<int>` handling when compiling to WASM.
   * `ImType` can now be declared as `const`.
   * Supported computing nullable functions with nullable parameters using `IsolateManagerShared`.
-  * `ImType.wrap` now accepts nullable values for the *outer* value being wrapped (note the Breaking Change regarding non-nullable *inner* types).
 
 * **Generator:**
 
