@@ -1,3 +1,7 @@
+## 6.0.0+1
+
+* Reduce complex for README.
+
 ## 6.0.0
 
 This major release incorporates numerous features, improvements, fixes, and breaking changes developed through the preceding release candidates. For a smooth transition, review the breaking changes section below. If you need information about deprecated methods before upgrading, please use `v6.0.0-rc.24`.
