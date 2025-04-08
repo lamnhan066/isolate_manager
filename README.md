@@ -10,74 +10,38 @@
 [![PubStats Rank](https://pubstats.dev/badges/packages/isolate_manager/rank.svg)](https://pubstats.dev/packages/isolate_manager)
 [![PubStats Dependents](https://pubstats.dev/badges/packages/isolate_manager/dependents.svg)](https://pubstats.dev/packages/isolate_manager)
 
-## Table of Contents
-
-* [What is Isolate Manager?](#what-is-isolate-manager)
-* [Features](#features)
-* [Setup](#setup)
-* [Annotations & Platform Setup](#annotations--platform-setup)
-
-  * [Mobile/Desktop](#mobiledesktop)
-  * [Web](#web)
-  * [WASM Notes](#wasm-notes)
-
-* [Usage Examples](#usage-examples)
-
-  * [One-off Isolate](#one-off-isolate)
-  * [Long-lived Multi-Function Isolates](#long-lived-multi-function-isolates)
-  * [Long-lived Single Function Isolate](#long-lived-single-function-isolate)
-  * [Custom Function Usage & Try-Catch](#custom-function-usage--try-catch)
-
-* [Advanced Features](#advanced-features)
-
-  * [Queue Management](#queue-management)
-  * [Progress Updates](#progress-updates)
-  * [Type Safety for Web Workers](#type-safety-for-web-workers)
-  * [Exception Safety for Web Workers](#exception-safety-for-web-workers)
-
-* [Generator Commands & Flags](#generator-commands--flags)
-* [Additional Information](#additional-information)
-* [Benchmark](#benchmark)
-* [Contributions](#contributions)
-
 ## What is Isolate Manager?
 
 A powerful Flutter/Dart package that simplifies concurrent programming using isolates, with cross-platform support including web and WebAssembly.
 
 ## Features
 
-* **Flexible Isolate Management:** Efficiently manage background tasks with different isolate lifecycles:
+- **Flexible Isolate Management:**
+  - [One-off Isolates:](#one-off-isolate) For single computations (similar to `Isolate.run`) with web worker support
+  - [Long-lived Multi-Function Isolates:](#long-lived-multi-function-isolates) One instance to handle multiple functions (ideal for shared operations)
+  - [Long-lived Single Function Isolates:](#long-lived-single-function-isolate) One instance per function with stream capabilities
+  
+- [Cross-Platform Support:](#annotations--platform-setup)
+  - [Web & WASM Compatible:](#web) Automatically compiles functions to JavaScript Workers on web
+  - Falls back to `Future`/`Stream` if Workers aren't available
+  - Full support for VMs, Web JS and WASM
 
-  * [One-off Isolates:](#one-off-isolate) For executing single, computationally intensive tasks without blocking the main thread (similar to `Isolate.run`), ideal for tasks like complex calculations. Supports web workers for web platforms.
-  * [Long-lived Multi-Function Isolates:](#long-lived-multi-function-isolates) Maintain a single isolate instance to handle multiple distinct functions, reducing overhead for shared operations like data processing or network requests.
-  * [Long-lived Single Function Isolates:](#long-lived-single-function-isolate) Dedicate a single isolate instance to a specific function, offering stream capabilities for continuous data processing or updates.
+- [Smart Queue Management:](#queue-management)
+  - Automatically queues multiple computations
+  - Supports priority tasks
+  - Customizable queue strategies with different behaviors when queue limits are reached
 
-* **Cross-Platform Support:** Write concurrent code that runs seamlessly across various platforms:
+- [Type Safety:](#type-safety-for-web-workers)
+  - Specialized types (`ImNum`, `ImString`, `ImBool`, `ImList` and `ImMap`) ensure only transferable data is exchanged
 
-  * [Web & WASM Compatible:](#web) Automatically compiles your isolate functions to JavaScript Workers on the web, leveraging browser concurrency.
-  * **Automatic Fallback:** If Workers are not available in a specific web environment, the package gracefully falls back to using `Future`/`Stream` for asynchronous execution.
-  * **Comprehensive Support:** Fully supports Dart VMs (for mobile and desktop), Web JavaScript, and WebAssembly.
+- [Exception Safety:](#exception-safety-for-web-workers)
+  - Exception handling across VMs, Web JS, and WASM by extending and registering `IsolateException`
 
-* **Smart Queue Management:** Optimize task execution and resource utilization:
-
-  * **Automatic Task Queueing:** Automatically manages and queues multiple computations to prevent overloading resources.
-  * **Priority Tasks:** Allows marking critical tasks with higher priority, ensuring they are executed before others.
-  * **Customizable Queue Strategies:** Provides various strategies (e.g., dropping oldest or newest tasks, rejecting new tasks) when queue limits are reached, allowing you to tailor the behavior to your application's needs.
-
-* **Type Safety for Web Workers:** Ensure reliable data transfer in web environments:
-
-  * Specialized types (`ImNum`, `ImString`, `ImBool`, `ImList`, and `ImMap`) restrict data exchange to transferable types compatible with JavaScript Workers. This prevents common data serialization issues that can occur when passing complex Dart objects to web workers, which have limitations on transferable data types.
-
-* **Exception Safety for Web Workers:** Handle errors gracefully across different isolate environments:
-
-  * Enables exception handling across VMs, Web JS, and WASM by allowing you to extend and register `IsolateException`. This ensures that exceptions occurring within isolates, especially in web worker environments where standard Dart exceptions might not be directly transferable, can be caught and handled appropriately on the main thread.
-
-* **Additional Features:**
-
-  * [Custom Function:](#custom-function-usage--try-catch) Offers full manual control over isolate execution, allowing for fine-grained management of events and communication.
-  * [Progress Reporting:](#progress-updates) Facilitates sending intermediate progress updates from the isolate back to the main thread using the custom function.
-  * [Code Generation:](#generator-commands--flags) Provides comprehensive worker generation tools and options to automate the creation of web worker code.
-  * [Benchmark:](#benchmark) Offers performance comparisons between native isolates, IsolateManager, and other concurrency approaches to help you choose the best strategy.
+- **Additional Features:**
+  - [Custom Function:](#custom-function-usage--try-catch) Full manual control over isolate execution
+  - [Progress Reporting:](#progress-updates) Send progress updates during computation using the custom function
+  - [Code Generation:](#generator-commands--flags) Comprehensive worker generation tools and options
+  - [Benchmark:](#benchmark) Compare performance between native isolates, IsolateManager, and other concurrency approaches
 
 ## Setup
 
@@ -101,36 +65,30 @@ int add(List<int> values) {
 
 ### Mobile/Desktop
 
-* No additional setup required
+- No additional setup required
 
 ### Web
 
-* **Function Annotations:** Annotate the methods that you want to generate to the JS Worker. Remember to run the generator after adding or modifying these annotations.
+- **Function Annotations:** Annotate the methods that you want to generate to the JS Worker.
+  - `@isolateManagerWorker` – For one-off or single-function isolates
+  - `@isolateManagerSharedWorker` – For shared multi-function isolates
+  - `@isolateManagerCustomWorker` – For custom isolate functions with manual control
 
-  * `@isolateManagerWorker` – For one-off or single-function isolates
-  * `@isolateManagerSharedWorker` – For shared multi-function isolates
-  * `@isolateManagerCustomWorker` – For custom isolate functions with manual control
+- **Required:** Functions must not depend on Flutter libraries. Only Dart primitives, Maps, and Lists are allowed or using the [`ImType`s](#type-safety-for-web-workers).
 
-* **Required:** Functions must not depend on Flutter libraries. Only Dart primitives, Maps, and Lists are allowed or using the [`ImType`s](#type-safety-for-web-workers).
-
-  * Only primitive Dart types (num, String, bool, null) are directly transferable to web workers.
-  * For complex data structures, use `Map` and `List` containing these primitives or the provided `ImType` wrappers.
-
-* Generate the JavaScript Workers with:
+- Generate the JavaScript Workers with:
 
   ```shell
   dart run isolate_manager:generate
   ```
 
-### WASM Notes
+- **WASM Notes:**
+  - When using WebAssembly, `int` types (including in collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false`
+  - If the app hangs when running with `flutter run -d chrome --wasm`, use:
 
-* When using WebAssembly, `int` types (including in collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false`.
-
-* If the app hangs when running with `flutter run -d chrome --wasm`, use:
-
-  ```shell
-  flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
-  ```
+    ```shell
+    flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
+    ```
 
 ## Usage Examples
 
@@ -270,18 +228,14 @@ void customIsolateFunction(dynamic params) {
 
 ### Queue Management
 
-* **Priority Tasks:** Set `priority: true` to move critical computations to the front of the queue
-
-* **Queue Limits:** Define `maxCount` to limit queued tasks
-
-* **Queue Strategies:** Customize behavior when queue limit is reached:
-
-  * `UnlimitedStrategy()` – No limit (default)
-  * `DropNewestStrategy()` – Drops newest task when the `maxCount` is reached
-  * `DropOldestStrategy()` – Drops oldest task when the `maxCount` is reached
-  * `RejectIncomingStrategy()` – Rejects new tasks when the `maxCount` is reached
-
-* **Custom Queue Strategy:** Extend `QueueStrategy` to implement your own logic:
+- **Priority Tasks:** Set `priority: true` to move critical computations to the front of the queue
+- **Queue Limits:** Define `maxCount` to limit queued tasks
+- **Queue Strategies:** Customize behavior when queue limit is reached:
+  - `UnlimitedStrategy()` – No limit (default)
+  - `DropNewestStrategy()` – Drops newest task when the `maxCount` is reached
+  - `DropOldestStrategy()` – Drops oldest task when the `maxCount` is reached
+  - `RejectIncomingStrategy()` – Rejects new tasks when the `maxCount` is reached
+- **Custom Queue Strategy:** Extend `QueueStrategy` to implement your own logic:
 
   ```dart
   class CustomStrategy<R, P> extends QueueStrategy<R, P> {
@@ -389,7 +343,7 @@ main() {
     await isolate.compute(ImNum(0));
   } on CustomIsolateException catch (e, s) {
     print(e); // 'Custom Isolate Exception'
-  }
+  } 
 }
 
 class CustomIsolateException extends IsolateException {
@@ -417,25 +371,26 @@ dart run isolate_manager:generate
 
 Additional options:
 
-* `--single` – Generate only single-function isolates
-* `--shared` – Generate only shared-function isolates
-* `--in <path>` (or `-i <path>`) – Input folder
-* `--out <path>` (or `-o <path>`) – Output folder
-* `--obfuscate <level>` – JS obfuscation level (0–4, default is 4)
-* `--debug` – Retain temporary files for debugging
-* `--worker-mappings-experiment=lib/main.dart` – Auto-generate worker mappings (experiment)
+- `--single` – Generate only single-function isolates
+- `--shared` – Generate only shared-function isolates
+- `--in <path>` (or `-i <path>`) – Input folder
+- `--out <path>` (or `-o <path>`) – Output folder
+- `--obfuscate <level>` – JS obfuscation level (0–4, default is 4)
+- `--debug` – Retain temporary files for debugging
+- `--worker-mappings-experiment=lib/main.dart` – Auto-generate worker mappings (experiment)
 
 ## Additional Information
 
-* **Queue Info:** Use `queuesLength` to get the current queue size
-* **Startup Control:** Use `ensureStarted` to await manual start; check `isStarted` to see if initialization is complete
-* **Data Flow:** When using converters, data flows from Main → Worker → Main → Converter → Final Result
+- **Queue Info:** Use `queuesLength` to get the current queue size
+- **Startup Control:** Use `ensureStarted` to await manual start; check `isStarted` to see if initialization is complete
+- **Static Methods:** For static functions, specify the worker name as `"ClassName.functionName"`
+- **Data Flow:** When using converters, data flows from Main → Worker → Main → Converter → Final Result
 
 ## Benchmark
 
-This benchmark compares the performance of recursive Fibonacci calculations using different concurrency approaches in various environments. The measurements are in microseconds and were taken on a MacBook M1 Pro 14" with 16GB RAM.
+Recursive Fibonacci benchmarks (measured in microseconds on a MacBook M1 Pro 14" with 16GB RAM):
 
-* **VM**
+- **VM**
 
 |Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run|
 |:-:|-:|-:|-:|-:|-:|-:|
@@ -443,7 +398,7 @@ This benchmark compares the performance of recursive Fibonacci calculations usin
 |33|2,273,956|2,268,299|816,148|2,288,071|2,282,269|2,271,376|
 |36|9,761,067|9,669,422|3,453,328|9,643,678|9,606,443|9,648,076|
 
-* **Chrome (with Worker support, JS compiler)**
+- **Chrome (with Worker support, JS compiler)**
 
 |Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|
 |:-:|-:|-:|-:|-:|-:|-:|
@@ -451,7 +406,7 @@ This benchmark compares the performance of recursive Fibonacci calculations usin
 |33|9,493,100|2,330,900|821,400|2,860,800|2,866,300|0|
 |36|40,051,000|9,756,200|3,452,100|10,281,200|10,270,300|0|
 
-* **Chrome (with Worker support, WASM compiler)**
+- **Chrome (with Worker support, WASM compiler)**
 
 |Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|
 |:-:|-:|-:|-:|-:|-:|-:|
