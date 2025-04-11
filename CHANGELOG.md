@@ -1,6 +1,6 @@
-## 6.0.0+1
+## 6.0.0+1, +2
 
-* Reduce complex for README.
+* Improve README.
 
 ## 6.0.0
 
