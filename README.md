@@ -10,74 +10,30 @@
 [![PubStats Rank](https://pubstats.dev/badges/packages/isolate_manager/rank.svg)](https://pubstats.dev/packages/isolate_manager)
 [![PubStats Dependents](https://pubstats.dev/badges/packages/isolate_manager/dependents.svg)](https://pubstats.dev/packages/isolate_manager)
 
-## Table of Contents
-
-* [What is Isolate Manager?](#what-is-isolate-manager)
-* [Features](#features)
-* [Setup](#setup)
-* [Annotations & Platform Setup](#annotations--platform-setup)
-
-  * [Mobile/Desktop](#mobiledesktop)
-  * [Web](#web)
-  * [WASM Notes](#wasm-notes)
-
-* [Usage Examples](#usage-examples)
-
-  * [One-off Isolate](#one-off-isolate)
-  * [Long-lived Multi-Function Isolates](#long-lived-multi-function-isolates)
-  * [Long-lived Single Function Isolate](#long-lived-single-function-isolate)
-  * [Custom Function Usage & Try-Catch](#custom-function-usage--try-catch)
-
-* [Advanced Features](#advanced-features)
-
-  * [Queue Management](#queue-management)
-  * [Progress Updates](#progress-updates)
-  * [Type Safety for Web Workers](#type-safety-for-web-workers)
-  * [Exception Safety for Web Workers](#exception-safety-for-web-workers)
-
-* [Generator Commands & Flags](#generator-commands--flags)
-* [Additional Information](#additional-information)
-* [Benchmark](#benchmark)
-* [Contributions](#contributions)
-
 ## What is Isolate Manager?
 
 A powerful Flutter/Dart package that simplifies concurrent programming using isolates, with cross-platform support including web and WebAssembly.
 
 ## Features
 
-* **Flexible Isolate Management:** Efficiently manage background tasks with different isolate lifecycles:
+* **Flexible Isolate Management:** Efficiently handle background tasks with various isolate lifecycles:
+  * **One-off Isolates:** Ideal for single, intensive tasks like calculations, with web worker support.
+  * **Multi-Function Isolates:** Reuse isolates for multiple functions, reducing overhead.
+  * **Single-Function Isolates:** Dedicated isolates for continuous data processing.
 
-  * [One-off Isolates:](#one-off-isolate) For executing single, computationally intensive tasks without blocking the main thread (similar to `Isolate.run`), ideal for tasks like complex calculations. Supports web workers for web platforms.
-  * [Long-lived Multi-Function Isolates:](#long-lived-multi-function-isolates) Maintain a single isolate instance to handle multiple distinct functions, reducing overhead for shared operations like data processing or network requests.
-  * [Long-lived Single Function Isolates:](#long-lived-single-function-isolate) Dedicate a single isolate instance to a specific function, offering stream capabilities for continuous data processing or updates.
+* **Cross-Platform Support:** Seamlessly run concurrent code across Dart VMs, Web, and WASM:
+  * **Web & WASM:** Automatically compiles isolate functions to JavaScript Workers.
+  * **Fallback:** Uses `Future`/`Stream` if Workers are unavailable.
 
-* **Cross-Platform Support:** Write concurrent code that runs seamlessly across various platforms:
+* **Smart Queue Management:** Optimize task execution with automatic queuing, priority tasks, and customizable strategies.
 
-  * [Web & WASM Compatible:](#web) Automatically compiles your isolate functions to JavaScript Workers on the web, leveraging browser concurrency.
-  * **Automatic Fallback:** If Workers are not available in a specific web environment, the package gracefully falls back to using `Future`/`Stream` for asynchronous execution.
-  * **Comprehensive Support:** Fully supports Dart VMs (for mobile and desktop), Web JavaScript, and WebAssembly.
-
-* **Smart Queue Management:** Optimize task execution and resource utilization:
-
-  * **Automatic Task Queueing:** Automatically manages and queues multiple computations to prevent overloading resources.
-  * **Priority Tasks:** Allows marking critical tasks with higher priority, ensuring they are executed before others.
-  * **Customizable Queue Strategies:** Provides various strategies (e.g., dropping oldest or newest tasks, rejecting new tasks) when queue limits are reached, allowing you to tailor the behavior to your application's needs.
-
-* **Type Safety for Web Workers:** Ensure reliable data transfer in web environments:
-
-  * Specialized types (`ImNum`, `ImString`, `ImBool`, `ImList`, and `ImMap`) restrict data exchange to transferable types compatible with JavaScript Workers. This prevents common data serialization issues that can occur when passing complex Dart objects to web workers, which have limitations on transferable data types.
-
-* **Exception Safety for Web Workers:** Handle errors gracefully across different isolate environments:
-
-  * Enables exception handling across VMs, Web JS, and WASM by allowing you to extend and register `IsolateException`. This ensures that exceptions occurring within isolates, especially in web worker environments where standard Dart exceptions might not be directly transferable, can be caught and handled appropriately on the main thread.
+* **Type & Exception Safety:** Ensure reliable data transfer and error handling across platforms using specialized types (`ImNum`, `ImString`, etc.) and custom exceptions.
 
 * **Additional Features:**
-
-  * [Custom Function:](#custom-function-usage--try-catch) Offers full manual control over isolate execution, allowing for fine-grained management of events and communication.
-  * [Progress Reporting:](#progress-updates) Facilitates sending intermediate progress updates from the isolate back to the main thread using the custom function.
-  * [Code Generation:](#generator-commands--flags) Provides comprehensive worker generation tools and options to automate the creation of web worker code.
-  * [Benchmark:](#benchmark) Offers performance comparisons between native isolates, IsolateManager, and other concurrency approaches to help you choose the best strategy.
+  * **Custom Functions:** Full control over isolate execution.
+  * **Progress Updates:** Send intermediate results from isolates.
+  * **Code Generation:** Automate web worker creation (without using `build_runner`).
+  * **Benchmark:** Compare performance across concurrency approaches.
 
 ## Setup
 
