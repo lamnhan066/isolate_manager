@@ -10,415 +10,585 @@
 [![PubStats Rank](https://pubstats.dev/badges/packages/isolate_manager/rank.svg)](https://pubstats.dev/packages/isolate_manager)
 [![PubStats Dependents](https://pubstats.dev/badges/packages/isolate_manager/dependents.svg)](https://pubstats.dev/packages/isolate_manager)
 
-## What is Isolate Manager?
+**Isolate Manager** is a powerful Flutter/Dart package designed to simplify concurrent programming using isolates. It offers robust cross-platform support, including native, web (via JavaScript Workers), and WebAssembly (WASM).
 
-A powerful Flutter/Dart package that simplifies concurrent programming using isolates, with cross-platform support including web and WebAssembly.
+---
 
-## Features
+## Why Isolate Manager?
 
-* **Flexible Isolate Management:** Efficiently handle background tasks with various isolate lifecycles:
-  * **One-off Isolates:** Ideal for single, intensive tasks like calculations, with web worker support.
-  * **Multi-Function Isolates:** Reuse isolates for multiple functions, reducing overhead.
-  * **Single-Function Isolates:** Dedicated isolates for continuous data processing.
+* **Effortless Concurrency:** Takes the complexity out of Dart's isolates for smooth background processing.
+* **Truly Cross-Platform:** Write your concurrent code once and run it seamlessly on Dart VM, Web (auto-compiles to JS Workers), and WASM.
+* **Robust & Safe:** Provides built-in type and exception safety mechanisms, especially crucial for web worker communication.
+* **Optimized Performance:** Features smart task queuing, priority handling, and customizable strategies to fine-tune execution.
+* **Flexible Isolate Types:** Choose from one-off, multi-function, or single-function isolates to best suit your task's lifecycle.
 
-* **Cross-Platform Support:** Seamlessly run concurrent code across Dart VMs, Web, and WASM:
-  * **Web & WASM:** Automatically compiles isolate functions to JavaScript Workers.
-  * **Fallback:** Uses `Future`/`Stream` if Workers are unavailable.
+---
 
-* **Smart Queue Management:** Optimize task execution with automatic queuing, priority tasks, and customizable strategies.
+## Core Features
 
-* **Type & Exception Safety:** Ensure reliable data transfer and error handling across platforms using specialized types (`ImNum`, `ImString`, etc.) and custom exceptions.
+* **Versatile Isolate Management:**
+  * **One-off Isolates:** Perfect for single, intensive computations. Supports web workers.
+  * **Multi-Function Isolates:** Reuse a single isolate for various functions, minimizing overhead.
+  * **Single-Function Isolates:** Dedicate an isolate to a specific, continuous task or data stream.
+* **Cross-Platform by Design:**
+  * **Web & WASM Ready:** Automatically compiles isolate functions into JavaScript Workers for web deployment.
+  * **Graceful Fallback:** Defaults to `Future`/`Stream` if Web Workers are unavailable.
+* **Intelligent Queue System:**
+  * Automatic task queuing.
+  * Support for priority tasks.
+  * Customizable queue overflow strategies.
+* **Type & Exception Safety:**
+  * Utilize specialized `ImType`s (`ImNum`, `ImString`, etc.) for reliable data transfer with web workers.
+  * Propagate custom exceptions across isolate boundaries, even on the web.
+* **Developer-Friendly Extras:**
+  * **Custom Isolate Functions:** Gain full control over the isolate's lifecycle and communication.
+  * **Progress Reporting:** Send intermediate updates from long-running tasks.
+  * **Codeless Web Workers:** Generate necessary JavaScript worker files without `build_runner`.
+  * **Built-in Benchmark:** Compare performance of different concurrency models.
 
-* **Additional Features:**
-  * **Custom Functions:** Full control over isolate execution.
-  * **Progress Updates:** Send intermediate results from isolates.
-  * **Code Generation:** Automate web worker creation (without using `build_runner`).
-  * **Benchmark:** Compare performance across concurrency approaches.
+## Getting Started
 
-## Setup
+### 1. Add Dependencies
 
-Add the dependencies:
+Add the following to your `pubspec.yaml`:
 
-```shell
-dart pub add isolate_manager
-dart pub add isolate_manager_generator --dev # Only when you want to use the JS Worker generator
+```yaml
+dependencies:
+  isolate_manager: ^latest_version # Use the latest version
+
+dev_dependencies:
+  isolate_manager_generator: ^latest_version # Required for web worker generation
 ```
 
-Functions used in isolates **must** be `static` or top-level. Add `@pragma('vm:entry-point')` to prevent tree-shaking:
+Then, run `dart pub get` or `flutter pub get`.
+
+### 2\. Important Prerequisite for Isolate Functions
+
+Functions intended to run in an isolate **must** be:
+
+* A `static` method within a class, OR
+* A top-level function (defined outside any class).
+
+Additionally, annotate these functions with `@pragma('vm:entry-point')` to prevent them from being removed by tree-shaking during compilation.
 
 ```dart
+import 'package:isolate_manager/isolate_manager.dart';
+
 @pragma('vm:entry-point')
-int add(List<int> values) {
-  return values[0] + values[1];
+int sum(List<int> numbers) {
+  return numbers.reduce((a, b) => a + b);
 }
 ```
 
-## Annotations & Platform Setup
+### 3\. Platform-Specific Setup
 
-### Mobile/Desktop
+#### Mobile & Desktop (VM)
 
-* No additional setup required
+✅ No additional setup is required\!
 
-### Web
+#### Web (JavaScript Workers)
 
-* **Function Annotations:** Annotate the methods that you want to generate to the JS Worker. Remember to run the generator after adding or modifying these annotations.
+To use isolates on the Web, your Dart functions need to be compiled into JavaScript Workers.
 
-  * `@isolateManagerWorker` – For one-off or single-function isolates
-  * `@isolateManagerSharedWorker` – For shared multi-function isolates
-  * `@isolateManagerCustomWorker` – For custom isolate functions with manual control
+* **Annotate Your Functions:**
+  Use specific annotations on the functions you want to be available as web workers. Run the generator after adding or modifying these.
 
-* **Required:** Functions must not depend on Flutter libraries. Only Dart primitives, Maps, and Lists are allowed or using the [`ImType`s](#type-safety-for-web-workers).
+  * `@isolateManagerWorker`: For one-off or single-function isolates.
+  * `@isolateManagerSharedWorker`: For shared, multi-function isolates.
+  * `@isolateManagerCustomWorker`: For custom isolate functions where you manage communication manually.
 
-  * Only primitive Dart types (num, String, bool, null) are directly transferable to web workers.
-  * For complex data structures, use `Map` and `List` containing these primitives or the provided `ImType` wrappers.
+* **Data Transfer Limitations:**
 
-* Generate the JavaScript Workers with:
+  * Functions for web workers must **not** depend on Flutter-specific libraries (e.g., `dart:ui`).
+  * Only Dart primitives (`num`, `String`, `bool`, `null`), and `Map` or `List` collections containing these primitives, are directly transferable.
+  * For other data types, use the provided [`ImType`s](https://www.google.com/search?q=%23ensuring-type-safety-web) or serialize/deserialize your data manually.
+
+* **Generate JS Workers:**
+  Run the following command in your terminal:
 
   ```shell
   dart run isolate_manager:generate
   ```
 
-### WASM Notes
+  (See [Web Worker Generator](https://www.google.com/search?q=%23web-worker-generator) for more options)
 
-* When using WebAssembly, `int` types (including in collections) are processed as `double`. A built-in converter automatically fixes this, or disable with `enableWasmConverter: false`.
+#### WebAssembly (WASM) Notes
 
-* If the app hangs when running with `flutter run -d chrome --wasm`, use:
-
+* **Type Handling:** When using WASM, `int` types (including those in collections) are treated as `double`. Isolate Manager includes a built-in converter to handle this automatically. You can disable it via `enableWasmConverter: false` if needed.
+* **Development Server Headers:** If your app hangs when running with `flutter run -d chrome --wasm`, you might need to set specific headers. Try:
+  
   ```shell
   flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
   ```
 
 ## Usage Examples
 
-### One-off Isolate
+### One-off Isolate (Simple Task)
 
-Use a one-off isolate with either of these methods:
+Ideal for fire-and-forget computations.
 
 ```dart
-@isolateManagerWorker
+import 'package:isolate_manager/isolate_manager.dart';
+
+@pragma('vm:entry-point')
+@isolateManagerWorker // For web worker generation
 int fibonacciRecursive(int n) {
-  if (n == 0) return 0;
-  if (n == 1) return 1;
+  if (n < 2) return n;
   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
 }
 
-// Option 1: Explicit worker parameters
-final fibo40 = await IsolateManager.run(
-  () => fibonacciRecursive(40),
-  workerName: 'fibonacciRecursive',
-  workerParameter: 40,
-);
+void main() async {
+  // Option 1: Explicit worker parameters (useful if function name differs or for clarity)
+  final result1 = await IsolateManager.run(
+    () => fibonacciRecursive(40), // The actual function to execute
+    workerName: 'fibonacciRecursive', // Name used for JS worker mapping
+    workerParameter: 40,           // Parameter for the JS worker
+  );
+  print('Fibonacci(40) - Option 1: $result1');
 
-// Option 2: Automatic worker mapping
-final fibo40 = await IsolateManager.runFunction(fibonacciRecursive, 40);
+  // Option 2: Automatic worker mapping (concise)
+  final result2 = await IsolateManager.runFunction(fibonacciRecursive, 40);
+  print('Fibonacci(40) - Option 2: $result2');
+}
 ```
 
-### Long-lived Multi-Function Isolates
+### Long-Lived Multi-Function Isolate
+
+Reuse a single isolate for multiple different computations.
 
 ```dart
+import 'package:isolate_manager/isolate_manager.dart';
+
+@pragma('vm:entry-point')
+@isolateManagerSharedWorker
+Future<double> addNumbersFuture(List<double> values) async {
+  // Simulate some work
+  await Future.delayed(Duration(milliseconds: 100));
+  return values[0] + values[1];
+}
+
+@pragma('vm:entry-point')
+@isolateManagerSharedWorker
+int multiplyNumbers(List<int> values) {
+  return values[0] * values[1];
+}
+
 void main() async {
   final sharedIsolate = IsolateManager.createShared(
-    concurrent: 3,
-    useWorker: true,
+    concurrent: 2, // Number of tasks this isolate can handle concurrently
+    useWorker: true, // Enable web worker usage if on web
     workerMappings: {
-      addFuture: 'addFuture',
-      add: 'add',
+      // Map Dart function references to their JS worker names
+      addNumbersFuture: 'addNumbersFuture',
+      multiplyNumbers: 'multiplyNumbers',
     },
   );
 
+  // Optional: Listen for intermediate values (if any function sends them)
   sharedIsolate.stream.listen((value) {
-    print('Intermediate value: $value');
+    print('Intermediate value from shared isolate: $value');
   });
 
+  final sumResult = await sharedIsolate.compute(addNumbersFuture, [10.5, 20.3]);
+  print('Sum (shared): 10.5 + 20.3 = $sumResult');
 
-  final added1 = await sharedIsolate.compute(addFuture, [1.1, 2.2]);
-  print('addFuture: 1.1 + 2.2 = $added1');
+  final productResult = await sharedIsolate.compute(multiplyNumbers, [7, 6]);
+  print('Product (shared): 7 * 6 = $productResult');
 
-  final added2 = await sharedIsolate.compute(add, [1, 2]);
-  print('add: 1 + 2 = $added2');
-
-  await sharedIsolate.stop(); // Or `restart` if you want to restart
-}
-
-@isolateManagerSharedWorker
-Future<double> addFuture(List<double> values) async {
-  return values[0] + values[1];
-}
-
-@isolateManagerSharedWorker
-int add(List<int> values) {
-  return values[0] + values[1];
+  await sharedIsolate.stop(); // Important to release resources
+  // Or use `sharedIsolate.restart()`
 }
 ```
 
-### Long-lived Single Function Isolate
+### Long-Lived Single-Function Isolate
+
+Dedicate an isolate to a single, potentially continuous, function.
 
 ```dart
-main() async {
-  final isolate = IsolateManager.create(
-    fibonacci,
-    workerName: 'fibonacci',
-    concurrent: 2,
-  );
+import 'package:isolate_manager/isolate_manager.dart';
 
-  isolate.stream.listen((value) {
-    print('Intermediate value: $value');
-  });
-
-  final fibo = await isolate(20);
-
-  await isolate.stop(); // Or `restart` if you want to restart
+@pragma('vm:entry-point')
+@isolateManagerWorker
+int complexCalculation(int initialValue) {
+  // Simulate a task that might send progress updates or run for a while
+  int result = initialValue;
+  for (int i = 0; i < 5; i++) {
+    result += i * 2;
+    // If this were a custom function, you could send progress here
+  }
+  return result;
 }
 
-@isolateManagerWorker
+void main() async {
+  final singleFuncIsolate = IsolateManager.create(
+    complexCalculation, // The function this isolate is dedicated to
+    workerName: 'complexCalculation', // For JS worker
+    concurrent: 1, // Typically 1 for a single dedicated function
+  );
+
+  // Optional: Listen for intermediate values
+  singleFuncIsolate.stream.listen((value) {
+    print('Intermediate value from single-function isolate: $value');
+  });
+
+  final calculationResult = await singleFuncIsolate.compute(10); // `compute` is callable
+  print('Complex Calculation Result: $calculationResult');
+
+  await singleFuncIsolate.stop(); // Release resources
+  // Or use `singleFuncIsolate.restart()`
+}
+```
+
+### Custom Function & Error Handling
+
+For fine-grained control over the isolate's behavior, including sending multiple results or handling initialization/disposal.
+
+```dart
+import 'dart:convert';
+import 'package:isolate_manager/isolate_manager.dart';
+
+@pragma('vm:entry-point')
+@isolateManagerWorker // For web
 int fibonacci(int n) {
-  if (n == 0) return 0;
-  if (n == 1) return 1;
+  if (n < 0) throw ArgumentError('Input cannot be negative.');
+  if (n < 2) return n;
   return fibonacci(n - 1) + fibonacci(n - 2);
 }
-```
 
-### Custom Function Usage & Try-Catch
-
-Define a custom function with full control over events, error handling, and progress updates:
-
-```dart
-main() {
-  final isolateManager = IsolateManager.createCustom(
-    customIsolateFunction,
-    workerName: 'customIsolateFunction',
-    debugMode: true,
-  );
-
-  try {
-    final fibo40 = await isolateManager.compute(40);
-  } catch (e) {
-    // Exception handling
-  }
-}
-
+@pragma('vm:entry-point')
 @isolateManagerCustomWorker
-void customIsolateFunction(dynamic params) {
+void customFibonacciWorker(dynamic params) {
   IsolateManagerFunction.customFunction<int, int>(
     params,
     onEvent: (controller, message) {
       try {
         final result = fibonacci(message);
-        controller.sendResult(result);
+        controller.sendResult(result); // Send the final result
       } catch (err, stack) {
-        controller.sendResultError(IsolateException(err, stack));
+        // Send an IsolateException for structured error handling
+        controller.sendResultError(IsolateException(err.toString(), stack.toString()));
       }
-      return 0;
+      return 0; // Indicates completion for this event
     },
     onInit: (controller) {
-      // Initialization logic here
+      print('Custom Fibonacci Worker: Initialized');
+      // Perform any setup logic here
     },
     onDispose: (controller) {
-      // Cleanup actions here
+      print('Custom Fibonacci Worker: Disposed');
+      // Perform any cleanup logic here
     },
-    autoHandleException: false,
-    autoHandleResult: false,
+    autoHandleException: false, // Set to true to let IsolateManager handle basic errors
+    autoHandleResult: false,    // Set to true to let IsolateManager handle basic result sending
   );
+}
+
+void main() async {
+  final customIsolate = IsolateManager.createCustom(
+    customFibonacciWorker,
+    workerName: 'customFibonacciWorker', // For JS Worker
+    debugMode: true, // Enable more logging
+  );
+
+  try {
+    final result = await customIsolate.compute(10);
+    print('Custom Fibonacci(10): $result');
+
+    final resultNegative = await customIsolate.compute(-5); // This will throw
+    print('Custom Fibonacci(-5): $resultNegative');
+  } on IsolateException catch (e) {
+    print('Caught IsolateException: ${e.error}');
+    // print('Stack trace: ${e.stacktrace}');
+  } catch (e) {
+    print('Caught other error: $e');
+  } finally {
+    await customIsolate.stop();
+  }
 }
 ```
 
-## Advanced Features
+## Advanced Capabilities
 
-### Queue Management
+### Smart Queue Management
 
-* **Priority Tasks:** Set `priority: true` to move critical computations to the front of the queue
+Control how tasks are queued and processed when multiple requests are made to an isolate.
 
-* **Queue Limits:** Define `maxCount` to limit queued tasks
+* **Priority Tasks:** Add `priority: true` when calling `compute` or `run` to move a task to the front of its queue.
 
-* **Queue Strategies:** Customize behavior when queue limit is reached:
+* **Queue Size Limit:** Set `maxCount` in `IsolateManager.createX` constructors to limit the number of pending tasks.
 
-  * `UnlimitedStrategy()` – No limit (default)
-  * `DropNewestStrategy()` – Drops newest task when the `maxCount` is reached
-  * `DropOldestStrategy()` – Drops oldest task when the `maxCount` is reached
-  * `RejectIncomingStrategy()` – Rejects new tasks when the `maxCount` is reached
+* **Queue Strategies:** Define behavior when `maxCount` is reached:
 
-* **Custom Queue Strategy:** Extend `QueueStrategy` to implement your own logic:
+  * `UnlimitedStrategy()`: (Default) No limit on queued tasks.
+  * `DropNewestStrategy()`: Removes the most recently added task.
+  * `DropOldestStrategy()`: Removes the oldest task in the queue.
+  * `RejectIncomingStrategy()`: Rejects any new tasks if the queue is full.
+
+* **Custom Queue Strategy:** For bespoke logic, extend `QueueStrategy<R, P>`:
 
   ```dart
-  class CustomStrategy<R, P> extends QueueStrategy<R, P> {
+  class MyCustomStrategy<R, P> extends QueueStrategy<R, P> {
     @override
     bool continueIfMaxCountExceeded() {
-      // Custom logic using `queues`, `queuesCount`, and `maxCount`
-
-      return true; // Allow new tasks
-      // or
-      return false; // Reject new tasks
+      // Access `queues`, `queuesCount`, `maxCount`
+      if (queuesCount >= maxCount && queues.isNotEmpty) {
+        // Example: Allow if the oldest task is low priority (pseudo-code)
+        // if (queues.first.priority == false) {
+        //   print('Custom strategy: Dropping oldest to make space.');
+        //   queues.removeFirst(); // You'd need to manage this carefully
+        //   return true; // Allow the new task
+        // }
+        return false; // Reject by default if full
+      }
+      return true; // Allow if not full
     }
   }
   ```
 
+  *Note: Modifying `queues` directly in `continueIfMaxCountExceeded` requires careful implementation to ensure consistency.*
+
 ### Progress Updates
 
-Receive progress updates before the final result:
+Receive intermediate results from a task before it completes. This is typically used with `IsolateManager.createCustom`.
 
 ```dart
-main() {
-  final isolateManager = IsolateManager.createCustom(progressFunction);
+// In your main Dart code:
+void main() async {
+  final isolate = IsolateManager.createCustom(
+    longRunningTaskWithProgress,
+    workerName: 'longRunningTaskWithProgress', // For JS Worker
+  );
 
-  final result = await isolateManager.compute(100, callback: (value) {
-    final data = jsonDecode(value);
-    if (data.containsKey('progress')) {
-      print('Progress: ${data['progress']}');
-      return false; // Indicates this is a progress update
-    }
-    print('Final result: ${data['result']}');
-    return true; // Final result received
-  });
+  print('Starting task with progress updates...');
+  final result = await isolate.compute(
+    100, // Example parameter for the task
+    callback: (dynamic value) {
+      // `value` is what `controller.sendResult()` sends from the isolate
+      try {
+        final data = jsonDecode(value as String); // Assuming JSON string for progress
+        if (data.containsKey('progress')) {
+          print('Progress: ${data['progress']}%');
+          return false; // Indicates this is a progress update, not the final result
+        } else if (data.containsKey('finalResult')) {
+          print('Final result package received: ${data['finalResult']}');
+          return true; // Indicates this is the final result
+        }
+      } catch (e) {
+        print('Error decoding progress/result: $e');
+        return true; // Treat as error, stop listening
+      }
+      return true; // Default to stop if format is unexpected
+    },
+  );
+
+  print('Task completed with final processed value: $result');
+  await isolate.stop();
 }
 
+// In your isolate function (e.g., custom worker):
+@pragma('vm:entry-point')
 @isolateManagerCustomWorker
-void progressFunction(dynamic params) {
+void longRunningTaskWithProgress(dynamic params) {
   IsolateManagerFunction.customFunction<String, int>(
     params,
-    onEvent: (controller, message) {
-      // Send progress updates
-      for (int i = 0; i < message; i++) {
-        final progress = jsonEncode({'progress': i});
-        controller.sendResult(progress);
-      }
+    onEvent: (controller, totalSteps) {
+      for (int i = 0; i <= totalSteps; i += 10) {
+        // Simulate work
+        Future.delayed(Duration(milliseconds: 50)); // Don't block the isolate
 
-      // Send final result
-      return jsonEncode({'result': message});
+        final progressReport = jsonEncode({'progress': i});
+        controller.sendResult(progressReport); // Send progress update
+      }
+      // Send the final result
+      return jsonEncode({'finalResult': totalSteps});
     },
   );
 }
 ```
 
-### Type Safety for Web Workers
+### Ensuring Type Safety (Web)
 
-Use helper types to ensure safe data transfer:
+When working with Web Workers, data transfer is restricted. `IsolateManager` provides `ImType` wrappers for common types to ensure they are correctly (de)serialized.
 
 ```dart
-main() {
-  // Convert native Dart objects to ImType:
-  try {
-    final isolate = IsolateManager.create(isolateFunction, workerName: 'isolateFunction');
-    final param = ImList.wrap([1, 2, 3]);
+import 'package:isolate_manager/isolate_manager.dart';
 
-    final result = await isolate.compute(param);
-  } on UnsupportedImTypeException catch (e) {
-    // Throws `UnsupportedImTypeException` when there is unsupported type
-  }
-}
-
+@pragma('vm:entry-point')
 @isolateManagerWorker
-ImMap isolateFunction(ImList numbers) {
-  // Decode the list into standard Dart types
-  final data = numbers.unwrap!;
-  final map = Map.fromEntries(
-    data.map((e) => MapEntry(ImString('$e'), ImNum(e as num))),
-  );
-  return ImMap(map);
+ImMap processDataWeb(ImList numbers) {
+  // 1. Unwrap to get standard Dart types (List<dynamic> in this case)
+  final nativeList = numbers.unwrap as List<dynamic>; // Or numbers.unwrap!
+
+  // 2. Process the data
+  final processedMap = <ImType, ImType>{};
+  for (var i = 0; i < nativeList.length; i++) {
+    final numVal = nativeList[i] as num; // Ensure type
+    processedMap[ImString('item_$i')] = ImNum(numVal * 2);
+  }
+
+  // 3. Wrap the result in an ImType
+  return ImMap(processedMap);
 }
 
-```
-
-Available `ImType`s (non-nullable types only):
-
-```dart
-final number = ImNum(1); // or 1.0
-final string = ImString('text');
-final boolean = ImBool(true);
-final list = ImList(<ImType>[]);
-final map = ImMap(<ImType, ImType>{});
-```
-
-### Exception Safety for Web Workers
-
-Create exceptions that can be safely transferred between isolates:
-
-```dart
-main() {
-  // Register the custom exception type for proper isolate communication
-  IsolateManager.registerException(
-    (message, stackTrace) => CustomIsolateException(message),
+void main() async {
+  // On web, this will use the JS worker if generated.
+  final isolate = IsolateManager.create(
+    processDataWeb,
+    workerName: 'processDataWeb',
   );
-
-  final isolate = IsolateManager.create(throwsCustomIsolateException);
 
   try {
-    await isolate.compute(ImNum(0));
-  } on CustomIsolateException catch (e, s) {
-    print(e); // 'Custom Isolate Exception'
+    // 1. Wrap your input data
+    final inputData = ImList.wrap([1, 2.5, 3]);
+
+    // 2. Compute
+    final ImMap result = await isolate.compute(inputData) as ImMap;
+
+    // 3. Unwrap the result
+    final nativeResult = result.unwrap as Map<dynamic, dynamic>;
+    nativeResult.forEach((key, value) {
+      print('Web Processed: ${key.unwrap} -> ${value.unwrap}');
+    });
+
+  } on UnsupportedImTypeException catch (e) {
+    print('Error: Unsupported type used with ImType. ${e.message}');
+  } catch (e) {
+    print('An error occurred: $e');
+  } finally {
+    await isolate.stop();
   }
 }
+```
 
-class CustomIsolateException extends IsolateException {
-  const CustomIsolateException(super.error);
+**Available `ImType`s (for non-nullable types only):**
+
+* `ImNum(double value)` / `ImNum(int value)`
+* `ImString(String value)`
+* `ImBool(bool value)`
+* `ImList(List<ImType> value)` or `ImList.wrap(List<dynamic> nativeList)`
+* `ImMap(Map<ImType, ImType> value)` or `ImMap.wrap(Map<dynamic, dynamic> nativeMap)`
+
+An `UnsupportedImTypeException` is thrown if `ImList.wrap` or `ImMap.wrap` encounters a type that cannot be converted.
+
+### Handling Exceptions (Web)
+
+To ensure custom exceptions are correctly propagated from Web Workers:
+
+1. **Define a Custom IsolateException:** Extend `IsolateException`.
+2. **Register the Exception:** Use `IsolateManager.registerException()` in your main application.
+3. **Throw the Custom Exception:** In your isolate function.
+
+```dart
+import 'package:isolate_manager/isolate_manager.dart';
+
+// 1. Define your custom exception
+class MyCustomWebException extends IsolateException {
+  const MyCustomWebException(super.error, [super.stacktrace]);
 
   @override
-  String get name => 'CustomIsolateException';
+  String get name => 'MyCustomWebException'; // Crucial for deserialization
 }
 
+@pragma('vm:entry-point')
 @isolateManagerWorker
-ImNum throwsCustomIsolateException(ImNum number) {
-  throw const CustomIsolateException('Custom Isolate Exception');
+ImNum taskThatThrowsCustom(ImNum input) {
+  if (input.unwrap == 0) {
+    throw const MyCustomWebException('Input cannot be zero!');
+  }
+  return ImNum(100 / (input.unwrap as num));
+}
+
+void main() async {
+  // 2. Register the exception type (typically in your app's initialization)
+  IsolateManager.registerException(
+    (message, stackTrace) => MyCustomWebException(message, stackTrace),
+  );
+
+  final isolate = IsolateManager.create(
+    taskThatThrowsCustom,
+    workerName: 'taskThatThrowsCustom', // For JS Worker
+  );
+
+  try {
+    print('Trying with valid input...');
+    final result = await isolate.compute(ImNum(10));
+    print('Result: ${(result as ImNum).unwrap}'); // Should be 10
+
+    print('\nTrying with input that causes custom exception...');
+    await isolate.compute(ImNum(0)); // This will throw
+  } on MyCustomWebException catch (e, s) {
+    print('Caught MyCustomWebException!');
+    print('Error: ${e.error}');
+    // print('Stack: $s'); // s is the stacktrace from the main isolate
+    // print('Original Isolate Stack: ${e.stacktrace}'); // stacktrace from the worker
+  } catch (e) {
+    print('Caught an unexpected error: $e');
+  } finally {
+    await isolate.stop();
+  }
 }
 ```
 
-## Generator Commands & Flags
+## Web Worker Generator
 
-Ensure that [the platform setup for the web](#web) is completed before running the following commands.
+Use the `isolate_manager:generate` command to compile annotated Dart functions into JavaScript workers for web deployment. Ensure [web platform setup](https://www.google.com/search?q=%23web-javascript-workers) is complete.
 
-Generate JavaScript Workers after adding or modifying annotated functions:
+**Command:**
 
 ```shell
 dart run isolate_manager:generate
 ```
 
-Additional options:
+**Flags & Options:**
 
-* `--single` – Generate only single-function isolates
-* `--shared` – Generate only shared-function isolates
-* `--in <path>` (or `-i <path>`) – Input folder
-* `--out <path>` (or `-o <path>`) – Output folder
-* `--obfuscate <level>` – JS obfuscation level (0–4, default is 4)
-* `--debug` – Retain temporary files for debugging
-* `--worker-mappings-experiment=lib/main.dart` – Auto-generate worker mappings (experiment)
+* `--single`: Generate only for functions annotated with `@isolateManagerWorker`.
+* `--shared`: Generate only for functions annotated with `@isolateManagerSharedWorker`.
+* `--in <path>` (or `-i <path>`): Specify the input directory to scan for annotated functions (default: `lib`).
+* `--out <path>` (or `-o <path>`): Specify the output directory for generated JS files (default: `web`).
+* `--obfuscate <level>`: Set JavaScript obfuscation level (0-4, default is 4 for smallest size). 0 means no obfuscation.
+* `--debug`: Retain temporary files created during generation for debugging purposes.
+* `--worker-mappings-experiment=lib/main.dart` (Experimental): Attempt to auto-generate `workerMappings` for `IsolateManager.createShared` by scanning the specified Dart file.
 
-## Additional Information
+## Additional Tips
 
-* **Queue Info:** Use `queuesLength` to get the current queue size
-* **Startup Control:** Use `ensureStarted` to await manual start; check `isStarted` to see if initialization is complete
-* **Data Flow:** When using converters, data flows from Main → Worker → Main → Converter → Final Result
+* **Queue Length:** Check `isolateManagerInstance.queuesLength` to get the current number of tasks in the queue.
+* **Manual Start Control:** Use `isolateManagerInstance.ensureStarted()` to await explicit initialization if needed. Check `isolateManagerInstance.isStarted` to see if the isolate is ready.
+* **Data Flow with Converters (WASM):** When WASM type converters are active, the data flow is: Main Isolate → Worker → Main Isolate → Converter → Final Result.
 
-## Benchmark
+## Performance Benchmark
 
-This benchmark compares the performance of recursive Fibonacci calculations using different concurrency approaches in various environments. The measurements are in microseconds and were taken on a MacBook M1 Pro 14" with 16GB RAM.
+The following benchmarks demonstrate the performance of recursive Fibonacci calculations across different concurrency approaches and environments. Measurements are in microseconds (µs) on a MacBook M1 Pro 14" with 16GB RAM.
 
-* **VM**
+* **VM (Native)**
 
-|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run|
-|:-:|-:|-:|-:|-:|-:|-:|
-|30|551,928|541,882|195,646|553,949|547,982|538,820|
-|33|2,273,956|2,268,299|816,148|2,288,071|2,282,269|2,271,376|
-|36|9,761,067|9,669,422|3,453,328|9,643,678|9,606,443|9,648,076|
+| Fibonacci | Main App    | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run |
+| :-------: | ----------: | ----------: | -------------: | -------------------------: | -----------------: | ----------: |
+|    30     |   551,928   |   541,882   |      195,646   |          553,949           |        547,982       |   538,820   |
+|    33     |  2,273,956  |  2,268,299  |      816,148   |         2,288,071          |       2,282,269      |  2,271,376  |
+|    36     |  9,761,067  |  9,669,422  |     3,453,328  |         9,643,678          |       9,606,443      |  9,648,076  |
 
 * **Chrome (with Worker support, JS compiler)**
 
-|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|
-|:-:|-:|-:|-:|-:|-:|-:|
-|30|2,274,100|573,900|211,700|1,160,800|1,181,800|0|
-|33|9,493,100|2,330,900|821,400|2,860,800|2,866,300|0|
-|36|40,051,000|9,756,200|3,452,100|10,281,200|10,270,300|0|
+| Fibonacci | Main App     | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
+| :-------: | -----------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
+|    30     |  2,274,100   |   573,900   |      211,700   |         1,160,800          |       1,181,800      |             0             |
+|    33     |  9,493,100   |  2,330,900  |      821,400   |         2,860,800          |       2,866,300      |             0             |
+|    36     | 40,051,000   |  9,756,200  |     3,452,100  |        10,281,200          |      10,270,300      |             0             |
 
 * **Chrome (with Worker support, WASM compiler)**
 
-|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|
-|:-:|-:|-:|-:|-:|-:|-:|
-|30|242,701|552,800|200,300|1,099,100|1,081,800|0|
-|33|1,027,300|2,315,700|819,800|2,863,700|2,852,600|0|
-|36|4,396,300|9,709,700|3,446,300|10,284,000|10,375,800|0|
+| Fibonacci | Main App    | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
+| :-------: | ----------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
+|    30     |   242,701   |   552,800   |      200,300   |         1,099,100          |       1,081,800      |             0             |
+|    33     |  1,027,300  |  2,315,700  |      819,800   |         2,863,700          |       2,852,600      |             0             |
+|    36     |  4,396,300  |  9,709,700  |     3,446,300  |        10,284,000          |      10,375,800      |             0             |
 
-[Detailed benchmark info](https://github.com/lamnhan066/isolate_manager/tree/main/benchmark)
+For more details, see the [full benchmark information](https://github.com/lamnhan066/isolate_manager/tree/main/benchmark).
 
-## Contributions
+## Contributing
 
-If you encounter issues or have suggestions for improvements, please open an issue or submit a pull request. If you appreciate this work, consider buying me a coffee:
+Contributions, issues, and feature requests are welcome\! Feel free to check the [issues page](https://github.com/lamnhan066/isolate_manager/issues).
+
+If you find this package helpful, consider supporting the developer:
 
 [![BMC QR](https://raw.githubusercontent.com/lamnhan066/isolate_manager/main/assets/images/bmc_qr.png)](https://www.buymeacoffee.com/lamnhan066)
