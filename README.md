@@ -84,7 +84,7 @@ int sum(List<int> numbers) {
 
 #### Mobile & Desktop (VM)
 
-✅ No additional setup is required\!
+No additional setup is required\!
 
 #### Web (JavaScript Workers)
 
