@@ -101,7 +101,7 @@ To use isolates on the Web, your Dart functions need to be compiled into JavaScr
 
   * Functions for web workers must **not** depend on Flutter-specific libraries (e.g., `dart:ui`).
   * Only Dart primitives (`num`, `String`, `bool`, `null`), and `Map` or `List` collections containing these primitives, are directly transferable.
-  * For other data types, use the provided [`ImType`s](https://www.google.com/search?q=%23ensuring-type-safety-web) or serialize/deserialize your data manually.
+  * For other data types, use the provided [`ImType`s](#ensuring-type-safety-web) or serialize/deserialize your data manually.
 
 * **Generate JS Workers:**
   Run the following command in your terminal:
@@ -110,7 +110,7 @@ To use isolates on the Web, your Dart functions need to be compiled into JavaScr
   dart run isolate_manager:generate
   ```
 
-  (See [Web Worker Generator](https://www.google.com/search?q=%23web-worker-generator) for more options)
+  (See [Web Worker Generator](#web-worker-generator) for more options)
 
 #### WebAssembly (WASM) Notes
 
@@ -140,9 +140,9 @@ int fibonacciRecursive(int n) {
 void main() async {
   // Option 1: Explicit worker parameters (useful if function name differs or for clarity)
   final result1 = await IsolateManager.run(
-    () => fibonacciRecursive(40), // The actual function to execute
+    () => fibonacciRecursive(40),     // The actual function to execute
     workerName: 'fibonacciRecursive', // Name used for JS worker mapping
-    workerParameter: 40,           // Parameter for the JS worker
+    workerParameter: 40,              // Parameter for the JS worker
   );
   print('Fibonacci(40) - Option 1: $result1');
 
@@ -162,8 +162,6 @@ import 'package:isolate_manager/isolate_manager.dart';
 @pragma('vm:entry-point')
 @isolateManagerSharedWorker
 Future<double> addNumbersFuture(List<double> values) async {
-  // Simulate some work
-  await Future.delayed(Duration(milliseconds: 100));
   return values[0] + values[1];
 }
 
@@ -175,7 +173,7 @@ int multiplyNumbers(List<int> values) {
 
 void main() async {
   final sharedIsolate = IsolateManager.createShared(
-    concurrent: 2, // Number of tasks this isolate can handle concurrently
+    concurrent: 2,   // Number of tasks this isolate can handle concurrently
     useWorker: true, // Enable web worker usage if on web
     workerMappings: {
       // Map Dart function references to their JS worker names
@@ -393,9 +391,6 @@ void longRunningTaskWithProgress(dynamic params) {
     params,
     onEvent: (controller, totalSteps) {
       for (int i = 0; i <= totalSteps; i += 10) {
-        // Simulate work
-        Future.delayed(Duration(milliseconds: 50)); // Don't block the isolate
-
         final progressReport = jsonEncode({'progress': i});
         controller.sendResult(progressReport); // Send progress update
       }
@@ -447,7 +442,7 @@ void main() async {
     // 3. Unwrap the result
     final nativeResult = result.unwrap as Map<dynamic, dynamic>;
     nativeResult.forEach((key, value) {
-      print('Web Processed: ${key.unwrap} -> ${value.unwrap}');
+      print('Web Processed: ${key} -> ${value}');
     });
 
   } on UnsupportedImTypeException catch (e) {
@@ -529,9 +524,39 @@ void main() async {
 }
 ```
 
+## Add A Worker Mapping Once
+
+```dart
+// Typically done during app initialisation:
+IsolateManager.addWorkerMapping(
+  fibonacciRecursive,      // Dart function
+  'fibonacciRecursive',    // Generated JS-worker file name
+);
+```
+
+Use the mapped function
+
+```dart
+// No boilerplate — the manager already knows which worker to spin up.
+await IsolateManager.runFunction(fibonacciRecursive, 40);
+await sharedIsolate.compute(addNumbersFuture, [10.5, 20.3]);
+await singleFuncIsolate.compute(10);
+```
+
+For readers who wonder what “magic” was removed
+
+```dart
+// Long form (now unnecessary):
+// final result = await IsolateManager.run(
+//   () => fibonacciRecursive(40),
+//   workerName: 'fibonacciRecursive',
+//   workerParameter: 40,
+// );
+```
+
 ## Web Worker Generator
 
-Use the `isolate_manager:generate` command to compile annotated Dart functions into JavaScript workers for web deployment. Ensure [web platform setup](https://www.google.com/search?q=%23web-javascript-workers) is complete.
+Use the `isolate_manager:generate` command to compile annotated Dart functions into JavaScript workers for web deployment. Ensure [web platform setup](#web-javascript-workers) is complete.
 
 **Command:**
 
