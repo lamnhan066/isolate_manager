@@ -12,8 +12,6 @@
 
 **Isolate Manager** is a powerful Flutter/Dart package designed to simplify concurrent programming using isolates. It offers robust cross-platform support, including native, web (via JavaScript Workers), and WebAssembly (WASM).
 
----
-
 ## Why Isolate Manager?
 
 * **Effortless Concurrency:** Takes the complexity out of Dart's isolates for smooth background processing.
@@ -22,9 +20,7 @@
 * **Optimized Performance:** Features smart task queuing, priority handling, and customizable strategies to fine-tune execution.
 * **Flexible Isolate Types:** Choose from one-off, multi-function, or single-function isolates to best suit your task's lifecycle.
 
----
-
-## Core Features
+## Features
 
 * **Versatile Isolate Management:**
   * **One-off Isolates:** Perfect for single, intensive computations. Supports web workers.
@@ -38,7 +34,7 @@
   * Support for priority tasks.
   * Customizable queue overflow strategies.
 * **Type & Exception Safety:**
-  * Utilize specialized `ImType`s (`ImNum`, `ImString`, etc.) for reliable data transfer with web workers.
+  * Utilize specialized `ImType` wrappers (`ImNum`, `ImString`, etc.) for reliable data transfer with web workers.
   * Propagate custom exceptions across isolate boundaries, even on the web.
 * **Developer-Friendly Extras:**
   * **Custom Isolate Functions:** Gain full control over the isolate's lifecycle and communication.
@@ -62,7 +58,7 @@ dev_dependencies:
 
 Then, run `dart pub get` or `flutter pub get`.
 
-### 2\. Important Prerequisite for Isolate Functions
+### 2. Important Prerequisite for Isolate Functions
 
 Functions intended to run in an isolate **must** be:
 
@@ -70,6 +66,9 @@ Functions intended to run in an isolate **must** be:
 * A top-level function (defined outside any class).
 
 Additionally, annotate these functions with `@pragma('vm:entry-point')` to prevent them from being removed by tree-shaking during compilation.
+
+> **Note:** Worker annotations like `@isolateManagerWorker`, `@isolateManagerSharedWorker`, and `@isolateManagerCustomWorker` are provided by the `isolate_manager` package.
+> Make sure to import them if you use them in your code.
 
 ```dart
 import 'package:isolate_manager/isolate_manager.dart';
@@ -80,15 +79,15 @@ int sum(List<int> numbers) {
 }
 ```
 
-### 3\. Platform-Specific Setup
+### 3. Platform-Specific Setup
 
 #### Mobile & Desktop (VM)
 
-No additional setup is required\!
+No additional setup is required!
 
 #### Web (JavaScript Workers)
 
-To use isolates on the Web, your Dart functions need to be compiled into JavaScript Workers.
+To use isolates on the web, your Dart functions need to be compiled into JavaScript Workers.
 
 * **Annotate Your Functions:**
   Use specific annotations on the functions you want to be available as web workers. Run the generator after adding or modifying these.
@@ -101,7 +100,7 @@ To use isolates on the Web, your Dart functions need to be compiled into JavaScr
 
   * Functions for web workers must **not** depend on Flutter-specific libraries (e.g., `dart:ui`).
   * Only Dart primitives (`num`, `String`, `bool`, `null`), and `Map` or `List` collections containing these primitives, are directly transferable.
-  * For other data types, use the provided [`ImType`s](#ensuring-type-safety-web) or serialize/deserialize your data manually.
+  * For other data types, use the provided [`ImType` wrappers](#ensuring-type-safety-web) or serialize/deserialize your data manually.
 
 * **Generate JS Workers:**
   Run the following command in your terminal:
@@ -110,13 +109,13 @@ To use isolates on the Web, your Dart functions need to be compiled into JavaScr
   dart run isolate_manager:generate
   ```
 
-  (See [Web Worker Generator](#web-worker-generator) for more options)
+  (See [Web Worker Generator](#web-worker-generator) for more options.)
 
 #### WebAssembly (WASM) Notes
 
-* **Type Handling:** When using WASM, `int` types (including those in collections) are treated as `double`. Isolate Manager includes a built-in converter to handle this automatically. You can disable it via `enableWasmConverter: false` if needed.
+* **Type Handling:** When using WASM, all `int` types (including those in collections) are treated as `double`. Isolate Manager provides a built-in converter to handle this automatically; you can disable it by setting `enableWasmConverter: false` if needed.
 * **Development Server Headers:** If your app hangs when running with `flutter run -d chrome --wasm`, you might need to set specific headers. Try:
-  
+
   ```shell
   flutter run -d chrome --wasm --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
   ```
@@ -194,7 +193,7 @@ void main() async {
   print('Product (shared): 7 * 6 = $productResult');
 
   await sharedIsolate.stop(); // Important to release resources
-  // Or use `sharedIsolate.restart()`
+  // Or use `sharedIsolate.restart()` to restart the isolate
 }
 ```
 
@@ -233,7 +232,7 @@ void main() async {
   print('Complex Calculation Result: $calculationResult');
 
   await singleFuncIsolate.stop(); // Release resources
-  // Or use `singleFuncIsolate.restart()`
+  // Or use `singleFuncIsolate.restart()` to restart the isolate
 }
 ```
 
@@ -313,7 +312,7 @@ Control how tasks are queued and processed when multiple requests are made to an
 
 * **Priority Tasks:** Add `priority: true` when calling `compute` or `run` to move a task to the front of its queue.
 
-* **Queue Size Limit:** Set `maxCount` in `IsolateManager.createX` constructors to limit the number of pending tasks.
+* **Queue Size Limit:** Set `maxCount` in `IsolateManager.create`, `createShared`, or `createCustom` constructors to limit the number of pending tasks.
 
 * **Queue Strategies:** Define behavior when `maxCount` is reached:
 
@@ -322,7 +321,7 @@ Control how tasks are queued and processed when multiple requests are made to an
   * `DropOldestStrategy()`: Removes the oldest task in the queue.
   * `RejectIncomingStrategy()`: Rejects any new tasks if the queue is full.
 
-* **Custom Queue Strategy:** For bespoke logic, extend `QueueStrategy<R, P>`:
+* **Custom Queue Strategy:** For custom logic, extend `QueueStrategy<R, P>`:
 
   ```dart
   class MyCustomStrategy<R, P> extends QueueStrategy<R, P> {
@@ -348,6 +347,8 @@ Control how tasks are queued and processed when multiple requests are made to an
 ### Progress Updates
 
 Receive intermediate results from a task before it completes. This is typically used with `IsolateManager.createCustom`.
+
+> In this example, progress updates are sent as JSON strings for demonstration purposes.
 
 ```dart
 // In your main Dart code:
@@ -412,7 +413,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 @isolateManagerWorker
 ImMap processDataWeb(ImList numbers) {
   // 1. Unwrap to get standard Dart types (List<dynamic> in this case)
-  final nativeList = numbers.unwrap as List<dynamic>; // Or numbers.unwrap!
+  final nativeList = numbers.unwrap as List<dynamic>;
 
   // 2. Process the data
   final processedMap = <ImType, ImType>{};
@@ -455,7 +456,7 @@ void main() async {
 }
 ```
 
-**Available `ImType`s (for non-nullable types only):**
+**Available `ImType` wrappers (for non-nullable types only):**
 
 * `ImNum(double value)` / `ImNum(int value)`
 * `ImString(String value)`
@@ -524,17 +525,19 @@ void main() async {
 }
 ```
 
-## Add A Worker Mapping Once
+## Add a Worker Mapping Once
+
+Typically done during app initialization:
 
 ```dart
-// Typically done during app initialisation:
 IsolateManager.addWorkerMapping(
   fibonacciRecursive,      // Dart function
   'fibonacciRecursive',    // Generated JS-worker file name
 );
+IsolateManager.addWorkerMapping(addNumbersFuture, 'addNumbersFuture');
 ```
 
-Use the mapped function
+Use the mapped function:
 
 ```dart
 // No boilerplate — the manager already knows which worker to spin up.
@@ -543,7 +546,7 @@ await sharedIsolate.compute(addNumbersFuture, [10.5, 20.3]);
 await singleFuncIsolate.compute(10);
 ```
 
-For readers who wonder what “magic” was removed
+If you’re wondering what “magic” was removed:
 
 ```dart
 // Long form (now unnecessary):
@@ -556,7 +559,8 @@ For readers who wonder what “magic” was removed
 
 ## Web Worker Generator
 
-Use the `isolate_manager:generate` command to compile annotated Dart functions into JavaScript workers for web deployment. Ensure [web platform setup](#web-javascript-workers) is complete.
+Use the `isolate_manager:generate` command to compile annotated Dart functions into JavaScript workers for web deployment.
+See [Web (JavaScript Workers)](#web-javascript-workers) for web platform setup.
 
 **Command:**
 
@@ -586,33 +590,33 @@ The following benchmarks demonstrate the performance of recursive Fibonacci calc
 
 * **VM (Native)**
 
-| Fibonacci | Main App    | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run |
-| :-------: | ----------: | ----------: | -------------: | -------------------------: | -----------------: | ----------: |
-|    30     |   551,928   |   541,882   |      195,646   |          553,949           |        547,982       |   538,820   |
-|    33     |  2,273,956  |  2,268,299  |      816,148   |         2,288,071          |       2,282,269      |  2,271,376  |
-|    36     |  9,761,067  |  9,669,422  |     3,453,328  |         9,643,678          |       9,606,443      |  9,648,076  |
+| Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run |
+| :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ----------: |
+|     30    |   551,928 |     541,882 |        195,646 |                    553,949 |            547,982 |     538,820 |
+|     33    | 2,273,956 |   2,268,299 |        816,148 |                  2,288,071 |          2,282,269 |   2,271,376 |
+|     36    | 9,761,067 |   9,669,422 |      3,453,328 |                  9,643,678 |          9,606,443 |   9,648,076 |
 
 * **Chrome (with Worker support, JS compiler)**
 
-| Fibonacci | Main App     | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
-| :-------: | -----------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
-|    30     |  2,274,100   |   573,900   |      211,700   |         1,160,800          |       1,181,800      |             0             |
-|    33     |  9,493,100   |  2,330,900  |      821,400   |         2,860,800          |       2,866,300      |             0             |
-|    36     | 40,051,000   |  9,756,200  |     3,452,100  |        10,281,200          |      10,270,300      |             0             |
+| Fibonacci |   Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
+| :-------: | ---------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
+|     30    |  2,274,100 |     573,900 |        211,700 |                  1,160,800 |          1,181,800 |                         0 |
+|     33    |  9,493,100 |   2,330,900 |        821,400 |                  2,860,800 |          2,866,300 |                         0 |
+|     36    | 40,051,000 |   9,756,200 |      3,452,100 |                 10,281,200 |         10,270,300 |                         0 |
 
 * **Chrome (with Worker support, WASM compiler)**
 
-| Fibonacci | Main App    | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
-| :-------: | ----------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
-|    30     |   242,701   |   552,800   |      200,300   |         1,099,100          |       1,081,800      |             0             |
-|    33     |  1,027,300  |  2,315,700  |      819,800   |         2,863,700          |       2,852,600      |             0             |
-|    36     |  4,396,300  |  9,709,700  |     3,446,300  |        10,284,000          |      10,375,800      |             0             |
+| Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
+| :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
+|     30    |   242,701 |     552,800 |        200,300 |                  1,099,100 |          1,081,800 |                         0 |
+|     33    | 1,027,300 |   2,315,700 |        819,800 |                  2,863,700 |          2,852,600 |                         0 |
+|     36    | 4,396,300 |   9,709,700 |      3,446,300 |                 10,284,000 |         10,375,800 |                         0 |
 
 For more details, see the [full benchmark information](https://github.com/lamnhan066/isolate_manager/tree/main/benchmark).
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome\! Feel free to check the [issues page](https://github.com/lamnhan066/isolate_manager/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/lamnhan066/isolate_manager/issues).
 
 If you find this package helpful, consider supporting the developer:
 
