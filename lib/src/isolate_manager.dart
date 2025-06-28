@@ -197,7 +197,7 @@ class IsolateManager<R, P> {
   ///   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
   /// }
   ///
-  /// final result = await IsolateManager.run(fibonacciRecursive, 40);
+  /// final result = await IsolateManager.runFunction(fibonacciRecursive, 40);
   /// ```
   ///
   /// Set [isDebug] to `true` to enable debug logging.
@@ -233,7 +233,9 @@ class IsolateManager<R, P> {
   /// web Workers when a [workerName] is provided. The [workerName] is automatically
   /// assigned if previously mapped via [addWorkerMapping] or a generator.
   ///
-  /// If [callback] is provided, it will be invoked with the result before returning.
+  /// If [callback] is provided, it will be invoked with intermediate results before
+  /// returning the final result. The [callback] should return `true` to indicate
+  /// the final result has been received.
   ///
   /// Transforms results using [converter] and [workerConverter] before returning them.
   ///
@@ -246,14 +248,27 @@ class IsolateManager<R, P> {
   ///
   /// Example:
   /// ```dart
-  /// @isolateManagerWorker
+  /// @isolateManagerCustomWorker
+  /// void customFibonacciFunction(dynamic params) {
+  ///  IsolateManagerFunction.customFunction<int, int>(
+  ///     params,
+  ///     onEvent: (IsolateManagerController<int, int> controller, int message) {
+  ///       final result = fibonacciRecursive(message);
+  ///       controller.sendResult(result);
+  ///     },
+  ///   );
+  /// }
+  ///
   /// int fibonacciRecursive(int n) {
   ///   if (n == 0) return 0;
   ///   if (n == 1) return 1;
   ///   return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
   /// }
   ///
-  /// final result = await IsolateManager.run(fibonacciRecursive, 40);
+  /// final result = await IsolateManager.runCustomFunction(
+  ///   customFibonacciFunction,
+  ///   40,
+  /// );
   /// ```
   ///
   /// Set [isDebug] to `true` to enable debug logging.
