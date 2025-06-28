@@ -253,8 +253,7 @@ class IsolateManager<R, P> {
   ///  IsolateManagerFunction.customFunction<int, int>(
   ///     params,
   ///     onEvent: (IsolateManagerController<int, int> controller, int message) {
-  ///       final result = fibonacciRecursive(message);
-  ///       controller.sendResult(result);
+  ///       return fibonacciRecursive(message);
   ///     },
   ///   );
   /// }
