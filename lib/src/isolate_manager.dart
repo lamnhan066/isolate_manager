@@ -279,6 +279,7 @@ class IsolateManager<R, P> {
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
     IsolateCallback<R>? callback,
+    bool enableWasmConverter = true,
     bool isDebug = false,
   }) async {
     final im = IsolateManager<R, P>.createCustom(
@@ -286,6 +287,7 @@ class IsolateManager<R, P> {
       workerName: workerName,
       converter: converter,
       workerConverter: workerConverter,
+      enableWasmConverter: enableWasmConverter,
       isDebug: isDebug,
     );
 
