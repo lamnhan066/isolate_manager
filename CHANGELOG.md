@@ -1,3 +1,9 @@
+## 6.0.1
+
+* Update `IsolateManager` docs for `runFunction` and `runCustomFunction`.
+* Add `enableWasmConverter` parameter to `IsolateManager`.
+* Update README.
+
 ## 6.0.0+1, +2
 
 * Improve README.
