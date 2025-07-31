@@ -442,12 +442,16 @@ class _MyAppState extends State<MyApp> {
 void _addWorkerMappings() {
   IsolateManager.addWorkerMapping(functionName, 'functionName');
   IsolateManager.addWorkerMapping(
-      isolateProgressFunction, 'isolateProgressFunction');
+    isolateProgressFunction,
+    'isolateProgressFunction',
+  );
   IsolateManager.addWorkerMapping(complexFunction, 'complexFunction');
   IsolateManager.addWorkerMapping(fetchAndDecode, 'fetchAndDecode');
   IsolateManager.addWorkerMapping(countEven, 'countEven');
   IsolateManager.addWorkerMapping(
-      fibonacciRecursiveFuture, 'fibonacciRecursiveFuture');
+    fibonacciRecursiveFuture,
+    'fibonacciRecursiveFuture',
+  );
   IsolateManager.addWorkerMapping(fibonacciFuture, 'fibonacciFuture');
   IsolateManager.addWorkerMapping(fibonacci, 'fibonacci');
 }
