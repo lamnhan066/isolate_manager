@@ -1,3 +1,8 @@
+## 6.1.0
+
+* Hide the `IsolateManagerController.initialParams` to avoid unexpected access. Because this attribute does nothing so I won't treat it as a breaking change.
+* Update the docs that related to deprecated `onInitial`.
+
 ## 6.0.1
 
 * Update `IsolateManager` docs for `runFunction` and `runCustomFunction`.
