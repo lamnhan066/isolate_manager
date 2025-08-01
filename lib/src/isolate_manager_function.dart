@@ -44,14 +44,14 @@ abstract class IsolateManagerFunction {
   /// void customIsolateFunction(dynamic params) {
   ///   IsolateManagerFunction.customFunction<int, int>(
   ///     params,
-  ///     onEvent: (controller, message) {
-  ///       /* This event will be executed every time the `message` is received from the main isolate */
-  ///       return fetchAndDecode(message);
-  ///     },
-  ///     onInitial: (controller, initialParams) {
+  ///     onInit: (controller) {
   ///        // This event will be executed before all the other events.
   ///        //
   ///        // This event can be a `Future` function.
+  ///     },
+  ///     onEvent: (controller, message) {
+  ///       /* This event will be executed every time the `message` is received from the main isolate */
+  ///       return fetchAndDecode(message);
   ///     },
   ///     onDispose: (controller) {
   ///        /* This event will be executed after all the other events and should NOT be a `Future` event */
@@ -121,7 +121,7 @@ abstract class IsolateManagerFunction {
   ///   // The function `fetchAndDecode` MUST NOT depend on any Flutter library
   ///   IsolateManagerFunction.workerFunction(
   ///     fetchAndDecode,
-  ///     onInitial: () {
+  ///     onInit: (controller) {
   ///       // This is optional.
   ///     }
   ///   );
@@ -159,14 +159,14 @@ abstract class IsolateManagerFunction {
   ///
   /// void customFunction(dynamic params) {
   ///   IsolateManagerFunction.customFunction<int, int>(
-  ///     onEvent: (controller, message) {
-  ///       /* This event will be executed every time the `message` is received from the main isolate */
-  ///       return fetchAndDecode(message);
-  ///     },
-  ///     onInitial: (controller, initialParams) {
+  ///     onInit: (controller) {
   ///        // This event will be executed before all the other events.
   ///        //
   ///        // This event can be a `Future` function.
+  ///     },
+  ///     onEvent: (controller, message) {
+  ///       /* This event will be executed every time the `message` is received from the main isolate */
+  ///       return fetchAndDecode(message);
   ///     },
   ///     onDispose: (controller) {
   ///        /* This event will be executed after all the other events and should NOT be a `Future` event */
