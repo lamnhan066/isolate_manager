@@ -1,8 +1,4 @@
-import 'dart:async';
-
-import 'package:isolate_manager/isolate_manager.dart';
-import 'package:isolate_manager/src/isolate_manager_controller/web.dart'
-    if (dart.library.io) 'isolate_manager_controller/stub.dart';
+part of 'isolate_manager.dart';
 
 /// This method only use to create a custom isolate.
 class IsolateManagerController<R, P> {
@@ -28,8 +24,8 @@ class IsolateManagerController<R, P> {
   /// Close this `IsolateManagerController`.
   Future<void> close() => _delegate.close();
 
-  /// Get initial parameters when you create the IsolateManager.
-  dynamic get initialParams => _delegate.initialParams;
+  /// Get initial parameters when you create the IsolateManager. For internal use only.
+  dynamic get _initialParams => _delegate.initialParams;
 
   /// This parameter is only used for Isolate. Use to listen for values from the main application.
   Stream<P> get onIsolateMessage => _delegate.onIsolateMessage;

@@ -3,11 +3,13 @@ import 'dart:js_interop';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
+import 'package:isolate_manager/src/models/initial_params_mixin.dart';
 import 'package:isolate_manager/src/utils/check_subtype.dart';
 import 'package:web/web.dart';
 
 /// This method only use to create a custom isolate.
 class IsolateManagerControllerImpl<R, P>
+    with InitialParamsMixin
     implements IsolateManagerController<R, P> {
   /// This method only use to create a custom isolate.
   ///

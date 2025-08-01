@@ -1,13 +1,15 @@
 import 'dart:async';
 
+import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
-import 'package:isolate_manager/src/base/isolate_manager_shared.dart';
-import 'package:isolate_manager/src/isolate_manager_function.dart';
+import 'package:isolate_manager/src/isolate_manager_controller/web.dart'
+    if (dart.library.io) 'isolate_manager_controller/stub.dart';
 import 'package:isolate_manager/src/models/isolate_queue.dart';
-import 'package:isolate_manager/src/models/queue_strategy.dart';
 import 'package:isolate_manager/src/utils/converter.dart';
 import 'package:isolate_manager/src/utils/normalize_path.dart';
 import 'package:isolate_manager/src/utils/print.dart';
+
+part 'isolate_manager_controller.dart';
 
 /// Type for the callback of the isolate.
 typedef IsolateCallback<R> = FutureOr<bool> Function(R value);
@@ -477,7 +479,7 @@ class IsolateManager<R, P> {
     IsolateManagerFunction.customFunction<R, P>(
       params,
       onEvent: (controller, message) {
-        final function = controller.initialParams;
+        final function = controller._initialParams;
         return (function as Function)(message) as FutureOr<R>;
       },
     );
