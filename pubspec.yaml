@@ -20,7 +20,5 @@ dependencies:
 
 dev_dependencies:
   coverage: ^1.10.0
-  isolate_manager_generator:
-    git: https://github.com/lamnhan066/isolate_manager_generator
   test: ^1.25.8
   very_good_analysis: ^8.0.0
