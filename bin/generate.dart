@@ -23,10 +23,12 @@ void main(List<String> args) async {
   if (args.contains('--add-generator')) {
     print('Adding isolate_manager_generator to dev dependencies...');
 
-    final addProcess = await Process.run(
-      'dart',
-      ['pub', 'add', 'isolate_manager_generator', '--dev'],
-    );
+    final addProcess = await Process.run('dart', [
+      'pub',
+      'add',
+      'isolate_manager_generator',
+      '--dev',
+    ]);
 
     if (addProcess.exitCode != 0) {
       print('Failed to add isolate_manager_generator: ${addProcess.stderr}');
@@ -36,19 +38,23 @@ void main(List<String> args) async {
     print('Added isolate_manager_generator to dev dependencies.');
   }
 
-  final process = await Process.start(
-    'dart',
-    ['run', 'isolate_manager_generator', ...args],
-  );
+  final process = await Process.start('dart', [
+    'run',
+    'isolate_manager_generator',
+    ...[...args]..remove('--add-generator'),
+  ]);
 
   process.stdout.transform(const Utf8Decoder()).listen(print);
   process.stderr.transform(const Utf8Decoder()).listen((e) {
     switch (e.trim()) {
       case 'Could not find package `isolate_manager_generator` or file `isolate_manager_generator`':
         print(
-          'Please run `dart pub add isolate_manager_generator --dev` or '
-          'add `isolate_manager_generator` to your dev dependencies '
-          'before running the generator.',
+          '⚠️ Missing dependency: `isolate_manager_generator`.\n'
+          'To fix this, you have two options:\n'
+          '1️⃣ Run: `dart pub add isolate_manager_generator --dev`\n'
+          '2️⃣ Or simply re-run this command with the `--add-generator` flag to add it automatically.\n'
+          '\n'
+          '💡 Tip: Adding it as a dev dependency ensures your project stays clean and build-ready.',
         );
         exit(11);
       default:
