@@ -3,10 +3,8 @@
 /// Parameters:
 ///   [error] - The error message or object
 ///   [stackTrace] - The stack trace associated with the exception
-typedef IsolateExceptionFactory = IsolateException Function(
-  Object error,
-  StackTrace stackTrace,
-);
+typedef IsolateExceptionFactory =
+    IsolateException Function(Object error, StackTrace stackTrace);
 
 /// An exception that can be safely transferred between isolates.
 ///
@@ -107,13 +105,13 @@ class IsolateException implements Exception {
   ///
   /// Returns a map containing the exception type, name, error message, and stack trace.
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'type': r'$IsolateException',
-        'name': name,
-        'value': <String, String>{
-          'e': error.toString(),
-          's': stackTrace.toString(),
-        },
-      };
+    'type': r'$IsolateException',
+    'name': name,
+    'value': <String, String>{
+      'e': error.toString(),
+      's': stackTrace.toString(),
+    },
+  };
 
   /// Checks if the given [map] represents a valid [IsolateException].
   ///

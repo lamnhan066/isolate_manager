@@ -14,13 +14,13 @@ class IsolateContactorControllerImplFuture<R, P>
     required void Function()? onDispose,
     required R Function(dynamic)? converter,
     required bool debugMode,
-  })  : _debugMode = debugMode,
-        _converter = converter,
-        _onDispose = onDispose,
-        _delegate = _extractController(params),
-        _initialParams = params is List ? params.first : null,
-        _mainStreamController = StreamController<R>.broadcast(),
-        _isolateStreamController = StreamController<P>.broadcast() {
+  }) : _debugMode = debugMode,
+       _converter = converter,
+       _onDispose = onDispose,
+       _delegate = _extractController(params),
+       _initialParams = params is List ? params.first : null,
+       _mainStreamController = StreamController<R>.broadcast(),
+       _isolateStreamController = StreamController<P>.broadcast() {
     _streamSubscription = _delegate.stream.listen(_handleEvent);
   }
 
@@ -129,6 +129,8 @@ class IsolateContactorControllerImplFuture<R, P>
       default:
         try {
           _mainStreamController.add(_converter?.call(value) ?? value as R);
+          // To catch both Error and Exception
+          // ignore: avoid_catches_without_on_clauses
         } catch (e, stack) {
           _mainStreamController.addError(e, stack);
         }
@@ -147,6 +149,8 @@ class IsolateContactorControllerImplFuture<R, P>
       default:
         try {
           _isolateStreamController.add(value as P);
+          // To catch both Error and Exception
+          // ignore: avoid_catches_without_on_clauses
         } catch (e, stack) {
           _isolateStreamController.addError(e, stack);
         }

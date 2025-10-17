@@ -49,14 +49,14 @@ class IsolateManagerShared {
     this.enableWasmConverter = true,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
-          internalFunction,
-          workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
-          workerConverter: workerConverter,
-          concurrent: concurrent,
-          queueStrategy: queueStrategy,
-          enableWasmConverter: false,
-          isDebug: isDebug,
-        ) {
+         internalFunction,
+         workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
+         workerConverter: workerConverter,
+         concurrent: concurrent,
+         queueStrategy: queueStrategy,
+         enableWasmConverter: false,
+         isDebug: isDebug,
+       ) {
     if (autoStart) start();
   }
 
@@ -150,7 +150,8 @@ class IsolateManagerShared {
       manager: _manager,
       function: function,
       params: params,
-      workerFunction: workerFunction ??
+      workerFunction:
+          workerFunction ??
           (workerMappings[function] == null
               ? null
               // Extract only the basename of the worker function path

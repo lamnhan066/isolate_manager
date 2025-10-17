@@ -16,6 +16,7 @@ abstract class IsolateContactorController<R, P> {
   factory IsolateContactorController(
     /// `params` is the default parameters of the isolate function.
     dynamic params, {
+
     /// `onDispose` is called when the controller is disposed.
     FutureOr<void> Function()? onDispose,
   }) {

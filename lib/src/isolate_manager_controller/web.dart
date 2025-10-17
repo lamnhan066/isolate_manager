@@ -15,15 +15,14 @@ class IsolateManagerControllerImpl<R, P>
   ///
   /// The [params] is a default parameter of a custom isolate function.
   /// `onDispose` will be called when the controller is disposed.
-  IsolateManagerControllerImpl(
-    dynamic params, {
-    void Function()? onDispose,
-  }) : _delegate = params.runtimeType == DedicatedWorkerGlobalScope
-            ? _IsolateManagerWorkerController<R, P>(
+  IsolateManagerControllerImpl(dynamic params, {void Function()? onDispose})
+    : _delegate =
+          params.runtimeType == DedicatedWorkerGlobalScope
+              ? _IsolateManagerWorkerController<R, P>(
                 params as DedicatedWorkerGlobalScope,
                 onDispose: onDispose,
               )
-            : IsolateContactorController<R, P>(params, onDispose: onDispose);
+              : IsolateContactorController<R, P>(params, onDispose: onDispose);
 
   /// Delegation of IsolateContactor.
   final IsolateContactorController<R, P> _delegate;
@@ -62,13 +61,14 @@ class IsolateManagerControllerImpl<R, P>
 class _IsolateManagerWorkerController<R, P>
     implements IsolateContactorController<R, P> {
   _IsolateManagerWorkerController(this.self, {this.onDispose}) {
-    self.onmessage = (MessageEvent event) {
-      dynamic result = event.data.dartify();
-      if (isImTypeSubtype<P>()) {
-        result = ImType.wrap(result as Object);
-      }
-      _streamController.sink.add(result as P);
-    }.toJS;
+    self.onmessage =
+        (MessageEvent event) {
+          dynamic result = event.data.dartify();
+          if (isImTypeSubtype<P>()) {
+            result = ImType.wrap(result as Object);
+          }
+          _streamController.sink.add(result as P);
+        }.toJS;
   }
   final DedicatedWorkerGlobalScope self;
   final void Function()? onDispose;
@@ -122,4 +122,5 @@ class _IsolateManagerWorkerController<R, P>
   @override
   void sendIsolateState(IsolateState state) => throw UnimplementedError();
 }
+
 // coverage:ignore-end

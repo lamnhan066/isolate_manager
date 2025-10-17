@@ -15,8 +15,9 @@ R converterHelper<R>(
     if (isSubtype<R, int>()) {
       effectiveValue = (effectiveValue as num).toInt() as R;
     } else if (isSubtype<R, Iterable<int>>()) {
-      effectiveValue =
-          (effectiveValue as Iterable).cast<num>().map((e) => e.toInt());
+      effectiveValue = (effectiveValue as Iterable).cast<num>().map(
+        (e) => e.toInt(),
+      );
 
       if (isSubtype<R, List<int>>()) {
         effectiveValue = effectiveValue.toList() as R;

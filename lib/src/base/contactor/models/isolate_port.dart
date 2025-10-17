@@ -4,5 +4,5 @@ enum IsolatePort {
   main,
 
   /// The isolate's port.
-  isolate;
+  isolate,
 }

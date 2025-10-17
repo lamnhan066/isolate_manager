@@ -1,3 +1,4 @@
+// For debug only
 // ignore_for_file: avoid_print
 
 @TestOn('chrome')
@@ -12,27 +13,23 @@ import 'utils.dart';
 void main() {
   IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
 
-  test(
-    'benchmark',
-    () async {
-      printDebug(
-        () =>
-            '|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|',
-      );
-      printDebug(() => '|:-:|-:|-:|-:|-:|-:|-:|');
+  test('benchmark', () async {
+    printDebug(
+      () =>
+          '|Fibonacci|Main App|One Isolate|Three Isolates|IsolateManager.runFunction|IsolateManager.run|Isolate.run (Unsupported)|',
+    );
+    printDebug(() => '|:-:|-:|-:|-:|-:|-:|-:|');
 
-      // Warmup: run each part once to trigger JIT
-      await warmup(30);
-      await warmup(33);
-      await warmup(36);
+    // Warmup: run each part once to trigger JIT
+    await warmup(30);
+    await warmup(33);
+    await warmup(36);
 
-      // Run benchmarks
-      await benchmarkFor(30);
-      await benchmarkFor(33);
-      await benchmarkFor(36);
-    },
-    timeout: const Timeout(Duration(seconds: 180)),
-  );
+    // Run benchmarks
+    await benchmarkFor(30);
+    await benchmarkFor(33);
+    await benchmarkFor(36);
+  }, timeout: const Timeout(Duration(seconds: 180)));
 }
 
 /// Run one warmup round to reduce JIT overhead.
@@ -70,9 +67,7 @@ Future<String> execute(
   }
 
   Future<void> runOneIsolate() async {
-    final singleIsolate = IsolateManager<int, int>.create(
-      fibonacciRecursive,
-    );
+    final singleIsolate = IsolateManager<int, int>.create(fibonacciRecursive);
     await singleIsolate.start();
     for (var i = 0; i < iterations; i++) {
       await singleIsolate.compute(fibonacciNumber);
@@ -86,21 +81,16 @@ Future<String> execute(
       concurrent: 3,
     );
     await threeIsolates.start();
-    await Future.wait(
-      [
-        for (int i = 0; i < iterations; i++)
-          threeIsolates.compute(fibonacciNumber),
-      ],
-    );
+    await Future.wait([
+      for (int i = 0; i < iterations; i++)
+        threeIsolates.compute(fibonacciNumber),
+    ]);
     await threeIsolates.stop();
   }
 
   Future<void> runIsolateManagerFunction() async {
     for (var i = 0; i < iterations; i++) {
-      await IsolateManager.runFunction(
-        fibonacciRecursive,
-        fibonacciNumber,
-      );
+      await IsolateManager.runFunction(fibonacciRecursive, fibonacciNumber);
     }
   }
 
@@ -127,8 +117,9 @@ Future<String> execute(
   results['Main App'] = await measure(runMainApp);
   results['One Isolate'] = await measure(runOneIsolate);
   results['Three Isolates'] = await measure(runThreeIsolates);
-  results['IsolateManager.runFunction'] =
-      await measure(runIsolateManagerFunction);
+  results['IsolateManager.runFunction'] = await measure(
+    runIsolateManagerFunction,
+  );
   results['IsolateManager.run'] = await measure(runIsolateManagerRun);
   results['Isolate.run'] = Duration.zero;
 

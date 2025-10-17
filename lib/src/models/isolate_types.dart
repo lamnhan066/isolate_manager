@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
-
 import 'package:isolate_manager/src/models/isolate_exceptions.dart';
+import 'package:meta/meta.dart';
 
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
@@ -14,6 +13,7 @@ import 'package:isolate_manager/src/models/isolate_exceptions.dart';
 ///   - [Map] (wrapped in [ImMap])
 ///
 /// The static [wrap] method wraps a Dart object in the appropriate [ImType].
+@immutable
 sealed class ImType<T extends Object> {
   /// Creates an instance of [ImType] holding the provided [_value].
   const ImType(this._value);
@@ -26,20 +26,22 @@ sealed class ImType<T extends Object> {
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
   static R wrap<R extends ImType<Object>>(Object? object) {
     return switch (object) {
-      final R r => r,
-      final num n => ImNum(n),
-      final String s => ImString(s),
-      final bool b => ImBool(b),
-      final Iterable<dynamic> list => ImList(
-          list.map((e) => wrap(e as Object?)),
-        ),
-      final Map<dynamic, dynamic> map => ImMap(
-          map.map((k, v) => MapEntry(wrap(k as Object?), wrap(v as Object?))),
-        ),
-      _ => throw UnsupportedImTypeException(
-          'Unsupported type ${object.runtimeType} when wrapping an IsolateType',
-        ),
-    } as R;
+          final R r => r,
+          final num n => ImNum(n),
+          final String s => ImString(s),
+          final bool b => ImBool(b),
+          final Iterable<dynamic> list => ImList(
+            list.map((e) => wrap(e as Object?)),
+          ),
+          final Map<dynamic, dynamic> map => ImMap(
+            map.map((k, v) => MapEntry(wrap(k as Object?), wrap(v as Object?))),
+          ),
+          _ =>
+            throw UnsupportedImTypeException(
+              'Unsupported type ${object.runtimeType} when wrapping an IsolateType',
+            ),
+        }
+        as R;
   }
 
   /// The internal wrapped value.
@@ -186,9 +188,7 @@ class ImMap extends _ImTypedMap<Object, Object> {
   ///   [num], [String], [bool], [List], and [Map] that contain these types.
   ///
   /// Throws an [UnsupportedImTypeException] if the object's type is not supported.
-  static ImMap wrap<K extends Object?, V extends Object?>(
-    Map<K, V> object,
-  ) {
+  static ImMap wrap<K extends Object?, V extends Object?>(Map<K, V> object) {
     return ImType.wrap<ImMap>(object);
   }
 

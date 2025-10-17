@@ -7,22 +7,18 @@ import 'package:isolate_manager/src/isolate_worker/isolate_worker_web.dart'
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
-typedef IsolateOnInitCallback<R, P> = FutureOr<void> Function(
-  IsolateManagerController<R, P> controller,
-);
+typedef IsolateOnInitCallback<R, P> =
+    FutureOr<void> Function(IsolateManagerController<R, P> controller);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed only one time
 /// before all events.
-typedef IsolateOnDisposeCallback<R, P> = void Function(
-  IsolateManagerController<R, P> controller,
-);
+typedef IsolateOnDisposeCallback<R, P> =
+    void Function(IsolateManagerController<R, P> controller);
 
 /// A callback for the [IsolateManagerFunction.customFunction] that will be executed every time
 /// the [message] is received from the `sendMessage` or `execute` method.
-typedef IsolateOnEventCallback<R, P> = FutureOr<R> Function(
-  IsolateManagerController<R, P> controller,
-  P message,
-);
+typedef IsolateOnEventCallback<R, P> =
+    FutureOr<R> Function(IsolateManagerController<R, P> controller, P message);
 
 /// A function for the `IsolateManagerFunction.workerFunction`.
 typedef IsolateWorkerFunction<R, P> = FutureOr<R> Function(P message);
@@ -75,13 +71,14 @@ abstract class IsolateManagerFunction {
 
     controller = IsolateManagerController(
       params,
-      onDispose: onDispose == null
-          ? null
-          : () async {
-              onDispose(controller);
-              await subscription?.cancel();
-              await controller.close();
-            },
+      onDispose:
+          onDispose == null
+              ? null
+              : () async {
+                onDispose(controller);
+                await subscription?.cancel();
+                await controller.close();
+              },
     );
 
     await onInit?.call(controller);
@@ -207,5 +204,6 @@ abstract class IsolateManagerFunction {
   static void sharedWorkerFunction(Map<String, Function> map) {
     return sharedWorkerFunctionImpl(map);
   }
+
   // coverage:ignore-end
 }

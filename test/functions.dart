@@ -11,9 +11,7 @@ ImNum throwsIsolateException(ImNum number) {
 
 @isolateManagerWorker
 ImNum throwsUnsupportedImTypeException(ImNum number) {
-  throw const UnsupportedImTypeException(
-    'UnsupportedImTypeException',
-  );
+  throw const UnsupportedImTypeException('UnsupportedImTypeException');
 }
 
 @isolateManagerWorker
@@ -103,6 +101,8 @@ Future<void> isolateFunction(dynamic params) async {
       try {
         final result = fibonacci(message);
         controller.sendResult(result);
+        // To catch both Error and Exception
+        // ignore: avoid_catches_without_on_clauses
       } catch (err, stack) {
         controller.sendResultError(IsolateException(err, stack));
       }
@@ -141,6 +141,8 @@ void isolateCallbackFunction(dynamic params) {
         }
 
         controller.sendResult(jsonEncode(<String, String>{'data': 'data'}));
+        // To catch both Error and Exception
+        // ignore: avoid_catches_without_on_clauses
       } catch (err, stack) {
         controller.sendResultError(IsolateException(err, stack));
       }
@@ -213,9 +215,7 @@ ImList isolateTypeList(ImList numbers) {
 ImMap isolateTypeMap(ImList numbers) {
   return ImMap(
     Map.fromEntries(
-      numbers.unwrap.map(
-        (e) => MapEntry(ImString('$e'), ImNum(e as num)),
-      ),
+      numbers.unwrap.map((e) => MapEntry(ImString('$e'), ImNum(e as num))),
     ),
   );
 }
@@ -223,9 +223,7 @@ ImMap isolateTypeMap(ImList numbers) {
 @isolateManagerWorker
 ImMap isolateTypeMapToMap(ImMap numbers) {
   return ImMap(
-    numbers.toMap().map(
-          (k, v) => MapEntry(ImString('${k.unwrap}'), v),
-        ),
+    numbers.toMap().map((k, v) => MapEntry(ImString('${k.unwrap}'), v)),
   );
 }
 

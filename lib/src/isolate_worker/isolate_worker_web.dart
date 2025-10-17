@@ -24,6 +24,8 @@ Future<void> isolateWorkerImpl<R, P>(
     try {
       final result = await function(message);
       controller.sendResult(result);
+      // To catch both Error and Exception
+      // ignore: avoid_catches_without_on_clauses
     } catch (err, stack) {
       if (err is IsolateException) {
         controller.sendResultError(err);

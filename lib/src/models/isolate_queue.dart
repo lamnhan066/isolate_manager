@@ -6,7 +6,7 @@ import 'package:isolate_manager/src/isolate_manager.dart';
 class IsolateQueue<R, P> {
   /// Use for queuing your `compute`.
   IsolateQueue(this.params, IsolateCallback<R>? callback)
-      : callback = callback ?? _defaultCallback<R>;
+    : callback = callback ?? _defaultCallback<R>;
 
   /// A default callback.
   static bool _defaultCallback<R>(R _) => true;

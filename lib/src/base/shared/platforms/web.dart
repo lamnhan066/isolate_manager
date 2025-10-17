@@ -22,11 +22,12 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
   // Avoid running `wrap` and `unwrap` when the Worker is not available.
   if (!isWorker || (isWorker && workerFunction == null)) {
     debugPrinter(
-      () => isWorker
-          ? 'Worker is available but `workerFunction` is null, '
-              'so `Future` will be used instead'
-          : 'Worker is not available, '
-              'so `Future` will be used instead',
+      () =>
+          isWorker
+              ? 'Worker is available but `workerFunction` is null, '
+                  'so `Future` will be used instead'
+              : 'Worker is not available, '
+                  'so `Future` will be used instead',
       debug: isDebug,
     );
 
@@ -41,20 +42,18 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
     finalParams = finalParams.unwrap;
   }
 
-  var result = await manager.compute(
-    [workerFunction, finalParams, isUseIsolateType],
-    priority: priority,
-  );
+  var result = await manager.compute([
+    workerFunction,
+    finalParams,
+    isUseIsolateType,
+  ], priority: priority);
 
   // Encode to IsolateType.
   if (isImTypeSubtype<R>()) {
     result = ImType.wrap(result);
   }
 
-  return converterHelper<R>(
-    result,
-    enableWasmConverter: enableWasmConverter,
-  );
+  return converterHelper<R>(result, enableWasmConverter: enableWasmConverter);
 }
 
 /// Create a Worker on Web.

@@ -19,15 +19,15 @@ class IsolateContactorInternalWorker<R, P>
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
     super.debugMode,
-  })  : _isolateFunction = isolateFunction,
-        _isolateParam = isolateParam,
-        _isolateContactorController = IsolateContactorControllerImpl(
-          Worker('$workerName.js'.toJS),
-          converter: converter,
-          workerConverter: workerConverter,
-          onDispose: null,
-          debugMode: debugMode,
-        );
+  }) : _isolateFunction = isolateFunction,
+       _isolateParam = isolateParam,
+       _isolateContactorController = IsolateContactorControllerImpl(
+         Worker('$workerName.js'.toJS),
+         converter: converter,
+         workerConverter: workerConverter,
+         onDispose: null,
+         debugMode: debugMode,
+       );
 
   /// Listener for result
   final IsolateContactorController<R, P> _isolateContactorController;

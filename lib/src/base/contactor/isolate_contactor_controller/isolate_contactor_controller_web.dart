@@ -16,7 +16,7 @@ abstract class IsolateContactorControllerImpl<R, P>
     required void Function()? onDispose,
     required IsolateConverter<R> converter, // Converter for native
     required IsolateConverter<R>
-        workerConverter, // Converter for Worker (Web Only)
+    workerConverter, // Converter for Worker (Web Only)
     required bool debugMode,
   }) {
     if (params is StreamController ||

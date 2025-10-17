@@ -14,15 +14,15 @@ class IsolateContactorInternalFuture<R, P>
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
     super.debugMode,
-  })  : _isolateFunction = isolateFunction,
-        _isolateParam = isolateParam,
-        _isolateContactorController = IsolateContactorControllerImpl(
-          StreamController<dynamic>.broadcast(),
-          converter: converter,
-          workerConverter: workerConverter,
-          onDispose: null,
-          debugMode: debugMode,
-        ) {
+  }) : _isolateFunction = isolateFunction,
+       _isolateParam = isolateParam,
+       _isolateContactorController = IsolateContactorControllerImpl(
+         StreamController<dynamic>.broadcast(),
+         converter: converter,
+         workerConverter: workerConverter,
+         onDispose: null,
+         debugMode: debugMode,
+       ) {
     _isolateFunction([_isolateParam, _isolateContactorController]);
   }
 

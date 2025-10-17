@@ -17,15 +17,16 @@ class IsolateContactorControllerImplWorker<R, P>
     required void Function()? onDispose,
     required R Function(dynamic) workerConverter,
     required bool debugMode,
-  })  : _debugMode = debugMode,
-        _workerConverter = workerConverter,
-        _onDispose = onDispose,
-        _delegate = params is List
-            ? (params.last as IsolateContactorControllerImpl).controller
-                as Worker
-            : params as Worker,
-        _initialParams = params is List ? params.first : null,
-        _mainStreamController = StreamController<R>.broadcast() {
+  }) : _debugMode = debugMode,
+       _workerConverter = workerConverter,
+       _onDispose = onDispose,
+       _delegate =
+           params is List
+               ? (params.last as IsolateContactorControllerImpl).controller
+                   as Worker
+               : params as Worker,
+       _initialParams = params is List ? params.first : null,
+       _mainStreamController = StreamController<R>.broadcast() {
     _delegate.onmessage = _handleMessage.toJS;
   }
 
@@ -130,6 +131,8 @@ class IsolateContactorControllerImplWorker<R, P>
       _mainStreamController.addError(
         IsolateException('Unhandled $data from the Isolate'),
       );
+      // To catch both Error and Exception
+      // ignore: avoid_catches_without_on_clauses
     } catch (e, stackTrace) {
       _mainStreamController.addError(
         IsolateException(e, stackTrace),

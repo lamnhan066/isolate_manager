@@ -16,8 +16,8 @@ Future<dynamic> internalFunction(List<dynamic> params) async {
   if (isIsolateTypeParameter) {
     parameter = ImType.wrap(parameter as Object);
   }
-  final completer = Completer<dynamic>()
-    ..complete((params[0] as Function)(parameter));
+  final completer =
+      Completer<dynamic>()..complete((params[0] as Function)(parameter));
   return completer.future;
 }
 

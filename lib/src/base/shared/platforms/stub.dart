@@ -13,14 +13,8 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
   required bool priority,
   required bool enableWasmConverter,
 }) async {
-  final result = await manager.compute(
-    [function, params],
-    priority: priority,
-  );
-  return converterHelper<R>(
-    result,
-    enableWasmConverter: enableWasmConverter,
-  );
+  final result = await manager.compute([function, params], priority: priority);
+  return converterHelper<R>(result, enableWasmConverter: enableWasmConverter);
 }
 
 /// Create a Worker on Web.

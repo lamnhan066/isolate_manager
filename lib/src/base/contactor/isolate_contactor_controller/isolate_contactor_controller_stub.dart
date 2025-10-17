@@ -16,18 +16,20 @@ class IsolateContactorControllerImpl<R, P>
     dynamic params, {
     required void Function()? onDispose,
     required R Function(dynamic)? converter,
+    // For internal use only
     // ignore: avoid_unused_constructor_parameters
     required R Function(dynamic)? workerConverter,
     required bool debugMode,
-  })  : _debugMode = debugMode,
-        _onDispose = onDispose,
-        _converter = converter,
-        _initialParams = params is List ? params.first : null,
-        _delegate = params is List
-            ? IsolateChannel.connectSend(params.last as SendPort)
-            : IsolateChannel.connectReceive(params as ReceivePort),
-        _mainStreamController = StreamController<R>.broadcast(),
-        _isolateStreamController = StreamController<P>.broadcast() {
+  }) : _debugMode = debugMode,
+       _onDispose = onDispose,
+       _converter = converter,
+       _initialParams = params is List ? params.first : null,
+       _delegate =
+           params is List
+               ? IsolateChannel.connectSend(params.last as SendPort)
+               : IsolateChannel.connectReceive(params as ReceivePort),
+       _mainStreamController = StreamController<R>.broadcast(),
+       _isolateStreamController = StreamController<P>.broadcast() {
     _streamSubscription = _delegate.stream.listen(
       _handleEvent,
       onError: _mainStreamController.addError,
@@ -117,6 +119,8 @@ class IsolateContactorControllerImpl<R, P>
       default:
         try {
           _mainStreamController.add(_converter?.call(value) ?? value as R);
+          // To catch both Error and Exception
+          // ignore: avoid_catches_without_on_clauses
         } catch (e, stack) {
           _mainStreamController.addError(e, stack);
         }
@@ -135,6 +139,8 @@ class IsolateContactorControllerImpl<R, P>
       default:
         try {
           _isolateStreamController.add(value as P);
+          // To catch both Error and Exception
+          // ignore: avoid_catches_without_on_clauses
         } catch (e, stack) {
           _isolateStreamController.addError(e, stack);
         }

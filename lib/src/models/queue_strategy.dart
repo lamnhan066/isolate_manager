@@ -110,9 +110,7 @@ class DropOldestStrategy<R, P> extends QueueStrategy<R, P> {
 /// Discard the new incoming computation if the [maxCount] is exceeded.
 class RejectIncomingStrategy<R, P> extends QueueStrategy<R, P> {
   /// Discard the new incoming computation if the [maxCount] is exceeded.
-  RejectIncomingStrategy({
-    super.maxCount = 0,
-  });
+  RejectIncomingStrategy({super.maxCount = 0});
 
   @override
   bool continueIfMaxCountExceeded() {
