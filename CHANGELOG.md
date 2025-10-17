@@ -1,3 +1,8 @@
+## 6.1.1
+
+* Hide the `IsolateManagerCustomWorker` class.
+* Strip --add-generator flag before launching generator.
+
 ## 6.1.0
 
 * Hide the `IsolateManagerController.initialParams` to avoid unexpected access. Because this attribute does nothing so I won't treat it as a breaking change.
