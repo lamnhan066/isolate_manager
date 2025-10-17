@@ -36,8 +36,6 @@ dependency_overrides:
     path: ../
 
 dev_dependencies:
-  isolate_manager_generator:
-    git: https://github.com/lamnhan066/isolate_manager_generator
   flutter_test:
     sdk: flutter
 
