@@ -1,5 +1,7 @@
+// Reason: ImType and its subclasses require custom equality logic for isolate-safe value comparison.
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'package:isolate_manager/src/models/isolate_exceptions.dart';
-import 'package:meta/meta.dart';
 
 /// An abstract wrapper for simple transferable types between the main thread
 /// and worker isolates.
@@ -13,7 +15,6 @@ import 'package:meta/meta.dart';
 ///   - [Map] (wrapped in [ImMap])
 ///
 /// The static [wrap] method wraps a Dart object in the appropriate [ImType].
-@immutable
 sealed class ImType<T extends Object> {
   /// Creates an instance of [ImType] holding the provided [_value].
   const ImType(this._value);
