@@ -1,3 +1,7 @@
+## 6.1.2
+
+* Improve the way to check if the isolate_manager_generator is installed.
+
 ## 6.1.1
 
 * Hide the `IsolateManagerCustomWorker` class.
