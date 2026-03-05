@@ -5,6 +5,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
 import 'package:isolate_manager/src/models/initial_params_mixin.dart';
 import 'package:isolate_manager/src/utils/check_subtype.dart';
+import 'package:isolate_manager/src/utils/extract_array_buffers.dart';
 import 'package:web/web.dart';
 
 /// This method only use to create a custom isolate.
@@ -48,7 +49,8 @@ class IsolateManagerControllerImpl<R, P>
 
   /// Send values from Isolate to the main application (to `onMessage`).
   @override
-  void sendResult(R result) => _delegate.sendResult(result);
+  void sendResult(R result, {List<Object>? transferables}) =>
+      _delegate.sendResult(result, transferables: transferables);
 
   /// Send the `Exception` to the main app.
   @override
@@ -82,13 +84,16 @@ class _IsolateManagerWorkerController<R, P>
 
   /// Send result to the main app
   @override
-  void sendResult(R m) {
-    if (m is ImType) {
-      self.postMessage(
-        <String, Object?>{'type': 'data', 'value': m.unwrap}.jsify(),
-      );
+  void sendResult(R m, {List<Object>? transferables}) {
+    final value = m is ImType ? m.unwrap : m;
+    final payload = <String, Object?>{'type': 'data', 'value': value}.jsify();
+
+    if (transferables != null && transferables.isNotEmpty) {
+      // Extract ArrayBuffers from transferables for zero-copy transfer
+      final jsTransferables = extractArrayBuffers(transferables);
+      self.postMessage(payload, jsTransferables);
     } else {
-      self.postMessage(<String, Object?>{'type': 'data', 'value': m}.jsify());
+      self.postMessage(payload);
     }
   }
 
@@ -117,7 +122,8 @@ class _IsolateManagerWorkerController<R, P>
   Stream<R> get onMessage => throw UnimplementedError();
 
   @override
-  void sendIsolate(dynamic message) => throw UnimplementedError();
+  void sendIsolate(dynamic message, {List<Object>? transferables}) =>
+      throw UnimplementedError();
 
   @override
   void sendIsolateState(IsolateState state) => throw UnimplementedError();

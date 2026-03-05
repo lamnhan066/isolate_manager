@@ -29,7 +29,12 @@ class IsolateManagerController<R, P> {
   Stream<P> get onIsolateMessage => _delegate.onIsolateMessage;
 
   /// Send values from Isolate to the main application (to `onMessage`).
-  void sendResult(R result) => _delegate.sendResult(result);
+  ///
+  /// [transferables] - Optional list of transferable objects (e.g., ByteBuffer, Uint8List)
+  /// that will be transferred instead of copied. Only works on web platform.
+  /// On native platforms, listed buffers are encoded as TransferableTypedData.
+  void sendResult(R result, {List<Object>? transferables}) =>
+      _delegate.sendResult(result, transferables: transferables);
 
   /// Send the `Exception` to the main app.
   void sendResultError(IsolateException exception) =>

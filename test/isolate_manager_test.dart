@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:isolate_manager/src/base/contactor/models/isolate_port.dart';
@@ -589,6 +590,12 @@ void main() {
         final encoded = converterHelper<ImList>(ImList.wrap(iterable));
         expect(encoded, isA<ImList>());
         expect(encoded.unwrap, equals(iterable));
+      });
+
+      test('work with Uint8List', () {
+        final encoded = converterHelper<Uint8List>(<int>[1, 2, 3]);
+        expect(encoded, isA<Uint8List>());
+        expect(encoded, orderedEquals(<int>[1, 2, 3]));
       });
 
       test('work with int', () {
@@ -1447,4 +1454,6 @@ void _addWorkerMappings() {
     isolateNullableInt,
     'workers/isolateNullableInt',
   );
+  IsolateManager.addWorkerMapping(identityBytes, 'workers/identityBytes');
+  IsolateManager.addWorkerMapping(processBytes, 'workers/processBytes');
 }

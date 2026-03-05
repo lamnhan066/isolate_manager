@@ -65,8 +65,11 @@ abstract class IsolateContactor<R, P> {
 
   /// Send message to the `function` for computing
   ///
+  /// [transferables] - Optional list of transferable objects (e.g., ByteBuffer)
+  /// that will be transferred instead of copied.
+  ///
   /// Throw `IsolateContactorException` when error occurs.
-  Future<R> sendMessage(P message);
+  Future<R> sendMessage(P message, {List<Object>? transferables});
 
   /// Listen to the result from the isolate.
   Stream<R> get onMessage;

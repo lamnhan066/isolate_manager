@@ -64,8 +64,16 @@ class IsolateContactorControllerImplFuture<R, P>
   }
 
   @override
-  void sendIsolate(P message) {
+  void sendIsolate(P message, {List<Object>? transferables}) {
     if (_delegate.isClosed) return;
+
+    if (transferables != null && transferables.isNotEmpty) {
+      debugPrinter(
+        () =>
+            '[Main App] transferables ignored in Web Future mode. Set workerName to use Worker transfer lists.',
+        debug: _debugMode,
+      );
+    }
 
     _delegate.sink.add({IsolatePort.isolate: message});
   }
@@ -78,8 +86,16 @@ class IsolateContactorControllerImplFuture<R, P>
   }
 
   @override
-  void sendResult(R message) {
+  void sendResult(R message, {List<Object>? transferables}) {
     if (_delegate.isClosed) return;
+
+    if (transferables != null && transferables.isNotEmpty) {
+      debugPrinter(
+        () =>
+            '[Isolate] transferables ignored in Web Future mode. Set workerName to use Worker transfer lists.',
+        debug: _debugMode,
+      );
+    }
 
     _delegate.sink.add({IsolatePort.main: message});
   }

@@ -13,3 +13,4 @@ export 'src/models/isolate_manager_shared_worker.dart';
 export 'src/models/isolate_manager_worker.dart';
 export 'src/models/isolate_types.dart';
 export 'src/models/queue_strategy.dart';
+export 'src/utils/auto_transfer.dart';

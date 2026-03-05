@@ -75,9 +75,12 @@ class IsolateContactorInternalFuture<R, P>
   }
 
   @override
-  Future<R> sendMessage(P message) async {
+  Future<R> sendMessage(P message, {List<Object>? transferables}) async {
     printDebug(() => '[Main App] Message sent to the Web Future: $message');
-    _isolateContactorController.sendIsolate(message);
+    _isolateContactorController.sendIsolate(
+      message,
+      transferables: transferables,
+    );
     return _isolateContactorController.onMessage.first;
   }
 }

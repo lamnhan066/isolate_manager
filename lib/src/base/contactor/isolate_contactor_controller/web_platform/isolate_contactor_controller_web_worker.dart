@@ -5,6 +5,7 @@ import 'package:isolate_manager/src/base/contactor/isolate_contactor_controller/
 import 'package:isolate_manager/src/base/isolate_contactor.dart';
 import 'package:isolate_manager/src/models/isolate_types.dart';
 import 'package:isolate_manager/src/utils/check_subtype.dart';
+import 'package:isolate_manager/src/utils/extract_array_buffers.dart';
 import 'package:isolate_manager/src/utils/print.dart';
 import 'package:web/web.dart';
 
@@ -50,11 +51,15 @@ class IsolateContactorControllerImplWorker<R, P>
   Stream<R> get onMessage => _mainStreamController.stream;
 
   @override
-  void sendIsolate(P message) {
-    if (message is ImType) {
-      _delegate.postMessage(message.unwrap.jsify());
+  void sendIsolate(P message, {List<Object>? transferables}) {
+    final jsMessage =
+        message is ImType ? message.unwrap.jsify() : message.jsify();
+
+    if (transferables != null && transferables.isNotEmpty) {
+      final jsTransferables = extractArrayBuffers(transferables);
+      _delegate.postMessage(jsMessage, jsTransferables);
     } else {
-      _delegate.postMessage(message.jsify());
+      _delegate.postMessage(jsMessage);
     }
   }
 
@@ -74,7 +79,7 @@ class IsolateContactorControllerImplWorker<R, P>
       throw UnimplementedError('initialized method is not implemented');
 
   @override
-  void sendResult(R message) =>
+  void sendResult(R message, {List<Object>? transferables}) =>
       throw UnimplementedError('sendResult is not implemented');
 
   @override

@@ -693,14 +693,26 @@ class IsolateManager<R, P> {
     P params, {
     IsolateCallback<R>? callback,
     bool priority = false,
-  }) => compute(params, callback: callback, priority: priority);
+    List<Object>? transferables,
+  }) => compute(
+    params,
+    callback: callback,
+    priority: priority,
+    transferables: transferables,
+  );
 
   ///  Similar to the [compute], for who's using IsolateContactor.
   Future<R> sendMessage(
     P params, {
     IsolateCallback<R>? callback,
     bool priority = false,
-  }) => compute(params, callback: callback, priority: priority);
+    List<Object>? transferables,
+  }) => compute(
+    params,
+    callback: callback,
+    priority: priority,
+    transferables: transferables,
+  );
 
   /// Compute isolate manager with [R] is return type.
   ///
@@ -738,10 +750,15 @@ class IsolateManager<R, P> {
     P params, {
     IsolateCallback<R>? callback,
     bool priority = false,
+    List<Object>? transferables,
   }) async {
     await start();
 
-    final queue = IsolateQueue<R, P>(params, callback);
+    final queue = IsolateQueue<R, P>(
+      params,
+      callback,
+      transferables: transferables,
+    );
     queueStrategy.add(queue, addToTop: priority);
     _executeQueue();
 
@@ -795,7 +812,10 @@ class IsolateManager<R, P> {
     );
 
     try {
-      await isolate.sendMessage(queue.params);
+      await isolate.sendMessage(
+        queue.params,
+        transferables: queue.transferables,
+      );
       // To catch both Error and Exception
       // ignore: avoid_catches_without_on_clauses
     } catch (_) {

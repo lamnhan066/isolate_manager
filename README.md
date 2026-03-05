@@ -466,6 +466,85 @@ void main() async {
 
 An `UnsupportedImTypeException` is thrown if `ImList.wrap` or `ImMap.wrap` encounters a type that cannot be converted.
 
+### Zero-Copy Data Transfers (Transferables)
+
+For large `Uint8List` or `ByteBuffer` payloads, pass a `transferables` list to `compute()` to enable zero-copy transport instead of copying bytes across isolate boundaries.
+
+#### Basic usage
+
+```dart
+@pragma('vm:entry-point')
+@isolateManagerWorker
+Uint8List processImage(Uint8List data) {
+  // ... image processing ...
+  return data;
+}
+
+final manager = IsolateManager.create(processImage, workerName: 'processImage');
+await manager.start();
+
+final pixels = Uint8List(1920 * 1080 * 4); // ~8 MB RGBA frame
+
+final result = await manager.compute(
+  pixels,
+  transferables: [pixels.buffer], // zero-copy send
+);
+```
+
+On **native (VM)** the buffer is wrapped in a `TransferableTypedData` and sent O(1) — no byte copying. On **web (dart2js)** the `ArrayBuffer` is transferred via the `postMessage` transfer list, also O(1), and the source buffer is **detached** (its `lengthInBytes` becomes 0) after the call returns.
+
+#### Auto-extraction with `sendResultWithAutoTransfer`
+
+Inside a custom isolate, the `AutoTransferExtension` recursively finds every `Uint8List` / `ByteBuffer` in the result and transfers them automatically — no manual bookkeeping needed:
+
+```dart
+import 'package:isolate_manager/isolate_manager.dart';
+
+@pragma('vm:entry-point')
+void processingWorker(dynamic params) {
+  final controller =
+      IsolateManagerController<Map<String, Object?>, Uint8List>(params);
+
+  controller.onIsolateMessage.listen((input) {
+    final output = Uint8List(input.length);
+    for (var i = 0; i < output.length; i++) {
+      output[i] = (input[i] + 1) % 256;
+    }
+
+    // Finds all Uint8List/ByteBuffer in the map and transfers them zero-copy.
+    controller.sendResultWithAutoTransfer({'result': output, 'size': output.length});
+  });
+
+  controller.initialized();
+}
+```
+
+#### Pros, cons, and platform behaviour
+
+| | Native (VM) | Web — dart2js | Web — dart2wasm |
+|---|---|---|---|
+| **No transferables** | Bytes deep-copied O(n) | Bytes serialised & copied O(n) | Bytes copied O(n) |
+| **`transferables: [data.buffer]`** | Zero-copy via `TransferableTypedData` (O(1) transport; small codec overhead) | Zero-copy via `ArrayBuffer` transfer (O(1)); source buffer detached | ⚠ No benefit — WASM linear memory must be copied to the JS heap regardless |
+| **Pre-built `TransferableTypedData`** | Fastest — skips codec overhead entirely | N/A | N/A |
+
+**Native (VM)**
+
+* ✅ Eliminates the O(n) copy for large buffers; measurable improvement at ~1 MB+.
+* ✅ Pre-building `TransferableTypedData` before calling `compute()` removes the codec overhead and is the fastest option.
+* ⚠ Small buffers (< ~100 KB) may see no net gain or a slight regression due to codec overhead.
+* ⚠ The source buffer is consumed by `TransferableTypedData`; do not reuse the original `Uint8List` after calling `compute()` with it as a transferable.
+
+**Web — dart2js**
+
+* ✅ Source `ArrayBuffer` is transferred in O(1); the worker receives the original memory.
+* ✅ Large speedups (2–10×) for MB-range payloads compared to copy-based transfer.
+* ⚠ Source buffer is **neutered** after `compute()` returns — `data.buffer.lengthInBytes` becomes 0. Keep a reference to the result instead.
+
+**Web — dart2wasm**
+
+* ⚠ WASM uses linear memory that is opaque to the JS engine. Every transfer still requires a copy from the WASM heap to a JS `ArrayBuffer`, so using `transferables` adds codec overhead with no speed benefit.
+* Prefer omitting `transferables` when targeting WASM.
+
 ### Handling Exceptions (Web)
 
 To ensure custom exceptions are correctly propagated from Web Workers:
