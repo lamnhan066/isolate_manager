@@ -45,7 +45,7 @@ class IsolateManagerShared {
     this.workerMappings = const <Function, String>{},
     bool autoStart = true,
     String subPath = '',
-    QueueStrategy<Object, List<Object>>? queueStrategy,
+    QueueStrategy<Object?, List<dynamic>>? queueStrategy,
     this.enableWasmConverter = true,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(

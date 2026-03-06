@@ -331,12 +331,12 @@ class IsolateManager<R, P> {
   static IsolateManagerShared createShared({
     int concurrent = 1,
     bool useWorker = false,
-    Object Function(dynamic)? workerConverter,
+    Object? Function(dynamic)? workerConverter,
     Map<Function, String>? workerMappings,
     bool autoStart = true,
     String subPath = '',
     int maxQueueCount = 0,
-    QueueStrategy<Object, List<Object>>? queueStrategy,
+    QueueStrategy<Object?, List<dynamic>>? queueStrategy,
     bool enableWasmConverter = true,
     bool isDebug = false,
   }) => IsolateManagerShared(
