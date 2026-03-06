@@ -4,11 +4,16 @@
 @TestOn('chrome')
 library;
 
+import 'dart:async';
+import 'dart:math';
+
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
 import 'functions.dart';
 import 'utils.dart';
+
+const samples = 30;
 
 void main() {
   IsolateManager.addWorkerMapping(fibonacciRecursive, 'fibonacciRecursive');
@@ -20,31 +25,39 @@ void main() {
     );
     printDebug(() => '|:-:|-:|-:|-:|-:|-:|-:|');
 
-    // Warmup: run each part once to trigger JIT
-    await warmup(30);
-    await warmup(33);
-    await warmup(36);
+    await warmup(23);
+    await warmup(26);
+    await warmup(29);
 
-    // Run benchmarks
-    await benchmarkFor(30);
-    await benchmarkFor(33);
-    await benchmarkFor(36);
+    await benchmarkFor(23);
+    await benchmarkFor(26);
+    await benchmarkFor(29);
   }, timeout: const Timeout(Duration(seconds: 180)));
 }
 
-/// Run one warmup round to reduce JIT overhead.
 Future<void> warmup(int fibonacciNumber) async {
-  await execute(fibonacciNumber, iterations: 5, warmupOnly: true);
+  final iterations = switch (fibonacciNumber) {
+    23 => 20,
+    26 => 10,
+    29 => 5,
+    _ => 10,
+  };
+
+  await execute(fibonacciNumber, iterations: iterations, warmupOnly: true);
 }
 
-/// Benchmark each method for the given fibonacci number.
 Future<void> benchmarkFor(int fibonacciNumber) async {
-  final result = await execute(fibonacciNumber, iterations: 70);
+  final iterations = switch (fibonacciNumber) {
+    23 => 50,
+    26 => 30,
+    29 => 10,
+    _ => 50,
+  };
+
+  final result = await execute(fibonacciNumber, iterations: iterations);
   printDebug(() => result);
 }
 
-/// Runs different methods with a separate measurement function.
-/// If [warmupOnly] is set, no measurement will be taken.
 Future<String> execute(
   int fibonacciNumber, {
   required int iterations,
@@ -52,12 +65,23 @@ Future<String> execute(
 }) async {
   final results = <String, Duration>{};
 
-  // Use a function to measure elapsed time for an async action.
-  Future<Duration> measure(Future<void> Function() action) async {
-    final watch = Stopwatch()..start();
-    await action();
-    watch.stop();
-    return watch.elapsed;
+  Future<Duration> measureStable(Future<void> Function() action) async {
+    final values = <int>[];
+
+    for (var i = 0; i < samples; i++) {
+      await Future<void>.delayed(Duration.zero); // yield event loop
+
+      final watch = Stopwatch()..start();
+      await action();
+      watch.stop();
+
+      values.add(watch.elapsedMicroseconds);
+    }
+
+    values.sort();
+    final median = values[values.length ~/ 2];
+
+    return Duration(microseconds: median);
   }
 
   Future<void> runMainApp() async {
@@ -68,10 +92,13 @@ Future<String> execute(
 
   Future<void> runOneIsolate() async {
     final singleIsolate = IsolateManager<int, int>.create(fibonacciRecursive);
+
     await singleIsolate.start();
+
     for (var i = 0; i < iterations; i++) {
       await singleIsolate.compute(fibonacciNumber);
     }
+
     await singleIsolate.stop();
   }
 
@@ -80,11 +107,14 @@ Future<String> execute(
       fibonacciRecursive,
       concurrent: 3,
     );
+
     await threeIsolates.start();
+
     await Future.wait([
       for (int i = 0; i < iterations; i++)
         threeIsolates.compute(fibonacciNumber),
     ]);
+
     await threeIsolates.stop();
   }
 
@@ -104,29 +134,41 @@ Future<String> execute(
     }
   }
 
-  if (warmupOnly) {
-    await runMainApp();
-    await runOneIsolate();
-    await runThreeIsolates();
-    await runIsolateManagerFunction();
-    await runIsolateManagerRun();
+  final tests = <String, Future<void> Function()>{
+    'Main App': runMainApp,
+    'One Isolate': runOneIsolate,
+    'Three Isolates': runThreeIsolates,
+    'IsolateManager.runFunction': runIsolateManagerFunction,
+    'IsolateManager.run': runIsolateManagerRun,
+  };
 
+  if (warmupOnly) {
+    for (final fn in tests.values) {
+      await fn();
+    }
     return '';
   }
 
-  results['Main App'] = await measure(runMainApp);
-  results['One Isolate'] = await measure(runOneIsolate);
-  results['Three Isolates'] = await measure(runThreeIsolates);
-  results['IsolateManager.runFunction'] = await measure(
-    runIsolateManagerFunction,
-  );
-  results['IsolateManager.run'] = await measure(runIsolateManagerRun);
+  final entries = tests.entries.toList()..shuffle(Random());
+
+  for (final entry in entries) {
+    results[entry.key] = await measureStable(entry.value);
+  }
+
   results['Isolate.run'] = Duration.zero;
 
-  // Convert durations to average microseconds per iteration
-  String format(Duration d) => d.inMicroseconds.asThousands();
+  String format(Duration d) {
+    final perIteration = d.inMicroseconds ~/ iterations;
+    return perIteration.asThousands();
+  }
 
-  return '|$fibonacciNumber|${format(results['Main App']!)}|${format(results['One Isolate']!)}|${format(results['Three Isolates']!)}|${format(results['IsolateManager.runFunction']!)}|${format(results['IsolateManager.run']!)}|${format(results['Isolate.run']!)}|';
+  return '|$fibonacciNumber|'
+      '${format(results['Main App']!)}|'
+      '${format(results['One Isolate']!)}|'
+      '${format(results['Three Isolates']!)}|'
+      '${format(results['IsolateManager.runFunction']!)}|'
+      '${format(results['IsolateManager.run']!)}|'
+      '${format(results['Isolate.run']!)}|';
 }
 
 void printDebug(Object? Function() log) {
