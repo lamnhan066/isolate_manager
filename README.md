@@ -522,25 +522,25 @@ void processingWorker(dynamic params) {
 #### Pros, cons, and platform behaviour
 
 | | Native (VM) | Web — dart2js | Web — dart2wasm |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **No transferables** | Bytes deep-copied O(n) | Bytes serialised & copied O(n) | Bytes copied O(n) |
 | **`transferables: [data.buffer]`** | Zero-copy via `TransferableTypedData` (O(1) transport; small codec overhead) | Zero-copy via `ArrayBuffer` transfer (O(1)); source buffer detached | ⚠ No benefit — WASM linear memory must be copied to the JS heap regardless |
 | **Pre-built `TransferableTypedData`** | Fastest — skips codec overhead entirely | N/A | N/A |
 
-**Native (VM)**
+**Native (VM):**
 
 * ✅ Eliminates the O(n) copy for large buffers; measurable improvement at ~1 MB+.
 * ✅ Pre-building `TransferableTypedData` before calling `compute()` removes the codec overhead and is the fastest option.
 * ⚠ Small buffers (< ~100 KB) may see no net gain or a slight regression due to codec overhead.
 * ⚠ The source buffer is consumed by `TransferableTypedData`; do not reuse the original `Uint8List` after calling `compute()` with it as a transferable.
 
-**Web — dart2js**
+**Web — dart2js:**
 
 * ✅ Source `ArrayBuffer` is transferred in O(1); the worker receives the original memory.
 * ✅ Large speedups (2–10×) for MB-range payloads compared to copy-based transfer.
 * ⚠ Source buffer is **neutered** after `compute()` returns — `data.buffer.lengthInBytes` becomes 0. Keep a reference to the result instead.
 
-**Web — dart2wasm**
+**Web — dart2wasm:**
 
 * ⚠ WASM uses linear memory that is opaque to the JS engine. Every transfer still requires a copy from the WASM heap to a JS `ArrayBuffer`, so using `transferables` adds codec overhead with no speed benefit.
 * Prefer omitting `transferables` when targeting WASM.
