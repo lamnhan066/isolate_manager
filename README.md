@@ -530,15 +530,15 @@ void processingWorker(dynamic params) {
 
 **Native (VM):**
 
-* ✅ Eliminates the O(n) copy for large buffers; measurable improvement at ~1 MB+.
-* ✅ Pre-building `TransferableTypedData` before calling `compute()` removes the codec overhead and is the fastest option.
+* Eliminates the O(n) copy for large buffers; measurable improvement at ~1 MB+.
+* Pre-building `TransferableTypedData` before calling `compute()` removes the codec overhead and is the fastest option.
 * ⚠️ Small buffers (< ~100 KB) may see no net gain or a slight regression due to codec overhead.
 * ⚠️ The source buffer is consumed by `TransferableTypedData`; do not reuse the original `Uint8List` after calling `compute()` with it as a transferable.
 
 **Web — dart2js:**
 
-* ✅ Source `ArrayBuffer` is transferred in O(1); the worker receives the original memory.
-* ✅ Large speedups (2–10×) for MB-range payloads compared to copy-based transfer.
+* Source `ArrayBuffer` is transferred in O(1); the worker receives the original memory.
+* Large speedups (2–10×) for MB-range payloads compared to copy-based transfer.
 * ⚠️ Source buffer is **neutered** after `compute()` returns — `data.buffer.lengthInBytes` becomes 0. Keep a reference to the result instead.
 
 **Web — dart2wasm:**
@@ -667,31 +667,31 @@ dart run isolate_manager:generate
 
 ## Performance Benchmark
 
-The following benchmarks demonstrate the performance of recursive Fibonacci calculations across different concurrency approaches and environments. Measurements are in microseconds (µs) on a MacBook M1 Pro 14" with 16GB RAM.
+The following benchmarks demonstrate the performance of recursive Fibonacci calculations across different concurrency approaches and environments. Measurements are in microseconds (µs) and represent the **median of 30 samples** to ensure stability. Benchmarked on a MacBook M1 Pro 14" with 16GB RAM.
 
 * **VM (Native)**
 
 | Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run |
 | :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ----------: |
-|     30    |   551,928 |     541,882 |        195,646 |                    553,949 |            547,982 |     538,820 |
-|     33    | 2,273,956 |   2,268,299 |        816,148 |                  2,288,071 |          2,282,269 |   2,271,376 |
-|     36    | 9,761,067 |   9,669,422 |      3,453,328 |                  9,643,678 |          9,606,443 |   9,648,076 |
+|     26    |     1,577 |       1,576 |            572 |                      1,731 |              1,661 |       1,615 |
+|     28    |     4,140 |       4,166 |          1,477 |                      4,188 |              4,178 |       4,132 |
+|     30    |    10,892 |      10,881 |          4,530 |                     11,207 |             10,793 |      10,765 |
 
 * **Chrome (with Worker support, JS compiler)**
 
-| Fibonacci |   Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
-| :-------: | ---------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
-|     30    |  2,274,100 |     573,900 |        211,700 |                  1,160,800 |          1,181,800 |                         0 |
-|     33    |  9,493,100 |   2,330,900 |        821,400 |                  2,860,800 |          2,866,300 |                         0 |
-|     36    | 40,051,000 |   9,756,200 |      3,452,100 |                 10,281,200 |         10,270,300 |                         0 |
+| Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
+| :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
+|     26    |     5,108 |       1,333 |            596 |                      8,607 |              8,797 |                         0 |
+|     28    |    13,486 |       3,256 |          1,340 |                     10,156 |             10,683 |                         0 |
+|     30    |    34,990 |       8,500 |          4,000 |                     15,230 |             15,000 |                         0 |
 
 * **Chrome (with Worker support, WASM compiler)**
 
 | Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
 | :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
-|     30    |   242,701 |     552,800 |        200,300 |                  1,099,100 |          1,081,800 |                         0 |
-|     33    | 1,027,300 |   2,315,700 |        819,800 |                  2,863,700 |          2,852,600 |                         0 |
-|     36    | 4,396,300 |   9,709,700 |      3,446,300 |                 10,284,000 |         10,375,800 |                         0 |
+|     26    |       504 |       1,320 |            594 |                      8,424 |              8,422 |                         0 |
+|     28    |     1,303 |       3,220 |          1,323 |                     10,660 |             10,266 |                         0 |
+|     30    |     3,379 |       8,370 |          3,960 |                     14,800 |             15,010 |                         0 |
 
 For more details, see the [full benchmark information](https://github.com/lamnhan066/isolate_manager/tree/main/benchmark).
 

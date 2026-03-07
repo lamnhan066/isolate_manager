@@ -24,21 +24,21 @@ void main() {
     printDebug(() => '|:-:|-:|-:|-:|-:|-:|-:|');
 
     // Stronger warmup
-    await warmup(23);
     await warmup(26);
-    await warmup(29);
+    await warmup(28);
+    await warmup(30);
 
-    await benchmarkFor(23);
     await benchmarkFor(26);
-    await benchmarkFor(29);
+    await benchmarkFor(28);
+    await benchmarkFor(30);
   }, timeout: const Timeout(Duration(seconds: 180)));
 }
 
 Future<void> warmup(int fibonacciNumber) async {
   final iterations = switch (fibonacciNumber) {
-    23 => 20,
-    26 => 10,
-    29 => 5,
+    26 => 20,
+    28 => 10,
+    30 => 5,
     _ => 10,
   };
 
@@ -47,9 +47,9 @@ Future<void> warmup(int fibonacciNumber) async {
 
 Future<void> benchmarkFor(int fibonacciNumber) async {
   final iterations = switch (fibonacciNumber) {
-    23 => 50,
-    26 => 30,
-    29 => 10,
+    26 => 50,
+    28 => 30,
+    30 => 10,
     _ => 50,
   };
 
