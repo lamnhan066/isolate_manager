@@ -542,6 +542,9 @@
     LateError$fieldNI(fieldName) {
       return new A.LateError("Field '" + fieldName + "' has not been initialized.");
     },
+    LateError$localNI(localName) {
+      return new A.LateError("Local '" + localName + "' has not been initialized.");
+    },
     LateError$fieldAI(fieldName) {
       return new A.LateError("Field '" + fieldName + "' has already been initialized.");
     },
@@ -1758,8 +1761,37 @@
     initHooks_closure1: function initHooks_closure1(t0) {
       this.prototypeForTag = t0;
     },
+    throwLateFieldNI(fieldName) {
+      throw A.initializeExceptionWrapper(A.LateError$fieldNI(fieldName), new Error());
+    },
+    throwLateFieldAI(fieldName) {
+      throw A.initializeExceptionWrapper(A.LateError$fieldAI(fieldName), new Error());
+    },
+    throwLateFieldADI(fieldName) {
+      throw A.initializeExceptionWrapper(A.LateError$fieldADI(fieldName), new Error());
+    },
+    _Cell$named(_name) {
+      var t1 = new A._Cell(_name);
+      t1._Cell$named$1(_name);
+      return t1;
+    },
+    _Cell: function _Cell(t0) {
+      this.__late_helper$_name = t0;
+      this._value = null;
+    },
     _UnmodifiableNativeByteBufferView$(_data) {
       return new A._UnmodifiableNativeByteBufferView(_data);
+    },
+    _checkLength($length) {
+      if (!A._isInt($length))
+        throw A.wrapException(A.ArgumentError$("Invalid length " + A.S($length), null));
+      return $length;
+    },
+    NativeUint8List_NativeUint8List($length) {
+      return A.NativeUint8List__createLength(A._checkLength($length));
+    },
+    NativeUint8List__createLength(arg) {
+      return new Uint8Array(arg);
     },
     _isInvalidArrayIndex(index) {
       return index >>> 0 !== index;
@@ -5189,8 +5221,8 @@
       this.index = t0;
       this._core$_name = t1;
     },
-    IsolateManagerController$(params, $R, $P) {
-      return new A.IsolateManagerController(A.IsolateManagerControllerImpl$(params, null, $R, $P), $R._eval$1("@<0>")._bind$1($P)._eval$1("IsolateManagerController<1,2>"));
+    IsolateManagerController$(params, onDispose, $R, $P) {
+      return new A.IsolateManagerController(A.IsolateManagerControllerImpl$(params, onDispose, $R, $P), $R._eval$1("@<0>")._bind$1($P)._eval$1("IsolateManagerController<1,2>"));
     },
     IsolateManagerController: function IsolateManagerController(t0, t1) {
       this._delegate = t0;
@@ -5220,37 +5252,46 @@
     },
     _IsolateManagerControllerImpl_Object_InitialParamsMixin: function _IsolateManagerControllerImpl_Object_InitialParamsMixin() {
     },
-    isolateWorkerImpl($function, onInit, $R, $P) {
+    IsolateManagerFunction_customFunction(params, onEvent, $R, $P) {
+      return A.IsolateManagerFunction_customFunction$body(params, onEvent, $R, $P);
+    },
+    IsolateManagerFunction_customFunction$body(params, onEvent, $R, $P) {
       var $async$goto = 0,
         $async$completer = A._makeAsyncAwaitCompleter(type$.void),
-        controller, t1;
-      var $async$isolateWorkerImpl = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
+        t1, controller;
+      var $async$IsolateManagerFunction_customFunction = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
         if ($async$errorCode === 1)
           return A._asyncRethrow($async$result, $async$completer);
         for (;;)
           switch ($async$goto) {
             case 0:
               // Function start
-              controller = A.IsolateManagerController$(A.getProperty(A.staticInteropGlobalContext(), "self", type$.JSObject), $R, $P);
-              t1 = onInit == null ? null : onInit.call$1(controller);
+              controller = A._Cell$named("controller");
+              controller.set$value(A.IsolateManagerController$(params, null, $R, $P));
               $async$goto = 2;
-              return A._asyncAwait(A._wrapAwaitedExpression(t1, type$.void), $async$isolateWorkerImpl);
+              return A._asyncAwait(A._wrapAwaitedExpression(null, type$.void), $async$IsolateManagerFunction_customFunction);
             case 2:
               // returning from await.
-              controller.get$onIsolateMessage().listen$1(new A.isolateWorkerImpl_closure($function, controller, $P, $R));
-              controller.initialized$0();
+              t1 = $R._eval$1("@<0>")._bind$1($P)._eval$1("IsolateManagerController<1,2>");
+              controller.readLocal$1$0(t1).get$onIsolateMessage().listen$1(new A.IsolateManagerFunction_customFunction_closure(onEvent, controller, true, true, $P, $R));
+              controller.readLocal$1$0(t1).initialized$0();
               // implicit return
               return A._asyncReturn(null, $async$completer);
           }
       });
-      return A._asyncStartSync($async$isolateWorkerImpl, $async$completer);
+      return A._asyncStartSync($async$IsolateManagerFunction_customFunction, $async$completer);
     },
-    isolateWorkerImpl_closure: function isolateWorkerImpl_closure(t0, t1, t2, t3) {
+    IsolateManagerFunction_customWorkerFunction($function) {
+      return A.customWorkerFunctionImpl($function);
+    },
+    IsolateManagerFunction_customFunction_closure: function IsolateManagerFunction_customFunction_closure(t0, t1, t2, t3, t4, t5) {
       var _ = this;
-      _.$function = t0;
+      _.onEvent = t0;
       _.controller = t1;
-      _.P = t2;
-      _.R = t3;
+      _.autoHandleResult = t2;
+      _.autoHandleException = t3;
+      _.P = t4;
+      _.R = t5;
     },
     InitialParamsMixin: function InitialParamsMixin() {
     },
@@ -5348,21 +5389,21 @@
     ImType_wrap_closure0: function ImType_wrap_closure0() {
     },
     ImNum: function ImNum(t0) {
-      this._value = t0;
+      this._isolate_types$_value = t0;
     },
     ImString: function ImString(t0) {
-      this._value = t0;
+      this._isolate_types$_value = t0;
     },
     ImBool: function ImBool(t0) {
-      this._value = t0;
+      this._isolate_types$_value = t0;
     },
     ImList: function ImList(t0, t1) {
       this._list = t0;
-      this._value = t1;
+      this._isolate_types$_value = t1;
     },
     ImMap: function ImMap(t0, t1) {
       this._isolate_types$_map = t0;
-      this._value = t1;
+      this._isolate_types$_value = t1;
     },
     _ImTypedIterable: function _ImTypedIterable() {
     },
@@ -5374,14 +5415,24 @@
     _ImTypedMap_unwrap_closure: function _ImTypedMap_unwrap_closure(t0) {
       this.$this = t0;
     },
-    throwLateFieldNI(fieldName) {
-      throw A.initializeExceptionWrapper(A.LateError$fieldNI(fieldName), new Error());
+    processBytes(data) {
+      var t2, i, t3,
+        t1 = data.length,
+        result = A.NativeUint8List_NativeUint8List(t1);
+      for (t2 = result.$flags | 0, i = 0; i < t1; ++i) {
+        t3 = B.JSInt_methods.$mod(data[i] + 1, 256);
+        t2 & 2 && A.throwUnsupportedOperation(result);
+        if (!(i < result.length))
+          return A.ioore(result, i);
+        result[i] = t3;
+      }
+      return result;
     },
-    throwLateFieldAI(fieldName) {
-      throw A.initializeExceptionWrapper(A.LateError$fieldAI(fieldName), new Error());
+    isolateFunctionBytes(params) {
+      var t1 = type$.Uint8List;
+      A.IsolateManagerFunction_customFunction(params, new A.isolateFunctionBytes_closure(), t1, t1);
     },
-    throwLateFieldADI(fieldName) {
-      throw A.initializeExceptionWrapper(A.LateError$fieldADI(fieldName), new Error());
+    isolateFunctionBytes_closure: function isolateFunctionBytes_closure() {
     },
     Recipe_isDigit(code) {
       return code >= 48 && code <= 57;
@@ -5405,15 +5456,15 @@
         return A.IsolateContactorControllerImplFuture$(params, converter, debugMode, onDispose, $R, $P);
       return A.IsolateContactorControllerImplWorker$(params, debugMode, onDispose, workerConverter, $R, $P);
     },
-    IsolateManagerFunction_workerFunction($function, $R, $P) {
-      return A.isolateWorkerImpl($function, null, $R, $P);
-    },
     converterHelper(value, customConverter, enableWasmConverter, $R) {
       var t1 = customConverter == null ? null : customConverter.call$1(value);
       return t1 == null ? $R._as(value) : t1;
     },
     unmangleGlobalNameIfPreservedAnyways($name) {
       return init.mangledGlobalNames[$name];
+    },
+    customWorkerFunctionImpl($function) {
+      $function.call$1(A.getProperty(A.staticInteropGlobalContext(), "self", type$.JSObject));
     },
     isSubtype0($S, $T) {
       return $T._eval$1("List<0>")._is(A._setArrayType([], $S._eval$1("JSArray<0>")));
@@ -5438,11 +5489,7 @@
     debugPrinter(log, debug) {
     },
     main() {
-      var t1 = type$.Uint8List;
-      A.IsolateManagerFunction_workerFunction(A.functions__identityBytes$closure(), t1, t1);
-    },
-    identityBytes(data) {
-      return data;
+      A.IsolateManagerFunction_customWorkerFunction(A.functions__isolateFunctionBytes$closure());
     }
   },
   B = {};
@@ -5697,6 +5744,17 @@
       factor = Math.pow(2, floorLog2);
       scaled = absolute < 1 ? absolute / factor : factor / absolute;
       return ((scaled * 9007199254740992 | 0) + (scaled * 3542243181176521 | 0)) * 599197 + floorLog2 * 1259 & 536870911;
+    },
+    $mod(receiver, other) {
+      var result = receiver % other;
+      if (result === 0)
+        return 0;
+      if (result > 0)
+        return result;
+      if (other < 0)
+        return result - other;
+      else
+        return result + other;
     },
     _isInt32$1(receiver, value) {
       return (value | 0) === value;
@@ -6551,6 +6609,23 @@
     },
     $signature: 12
   };
+  A._Cell.prototype = {
+    _Cell$named$1(_name) {
+      this._value = this;
+    },
+    readLocal$1$0($T) {
+      return this._readLocal$0();
+    },
+    _readLocal$0() {
+      var t1 = this._value;
+      if (t1 === this)
+        throw A.wrapException(A.LateError$localNI(this.__late_helper$_name));
+      return t1;
+    },
+    set$value(v) {
+      this._value = v;
+    }
+  };
   A.NativeByteBuffer.prototype = {
     get$runtimeType(receiver) {
       return B.Type_ByteBuffer_rqD;
@@ -6804,13 +6879,13 @@
     call$0() {
       this.callback.call$0();
     },
-    $signature: 1
+    $signature: 2
   };
   A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback.prototype = {
     call$0() {
       this.callback.call$0();
     },
-    $signature: 1
+    $signature: 2
   };
   A._TimerImpl.prototype = {
     _TimerImpl$2(milliseconds, callback) {
@@ -6870,7 +6945,7 @@
     call$1(result) {
       return this.bodyFunction.call$2(0, result);
     },
-    $signature: 2
+    $signature: 1
   };
   A._awaitOnObject_closure0.prototype = {
     call$2(error, stackTrace) {
@@ -7192,7 +7267,7 @@
     call$0() {
       this.cleanUp.call$1(this.cleanUpValue);
     },
-    $signature: 1
+    $signature: 2
   };
   A.Future_wait_closure.prototype = {
     call$1(value) {
@@ -7240,7 +7315,7 @@
     call$0() {
       this.cleanUp.call$1(this.value);
     },
-    $signature: 1
+    $signature: 2
   };
   A._Completer.prototype = {
     completeError$2(error, stackTrace) {
@@ -8871,7 +8946,7 @@
     call$1(r) {
       return this.completer.complete$1(r);
     },
-    $signature: 2
+    $signature: 1
   };
   A.promiseToFuture_closure0.prototype = {
     call$1(e) {
@@ -8879,7 +8954,7 @@
         return this.completer.completeError$1(A.NullRejectionException$(e === undefined));
       return this.completer.completeError$1(e);
     },
-    $signature: 2
+    $signature: 1
   };
   A.dartify_convert.prototype = {
     call$1(o) {
@@ -9348,14 +9423,14 @@
     $signature: 20
   };
   A._IsolateManagerControllerImpl_Object_InitialParamsMixin.prototype = {$isInitialParamsMixin: 1};
-  A.isolateWorkerImpl_closure.prototype = {
+  A.IsolateManagerFunction_customFunction_closure.prototype = {
     call$1(message) {
-      return this.$call$body$isolateWorkerImpl_closure(message);
+      return this.$call$body$IsolateManagerFunction_customFunction_closure(message);
     },
-    $call$body$isolateWorkerImpl_closure(message) {
+    $call$body$IsolateManagerFunction_customFunction_closure(message) {
       var $async$goto = 0,
         $async$completer = A._makeAsyncAwaitCompleter(type$.void),
-        $async$handler = 1, $async$errorStack = [], $async$self = this, result, err, stack, exception, t1, $async$exception;
+        $async$handler = 1, $async$errorStack = [], $async$self = this, value, err, stack, t1, t2, t3, exception, $async$exception;
       var $async$call$1 = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
         if ($async$errorCode === 1) {
           $async$errorStack.push($async$result);
@@ -9366,12 +9441,16 @@
             case 0:
               // Function start
               $async$handler = 3;
+              t1 = $async$self.controller;
+              t2 = $async$self.R;
+              t3 = t2._eval$1("@<0>")._bind$1($async$self.P)._eval$1("IsolateManagerController<1,2>");
               $async$goto = 6;
-              return A._asyncAwait(A._wrapAwaitedExpression($async$self.$function.call$1(message), $async$self.R), $async$call$1);
+              return A._asyncAwait(A._wrapAwaitedExpression($async$self.onEvent.call$2(t1.readLocal$1$0(t3), message), t2), $async$call$1);
             case 6:
               // returning from await.
-              result = $async$result;
-              $async$self.controller.sendResult$1(result);
+              value = $async$result;
+              if ($async$self.autoHandleResult)
+                t1.readLocal$1$0(t3).sendResult$1(value);
               $async$handler = 1;
               // goto after finally
               $async$goto = 5;
@@ -9382,11 +9461,10 @@
               $async$exception = $async$errorStack.pop();
               err = A.unwrapException($async$exception);
               stack = A.getTraceFromException($async$exception);
-              t1 = $async$self.controller;
-              if (err instanceof A.IsolateException)
-                t1.sendResultError$1(err);
+              if ($async$self.autoHandleException)
+                $async$self.controller.readLocal$1$0($async$self.R._eval$1("@<0>")._bind$1($async$self.P)._eval$1("IsolateManagerController<1,2>")).sendResultError$1(A.IsolateException$(err, stack, ""));
               else
-                t1.sendResultError$1(A.IsolateException$(err, stack, ""));
+                throw $async$exception;
               // goto after finally
               $async$goto = 5;
               break;
@@ -9431,23 +9509,23 @@
   };
   A.ImType.prototype = {
     get$unwrap() {
-      return this._value;
+      return this._isolate_types$_value;
     },
     $eq(_, other) {
       var t1, _this = this;
       if (other == null)
         return false;
       if (_this !== other)
-        t1 = A._instanceType(_this)._eval$1("ImType<ImType.T>")._is(other) && _this.get$runtimeType(0) === other.get$runtimeType(0) && J.$eq$(_this._value, other._value);
+        t1 = A._instanceType(_this)._eval$1("ImType<ImType.T>")._is(other) && _this.get$runtimeType(0) === other.get$runtimeType(0) && J.$eq$(_this._isolate_types$_value, other._isolate_types$_value);
       else
         t1 = true;
       return t1;
     },
     get$hashCode(_) {
-      return J.get$hashCode$(this._value);
+      return J.get$hashCode$(this._isolate_types$_value);
     },
     toString$0(_) {
-      return "ImType(" + A.S(this._value) + ")";
+      return "ImType(" + A.S(this._isolate_types$_value) + ")";
     }
   };
   A.ImType_wrap_closure.prototype = {
@@ -9465,17 +9543,17 @@
   };
   A.ImNum.prototype = {
     toString$0(_) {
-      return "ImNum(" + A.S(this._value) + ")";
+      return "ImNum(" + A.S(this._isolate_types$_value) + ")";
     }
   };
   A.ImString.prototype = {
     toString$0(_) {
-      return "ImString(" + this._value + ")";
+      return "ImString(" + this._isolate_types$_value + ")";
     }
   };
   A.ImBool.prototype = {
     toString$0(_) {
-      return "ImBool(" + this._value + ")";
+      return "ImBool(" + this._isolate_types$_value + ")";
     }
   };
   A.ImList.prototype = {
@@ -9572,6 +9650,12 @@
       return A._instanceType(this.$this)._eval$1("MapEntry<_ImTypedMap.K,_ImTypedMap.V>(ImType<_ImTypedMap.K>,ImType<_ImTypedMap.V>)");
     }
   };
+  A.isolateFunctionBytes_closure.prototype = {
+    call$2(controller, message) {
+      return A.processBytes(message);
+    },
+    $signature: 23
+  };
   (function aliases() {
     var _ = J.LegacyJavaScriptObject.prototype;
     _.super$LegacyJavaScriptObject$toString = _.toString$0;
@@ -9589,10 +9673,10 @@
     _static_1(A, "async__AsyncRun__scheduleImmediateWithSetImmediate$closure", "_AsyncRun__scheduleImmediateWithSetImmediate", 5);
     _static_1(A, "async__AsyncRun__scheduleImmediateWithTimer$closure", "_AsyncRun__scheduleImmediateWithTimer", 5);
     _static_0(A, "async___startMicrotaskLoop$closure", "_startMicrotaskLoop", 0);
-    _static_1(A, "async___nullDataHandler$closure", "_nullDataHandler", 2);
+    _static_1(A, "async___nullDataHandler$closure", "_nullDataHandler", 1);
     _static_2(A, "async___nullErrorHandler$closure", "_nullErrorHandler", 4);
     _static_0(A, "async___nullDoneHandler$closure", "_nullDoneHandler", 0);
-    _static(A, "async___rootScheduleMicrotask$closure", 4, null, ["call$4"], ["_rootScheduleMicrotask"], 23, 0);
+    _static(A, "async___rootScheduleMicrotask$closure", 4, null, ["call$4"], ["_rootScheduleMicrotask"], 24, 0);
     _instance_2_u(A._Future.prototype, "get$_completeError", "_completeError$2", 4);
     _instance_0_u(A._DoneStreamSubscription.prototype, "get$_onMicrotask", "_onMicrotask$0", 0);
     _instance_1_u(A.IsolateContactorControllerImplFuture.prototype, "get$_handleEvent", "_handleEvent$1", 18);
@@ -9601,23 +9685,23 @@
       return A.IsolateException___new_tearOff(error, B._StringStackTrace_OdL, "");
     }, function(error, stackTrace) {
       return A.IsolateException___new_tearOff(error, stackTrace, "");
-    }], 24, 0);
+    }], 25, 0);
     _static(A, "isolate_exceptions_UnsupportedImTypeException___new_tearOff$closure", 1, null, ["call$2", "call$1"], ["UnsupportedImTypeException___new_tearOff", function(error) {
       return A.UnsupportedImTypeException___new_tearOff(error, B._StringStackTrace_OdL);
-    }], 25, 0);
+    }], 26, 0);
+    _static_1(A, "functions__isolateFunctionBytes$closure", "isolateFunctionBytes", 1);
     _static(A, "converter__converterHelper$closure", 1, null, ["call$1$3$customConverter$enableWasmConverter", "call$1", "call$1$1"], ["converterHelper", function(value) {
       return A.converterHelper(value, null, true, type$.dynamic);
     }, function(value, $R) {
       return A.converterHelper(value, null, true, $R);
-    }], 26, 0);
-    _static_1(A, "functions__identityBytes$closure", "identityBytes", 27);
+    }], 27, 0);
   })();
   (function inheritance() {
     var _mixinHard = hunkHelpers.mixinHard,
       _inherit = hunkHelpers.inherit,
       _inheritMany = hunkHelpers.inheritMany;
     _inherit(A.Object, null);
-    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Stream, A.CastStreamSubscription, A.Error, A.Closure, A.SentinelValue, A.Iterable, A.ListIterator, A.MappedIterator, A.FixedLengthListMixin, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapEntryIterator, A._UnmodifiableNativeByteBufferView, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._BufferingStreamSubscription, A._BroadcastStreamController, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamSinkWrapper, A._DelayedEvent, A._DelayedDone, A._PendingEvents, A._DoneStreamSubscription, A._StreamIterator, A._ZoneFunction, A._Zone, A._HashMapKeyIterator, A.ListBase, A.DateTime, A.Duration, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.MapEntry, A.Null, A._StringStackTrace, A.StringBuffer, A.NullRejectionException, A.IsolateContactorControllerImplFuture, A.IsolateContactorControllerImplWorker, A.IsolateManagerController, A._IsolateManagerControllerImpl_Object_InitialParamsMixin, A._IsolateManagerWorkerController, A.InitialParamsMixin, A.IsolateException, A.ImType]);
+    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Stream, A.CastStreamSubscription, A.Error, A.Closure, A.SentinelValue, A.Iterable, A.ListIterator, A.MappedIterator, A.FixedLengthListMixin, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapEntryIterator, A._Cell, A._UnmodifiableNativeByteBufferView, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._BufferingStreamSubscription, A._BroadcastStreamController, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamSinkWrapper, A._DelayedEvent, A._DelayedDone, A._PendingEvents, A._DoneStreamSubscription, A._StreamIterator, A._ZoneFunction, A._Zone, A._HashMapKeyIterator, A.ListBase, A.DateTime, A.Duration, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.MapEntry, A.Null, A._StringStackTrace, A.StringBuffer, A.NullRejectionException, A.IsolateContactorControllerImplFuture, A.IsolateContactorControllerImplWorker, A.IsolateManagerController, A._IsolateManagerControllerImpl_Object_InitialParamsMixin, A._IsolateManagerWorkerController, A.InitialParamsMixin, A.IsolateException, A.ImType]);
     _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JavaScriptBigInt, J.JavaScriptSymbol, J.JSNumber, J.JSString]);
     _inheritMany(J.JavaScriptObject, [J.LegacyJavaScriptObject, J.JSArray, A.NativeByteBuffer, A.NativeTypedData]);
     _inheritMany(J.LegacyJavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);
@@ -9626,13 +9710,13 @@
     _inheritMany(J.JSNumber, [J.JSInt, J.JSNumNotInt]);
     _inheritMany(A.Stream, [A.CastStream, A._StreamImpl]);
     _inheritMany(A.Error, [A.LateError, A.NotNullableError, A.TypeError, A.JsNoSuchMethodError, A.UnknownJsTypeError, A.RuntimeError, A._Error, A.AssertionError, A.ArgumentError, A.UnsupportedError, A.UnimplementedError, A.StateError, A.ConcurrentModificationError]);
-    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.Instantiation, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A.Future_wait_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A.Stream_length_closure, A.MapBase_entries_closure, A.jsify__convert, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A._IsolateManagerWorkerController_closure, A.isolateWorkerImpl_closure, A.ImType_wrap_closure, A._ImTypedIterable_unwrap_closure]);
+    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.Instantiation, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A.Future_wait_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A.Stream_length_closure, A.MapBase_entries_closure, A.jsify__convert, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A._IsolateManagerWorkerController_closure, A.IsolateManagerFunction_customFunction_closure, A.ImType_wrap_closure, A._ImTypedIterable_unwrap_closure]);
     _inheritMany(A.Closure0Args, [A.nullFuture_closure, A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A.Future_wait_handleError_closure, A.Future_wait__closure, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A.Stream_length_closure0, A._BufferingStreamSubscription__sendError_sendError, A._BufferingStreamSubscription__sendDone_sendDone, A._PendingEvents_schedule_closure, A._RootZone_bindCallback_closure, A._RootZone_bindCallbackGuarded_closure, A._rootHandleError_closure, A.IsolateContactorControllerImplFuture_sendResult_closure, A.IsolateContactorControllerImplFuture__handleMainPort_closure, A.IsolateContactorControllerImplFuture__handleIsolatePort_closure, A.IsolateContactorControllerImplWorker__handleMessage_closure]);
     _inheritMany(A.Iterable, [A.EfficientLengthIterable, A.MappedIterable, A._KeysOrValues, A._SyncStarIterable]);
     _inheritMany(A.EfficientLengthIterable, [A.ListIterable, A.LinkedHashMapKeysIterable, A.LinkedHashMapEntriesIterable, A._HashMapKeyIterable]);
     _inherit(A.EfficientLengthMappedIterable, A.MappedIterable);
     _inherit(A.MappedListIterable, A.ListIterable);
-    _inheritMany(A.Closure2Args, [A.ConstantMap_map_closure, A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A.Future_wait_handleError, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A.MapBase_mapToString_closure, A.ImType_wrap_closure0, A._ImTypedMap_unwrap_closure]);
+    _inheritMany(A.Closure2Args, [A.ConstantMap_map_closure, A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A.Future_wait_handleError, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A.MapBase_mapToString_closure, A.ImType_wrap_closure0, A._ImTypedMap_unwrap_closure, A.isolateFunctionBytes_closure]);
     _inherit(A.ConstantStringMap, A.ConstantMap);
     _inherit(A.Instantiation1, A.Instantiation);
     _inherit(A.NullError, A.TypeError);
@@ -9675,7 +9759,7 @@
     typeUniverse: {eC: new Map(), tR: {}, eT: {}, tPV: {}, sEA: []},
     mangledGlobalNames: {int: "int", double: "double", num: "num", String: "String", bool: "bool", Null: "Null", List: "List", Object: "Object", Map: "Map", JSObject: "JSObject"},
     mangledNames: {},
-    types: ["~()", "Null()", "~(@)", "String()", "~(Object,StackTrace)", "~(~())", "Null(@)", "Object?(Object?)", "~(Object?)", "Future<~>()", "@(@)", "@(@,String)", "@(String)", "Null(~())", "Null(@,StackTrace)", "~(int,@)", "Null(Object,StackTrace)", "~(Object?,Object?)", "Future<~>(@)", "~(JSObject)", "Null(JSObject)", "ImType<Object>(@)", "MapEntry<ImType<Object>,ImType<Object>>(@,@)", "~(Zone?,ZoneDelegate?,Zone,~())", "IsolateException(Object[StackTrace,String])", "UnsupportedImTypeException(Object[StackTrace])", "0^(@{customConverter:0^(@)?,enableWasmConverter:bool})<Object?>", "Uint8List(Uint8List)"],
+    types: ["~()", "~(@)", "Null()", "String()", "~(Object,StackTrace)", "~(~())", "Null(@)", "Object?(Object?)", "~(Object?)", "Future<~>()", "@(@)", "@(@,String)", "@(String)", "Null(~())", "Null(@,StackTrace)", "~(int,@)", "Null(Object,StackTrace)", "~(Object?,Object?)", "Future<~>(@)", "~(JSObject)", "Null(JSObject)", "ImType<Object>(@)", "MapEntry<ImType<Object>,ImType<Object>>(@,@)", "Uint8List(IsolateManagerController<Uint8List,Uint8List>,Uint8List)", "~(Zone?,ZoneDelegate?,Zone,~())", "IsolateException(Object[StackTrace,String])", "UnsupportedImTypeException(Object[StackTrace])", "0^(@{customConverter:0^(@)?,enableWasmConverter:bool})<Object?>"],
     interceptorsByTag: null,
     leafTags: null,
     arrayRti: Symbol("$ti")

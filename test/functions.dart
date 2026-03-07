@@ -290,3 +290,16 @@ Uint8List processBytes(Uint8List data) {
   }
   return result;
 }
+
+@isolateManagerCustomWorker
+void isolateFunctionBytes(dynamic params) {
+  IsolateManagerFunction.customFunction<Uint8List, Uint8List>(
+    params,
+    onEvent: (
+      IsolateManagerController<Uint8List, Uint8List> controller,
+      Uint8List message,
+    ) {
+      return processBytes(message);
+    },
+  );
+}

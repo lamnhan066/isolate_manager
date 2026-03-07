@@ -35,6 +35,11 @@ class IsolateManager<R, P> {
   /// The conversion pipeline applies WASM conversions first, then passes results through
   /// any custom converter functions provided.
   ///
+  /// When [enableWasmTransferables] is `false` (default), `transferables` are omitted
+  /// when targeting WebAssembly (WASM) to avoid unnecessary overhead, as WASM does not
+  /// benefit from zero-copy transfers. Set to `true` to force the use of transferables
+  /// even on WASM.
+  ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
   ///   - [UnlimitedStrategy] - default.
@@ -51,6 +56,7 @@ class IsolateManager<R, P> {
     this.workerConverter,
     QueueStrategy<R, P>? queueStrategy,
     this.enableWasmConverter = true,
+    this.enableWasmTransferables = false,
     this.isDebug = false,
   }) : isCustomIsolate = false,
        queueStrategy = queueStrategy ?? UnlimitedStrategy(),
@@ -76,6 +82,11 @@ class IsolateManager<R, P> {
   /// The conversion pipeline applies WASM conversions first, then passes results through
   /// any custom converter functions provided.
   ///
+  /// When [enableWasmTransferables] is `false` (default), `transferables` are omitted
+  /// when targeting WebAssembly (WASM) to avoid unnecessary overhead, as WASM does not
+  /// benefit from zero-copy transfers. Set to `true` to force the use of transferables
+  /// even on WASM.
+  ///
   /// Control the Queue strategy via [queueStrategy] with the following basic
   /// strategies:
   ///   - [UnlimitedStrategy] - default.
@@ -92,6 +103,7 @@ class IsolateManager<R, P> {
     this.workerConverter,
     QueueStrategy<R, P>? queueStrategy,
     this.enableWasmConverter = true,
+    this.enableWasmTransferables = false,
     this.isDebug = false,
   }) : isCustomIsolate = true,
        queueStrategy = queueStrategy ?? UnlimitedStrategy(),
@@ -163,6 +175,7 @@ class IsolateManager<R, P> {
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
     bool enableWasmConverter = true,
+    bool enableWasmTransferables = false,
     bool isDebug = false,
   }) {
     return runFunction<R, Object?>(
@@ -171,6 +184,8 @@ class IsolateManager<R, P> {
       workerName: workerName,
       converter: converter,
       workerConverter: workerConverter,
+      enableWasmConverter: enableWasmConverter,
+      enableWasmTransferables: enableWasmTransferables,
       isDebug: isDebug,
     );
   }
@@ -210,6 +225,7 @@ class IsolateManager<R, P> {
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
     bool enableWasmConverter = true,
+    bool enableWasmTransferables = false,
     bool isDebug = false,
   }) async {
     final im = IsolateManager<R, P>.create(
@@ -218,6 +234,7 @@ class IsolateManager<R, P> {
       converter: converter,
       workerConverter: workerConverter,
       enableWasmConverter: enableWasmConverter,
+      enableWasmTransferables: enableWasmTransferables,
       isDebug: isDebug,
     );
 
@@ -281,6 +298,7 @@ class IsolateManager<R, P> {
     IsolateConverter<R>? workerConverter,
     IsolateCallback<R>? callback,
     bool enableWasmConverter = true,
+    bool enableWasmTransferables = false,
     bool isDebug = false,
   }) async {
     final im = IsolateManager<R, P>.createCustom(
@@ -289,6 +307,7 @@ class IsolateManager<R, P> {
       converter: converter,
       workerConverter: workerConverter,
       enableWasmConverter: enableWasmConverter,
+      enableWasmTransferables: enableWasmTransferables,
       isDebug: isDebug,
     );
 
@@ -451,6 +470,16 @@ class IsolateManager<R, P> {
   ///
   /// Default is `true`. Enable this when working with integer data in WASM environments.
   final bool enableWasmConverter;
+
+  /// Flag to enable transferables on WebAssembly (WASM).
+  ///
+  /// When an application is compiled to WebAssembly (WASM), using `transferables` for
+  /// zero-copy data transfer does not provide performance benefits and may add unnecessary
+  /// overhead, as WASM linear memory must still be copied to the JS heap.
+  ///
+  /// When this flag is `false` (default), `transferables` are automatically omitted
+  /// when targeting WASM. Set to `true` to force the use of transferables even on WASM.
+  final bool enableWasmTransferables;
 
   /// If you want to call the [start] method manually without `await`, you can `await`
   /// later by using [ensureStarted] to ensure that all the isolates are started.
@@ -754,10 +783,14 @@ class IsolateManager<R, P> {
   }) async {
     await start();
 
+    // Omit transferables on WASM unless explicitly enabled
+    final effectiveTransferables =
+        (kIsWasm && !enableWasmTransferables) ? null : transferables;
+
     final queue = IsolateQueue<R, P>(
       params,
       callback,
-      transferables: transferables,
+      transferables: effectiveTransferables,
     );
     queueStrategy.add(queue, addToTop: priority);
     _executeQueue();

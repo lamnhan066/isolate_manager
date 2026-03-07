@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:isolate_manager/isolate_manager.dart';
@@ -1217,6 +1218,210 @@ void main() {
     expect(result, equals(a1DTo2DList(list)));
   });
 
+  group('WASM Transferables -', () {
+    const isWasm = bool.fromEnvironment('dart.tool.dart2wasm');
+
+    test('enableWasmTransferables defaults to false', () async {
+      final isolateManager = IsolateManager<Uint8List, Uint8List>.create(
+        processBytes,
+      );
+
+      // Check that the default value is false
+      expect(isolateManager.enableWasmTransferables, equals(false));
+
+      await isolateManager.stop();
+    });
+
+    test('transferables are omitted on WASM by default', () async {
+      if (isWasm) {
+        final isolateManager = IsolateManager<Uint8List, Uint8List>.create(
+          processBytes,
+        );
+        await isolateManager.start();
+
+        final data = Uint8List(1024);
+        for (var i = 0; i < data.length; i++) {
+          data[i] = i % 256;
+        }
+
+        final originalLength = data.buffer.lengthInBytes;
+
+        // Without explicitly enabling transferables, they should be omitted on WASM
+        final result = await isolateManager.compute(
+          data,
+          transferables: [data.buffer],
+        );
+
+        expect(result.length, originalLength);
+
+        // Verify the processing worked
+        for (var i = 0; i < min(10, result.length); i++) {
+          expect(result[i], (i + 1) % 256);
+        }
+
+        // On WASM, when transferables are omitted, the source buffer should remain intact
+        expect(
+          data.buffer.lengthInBytes,
+          originalLength,
+          reason:
+              'Source buffer should not be detached when transferables are omitted on WASM',
+        );
+
+        await isolateManager.stop();
+      }
+    });
+
+    test(
+      'transferables can be enabled on WASM with enableWasmTransferables=true',
+      () async {
+        if (isWasm) {
+          final isolateManager = IsolateManager<Uint8List, Uint8List>.create(
+            processBytes,
+            enableWasmTransferables: true,
+          );
+          await isolateManager.start();
+
+          final data = Uint8List(1024);
+          for (var i = 0; i < data.length; i++) {
+            data[i] = i % 256;
+          }
+
+          final originalLength = data.buffer.lengthInBytes;
+
+          // With transferables explicitly enabled, they should work on WASM
+          final result = await isolateManager.compute(
+            data,
+            transferables: [data.buffer],
+          );
+
+          expect(result.length, originalLength);
+
+          // On WASM, when transferables are enabled, the behavior depends on the implementation
+          // The test mainly verifies that the parameter is respected
+          await isolateManager.stop();
+        }
+      },
+    );
+
+    test('transferables work normally on non-WASM platforms', () async {
+      if (!isWasm) {
+        final isolateManager = IsolateManager<Uint8List, Uint8List>.create(
+          processBytes,
+        );
+        await isolateManager.start();
+
+        final data = Uint8List(1024);
+        for (var i = 0; i < data.length; i++) {
+          data[i] = i % 256;
+        }
+
+        final originalLength = data.buffer.lengthInBytes;
+
+        // On non-WASM platforms, transferables should work regardless of the flag
+        final result = await isolateManager.compute(
+          data,
+          transferables: [data.buffer],
+        );
+
+        expect(result.length, originalLength);
+
+        // Verify the processing worked
+        for (var i = 0; i < min(10, result.length); i++) {
+          expect(result[i], (i + 1) % 256);
+        }
+
+        await isolateManager.stop();
+      }
+    });
+
+    test(
+      'static runFunction respects enableWasmTransferables parameter',
+      () async {
+        if (isWasm) {
+          final data = Uint8List(512);
+          for (var i = 0; i < data.length; i++) {
+            data[i] = i % 256;
+          }
+
+          final originalLength = data.buffer.lengthInBytes;
+
+          // Test with enableWasmTransferables=false (default)
+          final result1 = await IsolateManager.runFunction(processBytes, data);
+
+          expect(result1.length, originalLength);
+          // Buffer should not be detached when transferables are omitted
+          expect(
+            data.buffer.lengthInBytes,
+            originalLength,
+            reason:
+                'Buffer should not be detached when transferables are disabled',
+          );
+
+          // Reset data for second test
+          for (var i = 0; i < data.length; i++) {
+            data[i] = i % 256;
+          }
+
+          // Test with enableWasmTransferables=true
+          final result2 = await IsolateManager.runFunction(
+            processBytes,
+            data,
+            enableWasmTransferables: true,
+          );
+
+          expect(result2.length, originalLength);
+          // With transferables enabled, behavior depends on WASM implementation
+        }
+      },
+    );
+
+    test(
+      'static runCustomFunction respects enableWasmTransferables parameter',
+      () async {
+        if (isWasm) {
+          final data = Uint8List(256);
+          for (var i = 0; i < data.length; i++) {
+            data[i] = i % 256;
+          }
+
+          final originalLength = data.buffer.lengthInBytes;
+
+          // Test with enableWasmTransferables=false (default)
+          final result1 =
+              await IsolateManager.runCustomFunction<Uint8List, Uint8List>(
+                isolateFunctionBytes,
+                data,
+              );
+
+          expect(result1, isNotNull);
+          // Buffer should not be detached when transferables are omitted
+          expect(
+            data.buffer.lengthInBytes,
+            originalLength,
+            reason:
+                'Buffer should not be detached when transferables are disabled',
+          );
+
+          // Reset data for second test
+          for (var i = 0; i < data.length; i++) {
+            data[i] = i % 256;
+          }
+
+          // Test with enableWasmTransferables=true
+          final result2 =
+              await IsolateManager.runCustomFunction<Uint8List, Uint8List>(
+                isolateFunctionBytes,
+                data,
+                enableWasmTransferables: true,
+              );
+
+          expect(result2, isNotNull);
+          // With transferables enabled, behavior depends on WASM implementation
+        }
+      },
+    );
+  });
+
   group('Isolate Queue Strategy -', () {
     test('QueueStrategyUnlimited with multiple operations', () {
       final queueStrategies = UnlimitedStrategy<int, int>();
@@ -1456,4 +1661,5 @@ void _addWorkerMappings() {
   );
   IsolateManager.addWorkerMapping(identityBytes, 'workers/identityBytes');
   IsolateManager.addWorkerMapping(processBytes, 'workers/processBytes');
+  IsolateManager.addWorkerMapping(isolateFunctionBytes, 'workers/isolateFunctionBytes');
 }

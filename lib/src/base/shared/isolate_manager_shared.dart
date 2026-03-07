@@ -47,6 +47,7 @@ class IsolateManagerShared {
     String subPath = '',
     QueueStrategy<Object?, List<dynamic>>? queueStrategy,
     this.enableWasmConverter = true,
+    this.enableWasmTransferables = false,
     bool isDebug = false,
   }) : _manager = IsolateManager.create(
          internalFunction,
@@ -55,6 +56,7 @@ class IsolateManagerShared {
          concurrent: concurrent,
          queueStrategy: queueStrategy,
          enableWasmConverter: false,
+         enableWasmTransferables: enableWasmTransferables,
          isDebug: isDebug,
        ) {
     if (autoStart) start();
@@ -80,6 +82,16 @@ class IsolateManagerShared {
   ///
   /// Default is `true`. Enable this when working with integer data in WASM environments.
   final bool enableWasmConverter;
+
+  /// Flag to enable transferables on WebAssembly (WASM).
+  ///
+  /// When an application is compiled to WebAssembly (WASM), using `transferables` for
+  /// zero-copy data transfer does not provide performance benefits and may add unnecessary
+  /// overhead, as WASM linear memory must still be copied to the JS heap.
+  ///
+  /// When this flag is `false` (default), `transferables` are automatically omitted
+  /// when targeting WASM. Set to `true` to force the use of transferables even on WASM.
+  final bool enableWasmTransferables;
 
   /// Check that the [IsolateManager] is started or not.
   bool get isStarted => _manager.isStarted;

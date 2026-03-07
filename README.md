@@ -114,6 +114,7 @@ To use isolates on the web, your Dart functions need to be compiled into JavaScr
 #### WebAssembly (WASM) Notes
 
 * **Type Handling:** When using WASM, all `int` types (including those in collections) are treated as `double`. Isolate Manager provides a built-in converter to handle this automatically; you can disable it by setting `enableWasmConverter: false` if needed.
+* **Transferables:** On WASM, transferables (zero-copy data transfer) add unnecessary overhead and provide no performance benefit. By default, transferables are omitted when targeting WASM. You can re-enable them by setting `enableWasmTransferables: true` if needed.
 * **Development Server Headers:** If your app hangs when running with `flutter run -d chrome --wasm`, you might need to set specific headers. Try:
 
   ```shell
