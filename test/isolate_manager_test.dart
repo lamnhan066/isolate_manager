@@ -1335,6 +1335,41 @@ void main() {
     });
 
     test(
+      'transferables work normally on non-WASM platforms when enableWasmTransferables=true',
+      () async {
+        if (!isWasm) {
+          final isolateManager = IsolateManager<Uint8List, Uint8List>.create(
+            processBytes,
+            enableWasmTransferables: true,
+          );
+          await isolateManager.start();
+
+          final data = Uint8List(1024);
+          for (var i = 0; i < data.length; i++) {
+            data[i] = i % 256;
+          }
+
+          final originalLength = data.buffer.lengthInBytes;
+
+          // On non-WASM platforms, transferables should work regardless of the flag
+          final result = await isolateManager.compute(
+            data,
+            transferables: [data.buffer],
+          );
+
+          expect(result.length, originalLength);
+
+          // Verify the processing worked
+          for (var i = 0; i < min(10, result.length); i++) {
+            expect(result[i], (i + 1) % 256);
+          }
+
+          await isolateManager.stop();
+        }
+      },
+    );
+
+    test(
       'static runFunction respects enableWasmTransferables parameter',
       () async {
         if (isWasm) {

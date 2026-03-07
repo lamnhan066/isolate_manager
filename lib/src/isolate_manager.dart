@@ -785,7 +785,7 @@ class IsolateManager<R, P> {
 
     // Omit transferables on WASM unless explicitly enabled
     final effectiveTransferables =
-        (kIsWasm && !enableWasmTransferables) ? null : transferables;
+        (!enableWasmTransferables && kIsWasm) ? null : transferables;
 
     final queue = IsolateQueue<R, P>(
       params,
