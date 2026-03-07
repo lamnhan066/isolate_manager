@@ -1,3 +1,11 @@
+## 6.2.0
+
+* Add cross-platform transferables support (fixes [#56](https://github.com/lamnhan066/isolate_manager/issues/56), thanks to @kartikey321).
+* Add `enableWasmTransferables` parameter to automatically omit transferables on WASM targets for better performance.
+* Update `queueStrategy` and `workerConverter` types for better null safety (fixes [#54](https://github.com/lamnhan066/isolate_manager/issues/54)).
+* Improve benchmark scripts.
+* Update README.
+
 ## 6.1.2
 
 * Improve the way to check if the isolate_manager_generator is installed.
