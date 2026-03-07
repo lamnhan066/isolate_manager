@@ -1661,5 +1661,8 @@ void _addWorkerMappings() {
   );
   IsolateManager.addWorkerMapping(identityBytes, 'workers/identityBytes');
   IsolateManager.addWorkerMapping(processBytes, 'workers/processBytes');
-  IsolateManager.addWorkerMapping(isolateFunctionBytes, 'workers/isolateFunctionBytes');
+  IsolateManager.addWorkerMapping(
+    isolateFunctionBytes,
+    'workers/isolateFunctionBytes',
+  );
 }
