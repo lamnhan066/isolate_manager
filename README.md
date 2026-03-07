@@ -532,19 +532,20 @@ void processingWorker(dynamic params) {
 
 * ✅ Eliminates the O(n) copy for large buffers; measurable improvement at ~1 MB+.
 * ✅ Pre-building `TransferableTypedData` before calling `compute()` removes the codec overhead and is the fastest option.
-* ⚠ Small buffers (< ~100 KB) may see no net gain or a slight regression due to codec overhead.
-* ⚠ The source buffer is consumed by `TransferableTypedData`; do not reuse the original `Uint8List` after calling `compute()` with it as a transferable.
+* ⚠️ Small buffers (< ~100 KB) may see no net gain or a slight regression due to codec overhead.
+* ⚠️ The source buffer is consumed by `TransferableTypedData`; do not reuse the original `Uint8List` after calling `compute()` with it as a transferable.
 
 **Web — dart2js:**
 
 * ✅ Source `ArrayBuffer` is transferred in O(1); the worker receives the original memory.
 * ✅ Large speedups (2–10×) for MB-range payloads compared to copy-based transfer.
-* ⚠ Source buffer is **neutered** after `compute()` returns — `data.buffer.lengthInBytes` becomes 0. Keep a reference to the result instead.
+* ⚠️ Source buffer is **neutered** after `compute()` returns — `data.buffer.lengthInBytes` becomes 0. Keep a reference to the result instead.
 
 **Web — dart2wasm:**
 
-* ⚠ WASM uses linear memory that is opaque to the JS engine. Every transfer still requires a copy from the WASM heap to a JS `ArrayBuffer`, so using `transferables` adds codec overhead with no speed benefit.
+* ⚠️ WASM uses linear memory that is opaque to the JS engine. Every transfer still requires a copy from the WASM heap to a JS `ArrayBuffer`, so using `transferables` adds codec overhead with no speed benefit.
 * Prefer omitting `transferables` when targeting WASM.
+* ⚠️ **Note:** `enableWasmTransferables` is set to `true` by default for WASM targets to disable transferables on WASM targets to avoid codec overhead. If you want to disable it, set `enableWasmTransferables: false` in the `IsolateManager` constructor.
 
 ### Handling Exceptions (Web)
 
