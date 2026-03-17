@@ -40,5 +40,5 @@ Future<void> isolateWorkerImpl<R, P>(
 
 /// Create a custom worker in your `main`.
 void customWorkerFunctionImpl(IsolateWorkerFunction<void, dynamic> function) {
-  function(_self);
+  unawaited(Future.value(function(_self)));
 }

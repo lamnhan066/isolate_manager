@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -98,7 +99,7 @@ List<dynamic> a1DTo2DList(List<dynamic> params) {
 Future<void> isolateFunction(dynamic params) async {
   await IsolateManagerFunction.customFunction<int, int>(
     params,
-    onEvent: (IsolateManagerController<int, int> controller, int message) {
+    onEvent: (controller, message) {
       try {
         final result = fibonacci(message);
         controller.sendResult(result);
@@ -109,8 +110,8 @@ Future<void> isolateFunction(dynamic params) async {
       }
       return 0;
     },
-    onInit: (IsolateManagerController<int, int> controller) {},
-    onDispose: (IsolateManagerController<int, int> controller) {},
+    onInit: (controller) {},
+    onDispose: (controller) {},
     autoHandleException: false,
     autoHandleResult: false,
   );
@@ -118,72 +119,80 @@ Future<void> isolateFunction(dynamic params) async {
 
 @pragma('vm:entry-point')
 void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
-  IsolateManagerFunction.customFunction<int, int>(
-    params,
-    onEvent: (IsolateManagerController<int, int> controller, int message) {
-      return fibonacci(message);
-    },
-    onInit: (IsolateManagerController<int, int> controller) {},
-    onDispose: (IsolateManagerController<int, int> controller) {},
+  unawaited(
+    IsolateManagerFunction.customFunction<int, int>(
+      params,
+      onEvent: (controller, message) {
+        return fibonacci(message);
+      },
+      onInit: (controller) {},
+      onDispose: (controller) {},
+    ),
   );
 }
 
 @isolateManagerCustomWorker
 void isolateCallbackFunction(dynamic params) {
-  IsolateManagerFunction.customFunction(
-    params,
-    onEvent: (
-      IsolateManagerController<Object?, Object?> controller,
-      Object? message,
-    ) {
-      try {
-        for (var i = 0; i < 10; i++) {
-          controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
+  unawaited(
+    IsolateManagerFunction.customFunction(
+      params,
+      onEvent: (
+        controller,
+        message,
+      ) {
+        try {
+          for (var i = 0; i < 10; i++) {
+            controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
+          }
+
+          controller.sendResult(jsonEncode(<String, String>{'data': 'data'}));
+          // To catch both Error and Exception
+          // ignore: avoid_catches_without_on_clauses
+        } catch (err, stack) {
+          controller.sendResultError(IsolateException(err, stack));
         }
 
-        controller.sendResult(jsonEncode(<String, String>{'data': 'data'}));
-        // To catch both Error and Exception
-        // ignore: avoid_catches_without_on_clauses
-      } catch (err, stack) {
-        controller.sendResultError(IsolateException(err, stack));
-      }
-
-      // Just returns something that unused to complete this method.
-      return '';
-    },
-    autoHandleException: false,
-    autoHandleResult: false,
+        // Just returns something that unused to complete this method.
+        return '';
+      },
+      autoHandleException: false,
+      autoHandleResult: false,
+    ),
   );
 }
 
 @isolateManagerCustomWorker
 void isolateCallbackSimpleFunction(dynamic params) {
-  IsolateManagerFunction.customFunction(
-    params,
-    onEvent: (
-      IsolateManagerController<Object?, Object?> controller,
-      Object? message,
-    ) {
-      for (var i = 0; i < 10; i++) {
-        controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
-      }
+  unawaited(
+    IsolateManagerFunction.customFunction(
+      params,
+      onEvent: (
+        controller,
+        message,
+      ) {
+        for (var i = 0; i < 10; i++) {
+          controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
+        }
 
-      return jsonEncode(<String, Object?>{'data': message});
-    },
+        return jsonEncode(<String, Object?>{'data': message});
+      },
+    ),
   );
 }
 
 @isolateManagerCustomWorker
 void isolateCallbackSimpleFunctionWithSpecifiedType(dynamic params) {
-  IsolateManagerFunction.customFunction<String, int>(
-    params,
-    onEvent: (IsolateManagerController<String, int> controller, int message) {
-      for (var i = 0; i < 10; i++) {
-        controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
-      }
+  unawaited(
+    IsolateManagerFunction.customFunction<String, int>(
+      params,
+      onEvent: (controller, message) {
+        for (var i = 0; i < 10; i++) {
+          controller.sendResult(jsonEncode(<String, String>{'source': '$i'}));
+        }
 
-      return jsonEncode(<String, int>{'data': message});
-    },
+        return jsonEncode(<String, int>{'data': message});
+      },
+    ),
   );
 }
 
@@ -293,13 +302,15 @@ Uint8List processBytes(Uint8List data) {
 
 @isolateManagerCustomWorker
 void isolateFunctionBytes(dynamic params) {
-  IsolateManagerFunction.customFunction<Uint8List, Uint8List>(
-    params,
-    onEvent: (
-      IsolateManagerController<Uint8List, Uint8List> controller,
-      Uint8List message,
-    ) {
-      return processBytes(message);
-    },
+  unawaited(
+    IsolateManagerFunction.customFunction<Uint8List, Uint8List>(
+      params,
+      onEvent: (
+        controller,
+        message,
+      ) {
+        return processBytes(message);
+      },
+    ),
   );
 }

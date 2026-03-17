@@ -754,7 +754,7 @@ void main() {
 
     await Future.wait(<Future<void>>[
       for (int i = 0; i < 10; i++)
-        isolateManager.compute(i).then((int value) {
+        isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
         }),
     ]);
@@ -780,7 +780,7 @@ void main() {
 
     await Future.wait(<Future<void>>[
       for (int i = 0; i < 10; i++)
-        isolateManager.compute(i).then((int value) async {
+        isolateManager.compute(i).then((value) async {
           expect(value, equals(await fibonacciFuture(i)));
         }),
     ]);
@@ -796,13 +796,13 @@ void main() {
     )..start().ignore();
 
     isolateManager.stream
-        .listen((int value) {})
+        .listen((value) {})
         // Do not need to catch the error here
         .onError((error) {});
 
     await Future.wait(<Future<void>>[
       for (int i = 0; i < 10; i++)
-        isolateManager.compute(i).then((int value) {
+        isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
         }),
     ]);
@@ -811,7 +811,7 @@ void main() {
 
     await Future.wait(<Future<void>>[
       for (int i = 5; i < 13; i++)
-        isolateManager.compute(i).then((int value) {
+        isolateManager.compute(i).then((value) {
           expect(value, fibonacci(i));
         }),
     ]);
@@ -840,13 +840,13 @@ void main() {
       )..start().ignore();
 
       isolateManager.stream
-          .listen((int value) {})
+          .listen((value) {})
           // Do not need to catch the error here
           .onError((error) {});
 
       await Future.wait(<Future<void>>[
         for (int i = 0; i < 10; i++)
-          isolateManager.compute(i).then((int value) {
+          isolateManager.compute(i).then((value) {
             expect(value, fibonacci(i));
           }),
       ]);
@@ -855,7 +855,7 @@ void main() {
 
       await Future.wait(<Future<void>>[
         for (int i = 5; i < 13; i++)
-          isolateManager.compute(i).then((int value) {
+          isolateManager.compute(i).then((value) {
             expect(value, fibonacci(i));
           }),
       ]);
@@ -896,7 +896,7 @@ void main() {
     await expectLater(
       () => isolateManager.compute(
         <int>[50, 50],
-        callback: (int value) {
+        callback: (value) {
           return true;
         },
       ),
@@ -936,7 +936,7 @@ void main() {
 
       for (var i = 0; i < 100; i++) {
         futures.add(
-          isolateManager.compute(<int>[i, 20], callback: (int value) => true),
+          isolateManager.compute(<int>[i, 20], callback: (value) => true),
         );
       }
 
@@ -979,7 +979,7 @@ void main() {
 
       for (var i = 0; i < 100; i++) {
         futures.add(
-          isolateManager.compute(<int>[50, 20], callback: (int value) => true),
+          isolateManager.compute(<int>[50, 20], callback: (value) => true),
         );
       }
 
@@ -1019,7 +1019,7 @@ void main() {
 
       for (var i = 0; i < 100; i++) {
         futures.add(
-          isolateManager.compute(<int>[i, 20], callback: (int value) => true),
+          isolateManager.compute(<int>[i, 20], callback: (value) => true),
         );
       }
 
@@ -1056,7 +1056,7 @@ void main() {
 
       for (var i = 0; i < 100; i++) {
         futures.add(
-          isolateManager.compute(<int>[50, 20], callback: (int value) => true),
+          isolateManager.compute(<int>[50, 20], callback: (value) => true),
         );
       }
 
@@ -1073,7 +1073,7 @@ void main() {
 
     final result = await isolateManager.compute(
       1,
-      callback: (String value) {
+      callback: (value) {
         final decoded = jsonDecode(value) as Map;
         // Do not return this [value] as the final result
         if (decoded.containsKey('source')) {
@@ -1099,7 +1099,7 @@ void main() {
 
     final result = await isolateManager.compute(
       1,
-      callback: (String value) {
+      callback: (value) {
         final decoded = jsonDecode(value) as Map;
         // Do not return this [value] as the final result
         if (decoded.containsKey('source')) {
@@ -1127,7 +1127,7 @@ void main() {
 
       final result = await isolateManager.compute(
         1,
-        callback: (String value) {
+        callback: (value) {
           final decoded = jsonDecode(value) as Map;
           // Do not return this [value] as the final result
           if (decoded.containsKey('source')) {
@@ -1156,7 +1156,7 @@ void main() {
 
       final result = await isolateManager.compute(
         1,
-        callback: (String value) {
+        callback: (value) {
           final decoded = jsonDecode(value) as Map;
           // Do not return this [value] as the final result
           if (decoded.containsKey('source')) {

@@ -504,12 +504,14 @@ class IsolateManager<R, P> {
 
   /// A default function for using the [IsolateManager.create] method.
   static void _defaultIsolateFunction<R, P>(dynamic params) {
-    IsolateManagerFunction.customFunction<R, P>(
-      params,
-      onEvent: (controller, message) {
-        final function = controller._initialParams;
-        return (function as Function)(message) as FutureOr<R>;
-      },
+    unawaited(
+      IsolateManagerFunction.customFunction<R, P>(
+        params,
+        onEvent: (controller, message) {
+          final function = controller._initialParams;
+          return (function as Function)(message) as FutureOr<R>;
+        },
+      ),
     );
   }
 
@@ -552,7 +554,7 @@ class IsolateManager<R, P> {
                 ),
             debugMode: isDebug,
           ).then(
-            (IsolateContactor<R, P> value) =>
+            (value) =>
                 _isolates.addAll(<IsolateContactor<R, P>, bool>{value: false}),
           ),
       ]);
@@ -805,7 +807,7 @@ class IsolateManager<R, P> {
       /// Allow calling `compute` before `start`.
       if (queueStrategy.hasNext() && _isolates[isolate] == false) {
         final queue = queueStrategy.getNext();
-        _execute(isolate, queue);
+        unawaited(_execute(isolate, queue));
       }
     }
   }

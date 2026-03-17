@@ -35,7 +35,7 @@ void main() async {
     await Future.wait([
       for (var i = 0; i < 10; i++)
         isolates.compute(addFuture, <double>[i.toDouble(), i.toDouble()]).then((
-          double value,
+          value,
         ) async {
           expect(
             value,
@@ -43,11 +43,11 @@ void main() async {
           );
         }),
       for (var i = 0; i < 10; i++)
-        isolates(add, <int>[i, i]).then((int value) {
+        isolates(add, <int>[i, i]).then((value) {
           expect(value, equals(add(<int>[i, i])));
         }),
       for (var i = 0; i < 10; i++)
-        isolates.compute(concat, <String>['$i', '$i']).then((String value) {
+        isolates.compute(concat, <String>['$i', '$i']).then((value) {
           expect(value, equals(concat(<String>['$i', '$i'])));
         }),
     ]);
@@ -77,7 +77,7 @@ void main() async {
     await Future.wait([
       for (var i = 0; i < 10; i++)
         isolates.compute(addFuture, <double>[i.toDouble(), i.toDouble()]).then((
-          double value,
+          value,
         ) async {
           expect(
             value,
@@ -85,15 +85,15 @@ void main() async {
           );
         }),
       for (var i = 0; i < 10; i++)
-        isolates(add, <int>[i, i]).then((int value) {
+        isolates(add, <int>[i, i]).then((value) {
           expect(value, equals(add(<int>[i, i])));
         }),
       for (var i = 0; i < 10; i++)
-        isolates.compute(concat, <String>['$i', '$i']).then((String value) {
+        isolates.compute(concat, <String>['$i', '$i']).then((value) {
           expect(value, equals(concat(<String>['$i', '$i'])));
         }),
       isolates.compute(aDynamicMap, <String, Object>{'k': 1, 't': '2'}).then((
-        Map<dynamic, dynamic> value,
+        value,
       ) {
         expect(value, equals(<String, Object>{'k': 1, 't': '2'}));
       }),

@@ -95,7 +95,6 @@ class IsolateContactorControllerImplWorker<R, P>
 
   /// Centralizes the event processing for the incoming worker messages.
   // Can't return `Future<void>` because of the `onmessage` signature.
-  // ignore: avoid_void_async
   void _handleMessage(MessageEvent event) {
     debugPrinter(
       () => '[Main App] Message received from the Web Worker: ${event.data}',
@@ -123,7 +122,7 @@ class IsolateContactorControllerImplWorker<R, P>
 
       if (IsolateState.dispose.isValidMap(data)) {
         _onDispose?.call();
-        close();
+        unawaited(close());
         return;
       }
 

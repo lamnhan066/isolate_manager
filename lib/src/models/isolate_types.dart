@@ -70,8 +70,8 @@ sealed class ImType<T extends Object> {
 /// Use [ImNum] to safely transfer a numeric value between isolates.
 /// It also provides helper methods for converting the value.
 class ImNum extends ImType<num> {
-  /// Creates an [ImNum] with the given numeric [value].
-  const ImNum(super.value);
+  /// Creates an [ImNum] with the given numeric [_value].
+  const ImNum(super._value);
 
   /// Returns the numeric value as a [double].
   double toDouble() => _value.toDouble();
@@ -88,8 +88,8 @@ class ImNum extends ImType<num> {
 /// Use [ImString] to safely transfer strings between isolates.
 
 class ImString extends ImType<String> {
-  /// Creates an [ImString] with the given string [value].
-  const ImString(super.value);
+  /// Creates an [ImString] with the given string [_value].
+  const ImString(super._value);
 
   @override
   String toString() => 'ImString($_value)';
@@ -99,9 +99,9 @@ class ImString extends ImType<String> {
 ///
 /// Use [ImBool] when transferring boolean values between isolates.
 class ImBool extends ImType<bool> {
-  /// Creates an [ImBool] with the given boolean [value].
+  /// Creates an [ImBool] with the given boolean [_value].
   // ignore: avoid_positional_boolean_parameters
-  const ImBool(super.value);
+  const ImBool(super._value);
 
   @override
   String toString() => 'ImBool($_value)';
@@ -113,7 +113,7 @@ class ImBool extends ImType<bool> {
 /// of original Dart values.
 class ImList extends _ImTypedIterable<Object> {
   /// Creates an [ImList] with the provided list of wrapped objects.
-  const ImList(super.list);
+  const ImList(super._list);
 
   /// Converts a plain Dart object into its corresponding [ImList] instance.
   ///
@@ -181,7 +181,7 @@ class ImList extends _ImTypedIterable<Object> {
 /// Use [ImMap] to safely transfer maps between isolates.
 class ImMap extends _ImTypedMap<Object, Object> {
   /// Creates an [ImMap] with the provided map of wrapped objects.
-  const ImMap(super.map);
+  const ImMap(super._map);
 
   /// Converts a plain Dart object into its corresponding [ImMap] instance.
   ///

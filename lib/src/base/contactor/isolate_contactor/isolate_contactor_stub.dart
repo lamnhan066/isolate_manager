@@ -13,8 +13,6 @@ class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     required dynamic isolateParam,
     required String workerName,
     required IsolateConverter<R> converter,
-    // This parameter is needed on the web platform.
-    // ignore: avoid_unused_constructor_parameters
     required IsolateConverter<R> workerConverter,
     required ReceivePort receivePort,
     super.debugMode,

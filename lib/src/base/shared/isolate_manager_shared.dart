@@ -59,7 +59,7 @@ class IsolateManagerShared {
          enableWasmTransferables: enableWasmTransferables,
          isDebug: isDebug,
        ) {
-    if (autoStart) start();
+    if (autoStart) unawaited(start());
   }
 
   /// The instance of the [IsolateManager].

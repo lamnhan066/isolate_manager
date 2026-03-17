@@ -58,7 +58,14 @@ Future<R> platformExecuteImpl<R extends Object?, P extends Object?>({
 
 /// Create a Worker on Web.
 void workerFunctionImpl(Map<String, Function> map) {
-  IsolateManagerFunction.workerFunction((List<dynamic> message) {
-    return internalFunction([map[message[0]], message[1], message[2]]);
-  });
+  unawaited(
+    IsolateManagerFunction.workerFunction((message) {
+      final effectiveMessage = message! as List<dynamic>;
+      return internalFunction([
+        map[effectiveMessage[0]],
+        effectiveMessage[1],
+        effectiveMessage[2],
+      ]);
+    }),
+  );
 }

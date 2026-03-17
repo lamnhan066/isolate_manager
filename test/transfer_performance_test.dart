@@ -1,5 +1,5 @@
 // For debug only
-// ignore_for_file: avoid_print, document_ignores
+// ignore_for_file: avoid_print
 
 @TestOn('vm')
 library;
