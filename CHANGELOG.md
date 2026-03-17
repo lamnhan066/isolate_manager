@@ -1,3 +1,38 @@
+## 6.3.0
+
+* Documented support for using `--` to pass arguments to the Dart compiler.
+* Update the workflows to compatible with `isolate_manager_generator` `^0.4.0`.
+* Bump the dart analyzer to `^10.2.0`.
+* Note for `isolate_manager_generator` `^0.4.0`:
+  * BREAKING CHANGE: Removed `--omit-implicit-checks` option.
+      Before (the option is added automatically):
+
+      ```dart
+      dart run isolate_manager_generator
+      ```
+
+      After (the option is added manually):
+
+      ```dart
+      dart run isolate_manager_generator -- --omit-implicit-checks
+      ```
+
+  * BREAKING CHANGE: Removed unused source map generation and cleanup logic.
+      Before (the option is added automatically):
+
+      ```dart
+      dart run isolate_manager_generator
+      ```
+
+      After (the option is added manually):
+
+      ```dart
+      dart run isolate_manager_generator -- --no-source-maps
+      ```
+
+  * BREAKING CHANGE: The `js.deps` files are no longer removed automatically, and there is no helper available for this change.
+  * Bump the dart analyzer to `^10.0.0`.
+
 ## 6.2.0
 
 * Add cross-platform transferables support (fixes [#56](https://github.com/lamnhan066/isolate_manager/issues/56), thanks to @kartikey321).
