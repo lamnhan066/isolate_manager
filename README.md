@@ -659,6 +659,14 @@ dart run isolate_manager:generate
 * `--debug`: Retain temporary files created during generation for debugging purposes.
 * `--worker-mappings-experiment=lib/main.dart` (Experimental): Attempt to auto-generate `workerMappings` for `IsolateManager.createShared` by scanning the specified Dart file.
 
+You can also pass additional arguments to the underlying Dart compiler by adding `--` after the generator command. For example:
+
+```shell
+dart run isolate_manager:generate -- --omit-implicit-checks --no-source-maps
+```
+
+These arguments will be forwarded to the Dart process (useful for `dart2js` / `dart compile js` or other Dart compiler options).
+
 ## Additional Tips
 
 * **Queue Length:** Check `isolateManagerInstance.queuesLength` to get the current number of tasks in the queue.
