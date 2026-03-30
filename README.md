@@ -545,7 +545,7 @@ void processingWorker(dynamic params) {
 
 * ⚠️ WASM uses linear memory that is opaque to the JS engine. Every transfer still requires a copy from the WASM heap to a JS `ArrayBuffer`, so using `transferables` adds codec overhead with no speed benefit.
 * Prefer omitting `transferables` when targeting WASM.
-* ⚠️ **Note:** `enableWasmTransferables` is set to `true` by default for WASM targets to disable transferables on WASM targets to avoid codec overhead. If you want to disable it, set `enableWasmTransferables: false` in the `IsolateManager` constructor.
+* ⚠️ Note: Transferables are omitted by default when targeting WASM to avoid codec overhead. To enable transferables on WASM, set `enableWasmTransferables: true` in the `IsolateManager` constructor.
 
 ### Handling Exceptions (Web)
 
