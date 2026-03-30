@@ -1,3 +1,7 @@
+## 6.3.1
+
+* Fix the docs to clarify WASM transferables (`enableWasmTransferables` parameter) behavior in README.
+
 ## 6.3.0
 
 * Documented support for using `--` to pass arguments to the Dart compiler.
