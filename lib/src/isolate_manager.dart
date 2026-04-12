@@ -894,6 +894,11 @@ class IsolateManager<R, P> {
 
   String _buildIsolateDebugName(int index) {
     final globalName = 'Isolate-${++_globalIsolateCount}';
-    return '$globalName-${_debugName?.trim() ?? ''}-$index';
+    final trimmedDebugName = _debugName?.trim();
+    final debugNameSegment =
+        (trimmedDebugName == null || trimmedDebugName.isEmpty)
+            ? ''
+            : '-$trimmedDebugName';
+    return '$globalName$debugNameSegment-$index';
   }
 }
