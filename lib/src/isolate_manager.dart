@@ -51,6 +51,7 @@ class IsolateManager<R, P> {
   IsolateManager.create(
     IsolateFunction<R, P> this.isolateFunction, {
     String? workerName,
+    String? debugName,
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
@@ -60,6 +61,7 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   }) : isCustomIsolate = false,
        queueStrategy = queueStrategy ?? UnlimitedStrategy(),
+       _debugName = debugName,
        _workerName = normalizePath(workerName) {
     IsolateContactor.debugLogPrefix = debugLogPrefix;
   }
@@ -98,6 +100,7 @@ class IsolateManager<R, P> {
   IsolateManager.createCustom(
     IsolateCustomFunction this.isolateFunction, {
     String? workerName,
+    String? debugName,
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
@@ -107,6 +110,7 @@ class IsolateManager<R, P> {
     this.isDebug = false,
   }) : isCustomIsolate = true,
        queueStrategy = queueStrategy ?? UnlimitedStrategy(),
+       _debugName = debugName,
        _workerName = normalizePath(workerName) {
     // Set the debug log prefix.
     IsolateContactor.debugLogPrefix = debugLogPrefix;
@@ -171,6 +175,7 @@ class IsolateManager<R, P> {
   static Future<R> run<R>(
     FutureOr<R> Function() computation, {
     String? workerName,
+    String? debugName,
     Object? workerParameter,
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
@@ -182,6 +187,7 @@ class IsolateManager<R, P> {
       (_) => computation(),
       workerParameter,
       workerName: workerName,
+      debugName: debugName,
       converter: converter,
       workerConverter: workerConverter,
       enableWasmConverter: enableWasmConverter,
@@ -222,6 +228,7 @@ class IsolateManager<R, P> {
     IsolateFunction<R, P> function,
     P parameter, {
     String? workerName,
+    String? debugName,
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
     bool enableWasmConverter = true,
@@ -231,6 +238,7 @@ class IsolateManager<R, P> {
     final im = IsolateManager<R, P>.create(
       function,
       workerName: workerName,
+      debugName: debugName,
       converter: converter,
       workerConverter: workerConverter,
       enableWasmConverter: enableWasmConverter,
@@ -294,6 +302,7 @@ class IsolateManager<R, P> {
     IsolateCustomFunction function,
     P parameter, {
     String? workerName,
+    String? debugName,
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
     IsolateCallback<R>? callback,
@@ -304,6 +313,7 @@ class IsolateManager<R, P> {
     final im = IsolateManager<R, P>.createCustom(
       function,
       workerName: workerName,
+      debugName: debugName,
       converter: converter,
       workerConverter: workerConverter,
       enableWasmConverter: enableWasmConverter,
@@ -350,6 +360,7 @@ class IsolateManager<R, P> {
   static IsolateManagerShared createShared({
     int concurrent = 1,
     bool useWorker = false,
+    String? debugName,
     Object? Function(dynamic)? workerConverter,
     Map<Function, String>? workerMappings,
     bool autoStart = true,
@@ -361,6 +372,7 @@ class IsolateManager<R, P> {
   }) => IsolateManagerShared(
     concurrent: concurrent,
     useWorker: useWorker,
+    debugName: debugName,
     workerConverter: workerConverter,
     workerMappings: workerMappings ?? _workerMappings,
     autoStart: autoStart,
@@ -416,6 +428,9 @@ class IsolateManager<R, P> {
 
   /// Isolate function.
   final Object isolateFunction;
+
+  /// Logical name for the isolate manager.
+  final String? _debugName;
 
   /// Name of the `Worker` without the extension.
   ///
@@ -534,12 +549,17 @@ class IsolateManager<R, P> {
 
     if (isCustomIsolate) {
       // Create the custom isolates.
+      final debugNames = List<String>.generate(
+        concurrent,
+        (index) => _buildIsolateDebugName(index + 1),
+      );
       await Future.wait(<Future<void>>[
-        for (int i = 0; i < concurrent; i++)
+        for (final debugName in debugNames)
           IsolateContactor.createCustom<R, P>(
             isolateFunction as IsolateCustomFunction,
             workerName: workerName,
             initialParams: null,
+            debugName: debugName,
             converter:
                 (value) => converterHelper(
                   value,
@@ -560,12 +580,17 @@ class IsolateManager<R, P> {
       ]);
     } else {
       // Create isolates with the internal method.
+      final debugNames = List<String>.generate(
+        concurrent,
+        (index) => _buildIsolateDebugName(index + 1),
+      );
       await Future.wait(<Future<void>>[
-        for (int i = 0; i < concurrent; i++)
+        for (final debugName in debugNames)
           IsolateContactor.createCustom<R, P>(
             _defaultIsolateFunction<R, P>,
             initialParams: isolateFunction as IsolateFunction<R, P>,
             workerName: workerName,
+            debugName: debugName,
             converter:
                 (value) => converterHelper(
                   value,
@@ -863,5 +888,18 @@ class IsolateManager<R, P> {
   /// Print logs if [isDebug] is true
   void printDebug(Object? Function() object) {
     debugPrinter(object, debug: isDebug);
+  }
+
+  static int _globalIsolateCount = 0;
+
+  String _buildIsolateDebugName(int index) {
+    final globalName = 'Isolate-${++_globalIsolateCount}';
+    final managerName = _debugName?.trim();
+
+    if (managerName == null || managerName.isEmpty) {
+      return globalName;
+    }
+
+    return '$globalName-$managerName-$index';
   }
 }

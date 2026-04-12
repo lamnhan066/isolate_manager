@@ -17,7 +17,7 @@ typedef IsolateConverter<R> = R Function(dynamic value);
 /// as a return type.
 abstract class IsolateContactor<R, P> {
   /// Constructer.
-  const IsolateContactor({this.debugMode = false});
+  const IsolateContactor({this.debugMode = false, this.debugName});
 
   /// Use this value to change the prefix debug log.
   ///
@@ -26,6 +26,9 @@ abstract class IsolateContactor<R, P> {
 
   /// Debug mode.
   final bool debugMode;
+
+  /// Debug name for the isolate.
+  final String? debugName;
 
   /// Create an instance with your custom isolate function.
   ///
@@ -51,6 +54,7 @@ abstract class IsolateContactor<R, P> {
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
     required Object? initialParams,
+    required String debugName,
     required bool debugMode,
   }) async {
     return IsolateContactorInternal.createCustom<R, P>(
@@ -59,6 +63,7 @@ abstract class IsolateContactor<R, P> {
       converter: converter,
       workerConverter: workerConverter,
       initialParams: initialParams,
+      debugName: debugName,
       debugMode: debugMode,
     );
   }
@@ -79,6 +84,10 @@ abstract class IsolateContactor<R, P> {
 
   /// Print if [debugMode] is true
   void printDebug(Object? Function() object) {
-    debugPrinter(object, debug: debugMode);
+    debugPrinter(
+      () =>
+          '${debugName == null || debugName!.isEmpty ? '' : '[$debugName] '}${object()}',
+      debug: debugMode,
+    );
   }
 }

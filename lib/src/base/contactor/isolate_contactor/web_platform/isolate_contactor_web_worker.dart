@@ -18,6 +18,7 @@ class IsolateContactorInternalWorker<R, P>
     required String workerName,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    required super.debugName,
     super.debugMode,
   }) : _isolateFunction = isolateFunction,
        _isolateParam = isolateParam,
@@ -47,6 +48,7 @@ class IsolateContactorInternalWorker<R, P>
     required Object? initialParams,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    required String debugName,
     bool debugMode = false,
   }) async {
     final isolateContactor = IsolateContactorInternalWorker<R, P>._(
@@ -55,6 +57,7 @@ class IsolateContactorInternalWorker<R, P>
       isolateParam: initialParams,
       converter: converter,
       workerConverter: workerConverter,
+      debugName: debugName,
       debugMode: debugMode,
     );
 
