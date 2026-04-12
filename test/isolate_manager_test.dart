@@ -481,6 +481,7 @@ void main() {
 
       final isolateManager = IsolateManager<int, int>.create(
         fibonacci,
+        debugName: 'worker',
         isDebug: true,
       );
 

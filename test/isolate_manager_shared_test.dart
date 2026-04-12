@@ -18,6 +18,7 @@ void main() async {
     final isolates = IsolateManager.createShared(
       concurrent: 3,
       useWorker: true,
+      debugName: 'worker',
       subPath: 'workers',
       isDebug: true,
     );
@@ -62,6 +63,7 @@ void main() async {
       concurrent: 3,
       subPath: 'workers',
       useWorker: true,
+      debugName: 'processor',
     );
 
     isolates.stream.listen((result) {
