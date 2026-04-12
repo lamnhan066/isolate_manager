@@ -7,7 +7,7 @@ import 'package:isolate_manager/src/base/contactor/isolate_contactor/web_platfor
 /// Internal instance
 abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
   /// Constructer.
-  const IsolateContactorInternal({super.debugMode});
+  const IsolateContactorInternal({super.debugMode, super.debugName});
 
   /// Create modified isolate function
   static Future<IsolateContactorInternal<R, P>> createCustom<R, P>({
@@ -16,6 +16,7 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
     required Object? initialParams,
     required IsolateConverter<R> converter,
     required IsolateConverter<R> workerConverter,
+    required String debugName,
     required bool debugMode,
   }) async {
     /// If browser is not supported Worker then use Future
@@ -26,6 +27,7 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
         initialParams: initialParams,
         converter: converter,
         workerConverter: workerConverter,
+        debugName: debugName,
         debugMode: debugMode,
       );
     }
@@ -35,6 +37,7 @@ abstract class IsolateContactorInternal<R, P> extends IsolateContactor<R, P> {
       initialParams: initialParams,
       converter: converter,
       workerConverter: workerConverter,
+      debugName: debugName,
       debugMode: debugMode,
     );
   }

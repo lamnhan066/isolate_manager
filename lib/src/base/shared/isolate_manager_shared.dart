@@ -41,6 +41,7 @@ class IsolateManagerShared {
   IsolateManagerShared({
     int concurrent = 1,
     bool useWorker = false,
+    String debugName = 'shared',
     Object? Function(dynamic)? workerConverter,
     this.workerMappings = const <Function, String>{},
     bool autoStart = true,
@@ -52,6 +53,7 @@ class IsolateManagerShared {
   }) : _manager = IsolateManager.create(
          internalFunction,
          workerName: useWorker ? join(subPath, kSharedWorkerName) : '',
+         debugName: debugName,
          workerConverter: workerConverter,
          concurrent: concurrent,
          queueStrategy: queueStrategy,

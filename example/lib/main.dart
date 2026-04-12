@@ -26,6 +26,7 @@ class _MyAppState extends State<MyApp> {
   final isolates = IsolateManager.createShared(
     concurrent: 3,
     useWorker: true,
+    debugName: 'worker',
     isDebug: true,
   )..start();
 
