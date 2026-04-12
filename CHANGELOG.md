@@ -1,3 +1,7 @@
+## 6.3.2
+
+* Add `debugName` parameter for improved debugging in IsolateManager.
+
 ## 6.3.1
 
 * Fix the docs to clarify WASM transferables (`enableWasmTransferables` parameter) behavior in README.
