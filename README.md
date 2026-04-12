@@ -175,6 +175,7 @@ void main() async {
   final sharedIsolate = IsolateManager.createShared(
     concurrent: 2,   // Number of tasks this isolate can handle concurrently
     useWorker: true, // Enable web worker usage if on web
+    debugName: 'worker',
     workerMappings: {
       // Map Dart function references to their JS worker names
       addNumbersFuture: 'addNumbersFuture',
