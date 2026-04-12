@@ -51,7 +51,7 @@ class IsolateManager<R, P> {
   IsolateManager.create(
     IsolateFunction<R, P> this.isolateFunction, {
     String? workerName,
-    String? debugName,
+    String debugName = 'normal',
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
@@ -100,7 +100,7 @@ class IsolateManager<R, P> {
   IsolateManager.createCustom(
     IsolateCustomFunction this.isolateFunction, {
     String? workerName,
-    String? debugName,
+    String debugName = 'custom',
     this.concurrent = 1,
     this.converter,
     this.workerConverter,
@@ -175,7 +175,7 @@ class IsolateManager<R, P> {
   static Future<R> run<R>(
     FutureOr<R> Function() computation, {
     String? workerName,
-    String? debugName,
+    String debugName = 'normal',
     Object? workerParameter,
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
@@ -228,7 +228,7 @@ class IsolateManager<R, P> {
     IsolateFunction<R, P> function,
     P parameter, {
     String? workerName,
-    String? debugName,
+    String debugName = 'normal',
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
     bool enableWasmConverter = true,
@@ -302,7 +302,7 @@ class IsolateManager<R, P> {
     IsolateCustomFunction function,
     P parameter, {
     String? workerName,
-    String? debugName,
+    String debugName = 'custom',
     IsolateConverter<R>? converter,
     IsolateConverter<R>? workerConverter,
     IsolateCallback<R>? callback,
@@ -360,7 +360,7 @@ class IsolateManager<R, P> {
   static IsolateManagerShared createShared({
     int concurrent = 1,
     bool useWorker = false,
-    String? debugName,
+    String debugName = 'shared',
     Object? Function(dynamic)? workerConverter,
     Map<Function, String>? workerMappings,
     bool autoStart = true,
@@ -894,12 +894,6 @@ class IsolateManager<R, P> {
 
   String _buildIsolateDebugName(int index) {
     final globalName = 'Isolate-${++_globalIsolateCount}';
-    final managerName = _debugName?.trim();
-
-    if (managerName == null || managerName.isEmpty) {
-      return globalName;
-    }
-
-    return '$globalName-$managerName-$index';
+    return '$globalName-${_debugName?.trim() ?? ''}-$index';
   }
 }

@@ -41,7 +41,7 @@ class IsolateManagerShared {
   IsolateManagerShared({
     int concurrent = 1,
     bool useWorker = false,
-    String? debugName,
+    String debugName = 'shared',
     Object? Function(dynamic)? workerConverter,
     this.workerMappings = const <Function, String>{},
     bool autoStart = true,

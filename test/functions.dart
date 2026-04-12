@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:isolate_manager/isolate_manager.dart';
@@ -127,6 +128,23 @@ void isolateFunctionWithAutomaticallyHandlers(dynamic params) {
       },
       onInit: (controller) {},
       onDispose: (controller) {},
+    ),
+  );
+}
+
+@pragma('vm:entry-point')
+void reportCurrentIsolateDebugNameCustom(dynamic params) {
+  unawaited(
+    IsolateManagerFunction.customFunction<String?, int>(
+      params,
+      onEvent: (controller, message) {
+        controller.sendResult(Isolate.current.debugName);
+        return Isolate.current.debugName;
+      },
+      onInit: (controller) {},
+      onDispose: (controller) {},
+      autoHandleException: false,
+      autoHandleResult: false,
     ),
   );
 }

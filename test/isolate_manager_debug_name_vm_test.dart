@@ -7,6 +7,8 @@ import 'dart:isolate';
 import 'package:isolate_manager/isolate_manager.dart';
 import 'package:test/test.dart';
 
+import 'functions.dart';
+
 @pragma('vm:entry-point')
 Future<String?> reportCurrentIsolateDebugName(int delayMilliseconds) async {
   if (delayMilliseconds > 0) {
@@ -18,7 +20,7 @@ Future<String?> reportCurrentIsolateDebugName(int delayMilliseconds) async {
 
 void main() {
   group('Isolate debugName', () {
-    test('uses a default isolate name when debugName is omitted', () async {
+    test('uses a normal isolate name when debugName is omitted', () async {
       final manager = IsolateManager<String?, int>.create(
         reportCurrentIsolateDebugName,
       );
@@ -26,7 +28,36 @@ void main() {
       final debugName = await manager.compute(0);
 
       expect(debugName, isNotNull);
-      expect(debugName, matches(RegExp(r'^Isolate-\d+$')));
+      expect(debugName, matches(RegExp(r'^Isolate-\d+-normal-1$')));
+
+      await manager.stop();
+    });
+
+    test('uses a custom isolate name when debugName is omitted', () async {
+      final manager = IsolateManager<String?, int>.createCustom(
+        reportCurrentIsolateDebugNameCustom,
+      );
+
+      final debugName = await manager.compute(0);
+
+      expect(debugName, isNotNull);
+      expect(debugName, matches(RegExp(r'^Isolate-\d+-custom-1$')));
+
+      await manager.stop();
+    });
+
+    test('uses a shared isolate name when debugName is omitted', () async {
+      final manager = IsolateManager.createShared(concurrent: 2);
+
+      final debugNames = await Future.wait<String?>([
+        manager.compute(reportCurrentIsolateDebugName, 30),
+        manager.compute(reportCurrentIsolateDebugName, 30),
+      ]);
+
+      expect(debugNames, hasLength(2));
+      expect(debugNames.toSet(), hasLength(2));
+      expect(debugNames[0], matches(RegExp(r'^Isolate-\d+-shared-[12]$')));
+      expect(debugNames[1], matches(RegExp(r'^Isolate-\d+-shared-[12]$')));
 
       await manager.stop();
     });
