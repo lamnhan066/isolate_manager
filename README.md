@@ -123,6 +123,8 @@ To use isolates on the web, your Dart functions need to be compiled into JavaScr
 
 ## Usage Examples
 
+The optional `debugName` parameter defaults to `normal` for `create`/`run`, `custom` for `createCustom`/`runCustomFunction`, and `shared` for `createShared`.
+
 ### One-off Isolate (Simple Task)
 
 Ideal for fire-and-forget computations.
@@ -175,7 +177,6 @@ void main() async {
   final sharedIsolate = IsolateManager.createShared(
     concurrent: 2,   // Number of tasks this isolate can handle concurrently
     useWorker: true, // Enable web worker usage if on web
-    debugName: 'worker',
     workerMappings: {
       // Map Dart function references to their JS worker names
       addNumbersFuture: 'addNumbersFuture',
@@ -523,11 +524,11 @@ void processingWorker(dynamic params) {
 
 #### Pros, cons, and platform behaviour
 
-| | Native (VM) | Web — dart2js | Web — dart2wasm |
-| --- | --- | --- | --- |
-| **No transferables** | Bytes deep-copied O(n) | Bytes serialised & copied O(n) | Bytes copied O(n) |
-| **`transferables: [data.buffer]`** | Zero-copy via `TransferableTypedData` (O(1) transport; small codec overhead) | Zero-copy via `ArrayBuffer` transfer (O(1)); source buffer detached | ⚠ No benefit — WASM linear memory must be copied to the JS heap regardless |
-| **Pre-built `TransferableTypedData`** | Fastest — skips codec overhead entirely | N/A | N/A |
+|                                       | Native (VM)                                                                  | Web — dart2js                                                       | Web — dart2wasm                                                            |
+| ------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **No transferables**                  | Bytes deep-copied O(n)                                                       | Bytes serialised & copied O(n)                                      | Bytes copied O(n)                                                          |
+| **`transferables: [data.buffer]`**    | Zero-copy via `TransferableTypedData` (O(1) transport; small codec overhead) | Zero-copy via `ArrayBuffer` transfer (O(1)); source buffer detached | ⚠ No benefit — WASM linear memory must be copied to the JS heap regardless |
+| **Pre-built `TransferableTypedData`** | Fastest — skips codec overhead entirely                                      | N/A                                                                 | N/A                                                                        |
 
 **Native (VM):**
 
@@ -680,27 +681,27 @@ The following benchmarks demonstrate the performance of recursive Fibonacci calc
 
 * **VM (Native)**
 
-| Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run |
-| :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ----------: |
-|     26    |     1,577 |       1,576 |            572 |                      1,731 |              1,661 |       1,615 |
-|     28    |     4,140 |       4,166 |          1,477 |                      4,188 |              4,178 |       4,132 |
-|     30    |    10,892 |      10,881 |          4,530 |                     11,207 |             10,793 |      10,765 |
+| Fibonacci | Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run |
+| :-------: | -------: | ----------: | -------------: | -------------------------: | -----------------: | ----------: |
+|    26     |    1,577 |       1,576 |            572 |                      1,731 |              1,661 |       1,615 |
+|    28     |    4,140 |       4,166 |          1,477 |                      4,188 |              4,178 |       4,132 |
+|    30     |   10,892 |      10,881 |          4,530 |                     11,207 |             10,793 |      10,765 |
 
 * **Chrome (with Worker support, JS compiler)**
 
-| Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
-| :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
-|     26    |     5,108 |       1,333 |            596 |                      8,607 |              8,797 |                         0 |
-|     28    |    13,486 |       3,256 |          1,340 |                     10,156 |             10,683 |                         0 |
-|     30    |    34,990 |       8,500 |          4,000 |                     15,230 |             15,000 |                         0 |
+| Fibonacci | Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
+| :-------: | -------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
+|    26     |    5,108 |       1,333 |            596 |                      8,607 |              8,797 |                         0 |
+|    28     |   13,486 |       3,256 |          1,340 |                     10,156 |             10,683 |                         0 |
+|    30     |   34,990 |       8,500 |          4,000 |                     15,230 |             15,000 |                         0 |
 
 * **Chrome (with Worker support, WASM compiler)**
 
-| Fibonacci |  Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
-| :-------: | --------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
-|     26    |       504 |       1,320 |            594 |                      8,424 |              8,422 |                         0 |
-|     28    |     1,303 |       3,220 |          1,323 |                     10,660 |             10,266 |                         0 |
-|     30    |     3,379 |       8,370 |          3,960 |                     14,800 |             15,010 |                         0 |
+| Fibonacci | Main App | One Isolate | Three Isolates | IsolateManager.runFunction | IsolateManager.run | Isolate.run (Unsupported) |
+| :-------: | -------: | ----------: | -------------: | -------------------------: | -----------------: | ------------------------: |
+|    26     |      504 |       1,320 |            594 |                      8,424 |              8,422 |                         0 |
+|    28     |    1,303 |       3,220 |          1,323 |                     10,660 |             10,266 |                         0 |
+|    30     |    3,379 |       8,370 |          3,960 |                     14,800 |             15,010 |                         0 |
 
 For more details, see the [full benchmark information](https://github.com/lamnhan066/isolate_manager/tree/main/benchmark).
 
