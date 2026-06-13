@@ -708,7 +708,3 @@ For more details, see the [full benchmark information](https://github.com/lamnha
 ## Contributing
 
 Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/lamnhan066/isolate_manager/issues).
-
-If you find this package helpful, consider supporting the developer:
-
-[![BMC QR](https://raw.githubusercontent.com/lamnhan066/isolate_manager/main/assets/images/bmc_qr.png)](https://www.buymeacoffee.com/lamnhan066)
